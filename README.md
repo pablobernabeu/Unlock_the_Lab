@@ -1,4 +1,4 @@
-# Unlock the Lab: A Public Science Workshop
+# Unlock the Lab: Your Guide to Reading Science Like a Scientist
 
 Headlines often promise miracle cures and terrifying threats, but how much of it is backed by real science? In this interactive workshop, we invite you to go beyond the clickbait and step into the shoes of a scientist. We will explore the current state of public science communication, demystifying concepts such as open access, paywalls and the movement for open data.
 
