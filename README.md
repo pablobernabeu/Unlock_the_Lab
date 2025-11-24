@@ -31,10 +31,10 @@ Following the briefing, the facilitator distributes a unique 'Study Card' to eac
 | Category                                     | Low Score (1-2)                                                                                 | Medium Score (3-5)                                                                                    | High Score (6-7)                                                                                                 |
 | -------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | 1\. Access                                   | Impossible: Behind a paywall ($30+), no link provided, or "Contact author" with no reply.       | Difficult: Requires University login, searching through specific databases, or requesting via forums. | Open: One-click access to the full PDF. Free for everyone (Open Access).                                         |
-| 2\. The Headline                             | Clickbait: Uses words like "Miracle," "Proven," "Cure." Scarier or better than the actual data. | Modest: Describes the finding but might leave out limitations to sound more interesting.              | Accurate: Boring but true. Describes exactly what happened (e.g., "Correlation observed in mice").               |
+| 2\. Headline                             | Clickbait: Uses words like "Miracle," "Proven," "Cure." Scarier or better than the actual data. | Modest: Describes the finding but might leave out limitations to sound more interesting.              | Accurate: Boring but true. Describes exactly what happened (e.g., "Correlation observed in mice").               |
 | 3\. Does it Make Sense? (Theory)             | Nonsense: Ignores all previous science. Invents new laws of physics/biology without proof.      | Standard: Repeats what we already know without adding much new value.                                 | Robust: Fills a clear gap in knowledge. Uses past research responsibly to build a new argument.                  |
-| 4\. The Quality of the Test (Methods & Data) | Flawed & Closed: Tiny sample size. No control group. Data is secret/hidden.                     | Acceptable: Decent sample size. Standard methods. Data available upon request.                        | Rigorous & Open: Large sample size. Gold-standard controls. Raw data and statistics are fully open/downloadable. |
-| 5\. The Verdict (Conclusion)                 | Overblown: Claims a fact based on a guess. Confuses correlation with causation.                 | Logical: Conclusion mostly fits the results but ignores some alternative explanations.                | Nuanced: Very careful. Admits what they don't know. Claims only what the data proves.                            |
+| 4\. Quality of the Test (Methods & Data) | Flawed & Closed: Tiny sample size. No control group. Data is secret/hidden.                     | Acceptable: Decent sample size. Standard methods. Data available upon request.                        | Rigorous & Open: Large sample size. Gold-standard controls. Raw data and statistics are fully open/downloadable. |
+| 5\. Verdict (Conclusion)                 | Overblown: Claims a fact based on a guess. Confuses correlation with causation.                 | Logical: Conclusion mostly fits the results but ignores some alternative explanations.                | Nuanced: Very careful. Admits what they don't know. Claims only what the data proves.                            |
 | 6\. Source Reputation                        | Suspicious: Marketing blogs, "Predatory" journals (pay-to-publish), or corporate white papers.  | Unverified / Variable: Preprints (not yet reviewed), or mid-tier journals that sometimes favour hype. | Trusted: Top-tier peer-reviewed journals, reputable independent research institutes, or government bodies.       |
 
 ### III. The Journal Club (30 mins) 
@@ -45,16 +45,3 @@ For the next thirty minutes, each table transforms into a peer-review committee.
 ### IV. The Reveal (10 mins) 
 
 The workshop concludes with the 'Reveal' phase, where the game is scored. First, participants open their collected pile of peer voting slips and calculate the average rating given to them by their table, rounding to the nearest whole number. Once this is done, the facilitator opens the central Ballot Box and reads aloud the original self-ratings for each Study ID. Participants then compare their initial self-rating against the average peer rating to calculate the 'Gap.' The winners are those who achieved a Gap of zero or one, demonstrating that their objective assessment of the science perfectly aligned with the consensus of their peers, regardless of whether the study was high-quality or low-quality.
-
-
-
-
-
-
-
-
-
-
-
-
-
