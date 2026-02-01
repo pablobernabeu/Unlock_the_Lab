@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlock the Lab Workshop</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Page 1: Welcome -->
+        <div class="page active" id="page-welcome">
+            <div class="container">
+                <h1>🔬 Unlock the Lab</h1>
+                <h2>Your Guide to Reading Science Like a Scientist</h2>
+                
+                <div class="content">
+                    <p>Headlines often promise miracle cures and terrifying threats, but how much of it is backed by real science?</p>
+                    
+                    <p>In this interactive workshop, you'll step into the shoes of a scientist. You'll evaluate realistic (fictional) research papers using a scientific rating system.</p>
+                    
+                    <h3>How It Works:</h3>
+                    <ol>
+                        <li>Read the glossary and rating rubric</li>
+                        <li>Rate each research paper (1-7 scale)</li>
+                        <li>See how your rating compares to all other participants</li>
+                    </ol>
+                    
+                    <p class="highlight">Your goal: Rate each study objectively based on scientific rigor, not sensational headlines!</p>
+                </div>
+                
+                <button class="btn-primary" onclick="nextPage()">Get Started</button>
+            </div>
+        </div>
+
+        <!-- Page 2: Glossary and Rubric -->
+        <div class="page" id="page-guide">
+            <div class="container">
+                <h1>📚 Before We Begin</h1>
+                
+                <div class="content">
+                    <h2>Glossary</h2>
+                    <div id="glossary-content"></div>
+                    
+                    <h2 style="margin-top: 2rem;">Rating Rubric (1-7 Scale)</h2>
+                    <div id="rubric-content"></div>
+                    
+                    <div class="info-box" style="margin-top: 2rem;">
+                        <p><strong>💡 Remember:</strong> On the following pages, you can access this glossary and rubric at any time using the 📖 button in the bottom-right corner.</p>
+                    </div>
+                </div>
+                
+                <button class="btn-primary" onclick="nextPage()">Start Rating Papers</button>
+            </div>
+        </div>
+
+        <!-- Paper Pages (Generated Dynamically) -->
+        <div id="paper-pages"></div>
+
+        <!-- Final Page: Recap -->
+        <div class="page" id="page-final">
+            <div class="container">
+                <h1>🎉 Workshop Complete!</h1>
+                
+                <div class="content">
+                    <h2>Your Journey</h2>
+                    <p>You've evaluated <span id="total-papers">0</span> research papers using critical scientific thinking.</p>
+                    
+                    <h3>Key Takeaways:</h3>
+                    <ul>
+                        <li><strong>Access matters:</strong> Open science makes research accessible to everyone</li>
+                        <li><strong>Headlines lie:</strong> Clickbait often misrepresents actual findings</li>
+                        <li><strong>Methods matter:</strong> Good science requires rigorous methodology and open data</li>
+                        <li><strong>Context is key:</strong> Strong conclusions admit limitations and build on prior work</li>
+                    </ul>
+                    
+                    <div class="info-box">
+                        <h3>Keep Exploring Science!</h3>
+                        <p>When reading science news:</p>
+                        <ul>
+                            <li>Look for the original research paper</li>
+                            <li>Check if data is openly available</li>
+                            <li>Question sensational claims</li>
+                            <li>Consider the source and methodology</li>
+                        </ul>
+                    </div>
+                    
+                    <p style="text-align: center; margin-top: 2rem; font-size: 1.2rem;">
+                        Thank you for participating! 🔬✨
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Help Button (appears on paper pages) -->
+    <button id="help-button" class="floating-btn" onclick="showHelp()">
+        📖
+    </button>
+
+    <!-- Modal for Glossary/Rubric -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeHelp()">&times;</span>
+            <div class="modal-tabs">
+                <button class="tab-btn active" onclick="showTab('glossary')">Glossary</button>
+                <button class="tab-btn" onclick="showTab('rubric')">Rating Rubric</button>
+            </div>
+            <div id="modal-glossary" class="tab-content active"></div>
+            <div id="modal-rubric" class="tab-content"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

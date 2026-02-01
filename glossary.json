@@ -1,0 +1,50 @@
+[
+    {
+        "term": "Open Access",
+        "definition": "Research papers that are freely available to read online without a paywall or subscription. Anyone can access the full text immediately."
+    },
+    {
+        "term": "Paywall",
+        "definition": "A barrier that requires payment (often $30+) or institutional access to read a research paper. This limits who can verify the science."
+    },
+    {
+        "term": "Peer Review",
+        "definition": "A process where other experts in the field evaluate a research paper before publication to check its quality and validity."
+    },
+    {
+        "term": "Preprint",
+        "definition": "An early version of a research paper shared publicly before peer review. Useful for rapid communication but not yet vetted by experts."
+    },
+    {
+        "term": "Open Data",
+        "definition": "When researchers make their raw data publicly available so others can verify results and conduct their own analyses."
+    },
+    {
+        "term": "Sample Size",
+        "definition": "The number of participants or observations in a study. Larger samples generally provide more reliable results."
+    },
+    {
+        "term": "Control Group",
+        "definition": "A comparison group that doesn't receive the treatment being tested, used to determine if an intervention actually works."
+    },
+    {
+        "term": "Correlation vs. Causation",
+        "definition": "Correlation means two things happen together; causation means one causes the other. Correlation does NOT prove causation."
+    },
+    {
+        "term": "Preregistration",
+        "definition": "Declaring your research plan and analysis methods publicly before collecting data, which reduces bias and questionable research practices."
+    },
+    {
+        "term": "Predatory Journal",
+        "definition": "A publication that accepts papers without proper peer review, often charging fees. These journals prioritize profit over scientific quality."
+    },
+    {
+        "term": "Replication",
+        "definition": "Repeating a study to see if the same results occur. Replicable findings are more trustworthy than one-off results."
+    },
+    {
+        "term": "Statistical Significance",
+        "definition": "A measure of whether results are likely due to chance or represent a real effect. Typically set at p < 0.05, but context matters."
+    }
+]

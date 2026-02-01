@@ -1,0 +1,56 @@
+[
+    {
+        "id": "STUDY-001",
+        "headline": "Miracle Berry Cures Cancer in Just 3 Days!",
+        "access": "The 'study' is mentioned in a blog post selling the berry supplement for $49.99. No link to original research is provided. When you search online, you find only marketing materials and testimonials.",
+        "overview": "According to the blog, researchers gave an extract from the Amazonian Wonder Berry to 12 cancer patients. The blog claims all patients showed 'dramatic improvement' within 72 hours.",
+        "methods": "No details about the methods are provided. Sample size is mentioned as 12 people, but there's no information about what type of cancer, what measurements were taken, whether there was a control group, or if patients received other treatments. No data is shared.",
+        "conclusion": "The blog concludes that the Wonder Berry 'cures all forms of cancer' and should replace chemotherapy immediately. No limitations are mentioned.",
+        "source": "Published on 'NaturalHealthNews247.com' - a website that sells supplements and alternative medicine products. No peer review mentioned."
+    },
+    {
+        "id": "STUDY-002",
+        "headline": "Coffee Drinkers Live Longer, Study Finds",
+        "access": "Behind a $35 paywall at a mid-tier medical journal. The abstract is available for free, but full methods and data are not accessible without payment or university access.",
+        "overview": "Researchers followed 50,000 people for 10 years and found that those who drank 2-3 cups of coffee daily had a 15% lower mortality rate compared to non-coffee drinkers.",
+        "methods": "Large observational study with detailed questionnaires. However, the study is observational (not a controlled experiment), so it can only show correlation, not causation. Confounding factors like exercise and diet were noted but not fully controlled. Data is 'available upon request.'",
+        "conclusion": "The paper concludes that 'coffee consumption is associated with reduced mortality.' The headline oversimplifies this correlation as a definitive causal relationship. The paper admits correlation doesn't equal causation, but this nuance is lost in the headline.",
+        "source": "Published in the Journal of Dietary Studies, a peer-reviewed journal with moderate impact factor. Generally trustworthy but not top-tier."
+    },
+    {
+        "id": "STUDY-003",
+        "headline": "New Vaccine Shows Promise in Early Trials",
+        "access": "Fully open access. Published on a preprint server with a direct link to the full PDF. Anyone can download and read it for free immediately.",
+        "overview": "Researchers developed a vaccine for a rare tropical disease and tested it on 20 volunteers. All participants developed antibodies, suggesting the vaccine might trigger an immune response.",
+        "methods": "Phase I safety trial with 20 healthy volunteers. The study followed standard protocols and reported detailed methods. However, it's a very early-stage study - no control group, small sample size, and no testing in people with the actual disease yet. All raw data is publicly available on an open repository.",
+        "conclusion": "The researchers are appropriately cautious: 'These preliminary results suggest the vaccine is safe and may stimulate immune response. Further trials with larger samples and control groups are needed to determine efficacy.' The headline accurately reflects this cautious optimism.",
+        "source": "Posted on medRxiv, a preprint server for medical research. This means it has NOT been peer-reviewed yet. It's from a university research lab with good reputation, but findings are not yet validated by other scientists."
+    },
+    {
+        "id": "STUDY-004",
+        "headline": "Smartphone App Reduces Anxiety as Well as Therapy",
+        "access": "Open access article published under Creative Commons license. Full text, supplementary materials, and complete dataset are freely available on the journal website and a public data repository.",
+        "overview": "Randomized controlled trial comparing a mindfulness app to traditional cognitive behavioral therapy (CBT) for treating mild to moderate anxiety. 240 participants were randomly assigned to either 8 weeks of app use or 8 weeks of weekly CBT sessions.",
+        "methods": "Gold-standard randomized controlled trial with proper control group. Study was preregistered (analysis plan declared before data collection). Large sample size (240 participants). Used validated anxiety measures. Both groups showed similar reduction in anxiety scores. All materials, code, and anonymized data are publicly available.",
+        "conclusion": "The paper concludes: 'The mindfulness app produced similar reductions in anxiety symptoms as traditional CBT in our sample of participants with mild to moderate anxiety. However, results may not generalize to severe anxiety or other populations. Further research needed to understand long-term effects and mechanisms.' Very balanced and nuanced.",
+        "source": "Published in JAMA Psychiatry, a top-tier peer-reviewed journal with rigorous standards. The research was conducted at a major university with no industry funding."
+    },
+    {
+        "id": "STUDY-005",
+        "headline": "Eating Chocolate Makes You Smarter!",
+        "access": "The full paper is behind a paywall at a relatively unknown journal. Only the abstract is freely available, which provides minimal details about the actual study.",
+        "overview": "According to the abstract, 30 students were given either chocolate or no chocolate before a test. Those who ate chocolate scored an average of 8% higher.",
+        "methods": "Very small sample size (30 students). The abstract doesn't mention randomization, blinding, or control for confounding factors (maybe students who chose chocolate were already more alert?). No mention of statistical analysis or data availability. The full methods are hidden behind the paywall.",
+        "conclusion": "The title claims chocolate 'makes you smarter,' but at best, the study shows a small, short-term correlation between chocolate and test scores in a tiny sample. No discussion of alternative explanations (caffeine? sugar rush? placebo effect?).",
+        "source": "Published in 'International Journal of Food and Cognition' - a journal that charges authors $800 to publish and has a reputation for accepting most papers without rigorous review (potential predatory journal)."
+    },
+    {
+        "id": "STUDY-006",
+        "headline": "Exercise Associated with Better Sleep Quality in Adults",
+        "access": "Open access via PubMed Central. Full text is available for free, though supplementary data tables require navigating to an additional repository link.",
+        "overview": "Longitudinal study tracking 1,200 adults over 3 years. Researchers measured exercise frequency, sleep quality, and various health markers through regular surveys and wearable device data.",
+        "methods": "Large sample size with good follow-up rates (85% retention). Used validated measures for both exercise and sleep quality. Study controlled for age, BMI, and existing health conditions. However, this is still an observational study - people self-selected their exercise levels, so there could be unmeasured confounding factors. Data is available 'upon reasonable request to corresponding author.'",
+        "conclusion": "The researchers conclude: 'Regular moderate exercise is strongly associated with improved sleep quality. While our findings support a beneficial relationship, causality cannot be established from observational data alone. Randomized trials would be needed to confirm exercise directly improves sleep.' Appropriately cautious about correlation vs. causation.",
+        "source": "Published in Sleep Medicine Reviews, a well-respected peer-reviewed journal in the sleep research field. Research funded by national health institute with no conflicts of interest declared."
+    }
+]
