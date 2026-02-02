@@ -133,10 +133,43 @@
             background: #f9fafb;
             color: #667eea;
             font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 25px;
         }
 
-        tr:hover {
+        th:hover {
+            background: #f3f4f6;
+        }
+
+        th.sortable::after {
+            content: '⇅';
+            position: absolute;
+            right: 8px;
+            color: #9ca3af;
+            font-size: 0.8em;
+        }
+
+        th.sort-asc::after {
+            content: '↑';
+            color: #667eea;
+        }
+
+        th.sort-desc::after {
+            content: '↓';
+            color: #667eea;
+        }
+
+        tbody tr:hover {
             background: #f9fafb;
+        }
+
+        /* Color scale cells */
+        .color-scale {
+            font-weight: 600;
+            border-radius: 4px;
+            padding: 6px 12px !important;
         }
 
         .quality-indicator {
@@ -351,14 +384,14 @@
             <table id="statsTable">
                 <thead>
                     <tr>
-                        <th>Study</th>
-                        <th>Quality</th>
-                        <th>Responses</th>
-                        <th>Mean Rating</th>
-                        <th>Std Dev</th>
-                        <th>Min</th>
-                        <th>Max</th>
-                        <th>Agreement %</th>
+                        <th class="sortable" onclick="sortTable(0, 'string')" title="Click to sort">Study</th>
+                        <th class="sortable" onclick="sortTable(1, 'string')" title="Click to sort">Quality</th>
+                        <th class="sortable" onclick="sortTable(2, 'number')" title="Click to sort">Responses</th>
+                        <th class="sortable" onclick="sortTable(3, 'number')" title="Click to sort">Mean Rating</th>
+                        <th class="sortable" onclick="sortTable(4, 'number')" title="Click to sort">Std Dev</th>
+                        <th class="sortable" onclick="sortTable(5, 'number')" title="Click to sort">Min</th>
+                        <th class="sortable" onclick="sortTable(6, 'number')" title="Click to sort">Max</th>
+                        <th class="sortable" onclick="sortTable(7, 'number')" title="Click to sort">Agreement %</th>
                     </tr>
                 </thead>
                 <tbody id="statsTableBody">
@@ -533,6 +566,26 @@
             };
         }
 
+        // Color scale function - generates background colors based on value
+        function getColorScale(value, min, max, higherIsBetter = true) {
+            const normalized = (value - min) / (max - min);
+            const percent = Math.max(0, Math.min(1, normalized));
+            
+            if (higherIsBetter) {
+                // Green for high, red for low
+                const r = Math.round(239 - (239 - 16) * percent);
+                const g = Math.round(68 + (185 - 68) * percent);
+                const b = Math.round(68 + (129 - 68) * percent);
+                return `rgb(${r}, ${g}, ${b})`;
+            } else {
+                // Blue for low, red for high
+                const r = Math.round(59 + (239 - 59) * percent);
+                const g = Math.round(130 - (130 - 68) * percent);
+                const b = Math.round(246 - (246 - 68) * percent);
+                return `rgb(${r}, ${g}, ${b})`;
+            }
+        }
+
         function updateDashboard(ratingsData, activeData, leaderboardData) {
             const stats = {};
             let totalRatings = 0;
@@ -591,19 +644,28 @@
                 const quality = paperQualities[paperId];
                 const qualityClass = quality === 'high' ? 'quality-high' : quality === 'medium' ? 'quality-medium' : 'quality-low';
                 
+                // Calculate color scales
+                const meanColor = getColorScale(stat.mean, 1, 7, false); // Lower is better (blue)
+                const stdDevColor = getColorScale(stat.stdDev, 0, 3, false); // Lower is better
+                const agreementPercent = parseFloat(stat.agreement);
+                const agreementColor = getColorScale(agreementPercent, 0, 100, true); // Higher is better (green)
+                const responseColor = getColorScale(stat.count, 0, Math.max(...paperIds.map(id => stats[id].count)), true);
+                
                 return `
-                    <tr>
+                    <tr data-study="${paperId}" data-quality="${quality}" data-responses="${stat.count}" 
+                        data-mean="${stat.mean}" data-stddev="${stat.stdDev}" data-min="${stat.min}" 
+                        data-max="${stat.max}" data-agreement="${agreementPercent}">
                         <td><strong>${paperId}</strong></td>
                         <td>
                             <span class="quality-indicator ${qualityClass}"></span>
                             ${quality.charAt(0).toUpperCase() + quality.slice(1)}
                         </td>
-                        <td>${stat.count}</td>
-                        <td>${stat.mean}</td>
-                        <td>${stat.stdDev}</td>
+                        <td class="color-scale" style="background: ${responseColor}; color: ${stat.count > 5 ? 'white' : '#374151'}">${stat.count}</td>
+                        <td class="color-scale" style="background: ${meanColor}; color: white">${stat.mean}</td>
+                        <td class="color-scale" style="background: ${stdDevColor}; color: ${stat.stdDev > 1.5 ? 'white' : '#374151'}">${stat.stdDev}</td>
                         <td>${stat.min}</td>
                         <td>${stat.max}</td>
-                        <td>${stat.agreement}%</td>
+                        <td class="color-scale" style="background: ${agreementColor}; color: ${agreementPercent > 50 ? 'white' : '#374151'}">${stat.agreement}%</td>
                     </tr>
                 `;
             }).join('');
@@ -774,6 +836,52 @@
                         btn.textContent = '⏹️ End All Active Sessions';
                     });
             }
+        };
+
+        // Table sorting
+        let currentSort = { column: -1, ascending: true };
+
+        window.sortTable = function(columnIndex, dataType) {
+            const table = document.getElementById('statsTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Determine sort direction
+            const ascending = currentSort.column === columnIndex ? !currentSort.ascending : true;
+            currentSort = { column: columnIndex, ascending };
+            
+            // Update header indicators
+            table.querySelectorAll('th').forEach((th, index) => {
+                th.classList.remove('sort-asc', 'sort-desc');
+                if (index === columnIndex) {
+                    th.classList.add(ascending ? 'sort-asc' : 'sort-desc');
+                }
+            });
+            
+            // Get data attributes mapping
+            const dataAttrs = ['study', 'quality', 'responses', 'mean', 'stddev', 'min', 'max', 'agreement'];
+            const attr = dataAttrs[columnIndex];
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                let aVal = a.dataset[attr];
+                let bVal = b.dataset[attr];
+                
+                if (dataType === 'number') {
+                    aVal = parseFloat(aVal);
+                    bVal = parseFloat(bVal);
+                } else {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                
+                if (aVal < bVal) return ascending ? -1 : 1;
+                if (aVal > bVal) return ascending ? 1 : -1;
+                return 0;
+            });
+            
+            // Rebuild table
+            rows.forEach(row => tbody.appendChild(row));
         };
     </script>
 </body>

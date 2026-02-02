@@ -133,10 +133,43 @@
             background: #f9fafb;
             color: #667eea;
             font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 25px;
         }
 
-        tr:hover {
+        th:hover {
+            background: #f3f4f6;
+        }
+
+        th.sortable::after {
+            content: '⇅';
+            position: absolute;
+            right: 8px;
+            color: #9ca3af;
+            font-size: 0.8em;
+        }
+
+        th.sort-asc::after {
+            content: '↑';
+            color: #667eea;
+        }
+
+        th.sort-desc::after {
+            content: '↓';
+            color: #667eea;
+        }
+
+        tbody tr:hover {
             background: #f9fafb;
+        }
+
+        /* Color scale cells */
+        .color-scale {
+            font-weight: 600;
+            border-radius: 4px;
+            padding: 6px 12px !important;
         }
 
         .quality-indicator {
@@ -300,7 +333,7 @@
             }
         }
     </style>
-  <script type="module" crossorigin src="/assets/dashboard-BzEquET8.js"></script>
+  <script type="module" crossorigin src="/assets/dashboard-De01l5Nw.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
 </head>
 <body>
@@ -353,14 +386,14 @@
             <table id="statsTable">
                 <thead>
                     <tr>
-                        <th>Study</th>
-                        <th>Quality</th>
-                        <th>Responses</th>
-                        <th>Mean Rating</th>
-                        <th>Std Dev</th>
-                        <th>Min</th>
-                        <th>Max</th>
-                        <th>Agreement %</th>
+                        <th class="sortable" onclick="sortTable(0, 'string')" title="Click to sort">Study</th>
+                        <th class="sortable" onclick="sortTable(1, 'string')" title="Click to sort">Quality</th>
+                        <th class="sortable" onclick="sortTable(2, 'number')" title="Click to sort">Responses</th>
+                        <th class="sortable" onclick="sortTable(3, 'number')" title="Click to sort">Mean Rating</th>
+                        <th class="sortable" onclick="sortTable(4, 'number')" title="Click to sort">Std Dev</th>
+                        <th class="sortable" onclick="sortTable(5, 'number')" title="Click to sort">Min</th>
+                        <th class="sortable" onclick="sortTable(6, 'number')" title="Click to sort">Max</th>
+                        <th class="sortable" onclick="sortTable(7, 'number')" title="Click to sort">Agreement %</th>
                     </tr>
                 </thead>
                 <tbody id="statsTableBody">
