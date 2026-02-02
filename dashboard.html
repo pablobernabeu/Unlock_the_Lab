@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlock the Lab - Live Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h2 {
+            color: #667eea;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+
+        .data-table {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f9fafb;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .quality-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .quality-high { background: #10b981; }
+        .quality-medium { background: #f59e0b; }
+        .quality-low { background: #ef4444; }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔬 Unlock the Lab - Live Dashboard</h1>
+            <div class="status">
+                <div class="status-indicator"></div>
+                <span>Connected to Firebase • Real-time updates</span>
+            </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalRatings">0</div>
+                <div class="stat-label">Total Ratings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeParticipants">0</div>
+                <div class="stat-label">Active Participants</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completedSessions">0</div>
+                <div class="stat-label">Completed Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgScore">0</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h2>📊 Average Ratings by Study</h2>
+                <div class="chart-container">
+                    <canvas id="ratingsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h2>🎯 Rating Agreement (Std Deviation)</h2>
+                <div class="chart-container">
+                    <canvas id="agreementChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-table">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📈 Detailed Statistics</h2>
+            <table id="statsTable">
+                <thead>
+                    <tr>
+                        <th>Study</th>
+                        <th>Quality</th>
+                        <th>Responses</th>
+                        <th>Mean Rating</th>
+                        <th>Std Dev</th>
+                        <th>Min</th>
+                        <th>Max</th>
+                        <th>Agreement %</th>
+                    </tr>
+                </thead>
+                <tbody id="statsTableBody">
+                    <tr><td colspan="8" style="text-align: center; color: #999;">Loading data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCjLzq8QNQqhGOpTJy3tzwuQrovMm6Vdi4",
+            authDomain: "unlock-the-lab-workshop.firebaseapp.com",
+            databaseURL: "https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "unlock-the-lab-workshop",
+            storageBucket: "unlock-the-lab-workshop.firebasestorage.app",
+            messagingSenderId: "604889899913",
+            appId: "1:604889899913:web:d46afe88111e8bcb7d3758",
+            measurementId: "G-VEVYY65K1M"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const paperIds = ['STUDY-001', 'STUDY-002', 'STUDY-003', 'STUDY-004', 'STUDY-005', 'STUDY-006'];
+        const paperQualities = {
+            'STUDY-001': 'high',
+            'STUDY-002': 'medium', 
+            'STUDY-003': 'high',
+            'STUDY-004': 'low',
+            'STUDY-005': 'medium',
+            'STUDY-006': 'low'
+        };
+
+        let ratingsChart, agreementChart;
+
+        // Initialize charts
+        const ratingsCtx = document.getElementById('ratingsChart').getContext('2d');
+        ratingsChart = new Chart(ratingsCtx, {
+            type: 'bar',
+            data: {
+                labels: paperIds,
+                datasets: [{
+                    label: 'Average Rating',
+                    data: [],
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5,
+                        title: { display: true, text: 'Rating (1-5)' }
+                    }
+                }
+            }
+        });
+
+        const agreementCtx = document.getElementById('agreementChart').getContext('2d');
+        agreementChart = new Chart(agreementCtx, {
+            type: 'bar',
+            data: {
+                labels: paperIds,
+                datasets: [{
+                    label: 'Standard Deviation',
+                    data: [],
+                    backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                    borderColor: 'rgba(118, 75, 162, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Std Deviation (lower = higher agreement)' }
+                    }
+                }
+            }
+        });
+
+        function calculateStats(values) {
+            if (!values || values.length === 0) return { mean: 0, stdDev: 0, min: 0, max: 0, agreement: 0 };
+            
+            const mean = values.reduce((a, b) => a + b, 0) / values.length;
+            const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+            const stdDev = Math.sqrt(variance);
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            
+            // Agreement % (inverse of coefficient of variation, capped at 100%)
+            const agreement = mean === 0 ? 0 : Math.min(100, 100 * (1 - stdDev / mean));
+            
+            return { 
+                mean: mean.toFixed(2), 
+                stdDev: stdDev.toFixed(2), 
+                min: min.toFixed(1), 
+                max: max.toFixed(1),
+                agreement: agreement.toFixed(0)
+            };
+        }
+
+        function updateDashboard(ratingsData, activeData, leaderboardData) {
+            const stats = {};
+            let totalRatings = 0;
+            let allScores = [];
+
+            // Calculate stats for each paper
+            paperIds.forEach(paperId => {
+                const paperRatings = ratingsData[paperId] || {};
+                const values = Object.values(paperRatings).filter(v => v !== null && v !== undefined);
+                stats[paperId] = {
+                    ...calculateStats(values),
+                    count: values.length
+                };
+                totalRatings += values.length;
+            });
+
+            // Update summary stats
+            document.getElementById('totalRatings').textContent = totalRatings;
+            
+            const activeCount = activeData ? Object.keys(activeData).filter(key => {
+                const timestamp = activeData[key].timestamp;
+                return Date.now() - timestamp < 60000; // Active in last 60s
+            }).length : 0;
+            document.getElementById('activeParticipants').textContent = activeCount;
+            
+            const completedCount = leaderboardData ? Object.keys(leaderboardData).length : 0;
+            document.getElementById('completedSessions').textContent = completedCount;
+            
+            if (leaderboardData) {
+                allScores = Object.values(leaderboardData).map(entry => entry.score || 0);
+                const avgScore = allScores.length > 0 
+                    ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(0)
+                    : 0;
+                document.getElementById('avgScore').textContent = avgScore;
+            }
+
+            // Update charts
+            ratingsChart.data.datasets[0].data = paperIds.map(id => stats[id].mean);
+            ratingsChart.update();
+
+            agreementChart.data.datasets[0].data = paperIds.map(id => stats[id].stdDev);
+            agreementChart.update();
+
+            // Update table
+            const tbody = document.getElementById('statsTableBody');
+            tbody.innerHTML = paperIds.map(paperId => {
+                const stat = stats[paperId];
+                const quality = paperQualities[paperId];
+                const qualityClass = quality === 'high' ? 'quality-high' : quality === 'medium' ? 'quality-medium' : 'quality-low';
+                
+                return `
+                    <tr>
+                        <td><strong>${paperId}</strong></td>
+                        <td>
+                            <span class="quality-indicator ${qualityClass}"></span>
+                            ${quality.charAt(0).toUpperCase() + quality.slice(1)}
+                        </td>
+                        <td>${stat.count}</td>
+                        <td>${stat.mean}</td>
+                        <td>${stat.stdDev}</td>
+                        <td>${stat.min}</td>
+                        <td>${stat.max}</td>
+                        <td>${stat.agreement}%</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Listen to real-time updates
+        let ratingsData = {};
+        let activeData = {};
+        let leaderboardData = {};
+
+        onValue(ref(database, 'ratings'), (snapshot) => {
+            ratingsData = snapshot.val() || {};
+            updateDashboard(ratingsData, activeData, leaderboardData);
+        });
+
+        onValue(ref(database, 'active'), (snapshot) => {
+            activeData = snapshot.val() || {};
+            updateDashboard(ratingsData, activeData, leaderboardData);
+        });
+
+        onValue(ref(database, 'leaderboard'), (snapshot) => {
+            leaderboardData = snapshot.val() || {};
+            updateDashboard(ratingsData, activeData, leaderboardData);
+        });
+    </script>
+</body>
+</html>
