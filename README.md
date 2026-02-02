@@ -1,48 +1,195 @@
-# Unlock the Lab: Your Guide to Reading Science Like a Scientist
+# Unlock the Lab Workshop
 
-Headlines often promise miracle cures and terrifying threats, but how much of it is backed by real science? In this interactive workshop, we invite you to go beyond the clickbait and step into the shoes of a scientist. We will explore the current state of public science communication, demystifying concepts such as open access, paywalls and the movement for open data.
+A web-based application for teaching critical evaluation of scientific research through interactive peer assessment.
 
-Participants will then put these skills to the test in a 'Journal Club' simulation. You will be assigned a realistic (fictional) research case study to evaluate. Your challenge is to assess the study objectively—looking past the hype to rate its true scientific rigour—and present it to your peers. The twist? You win not by having the 'best' study but by how accurately your personal assessment matches the independent ratings of your peers. Join us to sharpen your critical thinking toolkit and learn how to access knowledge without the gatekeepers.
+## Overview
 
-**Minimum Age:** 12+ recommended.
+Unlock the Lab is an educational tool designed to develop science literacy by training participants to evaluate research quality using evidence-based criteria. The application presents fictional research scenarios and challenges users to predict peer consensus on research quality, creating an engaging environment for learning to distinguish rigorous science from sensationalized claims.
 
+### Educational Objectives
 
-## The Method (Facilitator Guide)
+- Develop critical thinking skills for evaluating scientific claims
+- Understand research quality indicators (methodology, data transparency, publication practices)
+- Recognize barriers to accessing scientific knowledge (paywalls, predatory publishing)
+- Practice objective assessment independent of headline framing
+- Build consensus evaluation skills through peer comparison
 
-**Duration:** 60 Minutes 
+## Features
 
-**Format:** Small groups (Journal Clubs) of 6–10 participants. 
+### Core Functionality
 
-**Materials:** Laptops (optional), 'Study Cards' (assigned randomly), 'Rating Slips' (plenty per table), 'The Rubric' (one per person), one 'Ballot Box' per table (can be a simple envelope).
+- **Interactive Workshop Flow**: Guided progression through educational content, evaluation rubric, and 23 fictional research scenarios
+- **Dual Assessment System**: Participants rate both research quality (1-7 scale) and predict peer consensus
+- **Real-time Leaderboard**: Rankings based on prediction accuracy with 24-hour and all-time views (top 200)
+- **Live Analytics Dashboard**: Public visualization of aggregate ratings, participant statistics, and study-level metrics with 95% confidence intervals
+- **Anonymous Participation**: Automatic assignment of unique usernames (e.g., "Cheerful Penguin") for data privacy
+- **Comprehensive Glossary**: 21 scientific terms with accessible definitions, available throughout the activity
 
+### Technical Capabilities
 
-### I. Briefing & Toolkit (10 mins) 
+- Real-time data synchronization via Firebase Realtime Database
+- Responsive design for desktop and mobile devices
+- Interactive data visualizations using Chart.js
+- Session timeout management (30-minute initial limit, extendable to 2 hours)
+- Active participant tracking (60-second activity window)
+- Percentage-based scoring system (0-100% per study, aggregate score)
 
-The session begins with a ten-minute briefing to equip participants with the necessary conceptual tools. The facilitator will introduce the core distinctions between public press releases and original scientific papers, specifically highlighting barriers such as paywalls, the significance of Open Data (the availability of raw statistics), and explain the 1-to-7 rating scale, ensuring everyone understands that 'science' encompasses the methodology and data availability, not just the polished PDF document.
+### Administrative Tools
 
+- Email/password authentication for admin access
+- Session management controls (end all active sessions)
+- Firebase usage monitoring (concurrent connections, storage, session count)
+- Study detail modals with paper information and DOI links
+- Sortable statistics table with color-coded metrics
 
-### II. The Assignment & Self-Rating (10 mins) 
+## Technology Stack
 
-Following the briefing, the facilitator distributes a unique 'Study Card' to each participant, ensuring a random assignment of fictional case studies. The room then settles into a ten-minute period of silent reading, allowing individuals to digest their assigned material. Crucially, participants must perform a strategic self-assessment: they are to rate their own study on the 1-to-7 scale based solely on the evidence provided in the text, rigorously ignoring the sensationalism of the headline. An evaluation guide is suggested below:
+### Frontend
+- HTML5, CSS3, JavaScript (ES6+)
+- Chart.js 4.4.0 (data visualization)
+- Vite 5.4.21 (build tool)
 
-| Category                                     | Low Score (1-2)                                                                                 | Medium Score (3-5)                                                                                    | High Score (6-7)                                                                                                 |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **1\. Access**                                   | **Impossible:** Behind a paywall ($30+), no link provided, or "Contact author" with no reply.       | **Difficult:** Requires University login, searching through specific databases, or requesting via forums. | **Open:** One-click access to the full PDF. Free for everyone (Open Access).                                         |
-| **2\. Headline**                             | **Clickbait:** Uses words like "Miracle," "Proven," "Cure." Scarier or better than the actual data. | **Modest:** Describes the finding but might leave out limitations to sound more interesting.              | **Accurate:** Boring but true. Describes exactly what happened (e.g., "Correlation observed in mice").               |
-| **3\. Does it Make Sense? (Theory)**             | **Nonsense:** Ignores all previous science. Invents new laws of physics/biology without proof.      | **Standard:** Repeats what we already know without adding much new value.                                 | **Robust:** Fills a clear gap in knowledge. Uses past research responsibly to build a new argument.                  |
-| **4\. Quality of the Test (Methods & Data)** | **Flawed & Closed:** Tiny sample size. No control group. Data is secret/hidden.                     | **Acceptable:** Decent sample size. Standard methods. Data available upon request.                        | **Rigorous & Open:** Preregistration, large sample size, gold-standard controls, and fully available materials and data. |
-| **5\. Verdict (Conclusion)**                 | **Overblown:** Claims a fact based on a guess. Confuses correlation with causation.                 | **Logical:** Conclusion mostly fits the results but ignores some alternative explanations.                | **Nuanced:** Very careful. Admits what they don't know. Claims only what the data proves.                            |
-| **6\. Source Reputation**                        | **Suspicious:** Marketing blogs, "Predatory" journals (pay-to-publish), or corporate white papers.  | **Unverified / Variable:** Preprints (not yet reviewed), or mid-tier journals that sometimes favour hype. | **Trusted:** Top-tier peer-reviewed journals, reputable independent research institutes, or government bodies.       |
+### Backend
+- Firebase Realtime Database (data storage and synchronization)
+- Firebase Authentication (admin access control)
+- Firebase Hosting (deployment)
 
+### Data Structure
+```
+/ratings/{sessionId}/{studyId} - Individual study ratings
+/active/{sessionId} - Active participant timestamps
+/leaderboard/{sessionId} - Completed session scores
+```
 
-Once decided, they must write their Study ID and their confidential rating on a slip of paper and deposit it into the central Ballot Box (or envelope) on their table. It is vital to emphasise that once this slip is deposited, the self-rating cannot be changed.
+## Installation
 
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
+- Firebase project with Realtime Database and Authentication enabled
 
-### III. The Journal Club (30 mins) 
+### Setup
 
-For the next thirty minutes, each table transforms into a peer-review committee. Participants take turns presenting their assigned study to the group, with a strict time limit of approximately three minutes per person. The facilitator must enforce a key rule regarding these presentations: they must remain neutral summaries of the facts—covering the method, data access and conclusion—without the presenter sharing their personal opinion or their secret rating. After hearing each pitch, the listening peers immediately write the Study ID and their own independent 1-to-7 rating on a blank slip. These slips are folded and handed directly to the presenter, who collects their 'peer reviews' in a sealed pile without looking at them until the end of the round.
+1. Clone the repository:
+```bash
+git clone https://github.com/pablobernabeu/Unlock_the_Lab.git
+cd Unlock_the_Lab
+```
 
+2. Install dependencies:
+```bash
+npm install
+```
 
-### IV. The Reveal (10 mins) 
+3. Configure Firebase:
+   - Create a Firebase project at https://console.firebase.google.com
+   - Enable Realtime Database and Email/Password Authentication
+   - Copy your Firebase configuration to `firebase-config.js`
 
-The workshop concludes with the 'Reveal' phase, where the game is scored. First, participants open their collected pile of peer voting slips and calculate the average rating given to them by their table, rounding to the nearest whole number. Once this is done, the facilitator opens the central Ballot Box and reads aloud the original self-ratings for each Study ID. Participants then compare their initial self-rating against the average peer rating to calculate the 'Gap.' The winners are those who achieved a Gap of zero or one, demonstrating that their objective assessment of the science perfectly aligned with the consensus of their peers, regardless of whether the study was high-quality or low-quality.
+4. Run development server:
+```bash
+npm run dev
+```
+
+5. Build for production:
+```bash
+npm run build
+```
+
+6. Deploy to Firebase:
+```bash
+firebase deploy --only hosting
+```
+
+## Usage
+
+### For Participants
+
+1. Navigate to the application URL
+2. Review the educational content, glossary, and rubric
+3. Evaluate 23 research scenarios by rating quality (1-7) and predicting peer ratings
+4. Receive immediate feedback on prediction accuracy
+5. View final score and leaderboard position upon completion
+
+### For Facilitators/Admins
+
+1. Access admin panel via the Admin link (bottom right corner)
+2. Sign in with configured email and password
+3. Monitor real-time participant activity and Firebase usage
+4. Manage active sessions as needed
+5. View detailed analytics on the public dashboard
+
+## Scoring System
+
+- **Per-Study Score**: `100 - |predicted_rating - actual_average| × 12` (capped at 0-100)
+- **Aggregate Score**: Sum of all 23 study scores
+- **Percentage Display**: `(total_score / 2300) × 100`
+- **Leaderboard Ranking**: Based on aggregate score, top 200 displayed
+
+## Data Management
+
+### Privacy Considerations
+
+- No demographic data or personally identifiable information collected
+- Anonymous usernames auto-generated and validated for uniqueness
+- Session IDs used as primary identifiers
+- All data fully anonymized for research purposes
+
+### Firebase Free Tier Limits
+
+- 100 concurrent connections
+- 1 GB database storage
+- 10 GB/month data transfer
+- Monitor via admin dashboard to avoid service interruptions
+
+## Project Structure
+
+```
+/
+├── index.html          # Main application entry point
+├── dashboard.html      # Public analytics dashboard
+├── admin.html          # Admin login page
+├── app.js              # Core application logic
+├── styles.css          # Global styles
+├── firebase-config.js  # Firebase configuration
+├── glossary.json       # Scientific terminology definitions
+├── rubric.json         # Evaluation criteria
+├── papers.json         # Research scenario data
+└── public/
+    └── unlock-lab-icon.svg  # Application logo
+```
+
+## Contributing
+
+Contributions are welcome through GitHub issues and pull requests. Areas for enhancement include:
+
+- Additional research scenarios
+- Localization/internationalization
+- Accessibility improvements (WCAG compliance)
+- Mobile experience optimization
+- Analytics export functionality
+
+See the [issues page](https://github.com/pablobernabeu/Unlock_the_Lab/issues) for current development priorities.
+
+## Licence
+
+This project is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) - free to use with attribution.
+
+## Author
+
+Dr Pablo Bernabeu  
+Department of Education, University of Oxford
+
+## Acknowledgements
+
+- Workshop design based on peer assessment pedagogy
+- Fictional research scenarios created for educational purposes
+- Open source libraries: Chart.js, Vite, Firebase SDK
+
+## Version History
+
+- **v1.0** (2026-02): Initial release with 23 scenarios, real-time leaderboard, and analytics dashboard
+
+## Support
+
+For questions, issues, or feature requests, please use the [GitHub issue tracker](https://github.com/pablobernabeu/Unlock_the_Lab/issues).

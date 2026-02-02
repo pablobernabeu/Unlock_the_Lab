@@ -1,27 +1,15 @@
 [
     {
-        "term": "Open Access",
-        "definition": "Research papers that are freely available to read online without a paywall or subscription. Anyone can access the full text immediately."
+        "term": "Abstract",
+        "definition": "A brief summary at the beginning of a research paper outlining the study's purpose, methods, results, and conclusions."
     },
     {
-        "term": "Paywall",
-        "definition": "A barrier that requires payment (often $30+) or institutional access to read a research paper. This limits who can verify the science."
+        "term": "Citation",
+        "definition": "A reference to another study or source, showing where information came from and allowing readers to verify claims."
     },
     {
-        "term": "Peer Review",
-        "definition": "A process where other experts in the field evaluate a research paper before publication to check its quality and validity."
-    },
-    {
-        "term": "Preprint",
-        "definition": "An early version of a research paper shared publicly before peer review. Useful for rapid communication but not yet vetted by experts."
-    },
-    {
-        "term": "Open Data",
-        "definition": "When researchers make their raw data publicly available so others can verify results and conduct their own analyses."
-    },
-    {
-        "term": "Sample Size",
-        "definition": "The number of participants or observations in a study. Larger samples generally provide more reliable results."
+        "term": "Conflict of Interest",
+        "definition": "When researchers have financial, professional, or personal interests that could influence their work. Good studies declare these transparently."
     },
     {
         "term": "Control Group",
@@ -32,19 +20,67 @@
         "definition": "Correlation means two things happen together; causation means one causes the other. Correlation does NOT prove causation."
     },
     {
-        "term": "Preregistration",
-        "definition": "Declaring your research plan and analysis methods publicly before collecting data, which reduces bias and questionable research practices."
+        "term": "Data",
+        "definition": "The information collected during a study, which can include measurements, observations, survey responses, or other recorded facts."
+    },
+    {
+        "term": "Hypothesis",
+        "definition": "A testable prediction about what will happen in a study, based on existing knowledge or theory."
+    },
+    {
+        "term": "Methods",
+        "definition": "The section describing how the study was conducted, including participants, materials, procedures, and analysis techniques."
+    },
+    {
+        "term": "Open Access",
+        "definition": "Research papers that are freely available to read online without a paywall or subscription. Anyone can access the full text immediately."
+    },
+    {
+        "term": "Open Data",
+        "definition": "When researchers make their raw data publicly available so others can verify results and conduct their own analyses."
+    },
+    {
+        "term": "Paywall",
+        "definition": "A barrier that requires payment (often $30+) or institutional access to read a research paper. This limits who can verify the science."
+    },
+    {
+        "term": "Peer Review",
+        "definition": "A process where other experts in the field evaluate a research paper before publication to check its quality and validity."
     },
     {
         "term": "Predatory Journal",
         "definition": "A publication that accepts papers without proper peer review, often charging fees. These journals prioritize profit over scientific quality."
     },
     {
+        "term": "Preprint",
+        "definition": "An early version of a research paper shared publicly before peer review. Useful for rapid communication but not yet vetted by experts."
+    },
+    {
+        "term": "Preregistration",
+        "definition": "Declaring your research plan and analysis methods publicly before collecting data, which reduces bias and questionable research practices."
+    },
+    {
         "term": "Replication",
         "definition": "Repeating a study to see if the same results occur. Replicable findings are more trustworthy than one-off results."
     },
     {
+        "term": "Results",
+        "definition": "The section presenting what the study found, including statistical outcomes and data visualizations."
+    },
+    {
+        "term": "Sample Size",
+        "definition": "The number of participants or observations in a study. Larger samples generally provide more reliable results."
+    },
+    {
         "term": "Statistical Significance",
         "definition": "A measure of whether results are likely due to chance or represent a real effect. Typically set at p < 0.05, but context matters."
+    },
+    {
+        "term": "Theory",
+        "definition": "A well-established explanation for a phenomenon, supported by substantial evidence from multiple studies."
+    },
+    {
+        "term": "Variable",
+        "definition": "Any factor that can change or be measured in a study, such as age, temperature, or test scores."
     }
 ]

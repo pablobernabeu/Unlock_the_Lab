@@ -54,6 +54,7 @@ h1 {
     font-size: 2rem;
     font-weight: 700;
     color: var(--primary-color);
+    margin-top: 0;
     margin-bottom: 0.5rem;
     text-align: center;
 }
@@ -62,7 +63,8 @@ h2 {
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--text-primary);
-    margin: 1.5rem 0 1rem;
+    margin: 0.5rem 0 1rem;
+    text-align: center;
 }
 
 h3 {
@@ -94,17 +96,6 @@ p {
     padding-left: 1.5rem;
     position: relative;
     margin-bottom: 0.75rem;
-}
-
-.skills-list li::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.5rem;
-    width: 6px;
-    height: 6px;
-    background: #10b981;
-    border-radius: 50%;
 }
 
 ul, ol {
@@ -351,14 +342,14 @@ li {
     transform: scale(1.05);
 }
 
-/* Color scale for rating options */
-.rating-option input[type="radio"]:checked + label[for$="-1"] { background: #3b82f6; border-color: #3b82f6; }
-.rating-option input[type="radio"]:checked + label[for$="-2"] { background: #06b6d4; border-color: #06b6d4; }
-.rating-option input[type="radio"]:checked + label[for$="-3"] { background: #10b981; border-color: #10b981; }
-.rating-option input[type="radio"]:checked + label[for$="-4"] { background: #84cc16; border-color: #84cc16; }
-.rating-option input[type="radio"]:checked + label[for$="-5"] { background: #facc15; border-color: #facc15; color: #1f2937; }
-.rating-option input[type="radio"]:checked + label[for$="-6"] { background: #fb923c; border-color: #fb923c; }
-.rating-option input[type="radio"]:checked + label[for$="-7"] { background: #ef4444; border-color: #ef4444; }
+/* Color scale for rating options - consistent: 1=red (low quality), 7=green (high quality) */
+.rating-option input[type="radio"]:checked + label[for$="-1"] { background: #ef4444; border-color: #ef4444; }
+.rating-option input[type="radio"]:checked + label[for$="-2"] { background: #fb923c; border-color: #fb923c; }
+.rating-option input[type="radio"]:checked + label[for$="-3"] { background: #facc15; border-color: #facc15; color: #1f2937; }
+.rating-option input[type="radio"]:checked + label[for$="-4"] { background: #fde047; border-color: #fde047; color: #1f2937; }
+.rating-option input[type="radio"]:checked + label[for$="-5"] { background: #84cc16; border-color: #84cc16; }
+.rating-option input[type="radio"]:checked + label[for$="-6"] { background: #22c55e; border-color: #22c55e; }
+.rating-option input[type="radio"]:checked + label[for$="-7"] { background: #10b981; border-color: #10b981; }
 
 .rating-labels {
     display: flex;

@@ -108,6 +108,7 @@
         .chart-container {
             position: relative;
             height: 400px;
+            cursor: pointer;
         }
 
         .data-table {
@@ -183,28 +184,6 @@
         .quality-high { background: #10b981; }
         .quality-medium { background: #f59e0b; }
         .quality-low { background: #ef4444; }
-
-        .admin-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(102, 126, 234, 0.9);
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: all 0.3s;
-            z-index: 100;
-        }
-
-        .admin-button:hover {
-            background: rgba(102, 126, 234, 1);
-            transform: scale(1.1);
-        }
 
         .admin-overlay {
             position: fixed;
@@ -374,12 +353,16 @@
         .study-modal-close:hover {
             color: #374151;
         }
+        
+        .leaderboard-tab:hover {
+            color: #667eea !important;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🔬 Unlock the Lab - Live Dashboard</h1>
+            <h1><img src="unlock-lab-icon.svg" alt="Unlock the Lab" style="height: 1.8em; vertical-align: middle; margin-top: -0.15em;"> Unlock the Lab - Live Dashboard</h1>
             <div class="status">
                 <div class="status-indicator"></div>
                 <span>Connected to Firebase • Real-time updates</span>
@@ -388,14 +371,14 @@
 
         <div class="stats-grid">
             <div class="stat-card">
+                <div class="stat-value" id="avgScore">0</div>
+                <div class="stat-label">Average Score</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Mean prediction accuracy score across all participants</p>
+            </div>
+            <div class="stat-card">
                 <div class="stat-value" id="totalRatings">0</div>
                 <div class="stat-label">Total Ratings</div>
                 <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Number of study ratings submitted by all participants</p>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="activeParticipants">0</div>
-                <div class="stat-label">Active Participants</div>
-                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Users currently rating studies (active in last 60 seconds)</p>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="completedSessions">0</div>
@@ -403,16 +386,41 @@
                 <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Total participants who finished all studies</p>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="avgScore">0</div>
-                <div class="stat-label">Average Score</div>
-                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Mean prediction accuracy score across all participants</p>
+                <div class="stat-value" id="uniqueParticipants">0</div>
+                <div class="stat-label">Participants</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Total number of different users who have submitted ratings</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeParticipants">0</div>
+                <div class="stat-label">Active Now</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Users currently rating studies (active in last 60 seconds)</p>
+            </div>
+        </div>
+
+        <!-- Leaderboard Section -->
+        <div class="data-table" style="margin-bottom: 20px;">
+            <h2 style="color: #667eea; margin-bottom: 10px;">🏆 Leaderboard</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 15px;">Top 200 performers ranked by prediction accuracy. Scores show how well participants predicted crowd ratings.</p>
+            
+            <!-- Leaderboard Tabs -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
+                <button id="tab24h" class="leaderboard-tab active" onclick="switchLeaderboardTab('24h')" style="padding: 10px 20px; border: none; background: none; color: #667eea; font-weight: bold; cursor: pointer; border-bottom: 3px solid #667eea; transition: all 0.2s;">
+                    📅 Past 24 Hours
+                </button>
+                <button id="tabAllTime" class="leaderboard-tab" onclick="switchLeaderboardTab('allTime')" style="padding: 10px 20px; border: none; background: none; color: #6b7280; font-weight: normal; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">
+                    🌟 All-Time Leaders
+                </button>
+            </div>
+            
+            <div id="leaderboardGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+                <div style="text-align: center; color: #999; grid-column: 1 / -1;">Loading leaderboard...</div>
             </div>
         </div>
 
         <div class="charts-grid">
             <div class="chart-card" style="grid-column: 1 / -1;">
                 <h2>📊 Average Ratings by Study</h2>
-                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. Click study names for details.</p>
+                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
                 <div class="chart-container">
                     <canvas id="ratingsChart"></canvas>
                 </div>
@@ -421,7 +429,7 @@
 
         <div class="data-table">
             <h2 style="color: #667eea; margin-bottom: 10px;">📈 Detailed Statistics</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Complete breakdown of ratings for each study. Std Dev measures disagreement (higher = more variable ratings). Agreement % shows consensus level. Color scales highlight relative values—click column headers to sort.</p>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Complete breakdown of ratings for each study. Std Dev measures disagreement (higher = more variable ratings). Agreement % shows consensus level. Color scales highlight relative values. <strong>Click study names to view detailed information.</strong> Click column headers to sort.</p>
             <table id="statsTable">
                 <thead>
                     <tr>
@@ -453,9 +461,17 @@
             </div>
         </div>
     </div>
-
-    <!-- Admin Button -->
-    <button class="admin-button" onclick="openAdminPanel()" title="Admin Panel">⚙️</button>
+    
+    <!-- Authorship & Project Info -->
+    <div style="max-width: 1400px; margin: 2rem auto 0; padding: 1.25rem; background: #f8fafc; border-radius: 8px; font-size: 0.9rem; color: #64748b;">
+        <p style="margin-bottom: 0.5rem;"><strong>Author:</strong> Dr Pablo Bernabeu, Department of Education, University of Oxford</p>
+        <p style="margin-bottom: 0.5rem;"><strong>Materials:</strong> <a href="https://github.com/pablobernabeu/Unlock_the_Lab" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; border-bottom: 1px solid #2563eb;">github.com/pablobernabeu/Unlock_the_Lab</a></p>
+        <p style="margin-bottom: 0.5rem;"><strong>Licence:</strong> <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none;">CC BY 4.0</a> — Free to use with attribution</p>
+        <p style="margin-bottom: 0; font-size: 0.85rem; font-style: italic;">💡 Contributions welcome! Suggest improvements or report issues on <a href="https://github.com/pablobernabeu/Unlock_the_Lab/issues" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; border-bottom: 1px solid #2563eb;">GitHub</a>.</p>
+    </div>
+    
+    <!-- Admin Link -->
+    <p style="max-width: 1400px; margin: 2rem auto; padding-right: 20px; text-align: right; font-size: 0.8rem;"><a href="#" onclick="openAdminPanel(); return false;" style="color: #94a3b8; text-decoration: none; cursor: pointer;">Admin</a></p>
 
     <!-- Admin Overlay -->
     <div class="admin-overlay" id="adminOverlay" onclick="closeAdminPanel(event)">
@@ -487,6 +503,42 @@
 
             <div id="adminActions" style="display: none;">
                 <p style="color: #666; margin-bottom: 15px;" id="adminEmail"></p>
+                
+                <!-- Firebase Usage Statistics (Admin Only) -->
+                <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border: 2px solid #e5e7eb; border-radius: 8px;">
+                    <h4 style="color: #667eea; margin-bottom: 12px; font-size: 1rem;">📊 Firebase Usage (Free Tier Limits)</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #667eea;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-weight: 600; color: #374151; font-size: 0.85rem;">Connections</span>
+                                <span id="connectionUsage" style="font-size: 1.1rem; font-weight: bold; color: #10b981;">0/100</span>
+                            </div>
+                            <div style="height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;">
+                                <div id="connectionBar" style="height: 100%; background: #10b981; width: 0%; transition: all 0.3s;"></div>
+                            </div>
+                            <p style="font-size: 0.7rem; color: #6b7280; margin-top: 6px; margin-bottom: 0;">Active in last 60s</p>
+                        </div>
+                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #3b82f6;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-weight: 600; color: #374151; font-size: 0.85rem;">Storage</span>
+                                <span id="storageUsage" style="font-size: 1.1rem; font-weight: bold; color: #10b981;">~0 MB</span>
+                            </div>
+                            <div style="height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;">
+                                <div id="storageBar" style="height: 100%; background: #10b981; width: 0%; transition: all 0.3s;"></div>
+                            </div>
+                            <p style="font-size: 0.7rem; color: #6b7280; margin-top: 6px; margin-bottom: 0;">1 GB limit</p>
+                        </div>
+                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #f59e0b;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-weight: 600; color: #374151; font-size: 0.85rem;">Sessions</span>
+                                <span id="sessionCount" style="font-size: 1.1rem; font-weight: bold; color: #667eea;">0</span>
+                            </div>
+                            <p style="font-size: 0.7rem; color: #6b7280; margin-top: 6px; margin-bottom: 0;">Completed</p>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.75rem; color: #64748b; margin-top: 12px; margin-bottom: 0;"><strong>Note:</strong> Free tier: 100 connections, 1 GB storage, 10 GB/month downloads.</p>
+                </div>
+                
                 <div class="admin-actions">
                     <button class="btn-danger" onclick="endAllSessions()" id="endSessionsBtn">
                         ⏹️ End All Active Sessions
@@ -519,6 +571,17 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
         const auth = getAuth(app);
+
+        // Load papers data for study details
+        let papersData = {};
+        fetch('papers.json')
+            .then(response => response.json())
+            .then(papers => {
+                papers.forEach(paper => {
+                    papersData[paper.id] = paper;
+                });
+            })
+            .catch(error => console.error('Error loading papers:', error));
 
         const paperIds = ['STUDY-101', 'STUDY-102', 'STUDY-103', 'STUDY-104', 'STUDY-105', 'STUDY-106', 
                           'STUDY-107', 'STUDY-108', 'STUDY-109', 'STUDY-110', 'STUDY-111', 'STUDY-112',
@@ -555,36 +618,74 @@
                 datasets: [{
                     label: 'Average Rating',
                     data: [],
-                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                    borderColor: 'rgba(102, 126, 234, 1)',
+                    backgroundColor: function(context) {
+                        const index = context.dataIndex;
+                        const quality = paperQualities[paperIds[index]];
+                        if (quality === 'high') return 'rgba(16, 185, 129, 0.7)';
+                        if (quality === 'medium') return 'rgba(245, 158, 11, 0.7)';
+                        return 'rgba(239, 68, 68, 0.7)';
+                    },
+                    borderColor: function(context) {
+                        const index = context.dataIndex;
+                        const quality = paperQualities[paperIds[index]];
+                        if (quality === 'high') return 'rgba(16, 185, 129, 1)';
+                        if (quality === 'medium') return 'rgba(245, 158, 11, 1)';
+                        return 'rgba(239, 68, 68, 1)';
+                    },
                     borderWidth: 2,
+                    borderRadius: 6,
                     errorBars: {}
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                onClick: (event, activeElements) => {
+                onClick: (event, activeElements, chart) => {
+                    // Check if clicked on a bar
                     if (activeElements.length > 0) {
                         const index = activeElements[0].index;
                         const studyId = paperIds[index];
                         showStudyDetails(studyId);
+                        return;
+                    }
+                    
+                    // Check if clicked on x-axis label
+                    const canvasPosition = Chart.helpers.getRelativePosition(event, chart);
+                    const xAxis = chart.scales.x;
+                    const yAxis = chart.scales.y;
+                    
+                    // If click is in the x-axis label area
+                    if (canvasPosition.y > yAxis.bottom && canvasPosition.y < chart.height) {
+                        const index = xAxis.getValueForPixel(canvasPosition.x);
+                        if (index >= 0 && index < paperIds.length) {
+                            showStudyDetails(paperIds[Math.round(index)]);
+                        }
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
                         max: 7,
-                        title: { display: true, text: 'Rating (1-7 scale)' }
+                        title: { 
+                            display: true, 
+                            text: 'Rating (1-7 scale)',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            color: '#374151'
+                        }
                     },
                     x: {
                         ticks: {
                             callback: function(value, index) {
-                                return paperIds[index] + ' \u24D8';
+                                return paperIds[index];
                             },
                             font: {
-                                size: 10
-                            }
+                                size: 10,
+                                weight: 'bold'
+                            },
+                            color: '#667eea'
                         }
                     }
                 },
@@ -675,22 +776,37 @@
         }
 
         // Color scale function - generates background colors based on value
-        function getColorScale(value, min, max, higherIsBetter = true) {
+        function getColorScale(value, min, max, higherIsBetter = true, reducedIntensity = false) {
             const normalized = (value - min) / (max - min);
             const percent = Math.max(0, Math.min(1, normalized));
             
             if (higherIsBetter) {
                 // Green for high, red for low
-                const r = Math.round(239 - (239 - 16) * percent);
-                const g = Math.round(68 + (185 - 68) * percent);
-                const b = Math.round(68 + (129 - 68) * percent);
-                return `rgb(${r}, ${g}, ${b})`;
+                if (reducedIntensity) {
+                    // Lighter, more pastel colors
+                    const r = Math.round(254 - (254 - 220) * percent);
+                    const g = Math.round(226 + (252 - 226) * percent);
+                    const b = Math.round(226 + (231 - 226) * percent);
+                    return `rgb(${r}, ${g}, ${b})`;
+                } else {
+                    const r = Math.round(239 - (239 - 16) * percent);
+                    const g = Math.round(68 + (185 - 68) * percent);
+                    const b = Math.round(68 + (129 - 68) * percent);
+                    return `rgb(${r}, ${g}, ${b})`;
+                }
             } else {
-                // Blue for low, red for high
-                const r = Math.round(59 + (239 - 59) * percent);
-                const g = Math.round(130 - (130 - 68) * percent);
-                const b = Math.round(246 - (246 - 68) * percent);
-                return `rgb(${r}, ${g}, ${b})`;
+                // Red for high, green for low (inverted)
+                if (reducedIntensity) {
+                    const r = Math.round(220 + (254 - 220) * percent);
+                    const g = Math.round(252 - (252 - 226) * percent);
+                    const b = Math.round(231 - (231 - 226) * percent);
+                    return `rgb(${r}, ${g}, ${b})`;
+                } else {
+                    const r = Math.round(16 + (239 - 16) * percent);
+                    const g = Math.round(185 - (185 - 68) * percent);
+                    const b = Math.round(129 - (129 - 68) * percent);
+                    return `rgb(${r}, ${g}, ${b})`;
+                }
             }
         }
 
@@ -698,6 +814,7 @@
             const stats = {};
             let totalRatings = 0;
             let allScores = [];
+            const uniqueUsers = new Set();
 
             // Calculate stats for each paper
             paperIds.forEach(paperId => {
@@ -705,6 +822,13 @@
                 const values = Object.values(paperRatings)
                     .filter(v => v !== null && v !== undefined)
                     .map(v => v.rating || v); // Handle both old format (number) and new format (object with rating)
+                
+                // Track unique user IDs
+                Object.keys(paperRatings).forEach(userId => {
+                    if (paperRatings[userId] !== null && paperRatings[userId] !== undefined) {
+                        uniqueUsers.add(userId);
+                    }
+                });
                 
                 // Include seed scores in calculation (weighted as 10 participants)
                 const seedScore = seedScores[paperId] || 4;
@@ -722,6 +846,7 @@
             storeStatsGlobally(stats);
 
             // Update summary stats
+            document.getElementById('uniqueParticipants').textContent = uniqueUsers.size;
             document.getElementById('totalRatings').textContent = totalRatings;
             
             const activeCount = activeData ? Object.keys(activeData).filter(key => {
@@ -736,10 +861,18 @@
             if (leaderboardData) {
                 allScores = Object.values(leaderboardData).map(entry => entry.score || 0);
                 const avgScore = allScores.length > 0 
-                    ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(0)
+                    ? (allScores.reduce((a, b) => a + b, 0) / allScores.length)
                     : 0;
-                document.getElementById('avgScore').textContent = avgScore;
+                // Convert to percentage (each completed session has 23 papers × 100 pts each = 2300 max)
+                const avgPercentage = Math.round((avgScore / 2300) * 100);
+                document.getElementById('avgScore').textContent = `${avgPercentage}%`;
             }
+            
+            // Update Firebase usage statistics
+            updateFirebaseUsage(activeCount, completedCount, ratingsData);
+            
+            // Update leaderboard table
+            updateLeaderboardTable(leaderboardData);
 
             // Update charts
             const errorBars = {};
@@ -761,28 +894,28 @@
                 const quality = paperQualities[paperId];
                 const qualityClass = quality === 'high' ? 'quality-high' : quality === 'medium' ? 'quality-medium' : 'quality-low';
                 
-                // Calculate color scales
-                const meanColor = getColorScale(stat.mean, 1, 7, false); // Lower is better (blue)
-                const stdDevColor = getColorScale(stat.stdDev, 0, 3, false); // Lower is better
+                // Calculate color scales (consistent: green=high, red=low; reduced intensity)
+                const meanColor = getColorScale(stat.mean, 1, 7, true, true); // Higher rating = green
+                const stdDevColor = getColorScale(stat.stdDev, 0, 3, false, true); // Lower stdDev = green
                 const agreementPercent = parseFloat(stat.agreement);
-                const agreementColor = getColorScale(agreementPercent, 0, 100, true); // Higher is better (green)
-                const responseColor = getColorScale(stat.count, 0, Math.max(...paperIds.map(id => stats[id].count)), true);
+                const agreementColor = getColorScale(agreementPercent, 0, 100, true, true); // Higher = green
+                const responseColor = getColorScale(stat.count, 0, Math.max(...paperIds.map(id => stats[id].count)), true, true);
                 
                 return `
                     <tr data-study="${paperId}" data-quality="${quality}" data-responses="${stat.count}" 
                         data-mean="${stat.mean}" data-stddev="${stat.stdDev}" data-min="${stat.min}" 
                         data-max="${stat.max}" data-agreement="${agreementPercent}">
-                        <td><strong>${paperId}</strong></td>
+                        <td><strong><a href="#" onclick="showStudyDetails('${paperId}'); return false;" style="color: #667eea; text-decoration: none; cursor: pointer;">${paperId}</a></strong></td>
                         <td>
                             <span class="quality-indicator ${qualityClass}"></span>
                             ${quality.charAt(0).toUpperCase() + quality.slice(1)}
                         </td>
-                        <td class="color-scale" style="background: ${responseColor}; color: ${stat.count > 5 ? 'white' : '#374151'}">${stat.count}</td>
-                        <td class="color-scale" style="background: ${meanColor}; color: white">${stat.mean}</td>
-                        <td class="color-scale" style="background: ${stdDevColor}; color: ${stat.stdDev > 1.5 ? 'white' : '#374151'}">${stat.stdDev}</td>
+                        <td class="color-scale" style="background: ${responseColor}; color: #1f2937; font-weight: 600;">${stat.count}</td>
+                        <td class="color-scale" style="background: ${meanColor}; color: #1f2937; font-weight: 600;">${stat.mean}</td>
+                        <td class="color-scale" style="background: ${stdDevColor}; color: #1f2937; font-weight: 600;">${stat.stdDev}</td>
                         <td>${stat.min}</td>
                         <td>${stat.max}</td>
-                        <td class="color-scale" style="background: ${agreementColor}; color: ${agreementPercent > 50 ? 'white' : '#374151'}">${stat.agreement}%</td>
+                        <td class="color-scale" style="background: ${agreementColor}; color: #1f2937; font-weight: 600;">${stat.agreement}%</td>
                     </tr>
                 `;
             }).join('');
@@ -1001,6 +1134,166 @@
             rows.forEach(row => tbody.appendChild(row));
         };
         
+        // Update Firebase usage statistics
+        function updateFirebaseUsage(activeCount, completedCount, ratingsData) {
+            // Concurrent connections (active participants)
+            const connectionPercent = Math.min(100, (activeCount / 100) * 100);
+            document.getElementById('connectionUsage').textContent = `${activeCount}/100`;
+            document.getElementById('connectionBar').style.width = `${connectionPercent}%`;
+            
+            // Update color based on usage
+            const connectionBar = document.getElementById('connectionBar');
+            const connectionUsageText = document.getElementById('connectionUsage');
+            if (connectionPercent >= 90) {
+                connectionBar.style.background = '#ef4444'; // Red - critical
+                connectionUsageText.style.color = '#ef4444';
+            } else if (connectionPercent >= 70) {
+                connectionBar.style.background = '#f59e0b'; // Orange - warning
+                connectionUsageText.style.color = '#f59e0b';
+            } else {
+                connectionBar.style.background = '#10b981'; // Green - safe
+                connectionUsageText.style.color = '#10b981';
+            }
+            
+            // Estimate data storage (rough calculation)
+            // Each rating entry ~200 bytes, each active entry ~100 bytes, each leaderboard entry ~150 bytes
+            const ratingsCount = ratingsData ? Object.keys(ratingsData).reduce((count, sessionId) => {
+                return count + Object.keys(ratingsData[sessionId] || {}).length;
+            }, 0) : 0;
+            
+            const estimatedBytes = (ratingsCount * 200) + (activeCount * 100) + (completedCount * 150);
+            const estimatedMB = (estimatedBytes / (1024 * 1024)).toFixed(2);
+            const storagePercent = Math.min(100, (estimatedMB / 1024) * 100); // 1 GB = 1024 MB
+            
+            document.getElementById('storageUsage').textContent = `~${estimatedMB} MB`;
+            document.getElementById('storageBar').style.width = `${storagePercent}%`;
+            
+            const storageBar = document.getElementById('storageBar');
+            if (storagePercent >= 90) {
+                storageBar.style.background = '#ef4444';
+            } else if (storagePercent >= 70) {
+                storageBar.style.background = '#f59e0b';
+            } else {
+                storageBar.style.background = '#10b981';
+            }
+            
+            // Total sessions
+            document.getElementById('sessionCount').textContent = completedCount;
+        }
+        
+        // Update leaderboard table
+        let currentLeaderboardTab = '24h';
+        let cachedLeaderboardData = {};
+        
+        function updateLeaderboardTable(leaderboardData) {
+            cachedLeaderboardData = leaderboardData || {};
+            renderLeaderboard();
+        }
+        
+        function switchLeaderboardTab(tab) {
+            currentLeaderboardTab = tab;
+            
+            // Update tab styles
+            const tab24h = document.getElementById('tab24h');
+            const tabAllTime = document.getElementById('tabAllTime');
+            
+            if (tab === '24h') {
+                tab24h.style.color = '#667eea';
+                tab24h.style.fontWeight = 'bold';
+                tab24h.style.borderBottom = '3px solid #667eea';
+                tabAllTime.style.color = '#6b7280';
+                tabAllTime.style.fontWeight = 'normal';
+                tabAllTime.style.borderBottom = '3px solid transparent';
+            } else {
+                tabAllTime.style.color = '#667eea';
+                tabAllTime.style.fontWeight = 'bold';
+                tabAllTime.style.borderBottom = '3px solid #667eea';
+                tab24h.style.color = '#6b7280';
+                tab24h.style.fontWeight = 'normal';
+                tab24h.style.borderBottom = '3px solid transparent';
+            }
+            
+            renderLeaderboard();
+        }
+        
+        // Expose to global scope for onclick handlers
+        window.switchLeaderboardTab = switchLeaderboardTab;
+        
+        function renderLeaderboard() {
+            const grid = document.getElementById('leaderboardGrid');
+            
+            if (!cachedLeaderboardData || Object.keys(cachedLeaderboardData).length === 0) {
+                grid.innerHTML = '<div style="text-align: center; color: #999; grid-column: 1 / -1;">No completed sessions yet</div>';
+                return;
+            }
+            
+            // Convert to array
+            let entries = Object.entries(cachedLeaderboardData).map(([sessionId, data]) => ({
+                sessionId,
+                userName: data.userName || 'Anonymous',
+                score: data.score || 0,
+                papersRated: data.papersRated || 0,
+                timestamp: data.timestamp || 0
+            }));
+            
+            // Filter by 24 hours if that tab is active
+            if (currentLeaderboardTab === '24h') {
+                const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+                entries = entries.filter(entry => entry.timestamp >= twentyFourHoursAgo);
+            }
+            
+            // Sort by score (descending) and limit to top 200
+            entries = entries.sort((a, b) => b.score - a.score).slice(0, 200);
+            
+            if (entries.length === 0) {
+                grid.innerHTML = '<div style="text-align: center; color: #999; grid-column: 1 / -1;">No completed sessions in the past 24 hours</div>';
+                return;
+            }
+            
+            // Generate grid cards
+            grid.innerHTML = entries.map((entry, index) => {
+                const rank = index + 1;
+                const percentageScore = Math.round((entry.score / 2300) * 100);
+                const medal = rank === 1 ? ' 🥇' : rank === 2 ? ' 🥈' : rank === 3 ? ' 🥉' : '';
+                const displayRank = `#${rank}`;
+                
+                // Calculate colors outside template literal
+                let bgColor = '#f9fafb';
+                let borderColor = '#e5e7eb';
+                if (rank === 1) {
+                    bgColor = '#fef3c7';
+                    borderColor = '#fbbf24';
+                } else if (rank === 2) {
+                    bgColor = '#e0e7ff';
+                    borderColor = '#818cf8';
+                } else if (rank === 3) {
+                    bgColor = '#fce7f3';
+                    borderColor = '#f472b6';
+                }
+                
+                const fontWeight = rank <= 3 ? 'bold' : '500';
+                const scoreColor = percentageScore >= 80 ? '#10b981' : percentageScore >= 60 ? '#3b82f6' : percentageScore >= 40 ? '#f59e0b' : '#ef4444';
+                
+                return `
+                    <div style="
+                        background: ${bgColor};
+                        border: 1px solid ${borderColor};
+                        border-radius: 6px;
+                        padding: 10px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 8px;
+                        transition: transform 0.2s, box-shadow 0.2s;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                        <div style="font-size: 0.8rem; font-weight: bold; color: #6b7280; flex-shrink: 0;">${displayRank}</div>
+                        <div style="font-size: 0.85rem; color: #1f2937; font-weight: ${fontWeight}; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${entry.userName}${medal}</div>
+                        <div style="font-size: 0.9rem; font-weight: bold; color: ${scoreColor}; flex-shrink: 0;">${percentageScore}%</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
         // Study details modal functions
         let currentStats = {};
         
@@ -1008,6 +1301,7 @@
             const modal = document.getElementById('studyModal');
             const quality = paperQualities[studyId];
             const stats = currentStats[studyId];
+            const paperInfo = papersData[studyId];
             
             if (!stats) {
                 alert('No data available for this study yet.');
@@ -1020,40 +1314,114 @@
                 <strong>Quality Level:</strong> ${quality.charAt(0).toUpperCase() + quality.slice(1)}
             `;
             
-            document.getElementById('studyStats').innerHTML = `
-                <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
-                    <h3 style="margin-top: 0; color: #667eea;">Rating Statistics</h3>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 0.75rem; font-weight: 600;">Participants:</td>
-                            <td style="padding: 0.75rem;">${stats.count}</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 0.75rem; font-weight: 600;">Mean Rating:</td>
-                            <td style="padding: 0.75rem;">${stats.mean} / 7</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 0.75rem; font-weight: 600;">95% CI:</td>
-                            <td style="padding: 0.75rem;">[${stats.ci95Lower}, ${stats.ci95Upper}]</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 0.75rem; font-weight: 600;">Std Deviation:</td>
-                            <td style="padding: 0.75rem;">${stats.stdDev}</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 0.75rem; font-weight: 600;">Range:</td>
-                            <td style="padding: 0.75rem;">${stats.min} - ${stats.max}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 0.75rem; font-weight: 600;">Agreement:</td>
-                            <td style="padding: 0.75rem;">${stats.agreement}%</td>
-                        </tr>
-                    </table>
-                    <p style="font-size: 0.85rem; color: #6b7280; margin-top: 1rem; margin-bottom: 0;">
-                        <strong>What this means:</strong> ${parseInt(stats.agreement) > 70 ? 'High agreement among participants - ratings are consistent.' : parseInt(stats.agreement) > 40 ? 'Moderate agreement - some variation in ratings.' : 'Low agreement - participants have quite different opinions about this study.'}
-                    </p>
-                </div>
-            `;
+            let studyDetailsHtml = '';
+            if (paperInfo) {
+                studyDetailsHtml = `
+                    <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
+                        <h3 style="margin-top: 0; color: #667eea;">Rating Statistics</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.75rem; font-weight: 600;">Participants:</td>
+                                <td style="padding: 0.75rem;">${stats.count}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.75rem; font-weight: 600;">Mean Rating:</td>
+                                <td style="padding: 0.75rem;">${stats.mean} / 7</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.75rem; font-weight: 600;">95% CI:</td>
+                                <td style="padding: 0.75rem;">[${stats.ci95Lower}, ${stats.ci95Upper}]</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.75rem; font-weight: 600;">Std Deviation:</td>
+                                <td style="padding: 0.75rem;">${stats.stdDev}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.75rem; font-weight: 600;">Range:</td>
+                                <td style="padding: 0.75rem;">${stats.min} - ${stats.max}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem; font-weight: 600;">Agreement:</td>
+                                <td style="padding: 0.75rem;">${stats.agreement}%</td>
+                            </tr>
+                        </table>
+                        <p style="font-size: 0.85rem; color: #6b7280; margin-top: 1rem; margin-bottom: 0;">
+                            <strong>What this means:</strong> ${parseInt(stats.agreement) > 70 ? 'High agreement among participants - ratings are consistent.' : parseInt(stats.agreement) > 40 ? 'Moderate agreement - some variation in ratings.' : 'Low agreement - participants have quite different opinions about this study.'}
+                        </p>
+                    </div>
+                    
+                    <hr style="margin: 2rem 0; border: none; border-top: 2px solid #e5e7eb;">
+                    
+                    <div style="margin-top: 1.5rem;">
+                        <h3 style="margin-top: 0; color: #667eea;">Study Details</h3>
+                        <div style="background: #ffffff; padding: 1rem; border-left: 4px solid #667eea; margin-bottom: 1rem;">
+                            <h4 style="margin: 0 0 0.5rem 0; color: #374151; font-size: 1rem;">${paperInfo.headline}</h4>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.25rem;">
+                            <h4 style="color: #667eea; font-size: 0.9rem; margin-bottom: 0.5rem;">📚 Access</h4>
+                            <p style="margin: 0; font-size: 0.85rem; line-height: 1.6;">${paperInfo.access}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.25rem;">
+                            <h4 style="color: #667eea; font-size: 0.9rem; margin-bottom: 0.5rem;">🔍 Overview</h4>
+                            <p style="margin: 0; font-size: 0.85rem; line-height: 1.6;">${paperInfo.overview}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.25rem;">
+                            <h4 style="color: #667eea; font-size: 0.9rem; margin-bottom: 0.5rem;">🧪 Methods</h4>
+                            <p style="margin: 0; font-size: 0.85rem; line-height: 1.6;">${paperInfo.methods}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.25rem;">
+                            <h4 style="color: #667eea; font-size: 0.9rem; margin-bottom: 0.5rem;">💡 Conclusion</h4>
+                            <p style="margin: 0; font-size: 0.85rem; line-height: 1.6;">${paperInfo.conclusion}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 0;">
+                            <h4 style="color: #667eea; font-size: 0.9rem; margin-bottom: 0.5rem;">📰 Source</h4>
+                            <p style="margin: 0; font-size: 0.85rem; line-height: 1.6;">${paperInfo.source}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                studyDetailsHtml = `
+                    <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
+                        <h3 style="margin-top: 0; color: #667eea;">Rating Statistics</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.75rem; font-weight: 600;">Participants:</td>
+                                <td style="padding: 0.75rem;">${stats.count}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.75rem; font-weight: 600;">Mean Rating:</td>
+                                <td style="padding: 0.75rem;">${stats.mean} / 7</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.75rem; font-weight: 600;">95% CI:</td>
+                                <td style="padding: 0.75rem;">[${stats.ci95Lower}, ${stats.ci95Upper}]</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.75rem; font-weight: 600;">Std Deviation:</td>
+                                <td style="padding: 0.75rem;">${stats.stdDev}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.75rem; font-weight: 600;">Range:</td>
+                                <td style="padding: 0.75rem;">${stats.min} - ${stats.max}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem; font-weight: 600;">Agreement:</td>
+                                <td style="padding: 0.75rem;">${stats.agreement}%</td>
+                            </tr>
+                        </table>
+                        <p style="font-size: 0.85rem; color: #6b7280; margin-top: 1rem; margin-bottom: 0;">
+                            <strong>What this means:</strong> ${parseInt(stats.agreement) > 70 ? 'High agreement among participants - ratings are consistent.' : parseInt(stats.agreement) > 40 ? 'Moderate agreement - some variation in ratings.' : 'Low agreement - participants have quite different opinions about this study.'}
+                        </p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('studyStats').innerHTML = studyDetailsHtml;
             
             modal.classList.add('active');
         };
@@ -1061,6 +1429,16 @@
         window.closeStudyModal = function() {
             document.getElementById('studyModal').classList.remove('active');
         };
+        
+        // Close modal with ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' || event.key === 'Esc') {
+                const modal = document.getElementById('studyModal');
+                if (modal.classList.contains('active')) {
+                    closeStudyModal();
+                }
+            }
+        });
         
         // Store stats globally for modal access
         function storeStatsGlobally(stats) {

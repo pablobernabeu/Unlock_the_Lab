@@ -1,0 +1,26 @@
+<svg viewBox="0 0 750 750" xmlns="http://www.w3.org/2000/svg">
+  <!-- Key -->
+  <circle cx="130" cy="380" r="100" fill="none" stroke="#3B7EA1" stroke-width="40"/>
+  <rect x="220" y="355" width="260" height="50" fill="#3B7EA1"/>
+  <rect x="350" y="270" width="130" height="80" fill="#fff"/>
+  
+  <!-- Flask -->
+  <path d="M 480 270 L 480 360 L 380 560 Q 380 600 420 600 L 620 600 Q 660 600 660 560 L 560 360 L 560 270 Z" 
+        fill="none" stroke="#3B7EA1" stroke-width="35"/>
+  
+  <!-- Flask liquid -->
+  <path d="M 470 430 L 420 530 Q 420 570 450 575 L 590 575 Q 620 570 620 530 L 570 430 Z" 
+        fill="#F5A623"/>
+  
+  <!-- Bubbles -->
+  <circle cx="570" cy="175" r="15" fill="#F5A623"/>
+  <circle cx="600" cy="210" r="25" fill="#F5A623"/>
+  <circle cx="550" cy="230" r="50" fill="#F5A623"/>
+  <circle cx="590" cy="275" r="20" fill="#F5A623"/>
+  <circle cx="565" cy="345" r="20" fill="#F5A623"/>
+  <circle cx="590" cy="395" r="12" fill="#F5A623"/>
+  
+  <!-- Key teeth -->
+  <rect x="480" y="270" width="40" height="50" fill="#3B7EA1"/>
+  <rect x="640" y="270" width="40" height="50" fill="#3B7EA1"/>
+</svg>

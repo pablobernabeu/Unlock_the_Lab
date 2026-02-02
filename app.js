@@ -1,6 +1,6 @@
 // Import Firebase modules
 import { database } from './firebase-config.js';
-import { ref, set, onValue } from 'firebase/database';
+import { ref, set, get, onValue } from 'firebase/database';
 
 // Application State
 let currentPage = 0;
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Generate or retrieve username
     userName = localStorage.getItem('userName');
     if (!userName) {
-        userName = generateUsername();
+        userName = await generateUniqueUsername();
         localStorage.setItem('userName', userName);
     }
     
@@ -105,7 +105,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (totalScore > 0) {
         const scoreDisplay = document.getElementById('total-score-header');
         if (scoreDisplay) {
-            scoreDisplay.innerHTML = `<span class="medal-icon">🏆</span> ${totalScore}`;
+            const totalPapers = papers.length || 23;
+            const percentageScore = Math.round((totalScore / (totalPapers * 100)) * 100);
+            scoreDisplay.innerHTML = `<span class="medal-icon">🏆</span> ${percentageScore}%`;
             document.getElementById('score-banner').style.display = 'flex';
         }
     }
@@ -148,6 +150,52 @@ function generateUsername() {
     const animal = animals[Math.floor(Math.random() * animals.length)];
     
     return `${adjective} ${animal}`;
+}
+
+// Generate a unique username by checking against existing leaderboard usernames
+async function generateUniqueUsername() {
+    const leaderboardRef = ref(database, 'leaderboard');
+    
+    try {
+        const snapshot = await get(leaderboardRef);
+        const existingUsernames = new Set();
+        
+        if (snapshot.exists()) {
+            const leaderboardData = snapshot.val();
+            Object.values(leaderboardData).forEach(entry => {
+                if (entry.userName) {
+                    existingUsernames.add(entry.userName);
+                }
+            });
+        }
+        
+        // Try generating a unique username (max 100 attempts)
+        let attempts = 0;
+        let username;
+        
+        do {
+            username = generateUsername();
+            attempts++;
+            
+            // If we've tried 100 times and still no unique name, append a number
+            if (attempts >= 100) {
+                const baseUsername = generateUsername();
+                let counter = 1;
+                username = `${baseUsername} ${counter}`;
+                while (existingUsernames.has(username)) {
+                    counter++;
+                    username = `${baseUsername} ${counter}`;
+                }
+                break;
+            }
+        } while (existingUsernames.has(username));
+        
+        return username;
+    } catch (error) {
+        console.error('Error checking username uniqueness:', error);
+        // Fallback to regular generation if Firebase check fails
+        return generateUsername();
+    }
 }
 
 // Save application state to localStorage
@@ -206,10 +254,16 @@ function restoreSubmittedRatings() {
 
 // Display username at bottom of all pages
 function displayUsername() {
+    // Update home page username display
+    const homeUsernameDisplay = document.getElementById('username-display-home');
+    if (homeUsernameDisplay) {
+        homeUsernameDisplay.innerHTML = `Your username is <span style="color: #667eea; font-weight: 600;">${userName}</span>`;
+    }
+    
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => {
-        // Skip if already has username footer
-        if (page.querySelector('.username-footer')) return;
+        // Skip home page and pages that already have username footer
+        if (page.id === 'page-welcome' || page.querySelector('.username-footer')) return;
         
         const footer = document.createElement('div');
         footer.className = 'username-footer';
@@ -466,9 +520,18 @@ function updateParticipantCount() {
         
         if (counter) {
             if (active && Object.keys(active).length > 0) {
-                const count = Object.keys(active).length;
-                counter.textContent = `${count} participant${count !== 1 ? 's' : ''} active`;
-                counter.style.display = 'inline-block';
+                // Count only participants active in the last 60 seconds
+                const activeCount = Object.keys(active).filter(key => {
+                    const timestamp = active[key].timestamp;
+                    return timestamp && (Date.now() - timestamp < 60000);
+                }).length;
+                
+                if (activeCount > 0) {
+                    counter.textContent = `${activeCount} participant${activeCount !== 1 ? 's' : ''} active`;
+                    counter.style.display = 'inline-block';
+                } else {
+                    counter.style.display = 'none';
+                }
             } else {
                 counter.style.display = 'none';
             }
@@ -865,7 +928,7 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
                 totalScore += score;
                 
                 // Display score with detailed feedback
-                scoreElement.textContent = `+${score} pts`;
+                scoreElement.textContent = `${score}%`;
                 scoreElement.style.fontSize = '2rem';
                 scoreElement.style.fontWeight = 'bold';
                 scoreElement.style.color = score >= 88 ? '#10b981' : score >= 76 ? '#3b82f6' : score >= 64 ? '#f59e0b' : '#ef4444';
@@ -884,7 +947,9 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
                 // Update total score display with animation
                 const scoreDisplay = document.getElementById('total-score-header');
                 if (scoreDisplay) {
-                    scoreDisplay.innerHTML = `<span class="medal-icon">🏆</span> ${totalScore}`;
+                    const totalPapers = papers.length || 23;
+                    const percentageScore = Math.round((totalScore / (totalPapers * 100)) * 100);
+                    scoreDisplay.innerHTML = `<span class="medal-icon">🏆</span> ${percentageScore}%`;
                     scoreDisplay.style.animation = 'scoreUpdate 0.5s ease';
                     setTimeout(() => scoreDisplay.style.animation = '', 500);
                 }
@@ -952,8 +1017,10 @@ window.addEventListener('keydown', function(event) {
 
 // Show final results and leaderboard
 function showFinalResults() {
-    // Display final score
-    document.getElementById('final-score').textContent = totalScore;
+    // Display final score as percentage
+    const totalPapers = papers.length || 23;
+    const percentageScore = Math.round((totalScore / (totalPapers * 100)) * 100);
+    document.getElementById('final-score').textContent = `${percentageScore}%`;
     
     console.log('Saving to leaderboard:', { sessionId, totalScore, userName });
     

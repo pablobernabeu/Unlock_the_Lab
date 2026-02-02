@@ -108,6 +108,7 @@
         .chart-container {
             position: relative;
             height: 400px;
+            cursor: pointer;
         }
 
         .data-table {
@@ -183,28 +184,6 @@
         .quality-high { background: #10b981; }
         .quality-medium { background: #f59e0b; }
         .quality-low { background: #ef4444; }
-
-        .admin-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(102, 126, 234, 0.9);
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: all 0.3s;
-            z-index: 100;
-        }
-
-        .admin-button:hover {
-            background: rgba(102, 126, 234, 1);
-            transform: scale(1.1);
-        }
 
         .admin-overlay {
             position: fixed;
@@ -374,14 +353,18 @@
         .study-modal-close:hover {
             color: #374151;
         }
+        
+        .leaderboard-tab:hover {
+            color: #667eea !important;
+        }
     </style>
-  <script type="module" crossorigin src="/assets/dashboard-BOmAwbYm.js"></script>
+  <script type="module" crossorigin src="/assets/dashboard-Bkk6Grsd.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🔬 Unlock the Lab - Live Dashboard</h1>
+            <h1><img src="unlock-lab-icon.svg" alt="Unlock the Lab" style="height: 1.8em; vertical-align: middle; margin-top: -0.15em;"> Unlock the Lab - Live Dashboard</h1>
             <div class="status">
                 <div class="status-indicator"></div>
                 <span>Connected to Firebase • Real-time updates</span>
@@ -390,14 +373,14 @@
 
         <div class="stats-grid">
             <div class="stat-card">
+                <div class="stat-value" id="avgScore">0</div>
+                <div class="stat-label">Average Score</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Mean prediction accuracy score across all participants</p>
+            </div>
+            <div class="stat-card">
                 <div class="stat-value" id="totalRatings">0</div>
                 <div class="stat-label">Total Ratings</div>
                 <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Number of study ratings submitted by all participants</p>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="activeParticipants">0</div>
-                <div class="stat-label">Active Participants</div>
-                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Users currently rating studies (active in last 60 seconds)</p>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="completedSessions">0</div>
@@ -405,16 +388,41 @@
                 <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Total participants who finished all studies</p>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="avgScore">0</div>
-                <div class="stat-label">Average Score</div>
-                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Mean prediction accuracy score across all participants</p>
+                <div class="stat-value" id="uniqueParticipants">0</div>
+                <div class="stat-label">Participants</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Total number of different users who have submitted ratings</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeParticipants">0</div>
+                <div class="stat-label">Active Now</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Users currently rating studies (active in last 60 seconds)</p>
+            </div>
+        </div>
+
+        <!-- Leaderboard Section -->
+        <div class="data-table" style="margin-bottom: 20px;">
+            <h2 style="color: #667eea; margin-bottom: 10px;">🏆 Leaderboard</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 15px;">Top 200 performers ranked by prediction accuracy. Scores show how well participants predicted crowd ratings.</p>
+            
+            <!-- Leaderboard Tabs -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
+                <button id="tab24h" class="leaderboard-tab active" onclick="switchLeaderboardTab('24h')" style="padding: 10px 20px; border: none; background: none; color: #667eea; font-weight: bold; cursor: pointer; border-bottom: 3px solid #667eea; transition: all 0.2s;">
+                    📅 Past 24 Hours
+                </button>
+                <button id="tabAllTime" class="leaderboard-tab" onclick="switchLeaderboardTab('allTime')" style="padding: 10px 20px; border: none; background: none; color: #6b7280; font-weight: normal; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">
+                    🌟 All-Time Leaders
+                </button>
+            </div>
+            
+            <div id="leaderboardGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+                <div style="text-align: center; color: #999; grid-column: 1 / -1;">Loading leaderboard...</div>
             </div>
         </div>
 
         <div class="charts-grid">
             <div class="chart-card" style="grid-column: 1 / -1;">
                 <h2>📊 Average Ratings by Study</h2>
-                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. Click study names for details.</p>
+                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
                 <div class="chart-container">
                     <canvas id="ratingsChart"></canvas>
                 </div>
@@ -423,7 +431,7 @@
 
         <div class="data-table">
             <h2 style="color: #667eea; margin-bottom: 10px;">📈 Detailed Statistics</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Complete breakdown of ratings for each study. Std Dev measures disagreement (higher = more variable ratings). Agreement % shows consensus level. Color scales highlight relative values—click column headers to sort.</p>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Complete breakdown of ratings for each study. Std Dev measures disagreement (higher = more variable ratings). Agreement % shows consensus level. Color scales highlight relative values. <strong>Click study names to view detailed information.</strong> Click column headers to sort.</p>
             <table id="statsTable">
                 <thead>
                     <tr>
@@ -455,9 +463,17 @@
             </div>
         </div>
     </div>
-
-    <!-- Admin Button -->
-    <button class="admin-button" onclick="openAdminPanel()" title="Admin Panel">⚙️</button>
+    
+    <!-- Authorship & Project Info -->
+    <div style="max-width: 1400px; margin: 2rem auto 0; padding: 1.25rem; background: #f8fafc; border-radius: 8px; font-size: 0.9rem; color: #64748b;">
+        <p style="margin-bottom: 0.5rem;"><strong>Author:</strong> Dr Pablo Bernabeu, Department of Education, University of Oxford</p>
+        <p style="margin-bottom: 0.5rem;"><strong>Materials:</strong> <a href="https://github.com/pablobernabeu/Unlock_the_Lab" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; border-bottom: 1px solid #2563eb;">github.com/pablobernabeu/Unlock_the_Lab</a></p>
+        <p style="margin-bottom: 0.5rem;"><strong>Licence:</strong> <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none;">CC BY 4.0</a> — Free to use with attribution</p>
+        <p style="margin-bottom: 0; font-size: 0.85rem; font-style: italic;">💡 Contributions welcome! Suggest improvements or report issues on <a href="https://github.com/pablobernabeu/Unlock_the_Lab/issues" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; border-bottom: 1px solid #2563eb;">GitHub</a>.</p>
+    </div>
+    
+    <!-- Admin Link -->
+    <p style="max-width: 1400px; margin: 2rem auto; padding-right: 20px; text-align: right; font-size: 0.8rem;"><a href="#" onclick="openAdminPanel(); return false;" style="color: #94a3b8; text-decoration: none; cursor: pointer;">Admin</a></p>
 
     <!-- Admin Overlay -->
     <div class="admin-overlay" id="adminOverlay" onclick="closeAdminPanel(event)">
@@ -489,6 +505,42 @@
 
             <div id="adminActions" style="display: none;">
                 <p style="color: #666; margin-bottom: 15px;" id="adminEmail"></p>
+                
+                <!-- Firebase Usage Statistics (Admin Only) -->
+                <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border: 2px solid #e5e7eb; border-radius: 8px;">
+                    <h4 style="color: #667eea; margin-bottom: 12px; font-size: 1rem;">📊 Firebase Usage (Free Tier Limits)</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #667eea;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-weight: 600; color: #374151; font-size: 0.85rem;">Connections</span>
+                                <span id="connectionUsage" style="font-size: 1.1rem; font-weight: bold; color: #10b981;">0/100</span>
+                            </div>
+                            <div style="height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;">
+                                <div id="connectionBar" style="height: 100%; background: #10b981; width: 0%; transition: all 0.3s;"></div>
+                            </div>
+                            <p style="font-size: 0.7rem; color: #6b7280; margin-top: 6px; margin-bottom: 0;">Active in last 60s</p>
+                        </div>
+                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #3b82f6;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-weight: 600; color: #374151; font-size: 0.85rem;">Storage</span>
+                                <span id="storageUsage" style="font-size: 1.1rem; font-weight: bold; color: #10b981;">~0 MB</span>
+                            </div>
+                            <div style="height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;">
+                                <div id="storageBar" style="height: 100%; background: #10b981; width: 0%; transition: all 0.3s;"></div>
+                            </div>
+                            <p style="font-size: 0.7rem; color: #6b7280; margin-top: 6px; margin-bottom: 0;">1 GB limit</p>
+                        </div>
+                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #f59e0b;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-weight: 600; color: #374151; font-size: 0.85rem;">Sessions</span>
+                                <span id="sessionCount" style="font-size: 1.1rem; font-weight: bold; color: #667eea;">0</span>
+                            </div>
+                            <p style="font-size: 0.7rem; color: #6b7280; margin-top: 6px; margin-bottom: 0;">Completed</p>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.75rem; color: #64748b; margin-top: 12px; margin-bottom: 0;"><strong>Note:</strong> Free tier: 100 connections, 1 GB storage, 10 GB/month downloads.</p>
+                </div>
+                
                 <div class="admin-actions">
                     <button class="btn-danger" onclick="endAllSessions()" id="endSessionsBtn">
                         ⏹️ End All Active Sessions
