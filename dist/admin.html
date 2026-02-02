@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control - Unlock the Lab</title>
+    <style>
+        body {
+            background: #f8fafc;
+        }
+        .admin-container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .admin-header {
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .admin-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        .status-box {
+            padding: 1rem;
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        .danger-zone {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .btn-danger:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        #login-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin: 1rem 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .error-message {
+            color: #ef4444;
+            padding: 0.75rem;
+            background: #fef2f2;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/admin-dp7n1AfL.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-4YSElDcj.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-DKpkfjBD.js">
+  <link rel="stylesheet" crossorigin href="/assets/firebase-config-6-_ENOb_.css">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>🔐 Admin Control Panel</h1>
+            <p style="color: #6b7280;">Manage workshop sessions and data</p>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-section">
+            <h2>Administrator Login</h2>
+            <form id="login-form" onsubmit="loginAdmin(event)">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div id="login-error" class="error-message" style="display: none;"></div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Login</button>
+            </form>
+        </div>
+
+        <!-- Admin Panel (hidden until logged in) -->
+        <div id="admin-panel" style="display: none;">
+            <div class="admin-section">
+                <h2>📊 Session Statistics</h2>
+                <div class="status-box">
+                    <p><strong>Active Sessions:</strong> <span id="active-count">Loading...</span></p>
+                    <p><strong>Total Ratings:</strong> <span id="total-ratings">Loading...</span></p>
+                    <p><strong>Leaderboard Entries:</strong> <span id="leaderboard-count">Loading...</span></p>
+                </div>
+            </div>
+
+            <div class="admin-section danger-zone">
+                <h2>⚠️ Session Management</h2>
+                <p style="margin-bottom: 1rem; color: #374151;">
+                    <strong>Stop All Active Sessions:</strong> This will clear all active participant data and force users to start new sessions. Ratings and leaderboard data will be preserved.
+                </p>
+                <button class="btn-danger" onclick="stopAllSessions()">
+                    🛑 Stop All Active Sessions
+                </button>
+                <div id="action-result" style="margin-top: 1rem;"></div>
+            </div>
+
+            <div class="admin-section">
+                <h2>🔗 Quick Links</h2>
+                <p><a href="dashboard.html" class="btn-primary" style="display: inline-block; text-decoration: none; margin-right: 1rem;">📊 Public Dashboard</a></p>
+                <p><a href="index.html" class="btn-secondary" style="display: inline-block; text-decoration: none;">← Back to Workshop</a></p>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button onclick="logoutAdmin()" style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">Logout</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

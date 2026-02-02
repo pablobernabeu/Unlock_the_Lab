@@ -6,7 +6,8 @@ export default {
     rollupOptions: {
       input: {
         main: 'index.html',
-        dashboard: 'dashboard.html'
+        dashboard: 'dashboard.html',
+        admin: 'admin.html'
       },
       output: {
         manualChunks: {

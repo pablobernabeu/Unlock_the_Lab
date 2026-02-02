@@ -2,6 +2,7 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
 import { getAnalytics } from 'firebase/analytics';
+import { getAuth } from 'firebase/auth';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -24,8 +25,11 @@ const database = getDatabase(app);
 // Initialize Analytics
 const analytics = getAnalytics(app);
 
+// Initialize Auth
+const auth = getAuth(app);
+
 // Export for use in other modules
-export { app, database, analytics };
+export { app, database, analytics, auth };
 
 // Database structure:
 // /ratings/{paperId}/{sessionId} = {rating: number, timestamp: number}
