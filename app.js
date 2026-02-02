@@ -66,10 +66,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // Generate or retrieve username
-    userName = sessionStorage.getItem('userName');
+    userName = localStorage.getItem('userName');
     if (!userName) {
         userName = generateUsername();
-        sessionStorage.setItem('userName', userName);
+        localStorage.setItem('userName', userName);
     }
     
     // Display username at bottom of all pages
@@ -81,11 +81,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Load content
     await loadContent();
     
-    // Initialize glossary and rubric on page 2
+    // Initialize glossary and rubric AFTER content is loaded
     renderGlossary();
     renderRubric();
     
-    // Generate paper pages
+    // Generate paper pages AFTER content is loaded
     generatePaperPages();
     
     // Restore previously submitted ratings if resuming
@@ -114,6 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Expose functions to global scope for HTML onclick handlers
 window.nextPage = nextPage;
+window.previousPage = previousPage;
 window.enableSubmit = enableSubmit;
 window.submitRating = submitRating;
 window.showHelp = showHelp;
@@ -432,6 +433,11 @@ function renderGlossary() {
     const glossaryContent = document.getElementById('glossary-content');
     const modalGlossary = document.getElementById('modal-glossary');
     
+    if (!glossary || glossary.length === 0) {
+        console.error('Glossary data not loaded');
+        return;
+    }
+    
     const glossaryHTML = glossary.map(item => `
         <div class="glossary-item">
             <div class="glossary-term">${item.term}</div>
@@ -439,14 +445,19 @@ function renderGlossary() {
         </div>
     `).join('');
     
-    glossaryContent.innerHTML = glossaryHTML;
-    modalGlossary.innerHTML = glossaryHTML;
+    if (glossaryContent) glossaryContent.innerHTML = glossaryHTML;
+    if (modalGlossary) modalGlossary.innerHTML = glossaryHTML;
 }
 
 // Render rubric
 function renderRubric() {
     const rubricContent = document.getElementById('rubric-content');
     const modalRubric = document.getElementById('modal-rubric');
+    
+    if (!rubric || rubric.length === 0) {
+        console.error('Rubric data not loaded');
+        return;
+    }
     
     const rubricHTML = `
         <table class="rubric-table">
@@ -471,8 +482,8 @@ function renderRubric() {
         </table>
     `;
     
-    rubricContent.innerHTML = rubricHTML;
-    modalRubric.innerHTML = rubricHTML;
+    if (rubricContent) rubricContent.innerHTML = rubricHTML;
+    if (modalRubric) modalRubric.innerHTML = rubricHTML;
 }
 
 // Generate paper pages dynamically
@@ -628,6 +639,12 @@ function nextPage() {
     const totalPages = papers.length + 3; // welcome + guide + papers + final
     if (currentPage < totalPages - 1) {
         showPage(currentPage + 1);
+    }
+}
+
+function previousPage() {
+    if (currentPage > 0) {
+        showPage(currentPage - 1);
     }
 }
 

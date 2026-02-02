@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "site": "unlock-the-lab-workshop",
+    "public": "redirect",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

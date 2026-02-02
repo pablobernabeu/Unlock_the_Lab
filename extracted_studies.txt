@@ -1,0 +1,483 @@
+
+Study ID: 101
+Headline: Chocolate Breakfasts Boost Math Scores by 50%!
+Theoretical Basis: The study relies on the simplified premise that glucose provides immediate fuel for the brain. However, it fails to engage with the substantial body of existing literature describing the ‘sugar crash’ effect and the impact of sustained energy release on cognitive concentration.
+Quality of Test (Methods & Data): The researchers observed N=12 children in a single classroom for three days. There was no control group (e.g., children eating a standard breakfast) to compare against. Data availability: The authors state that raw data and individual test scores are ‘not shared due to commercial sensitivity regarding the chocolate brand involved.’
+Conclusion: The authors conclude that chocolate should be mandatory in school breakfasts to improve national grades. This is a massive generalisation based on a tiny, uncontrolled sample.
+Access to Paper: Accessible only via a £35 paywall on the publisher's site.
+Source Reputation: Predatory Journal. Published in a ‘pay-to-publish’ outlet with no rigorous peer review process, often used for marketing stunts disguised as science.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 102
+Headline: New Alloy Shows Promise for Lighter Aircraft Components
+Theoretical Basis: The study builds on standard metallurgical theories regarding titanium-aluminium blends, specifically addressing a known gap in the literature regarding heat resistance at high altitudes. It uses previous stress-testing models responsibly to predict performance.
+Quality of Test (Methods & Data): The team conducted rigorous stress-testing in controlled lab conditions, repeating the fracture test 500 times. Data availability: Full datasets, stress-test logs and the statistical code used for analysis have been uploaded to a public repository (OSF/GitHub) for verification.
+Conclusion: The conclusion is cautious. It states the alloy is significantly lighter but notes it is currently too expensive for commercial use, suggesting further research into manufacturing costs is required.
+Access to Paper: Direct PDF link available (Open Access).
+Source Reputation: Respected Field-Specific Journal. A well-regarded peer-reviewed publication specialising in materials science and engineering.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 103
+Headline: Screens Before Bed Might Delay Sleep Onset
+Theoretical Basis: The hypothesis is grounded in well-established theories regarding blue light emission and the suppression of melatonin (the sleep hormone). It cites robust prior research on circadian rhythms.
+Quality of Test (Methods & Data): The study surveyed 2,000 adults. However, it relied entirely on self-reported data (participants estimated how much they slept), which is often inaccurate compared to objective tracking. Data availability: Summary tables are provided in the appendix, but raw participant data is not available to protect privacy.
+Conclusion: The authors suggest a link between phone use and insomnia but responsibly acknowledge ‘reverse causality’—noting that anxious people might be using their phones because they cannot sleep, rather than the phone causing the sleeplessness.
+Access to Paper: Accessible with difficulty (requires searching the DOI in a university library or using Sci-Hub).
+Source Reputation: High-Impact Generalist Journal. A prestigious journal that covers broad scientific topics; known for rigorous peer review but occasionally favours studies with mass appeal.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 104
+Headline: Drinking This Herbal Tea Every Morning Prevents Alzheimer's
+Theoretical Basis: The premise is loosely based on traditional folk medicine practices. It ignores current neurological understanding of amyloid plaques and tau tangles, which are the primary biological markers of Alzheimer's disease.
+Quality of Test (Methods & Data): A 6-week observational study of 40 people who already chose to drink the tea daily. There was no randomised control group. Cognition was measured via brief phone interviews rather than clinical scanning. Data availability: ‘Raw data unavailable due to participant confidentiality.’
+Conclusion: Overblown. The study confuses a short-term feeling of alertness (likely from caffeine) with the long-term prevention of a complex neurodegenerative disease.
+Access to Paper: Behind a publisher paywall (£49 for 24 hours access).
+Source Reputation: Predatory Journal. The journal website contains broken English and promises ‘publication within 48 hours for a fee,’ indicating zero peer review.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 105
+Headline: Specific Pesticide Shows Minimal Impact on Honey Bee Navigation in Field Conditions
+Theoretical Basis: The study investigates the ecological validity of previous lab-based findings. It questions whether the harm seen in petri dishes translates to real-world farming environments, a valid scientific question.
+Quality of Test (Methods & Data): A large-scale field trial across 20 farms over two years, using RFID tags to track thousands of individual bees. The methodology was pre-registered (declared before the experiment started) to prevent cherry-picking results. Data availability: Full datasets and tracking code are uploaded to a public repository (Zenodo).
+Conclusion: Cautious and specific. It states that at current agricultural usage levels, this specific chemical does not significantly impair homing flight, but explicitly warns against applying this finding to other insect species.
+Access to Paper: Open Access (Direct PDF link).
+Source Reputation: Respected Field-Specific Journal. Published in a top-tier peer-reviewed journal dedicated to ecology and entomology.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 106
+Headline: Instagram Use is the Primary Cause of Teen Anxiety
+Theoretical Basis: Uses standard social psychology theories regarding ‘social comparison’ and self-esteem. However, it assumes a direct causal vector without accounting for the complexity of adolescent mental health.
+Quality of Test (Methods & Data): A cross-sectional survey of 5,000 teenagers taken at a single point in time. While the sample size is large, the method relies entirely on self-reporting for both ‘hours used’ and ‘anxiety levels.’ Data availability: Summary statistics provided; raw data available only upon request to the lead author.
+Conclusion: Logical but limited. The study establishes a strong correlation but the authors (and the headline) imply causation. They fail to address whether anxious teens simply retreat to social media more often.
+Access to Paper: Accessible with difficulty (via university library subscription).
+Source Reputation: Mid-Tier Psychology Journal. A legitimate peer-reviewed journal, though one that occasionally publishes correlational studies with catchy titles to boost its impact factor.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 107
+Headline: New AI Hiring Tool Eliminates Gender Bias in Recruitment
+Theoretical Basis: The approach assumes that simply removing names from CVs is sufficient to de-bias an algorithmic process. It fails to engage with literature on ‘proxy variables’ (how AI finds other patterns that correlate with gender).
+Quality of Test (Methods & Data): The developers tested the AI using CVs from their own previous hiring rounds. They did not account for the fact that their historical hiring data was already biased against women, meaning the AI learned to replicate that bias. Data availability: ‘Data and algorithms are proprietary intellectual property and cannot be shared.’
+Conclusion: Incorrect. The study claims success because names were hidden, but independent analysis later showed the AI penalised applicants who attended women's colleges or played women's sports.
+Access to Paper: A white paper published directly on the tech company’s website (free, but requires an email sign-up).
+Source Reputation: Corporate White Paper. This is marketing material, not a peer-reviewed scientific study. It has not been vetted by independent experts.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 108
+Headline: Marginal Efficiency Gains in Perovskite Solar Cells Through New Layering Technique
+Theoretical Basis: The study directly addresses a known engineering bottleneck in electron transport layers. It references the specific physics of perovskite crystal degradation responsibly.
+Quality of Test (Methods & Data): Rigorous laboratory testing under standard solar simulation conditions. The experiment was replicated by a second, independent lab before publication to ensure accuracy. Data availability: All spectral data and fabrication recipes are included in the supplementary materials file.
+Conclusion: Accurate and boring. Reports a 1.5% efficiency increase. Critically, it notes that the new material degrades faster in humidity, admitting it is not yet ready for commercial use.
+Access to Paper: Open Access.
+Source Reputation: Top-Tier Generalist Journal. Published in a journal equivalent to Nature or Science, known for publishing significant breakthroughs with rigorous review.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 109
+Headline: Violent Video Games Desensitize Brain to Real-World Pain
+Theoretical Basis: Relies on theories of cognitive desensitisation but attempts to map complex behavioural psychology onto simple blood-flow changes in the brain without sufficient justification.
+Quality of Test (Methods & Data): A laboratory study of 60 university students. Half played a violent game for 20 minutes, half played a puzzle game, then viewed images of injuries whilst in an fMRI scanner. The analysis of specific brain regions was NOT preregistered. Data availability: Data not shared.
+Conclusion: The authors claim a definitive link to real-world violence based only on short-term brain activity changes. They did not measure actual aggressive behaviour or long-term effects.
+Access to Paper: Behind a paywall.
+Source Reputation: Mid-Tier Journal. A legitimate journal, but one that has been criticised in the past for accepting small-sample neuroscience studies that generate catchy headlines.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 110
+Headline: Microplastics Found in Bloodstream of 80% of People Tested
+Theoretical Basis: Investigates the bioaccumulation of polymers in the human body. This is a novel field, so the theoretical framework is exploratory rather than established.
+Quality of Test (Methods & Data): The team developed a novel, highly sensitive chemical analysis method (mass spectrometry) to detect tiny plastic particles. Stringent contamination controls were used to ensure plastics from the lab equipment didn't affect results. Data availability: Full methodology and anonymised data concentrations are freely available.
+Conclusion: Nuanced and alarming. It confirms the presence of plastics in blood but explicitly states that the health implications of these specific concentrations are currently unknown and require urgent further study.
+Access to Paper: Open Access.
+Source Reputation: High-Impact Generalist Journal. Published in a world-leading journal with extremely high rejection rates and rigorous statistical review.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 111
+Headline: Why Tall Men Make Better CEOs: It’s Evolution
+Theoretical Basis: Uses evolutionary psychology to suggest height signals dominance. It fails to account for the ‘halo effect’ (social bias) and treats modern corporate structures as if they are prehistoric hunter-gatherer societies.
+Quality of Test (Methods & Data): The authors looked at the height of CEOs in Fortune 500 companies and compared them to the national average. No measure of actual company performance, profit or leadership skill was included. Data availability: A spreadsheet of CEO heights is available on request.
+Conclusion: Overblown. It confuses a societal bias (we promote tall men) with an inherent evolutionary ability (tall men are better leaders).
+Access to Paper: Accessible with difficulty (requires requesting a copy on a scientific social network).
+Source Reputation: Preprint Server. The paper has been uploaded to a server but has not yet been peer-reviewed or accepted by a journal.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 112
+Headline: Lavender Essential Oil Cures Insomnia Faster Than Sleeping Pills
+Theoretical Basis: Based on aromatherapy principles. It completely ignores the known pharmacological mechanisms of benzodiazepines (sleeping pills) and offers no biological explanation for how the scent would override neurological insomnia.
+Quality of Test (Methods & Data): A study of 12 people attending a wellness retreat. They all received lavender pillows and reported sleeping better. There was no control group and no comparison to people taking sleeping pills. Data availability: Data not mentioned.
+Conclusion: Nonsense. A massive claim (‘cures insomnia,’ ‘faster than pills’) based on almost zero evidence and subjective feedback.
+Access to Paper: Free to access.
+Source Reputation: Predatory Journal. The publication charges authors a fee to publish anything, often skipping peer review entirely. The website lists ‘Astrology’ in its scientific categories.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 113
+Headline: Urban Foxes Adapt Diet to Include High Levels of Human Food Waste
+Theoretical Basis: Relies on standard ecological theory regarding ‘dietary plasticity’ in opportunistic omnivores (animals that eat anything). It fits well with existing urban ecology literature.
+Quality of Test (Methods & Data): Rigorous analysis of stomach contents of 300 deceased foxes collected over five years across three cities. Results were compared against rural fox diets. Data availability: Summary tables provided in the paper; full dietary datasets available on request to bona fide researchers.
+Conclusion: Solid. It concludes that urban foxes are highly dependent on anthropogenic (human) food sources, which may have implications for their health and population density.
+Access to Paper: Behind a paywall.
+Source Reputation: Respected Field-Specific Journal. A specialized journal for Zoology and Ecology, known for solid, data-driven science.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 114
+Headline: Simulated Martian Soil Supports Growth of Edible Crops
+Theoretical Basis: Addresses a crucial gap in knowledge regarding ‘In-Situ Resource Utilisation’ for future space missions. It applies standard botanical knowledge to a novel soil environment.
+Quality of Test (Methods & Data): A greenhouse experiment using NASA-developed Mars soil simulant (Regolith). Tested various crop types with different fertiliser additives. Control groups used standard Earth soil. Data availability: All plant growth metrics, soil composition analysis and watering schedules are freely downloadable.
+Conclusion: Optimistic but careful. Crops grew, but the authors note they accumulated heavy metals present in the Mars simulant, making them unsafe to eat without further processing. The headline misses this vital caveat.
+Access to Paper: Open Access.
+Source Reputation: Respected Field-Specific Journal. Published in a leading journal for Space and Planetary Science.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 115
+Headline: Listening to Classical Music While Studying Raises IQ
+Theoretical Basis: A rehash of the ‘Mozart Effect,’ a theory largely debunked by modern psychology. It suggests passive listening boosts general intelligence, rather than just temporary arousal or mood.
+Quality of Test (Methods & Data): 30 students took a short logic test after 10 minutes of Mozart, and another test after 10 minutes of silence. It did not measure IQ (which is a stable trait), but rather performance on one specific puzzle. The hypothesis was not preregistered. Data availability: Not provided.
+Conclusion: Overblown. It found a tiny, temporary improvement in one task and generalised it to ‘raising IQ,’ implying a permanent cognitive upgrade.
+Access to Paper: Behind a paywall.
+Source Reputation: Low-Tier Journal. A peer-reviewed journal, but one with a low impact factor that often publishes ‘novelty’ psychology studies.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 116
+Headline: Electric Vehicle Range Drops by Up to 30% in Freezing Temperatures
+Theoretical Basis: Based on known electrochemical properties of lithium-ion batteries. Electrolyte fluid becomes more viscous and internal resistance increases in cold climates; the theory is solid physics.
+Quality of Test (Methods & Data): Tested five popular EV models in climate-controlled chambers running standard driving cycles at +20°C and -10°C to ensure fair comparison. Data availability: Full test protocols and detailed discharge curves for all vehicles are available on the institute's website.
+Conclusion: Accurate. The study provides real-world data confirming a known limitation of current battery technology. It does not attack EVs but informs consumers in cold climates.
+Access to Paper: Open Access.
+Source Reputation: National Research Institute Report. Published by a government-funded transport research body. Highly credible and independent of car manufacturers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 117
+Headline: Remote Workers are 40% More Productive Than Office Workers
+Theoretical Basis: N/A. This is a purely explorative survey with no grounding in management theory or organisational psychology.
+Quality of Test (Methods & Data): An online survey of 2,000 workers. Productivity was measured solely by asking participants: ‘Do you feel more productive at home?’ Data availability: Proprietary data, not shared.
+Conclusion: Flawed. It uses a subjective feeling (‘I feel productive’) as an objective measure of output.
+Access to Paper: A PDF report downloadable from a website.
+Source Reputation: Corporate Marketing Report. The study was conducted and published by a management consultancy firm that sells remote-work software. A clear conflict of interest.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 118
+Headline: Gut Bacteria Imbalance is the Root Cause of All Depression
+Theoretical Basis: Investigates the ‘gut-brain axis,’ a legitimate and exciting new field. However, the theory reduces a complex biopsychosocial disorder (depression) to a single biological cause.
+Quality of Test (Methods & Data): Transferred fecal microbiota from depressed humans into sterile mice. The specific behavioural scoring criteria were preregistered. The mice showed behavioural changes associated with rodent stress. Data availability: Data available upon request.
+Conclusion: Overblown headline. The study shows an interesting mechanism in mice, but the headline makes a massive leap to claiming it is the sole cause of depression in humans, ignoring trauma and social factors.
+Access to Paper: Accessible with difficulty (specialist microbiology journal).
+Source Reputation: Respected Field-Specific Journal. A solid microbiology journal. The study is good; the interpretation of the conclusion (often by the press office) is the problem.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 119
+Headline: Northern Hemisphere Summer Temperatures Over Past 2,000 Years Reconstructed
+Theoretical Basis: Dendroclimatology (using tree rings as proxies for past climate). The study uses established protocols for calibrating tree ring width against known temperature records.
+Quality of Test (Methods & Data): Combined thousands of tree-ring datasets from across Europe and Asia. Used rigorous statistical modelling to account for uncertainties and outliers. Data availability: The entire dataset of proxy records and the reconstruction code are hosted on the NOAA Paleoclimatology database.
+Conclusion: Robust. It shows current warming is unprecedented in the context of the last two millennia. The conclusion is highly specific about geographical limitations and statistical margins of error.
+Access to Paper: Open Access.
+Source Reputation: Top-Tier Generalist Journal. Published in a prestigious journal (e.g., Nature) known for strictly reviewing climate models.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 120
+Headline: Bitcoin Adopted as Primary Currency in Developing Nation Stabilises Local Economy
+Theoretical Basis: Relies on unorthodox economic theories promoted by cryptocurrency advocates, often ignoring standard monetary policy principles regarding inflation and liquidity.
+Quality of Test (Methods & Data): Looks at economic indicators in the country over a very short period (3 months) after adoption. It ignores massive external factors, such as global oil prices, which affected that economy simultaneously. Data availability: Links to some public charts provided, but no raw economic dataset included.
+Conclusion: Flawed correlation. It attributes short-term stabilization entirely to Bitcoin without evidence, ignoring confounding variables.
+Access to Paper: A PDF uploaded to a crypto-enthusiast server.
+Source Reputation: Preprint / Blog Post. This is a non-peer-reviewed paper hosted on a community server. It has not been vetted by economists.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 121
+Headline: Vertical Farms Produce Higher Yields but Have Higher Carbon Footprint Than Traditional Agriculture
+Theoretical Basis: Uses ‘Life-Cycle Assessment’ (LCA), a standardised framework for assessing environmental impacts associated with all stages of a product's life.
+Quality of Test (Methods & Data): Compared data from three operational vertical farms against average data for conventional field farming of lettuce. Accounted for energy use for lighting/heating vs diesel for tractors/transport. Data availability: Full LCA assumptions and input data tables provided in the appendix.
+Conclusion: Nuanced. It reveals a trade-off: vertical farming saves land and water, but currently requires massive amounts of electricity, making it higher carbon depending on the local energy grid.
+Access to Paper: Open Access.
+Source Reputation: Respected Field-Specific Journal. Published in a reputable journal focusing on Sustainability and Agricultural Science.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 122
+Headline: Late-Night Smartphone Use Linked to Lower Sleep Quality in Adolescents via Objective Tracking
+Theoretical Basis: Builds on previous survey data but aims to correct the ‘recall bias’ (memory errors) of those studies by using digital tracking.
+Quality of Test (Methods & Data): 500 teenagers installed an app that tracked exact phone usage times and wore an actigraphy wristband to measure actual sleep patterns for two weeks. The statistical analysis plan was preregistered on OSF to prevent p-hacking. Data availability: Anonymised, aggregated data is available on the Open Science Framework (OSF), but individual raw traces are hidden for privacy.
+Conclusion: Strong. The use of objective measurement tools removes memory bias. The conclusion accurately reports a significant negative correlation between screen usage after 10 PM and sleep duration.
+Access to Paper: Behind a paywall.
+Source Reputation: High-Impact Generalist Journal. A top-tier journal known for rigorous medical and health sciences research.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Study ID: 123
+Headline: New Peptide Cream Reverses Skin Aging by 20 Years
+Theoretical Basis: Mentions ‘collagen boosting peptides’ but provides no explanation of the delivery mechanism—biologically, peptides are large molecules that struggle to penetrate the skin barrier.
+Quality of Test (Methods & Data): A company-run trial of 30 women. Results were based on the participants' own self-assessment of how their skin looked in the mirror after 4 weeks. No placebo cream was used. Data availability: ‘Data on file’ (i.e., secret).
+Conclusion: Marketing dressed up as science. Subjective opinion is presented as objective biological reversal of aging.
+Access to Paper: A summary on the cosmetic company's website referencing ‘clinical trials on file.’
+Source Reputation: Corporate Marketing Material. Not a study. This is a claim made on a commercial website, referencing internal data that has never been peer-reviewed.
+
