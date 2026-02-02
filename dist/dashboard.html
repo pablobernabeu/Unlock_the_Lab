@@ -332,8 +332,50 @@
                 font-size: 1.5rem;
             }
         }
+        
+        /* Study Details Modal */
+        .study-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .study-modal.active {
+            display: flex;
+        }
+        
+        .study-modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .study-modal-close {
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #9ca3af;
+            cursor: pointer;
+            line-height: 1;
+        }
+        
+        .study-modal-close:hover {
+            color: #374151;
+        }
     </style>
-  <script type="module" crossorigin src="/assets/dashboard-De01l5Nw.js"></script>
+  <script type="module" crossorigin src="/assets/dashboard-BOmAwbYm.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
 </head>
 <body>
@@ -350,39 +392,38 @@
             <div class="stat-card">
                 <div class="stat-value" id="totalRatings">0</div>
                 <div class="stat-label">Total Ratings</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Number of study ratings submitted by all participants</p>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="activeParticipants">0</div>
                 <div class="stat-label">Active Participants</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Users currently rating studies (active in last 60 seconds)</p>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="completedSessions">0</div>
                 <div class="stat-label">Completed Sessions</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Total participants who finished all studies</p>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="avgScore">0</div>
                 <div class="stat-label">Average Score</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Mean prediction accuracy score across all participants</p>
             </div>
         </div>
 
         <div class="charts-grid">
-            <div class="chart-card">
+            <div class="chart-card" style="grid-column: 1 / -1;">
                 <h2>📊 Average Ratings by Study</h2>
+                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. Click study names for details.</p>
                 <div class="chart-container">
                     <canvas id="ratingsChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <h2>🎯 Rating Agreement (Std Deviation)</h2>
-                <div class="chart-container">
-                    <canvas id="agreementChart"></canvas>
                 </div>
             </div>
         </div>
 
         <div class="data-table">
-            <h2 style="color: #667eea; margin-bottom: 20px;">📈 Detailed Statistics</h2>
+            <h2 style="color: #667eea; margin-bottom: 10px;">📈 Detailed Statistics</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Complete breakdown of ratings for each study. Std Dev measures disagreement (higher = more variable ratings). Agreement % shows consensus level. Color scales highlight relative values—click column headers to sort.</p>
             <table id="statsTable">
                 <thead>
                     <tr>
@@ -400,6 +441,18 @@
                     <tr><td colspan="8" style="text-align: center; color: #999;">Loading data...</td></tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Study Details Modal -->
+    <div class="study-modal" id="studyModal" onclick="closeStudyModal()">
+        <div class="study-modal-content" onclick="event.stopPropagation()">
+            <span class="study-modal-close" onclick="closeStudyModal()">&times;</span>
+            <div id="studyDetailsContent">
+                <h2 id="studyTitle"></h2>
+                <p id="studyQuality"></p>
+                <div id="studyStats"></div>
+            </div>
         </div>
     </div>
 

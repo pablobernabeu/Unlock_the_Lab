@@ -332,6 +332,48 @@
                 font-size: 1.5rem;
             }
         }
+        
+        /* Study Details Modal */
+        .study-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .study-modal.active {
+            display: flex;
+        }
+        
+        .study-modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .study-modal-close {
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #9ca3af;
+            cursor: pointer;
+            line-height: 1;
+        }
+        
+        .study-modal-close:hover {
+            color: #374151;
+        }
     </style>
 </head>
 <body>
@@ -348,39 +390,38 @@
             <div class="stat-card">
                 <div class="stat-value" id="totalRatings">0</div>
                 <div class="stat-label">Total Ratings</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Number of study ratings submitted by all participants</p>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="activeParticipants">0</div>
                 <div class="stat-label">Active Participants</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Users currently rating studies (active in last 60 seconds)</p>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="completedSessions">0</div>
                 <div class="stat-label">Completed Sessions</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Total participants who finished all studies</p>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="avgScore">0</div>
                 <div class="stat-label">Average Score</div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Mean prediction accuracy score across all participants</p>
             </div>
         </div>
 
         <div class="charts-grid">
-            <div class="chart-card">
+            <div class="chart-card" style="grid-column: 1 / -1;">
                 <h2>📊 Average Ratings by Study</h2>
+                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. Click study names for details.</p>
                 <div class="chart-container">
                     <canvas id="ratingsChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <h2>🎯 Rating Agreement (Std Deviation)</h2>
-                <div class="chart-container">
-                    <canvas id="agreementChart"></canvas>
                 </div>
             </div>
         </div>
 
         <div class="data-table">
-            <h2 style="color: #667eea; margin-bottom: 20px;">📈 Detailed Statistics</h2>
+            <h2 style="color: #667eea; margin-bottom: 10px;">📈 Detailed Statistics</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Complete breakdown of ratings for each study. Std Dev measures disagreement (higher = more variable ratings). Agreement % shows consensus level. Color scales highlight relative values—click column headers to sort.</p>
             <table id="statsTable">
                 <thead>
                     <tr>
@@ -398,6 +439,18 @@
                     <tr><td colspan="8" style="text-align: center; color: #999;">Loading data...</td></tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Study Details Modal -->
+    <div class="study-modal" id="studyModal" onclick="closeStudyModal()">
+        <div class="study-modal-content" onclick="event.stopPropagation()">
+            <span class="study-modal-close" onclick="closeStudyModal()">&times;</span>
+            <div id="studyDetailsContent">
+                <h2 id="studyTitle"></h2>
+                <p id="studyQuality"></p>
+                <div id="studyStats"></div>
+            </div>
         </div>
     </div>
 
@@ -491,7 +544,7 @@
         };
         const seedWeight = 100;
 
-        let ratingsChart, agreementChart;
+        let ratingsChart;
 
         // Initialize charts
         const ratingsCtx = document.getElementById('ratingsChart').getContext('2d');
@@ -504,55 +557,108 @@
                     data: [],
                     backgroundColor: 'rgba(102, 126, 234, 0.8)',
                     borderColor: 'rgba(102, 126, 234, 1)',
-                    borderWidth: 2
+                    borderWidth: 2,
+                    errorBars: {}
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, activeElements) => {
+                    if (activeElements.length > 0) {
+                        const index = activeElements[0].index;
+                        const studyId = paperIds[index];
+                        showStudyDetails(studyId);
+                    }
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 5,
-                        title: { display: true, text: 'Rating (1-5)' }
+                        max: 7,
+                        title: { display: true, text: 'Rating (1-7 scale)' }
+                    },
+                    x: {
+                        ticks: {
+                            callback: function(value, index) {
+                                return paperIds[index] + ' \u24D8';
+                            },
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Rating: ${context.parsed.y.toFixed(2)} (click for details)`;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
                     }
                 }
-            }
-        });
-
-        const agreementCtx = document.getElementById('agreementChart').getContext('2d');
-        agreementChart = new Chart(agreementCtx, {
-            type: 'bar',
-            data: {
-                labels: paperIds,
-                datasets: [{
-                    label: 'Standard Deviation',
-                    data: [],
-                    backgroundColor: 'rgba(118, 75, 162, 0.8)',
-                    borderColor: 'rgba(118, 75, 162, 1)',
-                    borderWidth: 2
-                }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Std Deviation (lower = higher agreement)' }
-                    }
+            plugins: [{
+                id: 'errorBars',
+                afterDatasetsDraw(chart) {
+                    const ctx = chart.ctx;
+                    const meta = chart.getDatasetMeta(0);
+                    const errorBars = chart.data.datasets[0].errorBars;
+                    
+                    meta.data.forEach((bar, index) => {
+                        if (!errorBars[index]) return;
+                        
+                        const { lower, upper } = errorBars[index];
+                        const x = bar.x;
+                        const yLower = chart.scales.y.getPixelForValue(lower);
+                        const yUpper = chart.scales.y.getPixelForValue(upper);
+                        
+                        ctx.save();
+                        ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+                        ctx.lineWidth = 2;
+                        
+                        // Vertical line
+                        ctx.beginPath();
+                        ctx.moveTo(x, yLower);
+                        ctx.lineTo(x, yUpper);
+                        ctx.stroke();
+                        
+                        // Lower cap
+                        ctx.beginPath();
+                        ctx.moveTo(x - 5, yLower);
+                        ctx.lineTo(x + 5, yLower);
+                        ctx.stroke();
+                        
+                        // Upper cap
+                        ctx.beginPath();
+                        ctx.moveTo(x - 5, yUpper);
+                        ctx.lineTo(x + 5, yUpper);
+                        ctx.stroke();
+                        
+                        ctx.restore();
+                    });
                 }
-            }
+            }]
         });
 
         function calculateStats(values) {
-            if (!values || values.length === 0) return { mean: 0, stdDev: 0, min: 0, max: 0, agreement: 0 };
+            if (!values || values.length === 0) return { mean: 0, stdDev: 0, min: 0, max: 0, agreement: 0, ci95Lower: 0, ci95Upper: 0 };
             
-            const mean = values.reduce((a, b) => a + b, 0) / values.length;
-            const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+            const n = values.length;
+            const mean = values.reduce((a, b) => a + b, 0) / n;
+            const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / n;
             const stdDev = Math.sqrt(variance);
             const min = Math.min(...values);
             const max = Math.max(...values);
+            
+            // Calculate 95% confidence interval
+            const stderr = stdDev / Math.sqrt(n);
+            const tValue = 1.96; // Approximate for large n, exact for n>30
+            const ci95Lower = Math.max(1, mean - tValue * stderr); // Clamp to scale minimum
+            const ci95Upper = Math.min(7, mean + tValue * stderr); // Clamp to scale maximum
             
             // Agreement % (inverse of coefficient of variation, capped at 100%)
             const agreement = mean === 0 ? 0 : Math.min(100, 100 * (1 - stdDev / mean));
@@ -562,7 +668,9 @@
                 stdDev: stdDev.toFixed(2), 
                 min: min.toFixed(1), 
                 max: max.toFixed(1),
-                agreement: agreement.toFixed(0)
+                agreement: agreement.toFixed(0),
+                ci95Lower: ci95Lower.toFixed(2),
+                ci95Upper: ci95Upper.toFixed(2)
             };
         }
 
@@ -609,6 +717,9 @@
                 };
                 totalRatings += values.length;
             });
+            
+            // Store stats for modal access
+            storeStatsGlobally(stats);
 
             // Update summary stats
             document.getElementById('totalRatings').textContent = totalRatings;
@@ -631,11 +742,17 @@
             }
 
             // Update charts
+            const errorBars = {};
+            paperIds.forEach((id, index) => {
+                errorBars[index] = {
+                    lower: parseFloat(stats[id].ci95Lower),
+                    upper: parseFloat(stats[id].ci95Upper)
+                };
+            });
+            
             ratingsChart.data.datasets[0].data = paperIds.map(id => stats[id].mean);
+            ratingsChart.data.datasets[0].errorBars = errorBars;
             ratingsChart.update();
-
-            agreementChart.data.datasets[0].data = paperIds.map(id => stats[id].stdDev);
-            agreementChart.update();
 
             // Update table
             const tbody = document.getElementById('statsTableBody');
@@ -883,6 +1000,72 @@
             // Rebuild table
             rows.forEach(row => tbody.appendChild(row));
         };
+        
+        // Study details modal functions
+        let currentStats = {};
+        
+        window.showStudyDetails = function(studyId) {
+            const modal = document.getElementById('studyModal');
+            const quality = paperQualities[studyId];
+            const stats = currentStats[studyId];
+            
+            if (!stats) {
+                alert('No data available for this study yet.');
+                return;
+            }
+            
+            document.getElementById('studyTitle').textContent = studyId;
+            document.getElementById('studyQuality').innerHTML = `
+                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: ${quality === 'high' ? '#10b981' : quality === 'medium' ? '#f59e0b' : '#ef4444'}; margin-right: 8px;"></span>
+                <strong>Quality Level:</strong> ${quality.charAt(0).toUpperCase() + quality.slice(1)}
+            `;
+            
+            document.getElementById('studyStats').innerHTML = `
+                <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
+                    <h3 style="margin-top: 0; color: #667eea;">Rating Statistics</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 0.75rem; font-weight: 600;">Participants:</td>
+                            <td style="padding: 0.75rem;">${stats.count}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 0.75rem; font-weight: 600;">Mean Rating:</td>
+                            <td style="padding: 0.75rem;">${stats.mean} / 7</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 0.75rem; font-weight: 600;">95% CI:</td>
+                            <td style="padding: 0.75rem;">[${stats.ci95Lower}, ${stats.ci95Upper}]</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 0.75rem; font-weight: 600;">Std Deviation:</td>
+                            <td style="padding: 0.75rem;">${stats.stdDev}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 0.75rem; font-weight: 600;">Range:</td>
+                            <td style="padding: 0.75rem;">${stats.min} - ${stats.max}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; font-weight: 600;">Agreement:</td>
+                            <td style="padding: 0.75rem;">${stats.agreement}%</td>
+                        </tr>
+                    </table>
+                    <p style="font-size: 0.85rem; color: #6b7280; margin-top: 1rem; margin-bottom: 0;">
+                        <strong>What this means:</strong> ${parseInt(stats.agreement) > 70 ? 'High agreement among participants - ratings are consistent.' : parseInt(stats.agreement) > 40 ? 'Moderate agreement - some variation in ratings.' : 'Low agreement - participants have quite different opinions about this study.'}
+                    </p>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        };
+        
+        window.closeStudyModal = function() {
+            document.getElementById('studyModal').classList.remove('active');
+        };
+        
+        // Store stats globally for modal access
+        function storeStatsGlobally(stats) {
+            currentStats = stats;
+        }
     </script>
 </body>
 </html>
