@@ -166,7 +166,7 @@
 
     <script type="module">
         import { auth, database } from './firebase-config.js';
-        import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+        import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'firebase/auth';
         import { ref, get, remove } from 'firebase/database';
 
         // Check auth state on load
@@ -178,17 +178,54 @@
                 showLoginForm();
             }
         });
+        
+        // Check for redirect result on page load
+        getRedirectResult(auth)
+            .then((result) => {
+                if (result) {
+                    // User signed in successfully via redirect
+                    const errorDiv = document.getElementById('login-error');
+                    if (errorDiv) errorDiv.style.display = 'none';
+                }
+            })
+            .catch((error) => {
+                const errorDiv = document.getElementById('login-error');
+                if (errorDiv) {
+                    errorDiv.textContent = `Login failed: ${error.message}`;
+                    errorDiv.style.display = 'block';
+                }
+            });
 
         window.loginWithGoogle = async function() {
             const errorDiv = document.getElementById('login-error');
             const provider = new GoogleAuthProvider();
             
             try {
+                // Try popup first, fallback to redirect if it fails
                 await signInWithPopup(auth, provider);
                 errorDiv.style.display = 'none';
             } catch (error) {
-                if (error.code !== 'auth/popup-closed-by-user') {
-                    errorDiv.textContent = `Login failed: ${error.message}`;
+                if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+                    // Popup blocked, try redirect instead
+                    try {
+                        await signInWithRedirect(auth, provider);
+                    } catch (redirectError) {
+                        errorDiv.textContent = `Login failed: ${redirectError.message}. Please ensure pop-ups are allowed and try again.`;
+                        errorDiv.style.display = 'block';
+                    }
+                } else if (error.code !== 'auth/popup-closed-by-user') {
+                    let errorMessage = error.message;
+                    
+                    // Provide more helpful error messages
+                    if (error.code === 'auth/unauthorized-domain') {
+                        errorMessage = 'This domain is not authorized. Please add it in Firebase Console > Authentication > Settings > Authorized domains.';
+                    } else if (error.code === 'auth/operation-not-allowed') {
+                        errorMessage = 'Google Sign-In is not enabled. Please enable it in Firebase Console > Authentication > Sign-in method.';
+                    } else if (error.code === 'auth/invalid-api-key') {
+                        errorMessage = 'Invalid API key. Please check your Firebase configuration.';
+                    }
+                    
+                    errorDiv.textContent = `Login failed: ${errorMessage}`;
                     errorDiv.style.display = 'block';
                 }
             }

@@ -1,56 +1,98 @@
-# Fix Google Authentication Error
+# Fix Google Authentication Errors
 
-## Error: `auth/unauthorized-domain`
+## Common Errors and Solutions
 
-This error occurs when trying to login to the admin panel because your deployment domain is not authorized in Firebase.
+### Error 1: `auth/unauthorized-domain`
+**Cause**: Your deployment domain is not authorized in Firebase.
 
-## Quick Fix (2 minutes)
+### Error 2: `The requested action is invalid`
+**Cause**: Google Sign-In provider is not properly enabled in Firebase Console.
 
-1. **Go to Firebase Console**: https://console.firebase.google.com/
-
-2. **Select your project**: **unlock-the-lab-workshop**
-
-3. **Navigate to Authentication**:
-   - Left sidebar → **Authentication**
-   - Click **Settings** tab
-   - Click **Authorized domains**
-
-4. **Add your domain(s)**:
-   - Click **Add domain**
-   - Add each of these:
-     ```
-     unlock-the-lab.web.app
-     unlock-the-lab-workshop.web.app
-     localhost
-     ```
-   - If using GitHub Pages, also add:
-     ```
-     pablobernabeu.github.io
-     ```
-
-5. **Click Save**
-
-6. **Test**: Refresh your admin page and try logging in with Google again
+### Error 3: `auth/operation-not-allowed`
+**Cause**: Google Sign-In method is disabled in Firebase.
 
 ---
 
-## What This Does
+## Complete Fix (5 minutes)
 
-Firebase Authentication only works from authorized domains to prevent unauthorized use of your auth system. By adding your deployment domains, you're telling Firebase "it's okay for users to authenticate from these websites."
+Follow **ALL** these steps in order:
 
-**Note**: `localhost` is usually pre-authorized for development, but production domains must be added manually.
+### Step 1: Enable Google Sign-In Provider ⚡
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Select project: **unlock-the-lab-workshop**
+3. Click **Authentication** in left sidebar
+4. Click **Sign-in method** tab
+5. Find **Google** in the providers list
+6. Click on **Google**
+7. **Toggle "Enable" to ON**
+8. **IMPORTANT**: Enter a support email (your email)
+9. Click **Save**
+
+### Step 2: Add Authorized Domains 🌐
+
+1. Still in **Authentication** section
+2. Click **Settings** tab (top of page)
+3. Scroll to **Authorized domains** section
+4. Click **Add domain** for each of these:
+   ```
+   unlock-the-lab.web.app
+   unlock-the-lab-workshop.web.app
+   localhost
+   ```
+5. If using GitHub Pages:
+   ```
+   pablobernabeu.github.io
+   ```
+
+### Step 3: Verify OAuth Consent Screen (if needed) ✅
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Select project: **unlock-the-lab-workshop**
+3. Left menu → **APIs & Services** → **OAuth consent screen**
+4. If it says "Not configured":
+   - Click **Configure Consent Screen**
+   - Choose **External** user type
+   - Fill in app name: "Unlock the Lab"
+   - Add your email as support email
+   - Click **Save and Continue**
+5. Skip scopes and test users (just click Continue)
+6. Click **Back to Dashboard**
+
+### Step 4: Test 🧪
+
+1. Clear browser cache or use incognito window
+2. Go to your admin page: `https://unlock-the-lab.web.app/admin.html`
+3. Click "Sign in with Google"
+4. Should now work! ✅
 
 ---
 
-## Already Added?
+## Still Having Issues?
 
-If you've already added the domains and still see the error:
+### If popup is blocked:
+- Allow popups for your site
+- Or the app will automatically try redirect method
 
-1. Check you're accessing the site from the exact domain you authorized
-2. Clear your browser cache
-3. Try in an incognito/private window
-4. Verify the domain exactly matches (no typos, http vs https, www vs non-www)
+### If you see "This app isn't verified":
+- This is normal for test apps
+- Click "Advanced" → "Go to Unlock the Lab (unsafe)"
+- This warning disappears when you publish your app properly
+
+### If nothing works:
+1. Check browser console (F12) for specific error messages
+2. Verify you're accessing from one of the authorized domains
+3. Make sure you completed ALL steps above
+4. Try a different browser
 
 ---
 
-After fixing this, your Google Sign-In button on the admin panel will work perfectly!
+## Checklist ✓
+
+- [ ] Google Sign-In provider enabled in Firebase Console
+- [ ] Support email added to Google provider
+- [ ] All deployment domains added to Authorized domains
+- [ ] OAuth consent screen configured (if prompted)
+- [ ] Tested in incognito window
+
+After completing all steps, Google Sign-In will work perfectly!
