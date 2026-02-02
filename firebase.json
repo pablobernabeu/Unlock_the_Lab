@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "unlock-the-lab",
     "public": "dist",
     "ignore": [
       "firebase.json",
