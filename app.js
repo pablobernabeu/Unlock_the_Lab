@@ -150,6 +150,75 @@ function generateUsername() {
     return `${adjective} ${animal}`;
 }
 
+// Save application state to localStorage
+function saveState() {
+    const state = {
+        currentPage,
+        userRatings,
+        userPredictions,
+        totalScore,
+        sessionId
+    };
+    localStorage.setItem('workshopState', JSON.stringify(state));
+}
+
+// Load application state from localStorage
+function loadState() {
+    try {
+        const saved = localStorage.getItem('workshopState');
+        if (saved) {
+            const state = JSON.parse(saved);
+            currentPage = state.currentPage || 0;
+            userRatings = state.userRatings || {};
+            userPredictions = state.userPredictions || {};
+            totalScore = state.totalScore || 0;
+            sessionId = state.sessionId || null;
+            return true; // State was loaded
+        }
+    } catch (error) {
+        console.error('Error loading state:', error);
+    }
+    return false; // No state to load
+}
+
+// Restore submitted ratings UI for previously rated papers
+function restoreSubmittedRatings() {
+    Object.keys(userRatings).forEach(paperId => {
+        // Find paper index
+        const paperIndex = papers.findIndex(p => p.id === paperId);
+        if (paperIndex >= 0) {
+            // Hide rating section, show results
+            const ratingSection = document.getElementById(`rating-section-${paperIndex}`);
+            const resultsBox = document.getElementById(`results-${paperIndex}`);
+            if (ratingSection) ratingSection.style.display = 'none';
+            if (resultsBox) {
+                resultsBox.style.display = 'block';
+                // Re-fetch and show results
+                const rating = userRatings[paperId];
+                const prediction = userPredictions[paperId];
+                if (rating && prediction) {
+                    showResults(paperIndex, paperId, rating, prediction, true);
+                }
+            }
+        }
+    });
+}
+
+// Display username at bottom of all pages
+function displayUsername() {
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(page => {
+        // Skip if already has username footer
+        if (page.querySelector('.username-footer')) return;
+        
+        const footer = document.createElement('div');
+        footer.className = 'username-footer';
+        footer.style.cssText = 'margin-top: 2rem; padding-top: 1rem; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 0.9rem;';
+        footer.textContent = `Playing as: ${userName}`;
+        page.querySelector('.container').appendChild(footer);
+    });
+}
+
 // Start session timeout to prevent excessive Firebase usage
 function startSessionTimeout() {
     sessionStartTime = Date.now();
