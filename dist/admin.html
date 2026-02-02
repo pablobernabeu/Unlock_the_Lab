@@ -94,7 +94,7 @@
             margin: 1rem 0;
         }
     </style>
-  <script type="module" crossorigin src="/assets/admin-fUlqIDyj.js"></script>
+  <script type="module" crossorigin src="/assets/admin-CwZ6V73G.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase-QsoZ-6oB.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase-config-GGoD4bnV.js">
@@ -139,10 +139,21 @@
                 <p style="margin-bottom: 1rem; color: #374151;">
                     <strong>Stop All Active Sessions:</strong> This will clear all active participant data and force users to start new sessions. Ratings and leaderboard data will be preserved.
                 </p>
-                <button class="btn-danger" onclick="stopAllSessions()">
+                <button class="btn-danger" onclick="stopAllSessions()" style="width: 100%; margin-bottom: 1rem;">
                     🛑 Stop All Active Sessions
                 </button>
                 <div id="action-result" style="margin-top: 1rem;"></div>
+            </div>
+
+            <div class="admin-section danger-zone">
+                <h2>🗑️ Data Management</h2>
+                <p style="margin-bottom: 1rem; color: #374151;">
+                    <strong>⚠️ CAUTION:</strong> This will permanently delete all stored ratings data. This action cannot be undone. The leaderboard and active sessions will remain.
+                </p>
+                <button class="btn-danger" onclick="deleteAllRatings()" style="width: 100%;">
+                    🗑️ Delete All Ratings Data
+                </button>
+                <div id="delete-result" style="margin-top: 1rem;"></div>
             </div>
 
             <div class="admin-section">

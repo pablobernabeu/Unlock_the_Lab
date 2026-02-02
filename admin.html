@@ -135,10 +135,21 @@
                 <p style="margin-bottom: 1rem; color: #374151;">
                     <strong>Stop All Active Sessions:</strong> This will clear all active participant data and force users to start new sessions. Ratings and leaderboard data will be preserved.
                 </p>
-                <button class="btn-danger" onclick="stopAllSessions()">
+                <button class="btn-danger" onclick="stopAllSessions()" style="width: 100%; margin-bottom: 1rem;">
                     🛑 Stop All Active Sessions
                 </button>
                 <div id="action-result" style="margin-top: 1rem;"></div>
+            </div>
+
+            <div class="admin-section danger-zone">
+                <h2>🗑️ Data Management</h2>
+                <p style="margin-bottom: 1rem; color: #374151;">
+                    <strong>⚠️ CAUTION:</strong> This will permanently delete all stored ratings data. This action cannot be undone. The leaderboard and active sessions will remain.
+                </p>
+                <button class="btn-danger" onclick="deleteAllRatings()" style="width: 100%;">
+                    🗑️ Delete All Ratings Data
+                </button>
+                <div id="delete-result" style="margin-top: 1rem;"></div>
             </div>
 
             <div class="admin-section">
@@ -240,6 +251,44 @@
                 await remove(activeRef);
                 
                 resultDiv.innerHTML = '<p style="color: #10b981; padding: 1rem; background: #d1fae5; border-radius: 4px;">✅ All active sessions have been stopped successfully.</p>';
+                
+                // Reload stats
+                await loadStats();
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: #ef4444; padding: 1rem; background: #fef2f2; border-radius: 4px;">❌ Error: ${error.message}</p>`;
+            }
+        };
+
+        window.deleteAllRatings = async function() {
+            const ratingsRef = ref(database, 'ratings');
+            const ratingsSnapshot = await get(ratingsRef);
+            
+            if (!ratingsSnapshot.exists()) {
+                alert('ℹ️ No ratings data to delete.');
+                return;
+            }
+            
+            const ratings = ratingsSnapshot.val();
+            let totalRatings = 0;
+            Object.values(ratings).forEach(paper => {
+                totalRatings += Object.keys(paper).length;
+            });
+            
+            const confirmMsg = `⚠️ WARNING: You are about to permanently delete ${totalRatings} rating(s) across all studies.\n\nThis action CANNOT be undone!\n\nType "DELETE" to confirm:`;
+            const userInput = prompt(confirmMsg);
+            
+            if (userInput !== 'DELETE') {
+                alert('❌ Deletion cancelled.');
+                return;
+            }
+
+            const resultDiv = document.getElementById('delete-result');
+            resultDiv.innerHTML = '<p style="color: #f59e0b;">⏳ Deleting all ratings data...</p>';
+
+            try {
+                await remove(ratingsRef);
+                
+                resultDiv.innerHTML = '<p style="color: #10b981; padding: 1rem; background: #d1fae5; border-radius: 4px;">✅ All ratings data has been permanently deleted.</p>';
                 
                 // Reload stats
                 await loadStats();
