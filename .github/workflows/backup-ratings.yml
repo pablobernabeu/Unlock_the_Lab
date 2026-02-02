@@ -22,16 +22,32 @@ jobs:
         run: |
           curl -o data/ratings.json \
             "https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/ratings.json"
+          echo "Ratings file size: $(wc -c < data/ratings.json) bytes"
+          cat data/ratings.json
       
       - name: Fetch leaderboard from Firebase
         run: |
           curl -o data/leaderboard.json \
             "https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/leaderboard.json"
+          echo "Leaderboard file size: $(wc -c < data/leaderboard.json) bytes"
+          cat data/leaderboard.json
       
       - name: Fetch active participants from Firebase
         run: |
           curl -o data/active.json \
             "https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/active.json"
+          echo "Active file size: $(wc -c < data/active.json) bytes"
+          cat data/active.json
+      
+      - name: Check if data was retrieved
+        run: |
+          # Check if files contain actual data (not just null)
+          if [ "$(cat data/ratings.json)" = "null" ]; then
+            echo "Warning: ratings.json contains null - Firebase may require authentication"
+          fi
+          if [ "$(cat data/leaderboard.json)" = "null" ]; then
+            echo "Warning: leaderboard.json contains null - Firebase may require authentication"
+          fi
       
       - name: Add timestamp
         run: |

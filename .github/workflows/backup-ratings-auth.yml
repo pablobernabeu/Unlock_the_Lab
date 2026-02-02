@@ -1,0 +1,94 @@
+name: Backup Firebase Ratings (Authenticated)
+
+on:
+  schedule:
+    # Run every day at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Create data directory
+        run: mkdir -p data
+      
+      - name: Create backup script
+        run: |
+          cat > backup.js << 'EOF'
+          import { initializeApp } from 'firebase/app';
+          import { getDatabase, ref, get } from 'firebase/database';
+          import { writeFileSync } from 'fs';
+
+          const firebaseConfig = {
+            apiKey: process.env.FIREBASE_API_KEY,
+            authDomain: "unlock-the-lab-workshop.firebaseapp.com",
+            databaseURL: "https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "unlock-the-lab-workshop",
+            storageBucket: "unlock-the-lab-workshop.firebasestorage.app",
+            messagingSenderId: "118027719328",
+            appId: "1:118027719328:web:89a856a3b2adef22a356b4"
+          };
+
+          const app = initializeApp(firebaseConfig);
+          const database = getDatabase(app);
+
+          async function backup() {
+            try {
+              // Fetch ratings
+              const ratingsRef = ref(database, 'ratings');
+              const ratingsSnapshot = await get(ratingsRef);
+              writeFileSync('data/ratings.json', JSON.stringify(ratingsSnapshot.val(), null, 2));
+              console.log('Ratings backed up');
+
+              // Fetch leaderboard
+              const leaderboardRef = ref(database, 'leaderboard');
+              const leaderboardSnapshot = await get(leaderboardRef);
+              writeFileSync('data/leaderboard.json', JSON.stringify(leaderboardSnapshot.val(), null, 2));
+              console.log('Leaderboard backed up');
+
+              // Fetch active participants
+              const activeRef = ref(database, 'active');
+              const activeSnapshot = await get(activeRef);
+              writeFileSync('data/active.json', JSON.stringify(activeSnapshot.val(), null, 2));
+              console.log('Active participants backed up');
+
+              // Add timestamp
+              const timestamp = { lastBackup: new Date().toISOString() };
+              writeFileSync('data/backup-info.json', JSON.stringify(timestamp, null, 2));
+              console.log('Backup completed successfully');
+            } catch (error) {
+              console.error('Backup failed:', error);
+              process.exit(1);
+            }
+          }
+
+          backup();
+          EOF
+      
+      - name: Install dependencies
+        run: |
+          npm install firebase
+      
+      - name: Run backup
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+        run: node backup.js
+      
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --quiet && git diff --staged --quiet || \
+            (git commit -m "Backup Firebase data - $(date -u +"%Y-%m-%d %H:%M UTC")" && git push)
