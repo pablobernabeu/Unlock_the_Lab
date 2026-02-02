@@ -256,6 +256,17 @@
             'STUDY-005': 'medium',
             'STUDY-006': 'low'
         };
+        
+        // Seed scores (vetted expert ratings) - weighted as 10 participants each
+        const seedScores = {
+            'STUDY-001': 6,
+            'STUDY-002': 4,
+            'STUDY-003': 6,
+            'STUDY-004': 2,
+            'STUDY-005': 4,
+            'STUDY-006': 2
+        };
+        const seedWeight = 10;
 
         let ratingsChart, agreementChart;
 
@@ -340,10 +351,18 @@
             // Calculate stats for each paper
             paperIds.forEach(paperId => {
                 const paperRatings = ratingsData[paperId] || {};
-                const values = Object.values(paperRatings).filter(v => v !== null && v !== undefined);
+                const values = Object.values(paperRatings)
+                    .filter(v => v !== null && v !== undefined)
+                    .map(v => v.rating || v); // Handle both old format (number) and new format (object with rating)
+                
+                // Include seed scores in calculation (weighted as 10 participants)
+                const seedScore = seedScores[paperId] || 4;
+                const allValues = [...values, ...Array(seedWeight).fill(seedScore)];
+                
                 stats[paperId] = {
-                    ...calculateStats(values),
-                    count: values.length
+                    ...calculateStats(allValues),
+                    count: values.length, // Show only real participant count
+                    totalCount: allValues.length // Total including seed
                 };
                 totalRatings += values.length;
             });

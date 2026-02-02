@@ -13,6 +13,17 @@ let userPredictions = {}; // Predicted average ratings
 let totalScore = 0;
 let userName = '';
 
+// Seed scores (vetted expert ratings) - weighted as 10 participants each
+const seedScores = {
+    'STUDY-001': 6,   // High quality
+    'STUDY-002': 4,   // Medium quality
+    'STUDY-003': 6,   // High quality
+    'STUDY-004': 2,   // Low quality
+    'STUDY-005': 4,   // Medium quality
+    'STUDY-006': 2    // Low quality
+};
+const seedWeight = 10; // Each seed score counts as 10 participants
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
     // Generate unique session ID for this participant
@@ -380,7 +391,12 @@ async function showResults(paperIndex, paperId, userRating, userPrediction) {
         
         if (ratings) {
             const ratingValues = Object.values(ratings).map(r => r.rating);
-            const average = ratingValues.reduce((a, b) => a + b, 0) / ratingValues.length;
+            
+            // Include seed score in average calculation (weighted as 10 participants)
+            const seedScore = seedScores[paperId] || 4;
+            const totalRatings = ratingValues.reduce((a, b) => a + b, 0) + (seedScore * seedWeight);
+            const totalCount = ratingValues.length + seedWeight;
+            const average = totalRatings / totalCount;
             const participantCount = ratingValues.length;
             
             // Update display
