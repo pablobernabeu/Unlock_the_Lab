@@ -351,6 +351,15 @@ li {
     transform: scale(1.05);
 }
 
+/* Color scale for rating options */
+.rating-option input[type="radio"]:checked + label[for$="-1"] { background: #3b82f6; border-color: #3b82f6; }
+.rating-option input[type="radio"]:checked + label[for$="-2"] { background: #06b6d4; border-color: #06b6d4; }
+.rating-option input[type="radio"]:checked + label[for$="-3"] { background: #10b981; border-color: #10b981; }
+.rating-option input[type="radio"]:checked + label[for$="-4"] { background: #84cc16; border-color: #84cc16; }
+.rating-option input[type="radio"]:checked + label[for$="-5"] { background: #facc15; border-color: #facc15; color: #1f2937; }
+.rating-option input[type="radio"]:checked + label[for$="-6"] { background: #fb923c; border-color: #fb923c; }
+.rating-option input[type="radio"]:checked + label[for$="-7"] { background: #ef4444; border-color: #ef4444; }
+
 .rating-labels {
     display: flex;
     justify-content: space-between;

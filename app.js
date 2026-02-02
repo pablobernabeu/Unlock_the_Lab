@@ -213,8 +213,8 @@ function displayUsername() {
         
         const footer = document.createElement('div');
         footer.className = 'username-footer';
-        footer.style.cssText = 'margin-top: 2rem; padding-top: 0.5rem; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 0.9rem;';
-        footer.textContent = `Playing as: ${userName}`;
+        footer.style.cssText = 'margin-top: 2rem; padding-top: 0.25rem; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 0.9rem;';
+        footer.innerHTML = `Your username is <span style="color: #667eea; font-weight: 600;">${userName}</span>`;
         page.querySelector('.container').appendChild(footer);
     });
 }
@@ -348,7 +348,8 @@ function updateTimerDisplay() {
     
     // Calculate papers remaining
     const papersRated = Object.keys(userRatings).length;
-    const papersRemaining = papers.length - papersRated;
+    const totalPapers = papers.length || 23; // Fallback to 23 if papers not loaded yet
+    const papersRemaining = Math.max(0, totalPapers - papersRated);
     
     const timerEl = document.getElementById('session-timer');
     if (timerEl && remaining > 0) {
@@ -799,9 +800,6 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
     const resultsBox = document.getElementById(`results-${paperIndex}`);
     resultsBox.style.display = 'block';
     
-    // Display user's rating
-    document.getElementById(`your-rating-${paperIndex}`).textContent = userRating;
-    
     // Listen for real-time updates to calculate average
     const ratingsRef = ref(database, `ratings/${paperId}`);
     const unsubscribe = onValue(ratingsRef, (snapshot) => {
@@ -851,16 +849,16 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
             document.getElementById(`count-${paperIndex}`).textContent = 
                 `Based on ${participantCount} participant${participantCount !== 1 ? 's' : ''}`;
             
-            // Calculate score based on prediction accuracy (only once when we have at least 2 participants)
-            // Skip recalculation if restoring from saved state
-            if (participantCount >= 2 && !document.getElementById(`score-${paperIndex}`).textContent && !isRestoring) {
+            // Calculate score based on prediction accuracy
+            // Skip recalculation if already calculated (score element has content) or if restoring from saved state
+            const scoreElement = document.getElementById(`score-${paperIndex}`);
+            if (!scoreElement.textContent && !isRestoring) {
                 const difference = Math.abs(userPrediction - average);
                 // Improved scoring: 100 pts for perfect, loses 12 pts per point of error (gentler penalty)
                 const score = Math.max(0, 100 - Math.round(difference * 12));
                 totalScore += score;
                 
                 // Display score with detailed feedback
-                const scoreElement = document.getElementById(`score-${paperIndex}`);
                 scoreElement.textContent = `+${score} pts`;
                 scoreElement.style.fontSize = '2rem';
                 scoreElement.style.fontWeight = 'bold';
@@ -935,6 +933,16 @@ window.onclick = function(event) {
         closeHelp();
     }
 }
+
+// Close modal with ESC key
+window.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const modal = document.getElementById('help-modal');
+        if (modal && modal.classList.contains('active')) {
+            closeHelp();
+        }
+    }
+});
 
 // Show final results and leaderboard
 function showFinalResults() {
