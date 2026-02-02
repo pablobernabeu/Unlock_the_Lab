@@ -8,6 +8,12 @@
 </head>
 <body>
     <div id="app">
+        <!-- Score Display (appears after first rating) -->
+        <div id="score-banner" class="score-banner" style="display: none;">
+            <span id="total-score-header">Score: 0</span>
+            <span id="participant-counter" class="participant-count">Loading...</span>
+        </div>
+        
         <!-- Page 1: Welcome -->
         <div class="page active" id="page-welcome">
             <div class="container">
@@ -63,8 +69,19 @@
                 <h1>🎉 Workshop Complete!</h1>
                 
                 <div class="content">
+                    <div class="final-score-card">
+                        <h2>Your Final Score</h2>
+                        <div class="final-score" id="final-score">0</div>
+                        <div class="score-rank" id="score-rank">Calculating rank...</div>
+                    </div>
+                    
                     <h2>Your Journey</h2>
                     <p>You've evaluated <span id="total-papers">0</span> research papers using critical scientific thinking.</p>
+                    
+                    <div class="leaderboard">
+                        <h3>🏆 Top Scores</h3>
+                        <div id="leaderboard-list">Loading...</div>
+                    </div>
                     
                     <h3>Key Takeaways:</h3>
                     <ul>

@@ -526,6 +526,135 @@ li {
 }
 
 /* ===========================
+   Gamification Elements
+   =========================== */
+.score-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 998;
+    box-shadow: 0 2px 8px var(--shadow);
+    font-weight: 600;
+}
+
+.score-banner + .page {
+    margin-top: 60px;
+}
+
+.participant-count {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.score-earned {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.score-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.score-message {
+    font-size: 1.1rem;
+    color: white;
+    margin-top: 0.5rem;
+    font-weight: 600;
+}
+
+.final-score-card {
+    background: linear-gradient(135deg, var(--primary-color), #7c3aed);
+    color: white;
+    padding: 2rem;
+    border-radius: 16px;
+    text-align: center;
+    margin: 2rem 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.final-score-card h2 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.final-score {
+    font-size: 4rem;
+    font-weight: 700;
+    margin: 1rem 0;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+}
+
+.score-rank {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    margin-top: 0.5rem;
+}
+
+.leaderboard {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.leaderboard h3 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.leaderboard-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid var(--border);
+}
+
+.leaderboard-entry.current-user {
+    background: #eff6ff;
+    border-left-color: var(--primary-color);
+    font-weight: 600;
+}
+
+.leaderboard-entry .rank {
+    font-size: 1.5rem;
+    min-width: 50px;
+}
+
+.leaderboard-entry .score {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.you-badge {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* ===========================
    Responsive Design
    =========================== */
 @media (max-width: 768px) {

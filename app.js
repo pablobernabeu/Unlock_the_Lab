@@ -9,6 +9,8 @@ let glossary = [];
 let rubric = [];
 let sessionId = null;
 let userRatings = {};
+let totalScore = 0;
+let userName = '';
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -25,6 +27,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Generate paper pages
     generatePaperPages();
     
+    // Track active participants
+    trackParticipant();
+    
+    // Update participant count
+    updateParticipantCount();
+    
     // Show first page
     showPage(0);
 });
@@ -40,6 +48,44 @@ window.showTab = showTab;
 // Generate unique session ID
 function generateSessionId() {
     return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Track active participants
+function trackParticipant() {
+    const participantRef = ref(database, `active/${sessionId}`);
+    
+    // Mark as active
+    set(participantRef, {
+        joinedAt: Date.now(),
+        lastActive: Date.now()
+    });
+    
+    // Update activity every 30 seconds
+    setInterval(() => {
+        set(participantRef, {
+            joinedAt: Date.now(),
+            lastActive: Date.now()
+        });
+    }, 30000);
+    
+    // Remove on page unload
+    window.addEventListener('beforeunload', () => {
+        set(participantRef, null);
+    });
+}
+
+// Update participant count display
+function updateParticipantCount() {
+    const activeRef = ref(database, 'active');
+    onValue(activeRef, (snapshot) => {
+        const active = snapshot.val();
+        const count = active ? Object.keys(active).length : 0;
+        
+        const counter = document.getElementById('participant-counter');
+        if (counter) {
+            counter.textContent = `${count} participant${count !== 1 ? 's' : ''} active`;
+        }
+    });
 }
 
 // Load content from JSON files
@@ -175,6 +221,10 @@ function generatePaperPages() {
                     
                     <div class="results-box" id="results-${index}" style="display: none;">
                         <h3>✅ Rating Submitted!</h3>
+                        <div class="score-earned">
+                            <div class="score-value" id="score-${index}"></div>
+                            <div class="score-message" id="score-msg-${index}"></div>
+                        </div>
                         <div class="rating-comparison">
                             <div class="rating-display">
                                 <div class="label">Your Rating</div>
@@ -213,12 +263,15 @@ function showPage(pageIndex) {
         targetPage = document.getElementById('page-guide');
     } else if (pageIndex <= papers.length + 1) {
         targetPage = document.getElementById(`page-paper-${pageIndex - 2}`);
-        // Show help button on paper pages
+        // Show help button and score banner on paper pages
         document.getElementById('help-button').classList.add('visible');
+        document.getElementById('score-banner').style.display = 'flex';
     } else {
         targetPage = document.getElementById('page-final');
         // Hide help button on final page
         document.getElementById('help-button').classList.remove('visible');
+        // Show final score and leaderboard
+        showFinalResults();
     }
     
     if (targetPage) {
@@ -307,6 +360,28 @@ async function showResults(paperIndex, paperId, userRating) {
             document.getElementById(`avg-rating-${paperIndex}`).textContent = average.toFixed(1);
             document.getElementById(`count-${paperIndex}`).textContent = 
                 `Based on ${participantCount} participant${participantCount !== 1 ? 's' : ''}`;
+            
+            // Calculate score (only once when we have at least 2 participants)
+            if (participantCount >= 2 && !document.getElementById(`score-${paperIndex}`).textContent) {
+                const difference = Math.abs(userRating - average);
+                const score = Math.max(0, 100 - Math.round(difference * 15));
+                totalScore += score;
+                
+                // Display score
+                document.getElementById(`score-${paperIndex}`).textContent = `+${score} pts`;
+                document.getElementById(`score-msg-${paperIndex}`).textContent = 
+                    difference === 0 ? 'Perfect match! 🎯' :
+                    difference <= 0.5 ? 'Excellent! Very close! ⭐' :
+                    difference <= 1 ? 'Great job! Close! 👍' :
+                    difference <= 2 ? 'Good attempt! 👌' :
+                    'Keep practicing! 💪';
+                
+                // Update total score display
+                const scoreDisplay = document.getElementById('total-score-header');
+                if (scoreDisplay) {
+                    scoreDisplay.textContent = `Score: ${totalScore}`;
+                }
+            }
         }
     });
 }
@@ -347,4 +422,56 @@ window.onclick = function(event) {
     if (event.target === modal) {
         closeHelp();
     }
+}
+
+// Show final results and leaderboard
+function showFinalResults() {
+    // Display final score
+    document.getElementById('final-score').textContent = totalScore;
+    
+    // Save score to leaderboard
+    const scoresRef = ref(database, `leaderboard/${sessionId}`);
+    set(scoresRef, {
+        score: totalScore,
+        timestamp: Date.now(),
+        papersRated: Object.keys(userRatings).length
+    });
+    
+    // Load and display leaderboard
+    const leaderboardRef = ref(database, 'leaderboard');
+    onValue(leaderboardRef, (snapshot) => {
+        const scores = snapshot.val();
+        
+        if (scores) {
+            const scoresArray = Object.entries(scores).map(([id, data]) => ({
+                id,
+                score: data.score,
+                timestamp: data.timestamp
+            }));
+            
+            // Sort by score (descending)
+            scoresArray.sort((a, b) => b.score - a.score);
+            
+            // Find user's rank
+            const userRank = scoresArray.findIndex(s => s.id === sessionId) + 1;
+            document.getElementById('score-rank').textContent = 
+                `You ranked #${userRank} out of ${scoresArray.length} participant${scoresArray.length !== 1 ? 's' : ''}!`;
+            
+            // Display top 5
+            const top5 = scoresArray.slice(0, 5);
+            const leaderboardHTML = top5.map((entry, index) => {
+                const isUser = entry.id === sessionId;
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                return `
+                    <div class="leaderboard-entry ${isUser ? 'current-user' : ''}">
+                        <span class="rank">${medal || `#${index + 1}`}</span>
+                        <span class="score">${entry.score} pts</span>
+                        ${isUser ? '<span class="you-badge">You!</span>' : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('leaderboard-list').innerHTML = leaderboardHTML || '<p>Be the first to complete!</p>';
+        }
+    });
 }
