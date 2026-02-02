@@ -72,21 +72,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.setItem('userName', userName);
     }
     
-    // Display username at bottom of all pages
-    displayUsername();
-    
     // Start session timeout
     startSessionTimeout();
     
-    // Load content
+    // Load content - MUST complete before generating pages
     await loadContent();
-    
-    // Initialize glossary and rubric AFTER content is loaded
-    renderGlossary();
-    renderRubric();
     
     // Generate paper pages AFTER content is loaded
     generatePaperPages();
+    
+    // Initialize glossary and rubric AFTER pages exist
+    renderGlossary();
+    renderRubric();
+    
+    // Display username at bottom of all pages AFTER pages are generated
+    displayUsername();
     
     // Restore previously submitted ratings if resuming
     if (hasState && Object.keys(userRatings).length > 0) {
@@ -108,8 +108,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
-    // Show saved page or first page
-    showPage(hasState ? currentPage : 0);
+    // IMPORTANT: Show saved page if state exists, otherwise start from beginning
+    const pageToShow = (hasState && currentPage > 0) ? currentPage : 0;
+    console.log('Showing page:', pageToShow, 'hasState:', hasState, 'currentPage:', currentPage);
+    showPage(pageToShow);
 });
 
 // Expose functions to global scope for HTML onclick handlers
