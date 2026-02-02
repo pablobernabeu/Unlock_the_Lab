@@ -11,6 +11,7 @@
         <!-- Score Display (appears after first rating) -->
         <div id="score-banner" class="score-banner" style="display: none;">
             <span id="total-score-header">Score: 0</span>
+            <span id="session-timer" class="session-timer"></span>
             <span id="participant-counter" class="participant-count">Loading...</span>
         </div>
         
@@ -21,23 +22,35 @@
                 <h2>Your Guide to Reading Science Like a Scientist</h2>
                 
                 <div class="content">
-                    <p>Headlines often promise miracle cures and terrifying threats, but how much of it is backed by real science?</p>
+                    <p class="intro-text">"Chocolate Makes You Smarter!" "This Plant Cures Alzheimer's!" Headlines promise miracles and threaten disasters—but what does the actual science say?</p>
                     
-                    <p>In this interactive workshop, you'll step into the shoes of a scientist. You'll evaluate realistic (fictional) research papers using a scientific rating system.</p>
+                    <p>In this interactive workshop, you'll become a science detective. You'll evaluate real-world research scenarios using the same criteria professional scientists use to judge quality.</p>
                     
-                    <h3>How It Works:</h3>
-                    <ol>
-                        <li>Read the glossary and rating rubric to understand quality criteria</li>
-                        <li>For each paper:
-                            <ul>
-                                <li><strong>Rate the study</strong> based on your scientific assessment (1-7 scale)</li>
-                                <li><strong>Predict what you think the average rating will be</strong> from all participants</li>
-                            </ul>
-                        </li>
-                        <li>Earn points based on how accurately you predict the crowd's assessment</li>
-                    </ol>
+                    <div class="info-box" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                        <h3 style="margin-top: 0;">🎯 Your Mission</h3>
+                        <p><strong>Dual Challenge:</strong> For each study, you must:</p>
+                        <ol style="margin: 10px 0;">
+                            <li><strong>Judge the science</strong> — Rate quality using expert criteria (1-7)</li>
+                            <li><strong>Predict the crowd</strong> — Guess what others will rate it on average</li>
+                        </ol>
+                        <p style="margin-bottom: 0;"><strong>Scoring:</strong> Points awarded based on prediction accuracy. Can you think like a scientist AND understand how the public perceives research?</p>
+                    </div>
                     
-                    <p class="highlight">Your goal: Rate each study objectively AND predict how others will rate it. Can you think like both a scientist and understand the crowd?</p>
+                    <h3>📚 What You'll Learn:</h3>
+                    <ul class="skills-list">
+                        <li>✅ Spot red flags in research (predatory journals, hidden data, clickbait)</li>
+                        <li>✅ Distinguish good science from marketing disguised as research</li>
+                        <li>✅ Understand why open access and transparency matter</li>
+                        <li>✅ Evaluate methodology, sample sizes, and conclusions critically</li>
+                    </ul>
+                    
+                    <p class="highlight" style="font-size: 1.1rem; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; text-align: center;">💡 First, you'll learn the tools. Then, you'll test your skills on real scenarios!</p>
+                    
+                    <div style="margin-top: 2rem; padding: 1rem; background: #f8fafc; border-radius: 8px; font-size: 0.9rem; color: #64748b;">
+                        <p style="margin-bottom: 0.5rem;"><strong>Author:</strong> Dr Pablo Bernabeu, Department of Education, University of Oxford</p>
+                        <p style="margin-bottom: 0.5rem;"><strong>Materials:</strong> <a href="https://github.com/pablobernabeu/Unlock_the_Lab" target="_blank" rel="noopener noreferrer" style="color: #2563eb;">github.com/pablobernabeu/Unlock_the_Lab</a></p>
+                        <p style="margin-bottom: 0;"><strong>Licence:</strong> <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" style="color: #2563eb;">CC BY 4.0</a> — Free to use with attribution</p>
+                    </div>
                 </div>
                 
                 <button class="btn-primary" onclick="nextPage()">Get Started</button>
@@ -50,14 +63,20 @@
                 <h1>📚 Before We Begin</h1>
                 
                 <div class="content">
-                    <h2>Glossary</h2>
+                    <div class="info-box" style="background: #e3f2fd; border-left: 4px solid #2196f3;">
+                        <p style="margin: 0;"><strong>📖 Take your time with these resources!</strong> They're the foundation for evaluating research quality. You can return to them anytime using the 📖 button.</p>
+                    </div>
+                    
+                    <h2 style="margin-top: 1.5rem;">📚 Scientific Glossary</h2>
+                    <p style="color: #666; margin-bottom: 1rem;">Key terms you'll encounter when evaluating research:</p>
                     <div id="glossary-content"></div>
                     
-                    <h2 style="margin-top: 2rem;">Rating Rubric (1-7 Scale)</h2>
+                    <h2 style="margin-top: 2.5rem;">⚖️ Quality Rating Rubric (1-7 Scale)</h2>
+                    <p style="color: #666; margin-bottom: 1rem;">Use these six criteria to rate each study. Consider all aspects together for your final score:</p>
                     <div id="rubric-content"></div>
                     
-                    <div class="info-box" style="margin-top: 2rem;">
-                        <p><strong>💡 Remember:</strong> On the following pages, you can access this glossary and rubric at any time using the 📖 button in the bottom-right corner.</p>
+                    <div class="info-box" style="margin-top: 2rem; background: #f3e5f5; border-left: 4px solid #9c27b0;">
+                        <p style="margin: 0;"><strong>💡 Scoring Strategy:</strong> Don't average the criteria—weigh them holistically. A study with excellent methods but clickbait headlines might rate 4-5. A study with everything right rates 6-7. Major flaws (predatory source, hidden data) drop it to 1-3.</p>
                     </div>
                 </div>
                 
@@ -88,12 +107,14 @@
                         <div id="leaderboard-list">Loading...</div>
                     </div>
                     
-                    <h3>Key Takeaways:</h3>
-                    <ul>
-                        <li><strong>Access matters:</strong> Open science makes research accessible to everyone</li>
-                        <li><strong>Headlines lie:</strong> Clickbait often misrepresents actual findings</li>
-                        <li><strong>Methods matter:</strong> Good science requires rigorous methodology and open data</li>
-                        <li><strong>Context is key:</strong> Strong conclusions admit limitations and build on prior work</li>
+                    <h3>🎓 What You've Mastered:</h3>
+                    <ul style="line-height: 1.8;">
+                        <li><strong>🔓 Open Access</strong> — Paywalls hide science from public scrutiny. Demand transparency!</li>
+                        <li><strong>🚨 Spotting Clickbait</strong> — Sensational headlines usually mean weak science underneath</li>
+                        <li><strong>🔬 Methodology Matters</strong> — Sample sizes, controls, and open data separate real from fake</li>
+                        <li><strong>📚 Source Credibility</strong> — Predatory journals publish anything for money. Trust matters</li>
+                        <li><strong>⚖️ Nuanced Conclusions</strong> — Good scientists admit what they don't know. Beware certainty!</li>
+                        <li><strong>🌐 Crowd vs. Experts</strong> — You learned how public perception differs from scientific quality</li>
                     </ul>
                     
                     <div class="info-box">
@@ -121,6 +142,13 @@
                     <p style="text-align: center; margin-top: 2rem; font-size: 1.2rem;">
                         Thank you for participating! 🔬✨
                     </p>
+                    
+                    <div style="margin-top: 2.5rem; padding: 1.5rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #2563eb;">
+                        <h3 style="margin-top: 0; color: #2563eb;">📋 Workshop Information</h3>
+                        <p style="margin-bottom: 0.75rem; color: #64748b;"><strong>Author:</strong> Dr Pablo Bernabeu<br>Department of Education, University of Oxford</p>
+                        <p style="margin-bottom: 0.75rem; color: #64748b;"><strong>App Materials:</strong> <a href="https://github.com/pablobernabeu/Unlock_the_Lab" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; border-bottom: 1px solid #2563eb;">github.com/pablobernabeu/Unlock_the_Lab</a></p>
+                        <p style="margin-bottom: 0; color: #64748b;"><strong>Licence:</strong> <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; border-bottom: 1px solid #2563eb;">CC BY 4.0 Attribution</a> — You're free to use and adapt these materials provided you acknowledge the authorship.</p>
+                    </div>
                 </div>
             </div>
         </div>

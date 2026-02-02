@@ -1,56 +1,209 @@
 [
-    {
-        "id": "STUDY-001",
-        "headline": "Miracle Berry Cures Cancer in Just 3 Days!",
-        "access": "The 'study' is mentioned in a blog post selling the berry supplement for $49.99. No link to original research is provided. When you search online, you find only marketing materials and testimonials.",
-        "overview": "According to the blog, researchers gave an extract from the Amazonian Wonder Berry to 12 cancer patients. The blog claims all patients showed 'dramatic improvement' within 72 hours.",
-        "methods": "No details about the methods are provided. Sample size is mentioned as 12 people, but there's no information about what type of cancer, what measurements were taken, whether there was a control group, or if patients received other treatments. No data is shared.",
-        "conclusion": "The blog concludes that the Wonder Berry 'cures all forms of cancer' and should replace chemotherapy immediately. No limitations are mentioned.",
-        "source": "Published on 'NaturalHealthNews247.com' - a website that sells supplements and alternative medicine products. No peer review mentioned."
-    },
-    {
-        "id": "STUDY-002",
-        "headline": "Coffee Drinkers Live Longer, Study Finds",
-        "access": "Behind a $35 paywall at a mid-tier medical journal. The abstract is available for free, but full methods and data are not accessible without payment or university access.",
-        "overview": "Researchers followed 50,000 people for 10 years and found that those who drank 2-3 cups of coffee daily had a 15% lower mortality rate compared to non-coffee drinkers.",
-        "methods": "Large observational study with detailed questionnaires. However, the study is observational (not a controlled experiment), so it can only show correlation, not causation. Confounding factors like exercise and diet were noted but not fully controlled. Data is 'available upon request.'",
-        "conclusion": "The paper concludes that 'coffee consumption is associated with reduced mortality.' The headline oversimplifies this correlation as a definitive causal relationship. The paper admits correlation doesn't equal causation, but this nuance is lost in the headline.",
-        "source": "Published in the Journal of Dietary Studies, a peer-reviewed journal with moderate impact factor. Generally trustworthy but not top-tier."
-    },
-    {
-        "id": "STUDY-003",
-        "headline": "New Vaccine Shows Promise in Early Trials",
-        "access": "Fully open access. Published on a preprint server with a direct link to the full PDF. Anyone can download and read it for free immediately.",
-        "overview": "Researchers developed a vaccine for a rare tropical disease and tested it on 20 volunteers. All participants developed antibodies, suggesting the vaccine might trigger an immune response.",
-        "methods": "Phase I safety trial with 20 healthy volunteers. The study followed standard protocols and reported detailed methods. However, it's a very early-stage study - no control group, small sample size, and no testing in people with the actual disease yet. All raw data is publicly available on an open repository.",
-        "conclusion": "The researchers are appropriately cautious: 'These preliminary results suggest the vaccine is safe and may stimulate immune response. Further trials with larger samples and control groups are needed to determine efficacy.' The headline accurately reflects this cautious optimism.",
-        "source": "Posted on medRxiv, a preprint server for medical research. This means it has NOT been peer-reviewed yet. It's from a university research lab with good reputation, but findings are not yet validated by other scientists."
-    },
-    {
-        "id": "STUDY-004",
-        "headline": "Smartphone App Reduces Anxiety as Well as Therapy",
-        "access": "Open access article published under Creative Commons license. Full text, supplementary materials, and complete dataset are freely available on the journal website and a public data repository.",
-        "overview": "Randomized controlled trial comparing a mindfulness app to traditional cognitive behavioral therapy (CBT) for treating mild to moderate anxiety. 240 participants were randomly assigned to either 8 weeks of app use or 8 weeks of weekly CBT sessions.",
-        "methods": "Gold-standard randomized controlled trial with proper control group. Study was preregistered (analysis plan declared before data collection). Large sample size (240 participants). Used validated anxiety measures. Both groups showed similar reduction in anxiety scores. All materials, code, and anonymized data are publicly available.",
-        "conclusion": "The paper concludes: 'The mindfulness app produced similar reductions in anxiety symptoms as traditional CBT in our sample of participants with mild to moderate anxiety. However, results may not generalize to severe anxiety or other populations. Further research needed to understand long-term effects and mechanisms.' Very balanced and nuanced.",
-        "source": "Published in JAMA Psychiatry, a top-tier peer-reviewed journal with rigorous standards. The research was conducted at a major university with no industry funding."
-    },
-    {
-        "id": "STUDY-005",
-        "headline": "Eating Chocolate Makes You Smarter!",
-        "access": "The full paper is behind a paywall at a relatively unknown journal. Only the abstract is freely available, which provides minimal details about the actual study.",
-        "overview": "According to the abstract, 30 students were given either chocolate or no chocolate before a test. Those who ate chocolate scored an average of 8% higher.",
-        "methods": "Very small sample size (30 students). The abstract doesn't mention randomization, blinding, or control for confounding factors (maybe students who chose chocolate were already more alert?). No mention of statistical analysis or data availability. The full methods are hidden behind the paywall.",
-        "conclusion": "The title claims chocolate 'makes you smarter,' but at best, the study shows a small, short-term correlation between chocolate and test scores in a tiny sample. No discussion of alternative explanations (caffeine? sugar rush? placebo effect?).",
-        "source": "Published in 'International Journal of Food and Cognition' - a journal that charges authors $800 to publish and has a reputation for accepting most papers without rigorous review (potential predatory journal)."
-    },
-    {
-        "id": "STUDY-006",
-        "headline": "Exercise Associated with Better Sleep Quality in Adults",
-        "access": "Open access via PubMed Central. Full text is available for free, though supplementary data tables require navigating to an additional repository link.",
-        "overview": "Longitudinal study tracking 1,200 adults over 3 years. Researchers measured exercise frequency, sleep quality, and various health markers through regular surveys and wearable device data.",
-        "methods": "Large sample size with good follow-up rates (85% retention). Used validated measures for both exercise and sleep quality. Study controlled for age, BMI, and existing health conditions. However, this is still an observational study - people self-selected their exercise levels, so there could be unmeasured confounding factors. Data is available 'upon reasonable request to corresponding author.'",
-        "conclusion": "The researchers conclude: 'Regular moderate exercise is strongly associated with improved sleep quality. While our findings support a beneficial relationship, causality cannot be established from observational data alone. Randomized trials would be needed to confirm exercise directly improves sleep.' Appropriately cautious about correlation vs. causation.",
-        "source": "Published in Sleep Medicine Reviews, a well-respected peer-reviewed journal in the sleep research field. Research funded by national health institute with no conflicts of interest declared."
-    }
+  {
+    "id": "STUDY-101",
+    "headline": "Chocolate Breakfasts Boost Math Scores by 50%!",
+    "access": "Accessible only via a £35 paywall on the publisher's site.",
+    "overview": "The study relies on the simplified premise that glucose provides immediate fuel for the brain. However, it fails to engage with the substantial body of existing literature describing the ‘sugar crash’ effect and the impact of sustained energy release on cognitive concentration.",
+    "methods": "The researchers observed N=12 children in a single classroom for three days. There was no control group (e.g., children eating a standard breakfast) to compare against. Data availability: The authors state that raw data and individual test scores are ‘not shared due to commercial sensitivity regarding the chocolate brand involved.’",
+    "conclusion": "The authors conclude that chocolate should be mandatory in school breakfasts to improve national grades. This is a massive generalisation based on a tiny, uncontrolled sample.",
+    "source": "Predatory Journal. Published in a ‘pay-to-publish’ outlet with no rigorous peer review process, often used for marketing stunts disguised as science."
+  },
+  {
+    "id": "STUDY-102",
+    "headline": "New Alloy Shows Promise for Lighter Aircraft Components",
+    "access": "Direct PDF link available (Open Access).",
+    "overview": "The study builds on standard metallurgical theories regarding titanium-aluminium blends, specifically addressing a known gap in the literature regarding heat resistance at high altitudes. It uses previous stress-testing models responsibly to predict performance.",
+    "methods": "The team conducted rigorous stress-testing in controlled lab conditions, repeating the fracture test 500 times. Data availability: Full datasets, stress-test logs and the statistical code used for analysis have been uploaded to a public repository (OSF/GitHub) for verification.",
+    "conclusion": "The conclusion is cautious. It states the alloy is significantly lighter but notes it is currently too expensive for commercial use, suggesting further research into manufacturing costs is required.",
+    "source": "Respected Field-Specific Journal. A well-regarded peer-reviewed publication specialising in materials science and engineering."
+  },
+  {
+    "id": "STUDY-103",
+    "headline": "Screens Before Bed Might Delay Sleep Onset",
+    "access": "Accessible with difficulty (requires searching the DOI in a university library or using Sci-Hub).",
+    "overview": "The hypothesis is grounded in well-established theories regarding blue light emission and the suppression of melatonin (the sleep hormone). It cites robust prior research on circadian rhythms.",
+    "methods": "The study surveyed 2,000 adults. However, it relied entirely on self-reported data (participants estimated how much they slept), which is often inaccurate compared to objective tracking. Data availability: Summary tables are provided in the appendix, but raw participant data is not available to protect privacy.",
+    "conclusion": "The authors suggest a link between phone use and insomnia but responsibly acknowledge ‘reverse causality’—noting that anxious people might be using their phones because they cannot sleep, rather than the phone causing the sleeplessness.",
+    "source": "High-Impact Generalist Journal. A prestigious journal that covers broad scientific topics; known for rigorous peer review but occasionally favours studies with mass appeal."
+  },
+  {
+    "id": "STUDY-104",
+    "headline": "Drinking This Herbal Tea Every Morning Prevents Alzheimer's",
+    "access": "Behind a publisher paywall (£49 for 24 hours access).",
+    "overview": "The premise is loosely based on traditional folk medicine practices. It ignores current neurological understanding of amyloid plaques and tau tangles, which are the primary biological markers of Alzheimer's disease.",
+    "methods": "A 6-week observational study of 40 people who already chose to drink the tea daily. There was no randomised control group. Cognition was measured via brief phone interviews rather than clinical scanning. Data availability: ‘Raw data unavailable due to participant confidentiality.’",
+    "conclusion": "Overblown. The study confuses a short-term feeling of alertness (likely from caffeine) with the long-term prevention of a complex neurodegenerative disease.",
+    "source": "Predatory Journal. The journal website contains broken English and promises ‘publication within 48 hours for a fee,’ indicating zero peer review."
+  },
+  {
+    "id": "STUDY-105",
+    "headline": "Specific Pesticide Shows Minimal Impact on Honey Bee Navigation in Field Conditions",
+    "access": "Open Access (Direct PDF link).",
+    "overview": "The study investigates the ecological validity of previous lab-based findings. It questions whether the harm seen in petri dishes translates to real-world farming environments, a valid scientific question.",
+    "methods": "A large-scale field trial across 20 farms over two years, using RFID tags to track thousands of individual bees. The methodology was pre-registered (declared before the experiment started) to prevent cherry-picking results. Data availability: Full datasets and tracking code are uploaded to a public repository (Zenodo).",
+    "conclusion": "Cautious and specific. It states that at current agricultural usage levels, this specific chemical does not significantly impair homing flight, but explicitly warns against applying this finding to other insect species.",
+    "source": "Respected Field-Specific Journal. Published in a top-tier peer-reviewed journal dedicated to ecology and entomology."
+  },
+  {
+    "id": "STUDY-106",
+    "headline": "Instagram Use is the Primary Cause of Teen Anxiety",
+    "access": "Accessible with difficulty (via university library subscription).",
+    "overview": "Uses standard social psychology theories regarding ‘social comparison’ and self-esteem. However, it assumes a direct causal vector without accounting for the complexity of adolescent mental health.",
+    "methods": "A cross-sectional survey of 5,000 teenagers taken at a single point in time. While the sample size is large, the method relies entirely on self-reporting for both ‘hours used’ and ‘anxiety levels.’ Data availability: Summary statistics provided; raw data available only upon request to the lead author.",
+    "conclusion": "Logical but limited. The study establishes a strong correlation but the authors (and the headline) imply causation. They fail to address whether anxious teens simply retreat to social media more often.",
+    "source": "Mid-Tier Psychology Journal. A legitimate peer-reviewed journal, though one that occasionally publishes correlational studies with catchy titles to boost its impact factor."
+  },
+  {
+    "id": "STUDY-107",
+    "headline": "New AI Hiring Tool Eliminates Gender Bias in Recruitment",
+    "access": "A white paper published directly on the tech company’s website (free, but requires an email sign-up).",
+    "overview": "The approach assumes that simply removing names from CVs is sufficient to de-bias an algorithmic process. It fails to engage with literature on ‘proxy variables’ (how AI finds other patterns that correlate with gender).",
+    "methods": "The developers tested the AI using CVs from their own previous hiring rounds. They did not account for the fact that their historical hiring data was already biased against women, meaning the AI learned to replicate that bias. Data availability: ‘Data and algorithms are proprietary intellectual property and cannot be shared.’",
+    "conclusion": "Incorrect. The study claims success because names were hidden, but independent analysis later showed the AI penalised applicants who attended women's colleges or played women's sports.",
+    "source": "Corporate White Paper. This is marketing material, not a peer-reviewed scientific study. It has not been vetted by independent experts."
+  },
+  {
+    "id": "STUDY-108",
+    "headline": "Marginal Efficiency Gains in Perovskite Solar Cells Through New Layering Technique",
+    "access": "Open Access.",
+    "overview": "The study directly addresses a known engineering bottleneck in electron transport layers. It references the specific physics of perovskite crystal degradation responsibly.",
+    "methods": "Rigorous laboratory testing under standard solar simulation conditions. The experiment was replicated by a second, independent lab before publication to ensure accuracy. Data availability: All spectral data and fabrication recipes are included in the supplementary materials file.",
+    "conclusion": "Accurate and boring. Reports a 1.5% efficiency increase. Critically, it notes that the new material degrades faster in humidity, admitting it is not yet ready for commercial use.",
+    "source": "Top-Tier Generalist Journal. Published in a journal equivalent to Nature or Science, known for publishing significant breakthroughs with rigorous review."
+  },
+  {
+    "id": "STUDY-109",
+    "headline": "Violent Video Games Desensitize Brain to Real-World Pain",
+    "access": "Behind a paywall.",
+    "overview": "Relies on theories of cognitive desensitisation but attempts to map complex behavioural psychology onto simple blood-flow changes in the brain without sufficient justification.",
+    "methods": "A laboratory study of 60 university students. Half played a violent game for 20 minutes, half played a puzzle game, then viewed images of injuries whilst in an fMRI scanner. The analysis of specific brain regions was NOT preregistered. Data availability: Data not shared.",
+    "conclusion": "The authors claim a definitive link to real-world violence based only on short-term brain activity changes. They did not measure actual aggressive behaviour or long-term effects.",
+    "source": "Mid-Tier Journal. A legitimate journal, but one that has been criticised in the past for accepting small-sample neuroscience studies that generate catchy headlines."
+  },
+  {
+    "id": "STUDY-110",
+    "headline": "Microplastics Found in Bloodstream of 80% of People Tested",
+    "access": "Open Access.",
+    "overview": "Investigates the bioaccumulation of polymers in the human body. This is a novel field, so the theoretical framework is exploratory rather than established.",
+    "methods": "The team developed a novel, highly sensitive chemical analysis method (mass spectrometry) to detect tiny plastic particles. Stringent contamination controls were used to ensure plastics from the lab equipment didn't affect results. Data availability: Full methodology and anonymised data concentrations are freely available.",
+    "conclusion": "Nuanced and alarming. It confirms the presence of plastics in blood but explicitly states that the health implications of these specific concentrations are currently unknown and require urgent further study.",
+    "source": "High-Impact Generalist Journal. Published in a world-leading journal with extremely high rejection rates and rigorous statistical review."
+  },
+  {
+    "id": "STUDY-111",
+    "headline": "Why Tall Men Make Better CEOs: It’s Evolution",
+    "access": "Accessible with difficulty (requires requesting a copy on a scientific social network).",
+    "overview": "Uses evolutionary psychology to suggest height signals dominance. It fails to account for the ‘halo effect’ (social bias) and treats modern corporate structures as if they are prehistoric hunter-gatherer societies.",
+    "methods": "The authors looked at the height of CEOs in Fortune 500 companies and compared them to the national average. No measure of actual company performance, profit or leadership skill was included. Data availability: A spreadsheet of CEO heights is available on request.",
+    "conclusion": "Overblown. It confuses a societal bias (we promote tall men) with an inherent evolutionary ability (tall men are better leaders).",
+    "source": "Preprint Server. The paper has been uploaded to a server but has not yet been peer-reviewed or accepted by a journal."
+  },
+  {
+    "id": "STUDY-112",
+    "headline": "Lavender Essential Oil Cures Insomnia Faster Than Sleeping Pills",
+    "access": "Free to access.",
+    "overview": "Based on aromatherapy principles. It completely ignores the known pharmacological mechanisms of benzodiazepines (sleeping pills) and offers no biological explanation for how the scent would override neurological insomnia.",
+    "methods": "A study of 12 people attending a wellness retreat. They all received lavender pillows and reported sleeping better. There was no control group and no comparison to people taking sleeping pills. Data availability: Data not mentioned.",
+    "conclusion": "Nonsense. A massive claim (‘cures insomnia,’ ‘faster than pills’) based on almost zero evidence and subjective feedback.",
+    "source": "Predatory Journal. The publication charges authors a fee to publish anything, often skipping peer review entirely. The website lists ‘Astrology’ in its scientific categories."
+  },
+  {
+    "id": "STUDY-113",
+    "headline": "Urban Foxes Adapt Diet to Include High Levels of Human Food Waste",
+    "access": "Behind a paywall.",
+    "overview": "Relies on standard ecological theory regarding ‘dietary plasticity’ in opportunistic omnivores (animals that eat anything). It fits well with existing urban ecology literature.",
+    "methods": "Rigorous analysis of stomach contents of 300 deceased foxes collected over five years across three cities. Results were compared against rural fox diets. Data availability: Summary tables provided in the paper; full dietary datasets available on request to bona fide researchers.",
+    "conclusion": "Solid. It concludes that urban foxes are highly dependent on anthropogenic (human) food sources, which may have implications for their health and population density.",
+    "source": "Respected Field-Specific Journal. A specialized journal for Zoology and Ecology, known for solid, data-driven science."
+  },
+  {
+    "id": "STUDY-114",
+    "headline": "Simulated Martian Soil Supports Growth of Edible Crops",
+    "access": "Open Access.",
+    "overview": "Addresses a crucial gap in knowledge regarding ‘In-Situ Resource Utilisation’ for future space missions. It applies standard botanical knowledge to a novel soil environment.",
+    "methods": "A greenhouse experiment using NASA-developed Mars soil simulant (Regolith). Tested various crop types with different fertiliser additives. Control groups used standard Earth soil. Data availability: All plant growth metrics, soil composition analysis and watering schedules are freely downloadable.",
+    "conclusion": "Optimistic but careful. Crops grew, but the authors note they accumulated heavy metals present in the Mars simulant, making them unsafe to eat without further processing. The headline misses this vital caveat.",
+    "source": "Respected Field-Specific Journal. Published in a leading journal for Space and Planetary Science."
+  },
+  {
+    "id": "STUDY-115",
+    "headline": "Listening to Classical Music While Studying Raises IQ",
+    "access": "Behind a paywall.",
+    "overview": "A rehash of the ‘Mozart Effect,’ a theory largely debunked by modern psychology. It suggests passive listening boosts general intelligence, rather than just temporary arousal or mood.",
+    "methods": "30 students took a short logic test after 10 minutes of Mozart, and another test after 10 minutes of silence. It did not measure IQ (which is a stable trait), but rather performance on one specific puzzle. The hypothesis was not preregistered. Data availability: Not provided.",
+    "conclusion": "Overblown. It found a tiny, temporary improvement in one task and generalised it to ‘raising IQ,’ implying a permanent cognitive upgrade.",
+    "source": "Low-Tier Journal. A peer-reviewed journal, but one with a low impact factor that often publishes ‘novelty’ psychology studies."
+  },
+  {
+    "id": "STUDY-116",
+    "headline": "Electric Vehicle Range Drops by Up to 30% in Freezing Temperatures",
+    "access": "Open Access.",
+    "overview": "Based on known electrochemical properties of lithium-ion batteries. Electrolyte fluid becomes more viscous and internal resistance increases in cold climates; the theory is solid physics.",
+    "methods": "Tested five popular EV models in climate-controlled chambers running standard driving cycles at +20°C and -10°C to ensure fair comparison. Data availability: Full test protocols and detailed discharge curves for all vehicles are available on the institute's website.",
+    "conclusion": "Accurate. The study provides real-world data confirming a known limitation of current battery technology. It does not attack EVs but informs consumers in cold climates.",
+    "source": "National Research Institute Report. Published by a government-funded transport research body. Highly credible and independent of car manufacturers."
+  },
+  {
+    "id": "STUDY-117",
+    "headline": "Remote Workers are 40% More Productive Than Office Workers",
+    "access": "A PDF report downloadable from a website.",
+    "overview": "N/A. This is a purely explorative survey with no grounding in management theory or organisational psychology.",
+    "methods": "An online survey of 2,000 workers. Productivity was measured solely by asking participants: ‘Do you feel more productive at home?’ Data availability: Proprietary data, not shared.",
+    "conclusion": "Flawed. It uses a subjective feeling (‘I feel productive’) as an objective measure of output.",
+    "source": "Corporate Marketing Report. The study was conducted and published by a management consultancy firm that sells remote-work software. A clear conflict of interest."
+  },
+  {
+    "id": "STUDY-118",
+    "headline": "Gut Bacteria Imbalance is the Root Cause of All Depression",
+    "access": "Accessible with difficulty (specialist microbiology journal).",
+    "overview": "Investigates the ‘gut-brain axis,’ a legitimate and exciting new field. However, the theory reduces a complex biopsychosocial disorder (depression) to a single biological cause.",
+    "methods": "Transferred fecal microbiota from depressed humans into sterile mice. The specific behavioural scoring criteria were preregistered. The mice showed behavioural changes associated with rodent stress. Data availability: Data available upon request.",
+    "conclusion": "Overblown headline. The study shows an interesting mechanism in mice, but the headline makes a massive leap to claiming it is the sole cause of depression in humans, ignoring trauma and social factors.",
+    "source": "Respected Field-Specific Journal. A solid microbiology journal. The study is good; the interpretation of the conclusion (often by the press office) is the problem."
+  },
+  {
+    "id": "STUDY-119",
+    "headline": "Northern Hemisphere Summer Temperatures Over Past 2,000 Years Reconstructed",
+    "access": "Open Access.",
+    "overview": "Dendroclimatology (using tree rings as proxies for past climate). The study uses established protocols for calibrating tree ring width against known temperature records.",
+    "methods": "Combined thousands of tree-ring datasets from across Europe and Asia. Used rigorous statistical modelling to account for uncertainties and outliers. Data availability: The entire dataset of proxy records and the reconstruction code are hosted on the NOAA Paleoclimatology database.",
+    "conclusion": "Robust. It shows current warming is unprecedented in the context of the last two millennia. The conclusion is highly specific about geographical limitations and statistical margins of error.",
+    "source": "Top-Tier Generalist Journal. Published in a prestigious journal (e.g., Nature) known for strictly reviewing climate models."
+  },
+  {
+    "id": "STUDY-120",
+    "headline": "Bitcoin Adopted as Primary Currency in Developing Nation Stabilises Local Economy",
+    "access": "A PDF uploaded to a crypto-enthusiast server.",
+    "overview": "Relies on unorthodox economic theories promoted by cryptocurrency advocates, often ignoring standard monetary policy principles regarding inflation and liquidity.",
+    "methods": "Looks at economic indicators in the country over a very short period (3 months) after adoption. It ignores massive external factors, such as global oil prices, which affected that economy simultaneously. Data availability: Links to some public charts provided, but no raw economic dataset included.",
+    "conclusion": "Flawed correlation. It attributes short-term stabilization entirely to Bitcoin without evidence, ignoring confounding variables.",
+    "source": "Preprint / Blog Post. This is a non-peer-reviewed paper hosted on a community server. It has not been vetted by economists."
+  },
+  {
+    "id": "STUDY-121",
+    "headline": "Vertical Farms Produce Higher Yields but Have Higher Carbon Footprint Than Traditional Agriculture",
+    "access": "Open Access.",
+    "overview": "Uses ‘Life-Cycle Assessment’ (LCA), a standardised framework for assessing environmental impacts associated with all stages of a product's life.",
+    "methods": "Compared data from three operational vertical farms against average data for conventional field farming of lettuce. Accounted for energy use for lighting/heating vs diesel for tractors/transport. Data availability: Full LCA assumptions and input data tables provided in the appendix.",
+    "conclusion": "Nuanced. It reveals a trade-off: vertical farming saves land and water, but currently requires massive amounts of electricity, making it higher carbon depending on the local energy grid.",
+    "source": "Respected Field-Specific Journal. Published in a reputable journal focusing on Sustainability and Agricultural Science."
+  },
+  {
+    "id": "STUDY-122",
+    "headline": "Late-Night Smartphone Use Linked to Lower Sleep Quality in Adolescents via Objective Tracking",
+    "access": "Behind a paywall.",
+    "overview": "Builds on previous survey data but aims to correct the ‘recall bias’ (memory errors) of those studies by using digital tracking.",
+    "methods": "500 teenagers installed an app that tracked exact phone usage times and wore an actigraphy wristband to measure actual sleep patterns for two weeks. The statistical analysis plan was preregistered on OSF to prevent p-hacking. Data availability: Anonymised, aggregated data is available on the Open Science Framework (OSF), but individual raw traces are hidden for privacy.",
+    "conclusion": "Strong. The use of objective measurement tools removes memory bias. The conclusion accurately reports a significant negative correlation between screen usage after 10 PM and sleep duration.",
+    "source": "High-Impact Generalist Journal. A top-tier journal known for rigorous medical and health sciences research."
+  },
+  {
+    "id": "STUDY-123",
+    "headline": "New Peptide Cream Reverses Skin Aging by 20 Years",
+    "access": "A summary on the cosmetic company's website referencing ‘clinical trials on file.’",
+    "overview": "Mentions ‘collagen boosting peptides’ but provides no explanation of the delivery mechanism—biologically, peptides are large molecules that struggle to penetrate the skin barrier.",
+    "methods": "A company-run trial of 30 women. Results were based on the participants' own self-assessment of how their skin looked in the mirror after 4 weeks. No placebo cream was used. Data availability: ‘Data on file’ (i.e., secret).",
+    "conclusion": "Marketing dressed up as science. Subjective opinion is presented as objective biological reversal of aging.",
+    "source": "Corporate Marketing Material. Not a study. This is a claim made on a commercial website, referencing internal data that has never been peer-reviewed."
+  }
 ]

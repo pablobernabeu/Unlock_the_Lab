@@ -77,6 +77,36 @@ p {
     color: var(--text-primary);
 }
 
+.intro-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #1e40af;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+.skills-list {
+    list-style: none;
+    margin-left: 0;
+}
+
+.skills-list li {
+    padding-left: 1.5rem;
+    position: relative;
+    margin-bottom: 0.75rem;
+}
+
+.skills-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    width: 6px;
+    height: 6px;
+    background: #10b981;
+    border-radius: 50%;
+}
+
 ul, ol {
     margin: 1rem 0 1rem 1.5rem;
 }
@@ -92,11 +122,27 @@ li {
     display: none;
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
+    position: relative;
+    padding-bottom: 3rem;
 }
 
 .page.active {
     display: block;
     opacity: 1;
+}
+
+.username-footer {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-align: center;
+    padding: 0.25rem 0.75rem;
+    background: rgba(148, 163, 184, 0.1);
+    border-radius: 12px;
+    font-weight: 500;
 }
 
 /* ===========================
@@ -525,6 +571,12 @@ li {
     100% { transform: rotate(360deg); }
 }
 
+@keyframes scoreUpdate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
 /* ===========================
    Gamification Elements
    =========================== */
@@ -546,6 +598,15 @@ li {
 
 .score-banner + .page {
     margin-top: 60px;
+}
+
+.session-timer {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    padding: 0.25rem 0.75rem;
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    transition: color 0.3s ease;
 }
 
 .participant-count {
@@ -618,9 +679,10 @@ li {
 }
 
 .leaderboard-entry {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 60px 1fr auto auto;
     align-items: center;
+    gap: 0.75rem;
     padding: 1rem;
     margin: 0.5rem 0;
     background: #f8fafc;
@@ -636,7 +698,15 @@ li {
 
 .leaderboard-entry .rank {
     font-size: 1.5rem;
-    min-width: 50px;
+    text-align: center;
+}
+
+.leaderboard-entry .username {
+    color: var(--text-primary);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .leaderboard-entry .score {

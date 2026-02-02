@@ -13,21 +13,70 @@ let userPredictions = {}; // Predicted average ratings
 let totalScore = 0;
 let userName = '';
 
+// Session timeout configuration (to prevent excessive Firebase costs)
+const INITIAL_SESSION_DURATION = 30 * 60 * 1000; // 30 minutes initially
+const EXTENSION_DURATION = 5 * 60 * 1000; // 5 minute extensions
+const ABSOLUTE_MAX_DURATION = 50 * 60 * 1000; // 50 minutes absolute maximum
+const WARNING_TIMES = [15 * 60 * 1000, 5 * 60 * 1000]; // Warnings at 15 min and 5 min remaining
+const EXTENSION_PROMPT_TIME = 1 * 60 * 1000; // Ask to extend 1 min before end
+let sessionStartTime = null;
+let currentSessionEnd = INITIAL_SESSION_DURATION; // Current deadline (can be extended)
+let sessionTimeoutId = null;
+let extensionPromptTimeoutId = null;
+let warningTimeouts = []; // Track multiple warning timeouts
+let firebaseListeners = []; // Track all Firebase listeners for cleanup
+let hasShownWarnings = new Set(); // Track which warnings have been shown
+
 // Seed scores (vetted expert ratings) - weighted as 10 participants each
 const seedScores = {
-    'STUDY-001': 6,   // High quality
-    'STUDY-002': 4,   // Medium quality
-    'STUDY-003': 6,   // High quality
-    'STUDY-004': 2,   // Low quality
-    'STUDY-005': 4,   // Medium quality
-    'STUDY-006': 2    // Low quality
+    'STUDY-101': 1,
+    'STUDY-102': 5,
+    'STUDY-103': 6,
+    'STUDY-104': 1,
+    'STUDY-105': 5,
+    'STUDY-106': 4,
+    'STUDY-107': 2,
+    'STUDY-108': 7,
+    'STUDY-109': 4,
+    'STUDY-110': 6,
+    'STUDY-111': 2,
+    'STUDY-112': 1,
+    'STUDY-113': 6,
+    'STUDY-114': 5,
+    'STUDY-115': 3,
+    'STUDY-116': 5,
+    'STUDY-117': 1,
+    'STUDY-118': 4,
+    'STUDY-119': 7,
+    'STUDY-120': 2,
+    'STUDY-121': 5,
+    'STUDY-122': 6,
+    'STUDY-123': 1
 };
-const seedWeight = 10; // Each seed score counts as 10 participants
+const seedWeight = 100; // Each seed score counts as 100 participants
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
-    // Generate unique session ID for this participant
-    sessionId = generateSessionId();
+    // Try to load saved state first
+    const hasState = loadState();
+    
+    // Generate or restore session ID
+    if (!sessionId) {
+        sessionId = generateSessionId();
+    }
+    
+    // Generate or retrieve username
+    userName = sessionStorage.getItem('userName');
+    if (!userName) {
+        userName = generateUsername();
+        sessionStorage.setItem('userName', userName);
+    }
+    
+    // Display username at bottom of all pages
+    displayUsername();
+    
+    // Start session timeout
+    startSessionTimeout();
     
     // Load content
     await loadContent();
@@ -39,14 +88,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Generate paper pages
     generatePaperPages();
     
+    // Restore previously submitted ratings if resuming
+    if (hasState && Object.keys(userRatings).length > 0) {
+        restoreSubmittedRatings();
+    }
+    
     // Track active participants
     trackParticipant();
     
     // Update participant count
     updateParticipantCount();
     
-    // Show first page
-    showPage(0);
+    // Update score display if resuming with existing score
+    if (totalScore > 0) {
+        const scoreDisplay = document.getElementById('total-score-header');
+        if (scoreDisplay) {
+            scoreDisplay.textContent = `Score: ${totalScore}`;
+            document.getElementById('score-banner').style.display = 'flex';
+        }
+    }
+    
+    // Show saved page or first page
+    showPage(hasState ? currentPage : 0);
 });
 
 // Expose functions to global scope for HTML onclick handlers
@@ -60,6 +123,229 @@ window.showTab = showTab;
 // Generate unique session ID
 function generateSessionId() {
     return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Generate child-friendly username
+function generateUsername() {
+    const adjectives = [
+        'Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange', 'Pink', 'Teal',
+        'Brave', 'Wise', 'Swift', 'Tall', 'Happy', 'Clever', 'Bright', 'Quick',
+        'Mighty', 'Gentle', 'Bold', 'Cheerful', 'Curious', 'Friendly', 'Kind', 'Peaceful'
+    ];
+    
+    const animals = [
+        'Fox', 'Raccoon', 'Owl', 'Sparrow', 'Robin', 'Falcon', 'Eagle', 'Hawk',
+        'Rabbit', 'Squirrel', 'Deer', 'Bear', 'Wolf', 'Otter', 'Badger', 'Hedgehog',
+        'Dolphin', 'Seal', 'Penguin', 'Panda', 'Koala', 'Tiger', 'Lion', 'Leopard'
+    ];
+    
+    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const animal = animals[Math.floor(Math.random() * animals.length)];
+    
+    return `${adjective} ${animal}`;
+}
+
+// Start session timeout to prevent excessive Firebase usage
+function startSessionTimeout() {
+    sessionStartTime = Date.now();
+    currentSessionEnd = INITIAL_SESSION_DURATION;
+    
+    // Update timer display every minute
+    updateTimerDisplay();
+    const timerInterval = setInterval(() => {
+        const elapsed = Date.now() - sessionStartTime;
+        if (elapsed >= ABSOLUTE_MAX_DURATION) {
+            clearInterval(timerInterval);
+        }
+        updateTimerDisplay();
+    }, 60000); // Update every minute
+    
+    // Set up warning timeouts
+    scheduleWarnings();
+    
+    // Set up extension prompt (1 minute before current deadline)
+    scheduleExtensionPrompt();
+    
+    // Set session end timeout
+    sessionTimeoutId = setTimeout(() => {
+        clearInterval(timerInterval);
+        endSession();
+    }, currentSessionEnd);
+}
+
+// Schedule warning messages
+function scheduleWarnings() {
+    // Clear existing warnings
+    warningTimeouts.forEach(id => clearTimeout(id));
+    warningTimeouts = [];
+    
+    WARNING_TIMES.forEach(warningTime => {
+        const triggerTime = currentSessionEnd - warningTime;
+        if (triggerTime > 0 && !hasShownWarnings.has(warningTime)) {
+            const timeoutId = setTimeout(() => {
+                showSessionWarning(warningTime);
+                hasShownWarnings.add(warningTime);
+            }, triggerTime);
+            warningTimeouts.push(timeoutId);
+        }
+    });
+}
+
+// Schedule extension prompt
+function scheduleExtensionPrompt() {
+    if (extensionPromptTimeoutId) {
+        clearTimeout(extensionPromptTimeoutId);
+    }
+    
+    const promptTime = currentSessionEnd - EXTENSION_PROMPT_TIME;
+    if (promptTime > 0 && currentSessionEnd < ABSOLUTE_MAX_DURATION) {
+        extensionPromptTimeoutId = setTimeout(() => {
+            showExtensionPrompt();
+        }, promptTime);
+    }
+}
+
+// Show warning that time is running low
+function showSessionWarning(remainingTime) {
+    const minutes = Math.floor(remainingTime / 60000);
+    alert(`⏰ ${minutes} minutes remaining in your session.`);
+}
+
+// Show extension prompt
+function showExtensionPrompt() {
+    const canExtend = currentSessionEnd < ABSOLUTE_MAX_DURATION;
+    
+    if (!canExtend) {
+        alert('⏰ Your session will end in 1 minute. This is the maximum session duration.');
+        return;
+    }
+    
+    const totalMinutes = Math.floor(currentSessionEnd / 60000);
+    const maxMinutes = Math.floor(ABSOLUTE_MAX_DURATION / 60000);
+    const extensionMinutes = Math.floor(EXTENSION_DURATION / 60000);
+    
+    const extend = confirm(
+        `⏰ Your ${totalMinutes}-minute session will end in 1 minute.\n\n` +
+        `Would you like to extend for ${extensionMinutes} more minutes?\n` +
+        `(Maximum total: ${maxMinutes} minutes)`
+    );
+    
+    if (extend) {
+        extendSession();
+    }
+}
+
+// Extend the session
+function extendSession() {
+    // Clear current session timeout
+    if (sessionTimeoutId) {
+        clearTimeout(sessionTimeoutId);
+    }
+    
+    // Extend the deadline
+    const newDeadline = currentSessionEnd + EXTENSION_DURATION;
+    
+    // Cap at absolute maximum
+    currentSessionEnd = Math.min(newDeadline, ABSOLUTE_MAX_DURATION);
+    
+    // Schedule new warnings and extension prompt
+    scheduleWarnings();
+    scheduleExtensionPrompt();
+    
+    // Set new session end timeout
+    sessionTimeoutId = setTimeout(() => {
+        endSession();
+    }, currentSessionEnd);
+    
+    // Update timer display immediately
+    updateTimerDisplay();
+    
+    const addedMinutes = Math.floor((currentSessionEnd - (newDeadline - EXTENSION_DURATION)) / 60000);
+    if (addedMinutes > 0) {
+        alert(`✅ Session extended! You have ${addedMinutes} more minutes.`);
+    }
+}
+
+// Update timer display
+function updateTimerDisplay() {
+    const elapsed = Date.now() - sessionStartTime;
+    const remaining = currentSessionEnd - elapsed;
+    const minutes = Math.floor(remaining / 60000);
+    
+    const timerEl = document.getElementById('session-timer');
+    if (timerEl && remaining > 0) {
+        timerEl.textContent = `${minutes} min remaining`;
+        // Change color when time is running low
+        if (remaining <= 5 * 60000) {
+            timerEl.style.color = '#f56565';
+        } else if (remaining <= 15 * 60000) {
+            timerEl.style.color = '#fbbf24';
+        } else {
+            timerEl.style.color = '';
+        }
+    } else if (timerEl) {
+        timerEl.textContent = 'Session ending...';
+        timerEl.style.color = '#f56565';
+    }
+}
+function endSession() {
+    // Stop all Firebase listeners
+    firebaseListeners.forEach(unsubscribe => {
+        if (typeof unsubscribe === 'function') {
+            unsubscribe();
+        }
+    });
+    firebaseListeners = [];
+    
+    // Remove from active participants
+    if (sessionId) {
+        const participantRef = ref(database, `active/${sessionId}`);
+        set(participantRef, null);
+    }
+    
+    // Clear all timeouts
+    if (sessionTimeoutId) clearTimeout(sessionTimeoutId);
+    if (extensionPromptTimeoutId) clearTimeout(extensionPromptTimeoutId);
+    warningTimeouts.forEach(id => clearTimeout(id));
+    
+    // Show message and disable interaction
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        color: white;
+        text-align: center;
+        padding: 20px;
+    `;
+    
+    const totalMinutes = Math.floor((Date.now() - sessionStartTime) / 60000);
+    overlay.innerHTML = `
+        <div>
+            <h2 style="margin-bottom: 20px;">⏰ Session Expired</h2>
+            <p style="margin-bottom: 20px;">
+                Your ${totalMinutes}-minute session has ended to conserve resources.<br>
+                Thank you for participating!
+            </p>
+            <button onclick="location.reload()" style="
+                background: #667eea;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+            ">Start New Session</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
 }
 
 // Track active participants
@@ -88,16 +374,36 @@ function trackParticipant() {
 
 // Update participant count display
 function updateParticipantCount() {
+    const counter = document.getElementById('participant-counter');
+    
+    // Hide counter initially
+    if (counter) {
+        counter.style.display = 'none';
+    }
+    
     const activeRef = ref(database, 'active');
-    onValue(activeRef, (snapshot) => {
+    const unsubscribe = onValue(activeRef, (snapshot) => {
         const active = snapshot.val();
-        const count = active ? Object.keys(active).length : 0;
         
-        const counter = document.getElementById('participant-counter');
         if (counter) {
-            counter.textContent = `${count} participant${count !== 1 ? 's' : ''} active`;
+            if (active && Object.keys(active).length > 0) {
+                const count = Object.keys(active).length;
+                counter.textContent = `${count} participant${count !== 1 ? 's' : ''} active`;
+                counter.style.display = 'inline-block';
+            } else {
+                counter.style.display = 'none';
+            }
+        }
+    }, (error) => {
+        // Handle Firebase connection errors - hide counter
+        console.error('Error updating participant count:', error);
+        if (counter) {
+            counter.style.display = 'none';
         }
     });
+    
+    // Track listener for cleanup
+    firebaseListeners.push(unsubscribe);
 }
 
 // Load content from JSON files
@@ -210,8 +516,10 @@ function generatePaperPages() {
                     </div>
                     
                     <div class="rating-section" id="rating-section-${index}">
-                        <h3>1️⃣ Your Scientific Assessment</h3>
-                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Based on the rubric, how would YOU rate this study's quality?</p>
+                        <div style="background: #f0f4ff; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #667eea;">
+                            <h3 style="margin: 0 0 10px 0; color: #667eea;">1️⃣ Your Scientific Assessment</h3>
+                            <p style="font-size: 0.95rem; color: #444; margin: 0;">Review all six rubric criteria (Access, Headline, Theory, Methods, Conclusion, Source). Then assign your overall quality rating:</p>
+                        </div>
                         <div class="rating-scale">
                             ${[1, 2, 3, 4, 5, 6, 7].map(value => `
                                 <div class="rating-option">
@@ -227,8 +535,10 @@ function generatePaperPages() {
                             <span>Excellent Quality</span>
                         </div>
                         
-                        <h3 style="margin-top: 30px;">2️⃣ Predict the Crowd</h3>
-                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">What do you think the AVERAGE rating will be from all participants?</p>
+                        <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 30px 0 15px 0; border-left: 4px solid #ff9800;">
+                            <h3 style="margin: 0 0 10px 0; color: #f57c00;">2️⃣ Predict the Crowd</h3>
+                            <p style="font-size: 0.95rem; color: #444; margin: 0;">Now guess: What will the AVERAGE rating be from all workshop participants? Will others catch the same flaws you did?</p>
+                        </div>
                         <div class="rating-scale">
                             ${[1, 2, 3, 4, 5, 6, 7].map(value => `
                                 <div class="rating-option">
@@ -311,6 +621,7 @@ function showPage(pageIndex) {
     }
     
     currentPage = pageIndex;
+    saveState();
 }
 
 function nextPage() {
@@ -359,6 +670,9 @@ async function submitRating(paperIndex, paperId) {
         userRatings[paperId] = rating;
         userPredictions[paperId] = prediction;
         
+        // Save state
+        saveState();
+        
         // Hide rating section
         document.getElementById(`rating-section-${paperIndex}`).style.display = 'none';
         
@@ -377,7 +691,7 @@ async function submitRating(paperIndex, paperId) {
 }
 
 // Show results with real-time average
-async function showResults(paperIndex, paperId, userRating, userPrediction) {
+async function showResults(paperIndex, paperId, userRating, userPrediction, isRestoring = false) {
     const resultsBox = document.getElementById(`results-${paperIndex}`);
     resultsBox.style.display = 'block';
     
@@ -386,7 +700,7 @@ async function showResults(paperIndex, paperId, userRating, userPrediction) {
     
     // Listen for real-time updates to calculate average
     const ratingsRef = ref(database, `ratings/${paperId}`);
-    onValue(ratingsRef, (snapshot) => {
+    const unsubscribe = onValue(ratingsRef, (snapshot) => {
         const ratings = snapshot.val();
         
         if (ratings) {
@@ -405,28 +719,47 @@ async function showResults(paperIndex, paperId, userRating, userPrediction) {
                 `Based on ${participantCount} participant${participantCount !== 1 ? 's' : ''}`;
             
             // Calculate score based on prediction accuracy (only once when we have at least 2 participants)
-            if (participantCount >= 2 && !document.getElementById(`score-${paperIndex}`).textContent) {
+            // Skip recalculation if restoring from saved state
+            if (participantCount >= 2 && !document.getElementById(`score-${paperIndex}`).textContent && !isRestoring) {
                 const difference = Math.abs(userPrediction - average);
-                const score = Math.max(0, 100 - Math.round(difference * 15));
+                // Improved scoring: 100 pts for perfect, loses 12 pts per point of error (gentler penalty)
+                const score = Math.max(0, 100 - Math.round(difference * 12));
                 totalScore += score;
                 
-                // Display score
-                document.getElementById(`score-${paperIndex}`).textContent = `+${score} pts`;
-                document.getElementById(`score-msg-${paperIndex}`).textContent = 
-                    difference === 0 ? `Perfect prediction! 🎯 (You predicted ${userPrediction}, average is ${average.toFixed(1)})` :
-                    difference <= 0.5 ? `Excellent prediction! ⭐ (Predicted ${userPrediction}, actual ${average.toFixed(1)})` :
-                    difference <= 1 ? `Great prediction! 👍 (Predicted ${userPrediction}, actual ${average.toFixed(1)})` :
-                    difference <= 2 ? `Good attempt! 👌 (Predicted ${userPrediction}, actual ${average.toFixed(1)})` :
-                    `Keep practicing! 💪 (Predicted ${userPrediction}, actual ${average.toFixed(1)})`;
+                // Display score with detailed feedback
+                const scoreElement = document.getElementById(`score-${paperIndex}`);
+                scoreElement.textContent = `+${score} pts`;
+                scoreElement.style.fontSize = '2rem';
+                scoreElement.style.fontWeight = 'bold';
+                scoreElement.style.color = score >= 88 ? '#10b981' : score >= 76 ? '#3b82f6' : score >= 64 ? '#f59e0b' : '#ef4444';
                 
-                // Update total score display
+                const msgElement = document.getElementById(`score-msg-${paperIndex}`);
+                msgElement.innerHTML = 
+                    difference === 0 ? `<strong>🎯 Perfect prediction!</strong><br>You nailed it: ${userPrediction} = ${average.toFixed(1)}` :
+                    difference <= 0.5 ? `<strong>⭐ Outstanding!</strong><br>Predicted ${userPrediction}, actual ${average.toFixed(1)} — spot on!` :
+                    difference <= 1 ? `<strong>🎪 Excellent work!</strong><br>Predicted ${userPrediction}, actual ${average.toFixed(1)} — very close!` :
+                    difference <= 1.5 ? `<strong>👍 Great prediction!</strong><br>Predicted ${userPrediction}, actual ${average.toFixed(1)} — well done!` :
+                    difference <= 2.5 ? `<strong>👌 Good attempt!</strong><br>Predicted ${userPrediction}, actual ${average.toFixed(1)} — getting there!` :
+                    `<strong>💪 Keep learning!</strong><br>Predicted ${userPrediction}, actual ${average.toFixed(1)} — science perception is tricky!`;
+                msgElement.style.fontSize = '0.95rem';
+                msgElement.style.lineHeight = '1.5';
+                
+                // Update total score display with animation
                 const scoreDisplay = document.getElementById('total-score-header');
                 if (scoreDisplay) {
                     scoreDisplay.textContent = `Score: ${totalScore}`;
+                    scoreDisplay.style.animation = 'scoreUpdate 0.5s ease';
+                    setTimeout(() => scoreDisplay.style.animation = '', 500);
                 }
+                
+                // Save state after score update
+                saveState();
             }
         }
     });
+    
+    // Track listener for cleanup
+    firebaseListeners.push(unsubscribe);
 }
 
 // Help modal functions
@@ -477,7 +810,8 @@ function showFinalResults() {
     set(scoresRef, {
         score: totalScore,
         timestamp: Date.now(),
-        papersRated: Object.keys(userRatings).length
+        papersRated: Object.keys(userRatings).length,
+        userName: userName
     });
     
     // Load and display leaderboard
@@ -489,7 +823,8 @@ function showFinalResults() {
             const scoresArray = Object.entries(scores).map(([id, data]) => ({
                 id,
                 score: data.score,
-                timestamp: data.timestamp
+                timestamp: data.timestamp,
+                userName: data.userName || 'Anonymous'
             }));
             
             // Sort by score (descending)
@@ -508,6 +843,7 @@ function showFinalResults() {
                 return `
                     <div class="leaderboard-entry ${isUser ? 'current-user' : ''}">
                         <span class="rank">${medal || `#${index + 1}`}</span>
+                        <span class="username">${entry.userName}</span>
                         <span class="score">${entry.score} pts</span>
                         ${isUser ? '<span class="you-badge">You!</span>' : ''}
                     </div>

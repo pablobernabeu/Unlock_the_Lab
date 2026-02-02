@@ -151,6 +151,145 @@
         .quality-medium { background: #f59e0b; }
         .quality-low { background: #ef4444; }
 
+        .admin-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.9);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .admin-button:hover {
+            background: rgba(102, 126, 234, 1);
+            transform: scale(1.1);
+        }
+
+        .admin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .admin-overlay.active {
+            display: flex;
+        }
+
+        .admin-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .admin-panel h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .admin-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .admin-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .admin-timer {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .admin-timer.warning {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .admin-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .admin-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel {
+            background: #e5e7eb;
+            color: #666;
+        }
+
+        .btn-cancel:hover {
+            background: #d1d5db;
+        }
+
+        .btn-submit {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: #5568d3;
+        }
+
+        .admin-actions {
+            margin-top: 20px;
+        }
+
+        .btn-danger {
+            width: 100%;
+            padding: 15px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-danger:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+
         @media (max-width: 768px) {
             .charts-grid {
                 grid-template-columns: 1fr;
@@ -229,9 +368,56 @@
         </div>
     </div>
 
+    <!-- Admin Button -->
+    <button class="admin-button" onclick="openAdminPanel()" title="Admin Panel">⚙️</button>
+
+    <!-- Admin Overlay -->
+    <div class="admin-overlay" id="adminOverlay" onclick="closeAdminPanel(event)">
+        <div class="admin-panel" onclick="event.stopPropagation()">
+            <h3 id="adminTitle">🔐 Admin Access</h3>
+            
+            <div id="passwordSection">
+                <input 
+                    type="email" 
+                    id="adminEmail" 
+                    class="admin-input" 
+                    placeholder="Admin email"
+                    onkeypress="handlePasswordKeyPress(event)"
+                    autofocus
+                >
+                <input 
+                    type="password" 
+                    id="adminPassword" 
+                    class="admin-input" 
+                    placeholder="Password"
+                    onkeypress="handlePasswordKeyPress(event)"
+                >
+                <div class="admin-timer" id="adminTimer">Time remaining: 10s</div>
+                <div class="admin-buttons">
+                    <button class="btn-cancel" onclick="closeAdminPanel()">Cancel</button>
+                    <button class="btn-submit" onclick="verifyPassword()" id="loginBtn">Sign In</button>
+                </div>
+            </div>
+
+            <div id="adminActions" style="display: none;">
+                <p style="color: #666; margin-bottom: 15px;" id="adminEmail"></p>
+                <div class="admin-actions">
+                    <button class="btn-danger" onclick="endAllSessions()" id="endSessionsBtn">
+                        ⏹️ End All Active Sessions
+                    </button>
+                </div>
+                <div class="admin-buttons" style="margin-top: 15px;">
+                    <button class="btn-cancel" onclick="adminSignOut()" style="background: #ef4444; color: white;">Sign Out</button>
+                    <button class="btn-cancel" onclick="closeAdminPanel()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyCjLzq8QNQqhGOpTJy3tzwuQrovMm6Vdi4",
@@ -246,27 +432,31 @@
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        const auth = getAuth(app);
 
-        const paperIds = ['STUDY-001', 'STUDY-002', 'STUDY-003', 'STUDY-004', 'STUDY-005', 'STUDY-006'];
+        const paperIds = ['STUDY-101', 'STUDY-102', 'STUDY-103', 'STUDY-104', 'STUDY-105', 'STUDY-106', 
+                          'STUDY-107', 'STUDY-108', 'STUDY-109', 'STUDY-110', 'STUDY-111', 'STUDY-112',
+                          'STUDY-113', 'STUDY-114', 'STUDY-115', 'STUDY-116', 'STUDY-117', 'STUDY-118',
+                          'STUDY-119', 'STUDY-120', 'STUDY-121', 'STUDY-122', 'STUDY-123'];
         const paperQualities = {
-            'STUDY-001': 'high',
-            'STUDY-002': 'medium', 
-            'STUDY-003': 'high',
-            'STUDY-004': 'low',
-            'STUDY-005': 'medium',
-            'STUDY-006': 'low'
+            'STUDY-101': 'low', 'STUDY-102': 'medium', 'STUDY-103': 'high', 'STUDY-104': 'low',
+            'STUDY-105': 'medium', 'STUDY-106': 'medium', 'STUDY-107': 'low', 'STUDY-108': 'high',
+            'STUDY-109': 'medium', 'STUDY-110': 'high', 'STUDY-111': 'low', 'STUDY-112': 'low',
+            'STUDY-113': 'high', 'STUDY-114': 'medium', 'STUDY-115': 'low', 'STUDY-116': 'medium',
+            'STUDY-117': 'low', 'STUDY-118': 'medium', 'STUDY-119': 'high', 'STUDY-120': 'low',
+            'STUDY-121': 'medium', 'STUDY-122': 'high', 'STUDY-123': 'low'
         };
         
         // Seed scores (vetted expert ratings) - weighted as 10 participants each
         const seedScores = {
-            'STUDY-001': 6,
-            'STUDY-002': 4,
-            'STUDY-003': 6,
-            'STUDY-004': 2,
-            'STUDY-005': 4,
-            'STUDY-006': 2
+            'STUDY-101': 1, 'STUDY-102': 5, 'STUDY-103': 6, 'STUDY-104': 1,
+            'STUDY-105': 5, 'STUDY-106': 4, 'STUDY-107': 2, 'STUDY-108': 7,
+            'STUDY-109': 4, 'STUDY-110': 6, 'STUDY-111': 2, 'STUDY-112': 1,
+            'STUDY-113': 6, 'STUDY-114': 5, 'STUDY-115': 3, 'STUDY-116': 5,
+            'STUDY-117': 1, 'STUDY-118': 4, 'STUDY-119': 7, 'STUDY-120': 2,
+            'STUDY-121': 5, 'STUDY-122': 6, 'STUDY-123': 1
         };
-        const seedWeight = 10;
+        const seedWeight = 100;
 
         let ratingsChart, agreementChart;
 
@@ -438,6 +628,153 @@
             leaderboardData = snapshot.val() || {};
             updateDashboard(ratingsData, activeData, leaderboardData);
         });
+
+        // Admin Panel Functions
+        let adminTimer;
+        let timeRemaining = 10;
+        let currentUser = null;
+
+        // Listen to auth state changes
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                // User is signed in
+                document.getElementById('adminEmail').textContent = `✅ Signed in as ${user.email}`;
+            }
+        });
+
+        window.openAdminPanel = function() {
+            const overlay = document.getElementById('adminOverlay');
+            overlay.classList.add('active');
+            
+            if (!currentUser) {
+                document.getElementById('passwordSection').style.display = 'block';
+                document.getElementById('adminActions').style.display = 'none';
+                document.getElementById('adminEmail').value = '';
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminEmail').focus();
+                startTimer();
+            } else {
+                document.getElementById('passwordSection').style.display = 'none';
+                document.getElementById('adminActions').style.display = 'block';
+            }
+        };
+
+        window.closeAdminPanel = function(event) {
+            // Only close if clicking overlay background or cancel button
+            if (!event || event.target.id === 'adminOverlay' || event.target.classList.contains('btn-cancel')) {
+                const overlay = document.getElementById('adminOverlay');
+                overlay.classList.remove('active');
+                clearInterval(adminTimer);
+                timeRemaining = 10;
+            }
+        };
+
+        function startTimer() {
+            timeRemaining = 10;
+            updateTimerDisplay();
+            
+            adminTimer = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(adminTimer);
+                    closeAdminPanel({ target: { id: 'adminOverlay' } });
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById('adminTimer');
+            timerElement.textContent = `Time remaining: ${timeRemaining}s`;
+            
+            if (timeRemaining <= 3) {
+                timerElement.classList.add('warning');
+            } else {
+                timerElement.classList.remove('warning');
+            }
+        }
+
+        window.handlePasswordKeyPress = function(event) {
+            if (event.key === 'Enter') {
+                verifyPassword();
+            }
+        };
+
+        window.verifyPassword = function() {
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            
+            if (!email || !password) {
+                alert('❌ Please enter both email and password');
+                return;
+            }
+            
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing in...';
+            
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    clearInterval(adminTimer);
+                    currentUser = userCredential.user;
+                    document.getElementById('passwordSection').style.display = 'none';
+                    document.getElementById('adminActions').style.display = 'block';
+                    document.getElementById('adminTitle').textContent = '✅ Admin Panel';
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Sign In';
+                })
+                .catch((error) => {
+                    let message = 'Authentication failed';
+                    if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                        message = 'Invalid email or password';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        message = 'Too many failed attempts. Try again later';
+                    }
+                    alert('❌ ' + message);
+                    document.getElementById('adminPassword').value = '';
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Sign In';
+                });
+        };
+
+        window.adminSignOut = function() {
+            signOut(auth).then(() => {
+                currentUser = null;
+                closeAdminPanel({ target: { id: 'adminOverlay' } });
+            }).catch((error) => {
+                alert('❌ Error signing out: ' + error.message);
+            });
+        };
+
+        window.endAllSessions = function() {
+            const activeCount = Object.keys(activeData).length;
+            
+            if (activeCount === 0) {
+                alert('ℹ️ No active sessions to end');
+                return;
+            }
+            
+            if (confirm(`⚠️ This will end ${activeCount} active session(s).\n\nAre you sure you want to continue?`)) {
+                const btn = document.getElementById('endSessionsBtn');
+                btn.disabled = true;
+                btn.textContent = 'Ending sessions...';
+                
+                set(ref(database, 'active'), null)
+                    .then(() => {
+                        alert(`✅ Successfully ended ${activeCount} session(s)`);
+                        btn.disabled = false;
+                        btn.textContent = '⏹️ End All Active Sessions';
+                        closeAdminPanel({ target: { id: 'adminOverlay' } });
+                    })
+                    .catch((error) => {
+                        alert('❌ Error ending sessions: ' + error.message);
+                        btn.disabled = false;
+                        btn.textContent = '⏹️ End All Active Sessions';
+                    });
+            }
+        };
     </script>
 </body>
 </html>
