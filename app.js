@@ -763,6 +763,8 @@ async function submitRating(paperIndex, paperId) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
         
+        console.log('Submitting rating:', { paperId, sessionId, rating, prediction });
+        
         // Save both rating and prediction to Firebase
         const ratingRef = ref(database, `ratings/${paperId}/${sessionId}`);
         await set(ratingRef, {
@@ -770,6 +772,8 @@ async function submitRating(paperIndex, paperId) {
             prediction: prediction,
             timestamp: Date.now()
         });
+        
+        console.log('Rating submitted successfully');
         
         // Store locally
         userRatings[paperId] = rating;
@@ -786,7 +790,8 @@ async function submitRating(paperIndex, paperId) {
         
     } catch (error) {
         console.error('Error submitting rating:', error);
-        alert('Error submitting rating. Please try again.');
+        console.error('Error details:', error.code, error.message);
+        alert(`Error submitting rating: ${error.message}\n\nPlease check the browser console for details.`);
         
         // Re-enable submit button
         const submitBtn = document.getElementById(`submit-${paperIndex}`);
