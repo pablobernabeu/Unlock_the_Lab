@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (totalScore > 0) {
         const scoreDisplay = document.getElementById('total-score-header');
         if (scoreDisplay) {
-            scoreDisplay.textContent = `Score: ${totalScore}`;
+            scoreDisplay.innerHTML = `<span class="medal-icon">🏆</span> ${totalScore}`;
             document.getElementById('score-banner').style.display = 'flex';
         }
     }
@@ -213,7 +213,7 @@ function displayUsername() {
         
         const footer = document.createElement('div');
         footer.className = 'username-footer';
-        footer.style.cssText = 'margin-top: 2rem; padding-top: 1rem; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 0.9rem;';
+        footer.style.cssText = 'margin-top: 2rem; padding-top: 0.5rem; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 0.9rem;';
         footer.textContent = `Playing as: ${userName}`;
         page.querySelector('.container').appendChild(footer);
     });
@@ -346,9 +346,13 @@ function updateTimerDisplay() {
     const remaining = currentSessionEnd - elapsed;
     const minutes = Math.floor(remaining / 60000);
     
+    // Calculate papers remaining
+    const papersRated = Object.keys(userRatings).length;
+    const papersRemaining = papers.length - papersRated;
+    
     const timerEl = document.getElementById('session-timer');
     if (timerEl && remaining > 0) {
-        timerEl.textContent = `${minutes} min remaining`;
+        timerEl.textContent = `${minutes} min | ${papersRemaining} paper${papersRemaining !== 1 ? 's' : ''} left`;
         // Change color when time is running low
         if (remaining <= 5 * 60000) {
             timerEl.style.color = '#f56565';
@@ -651,13 +655,17 @@ function generatePaperPages() {
                             <div class="score-message" id="score-msg-${index}"></div>
                         </div>
                         <div class="rating-comparison">
-                            <div class="rating-display">
-                                <div class="label">Your Rating</div>
-                                <div class="value" id="your-rating-${index}">-</div>
+                            <div class="rating-scale-grid">
+                                <div class="scale-label">Your Rating</div>
+                                <div class="scale-row" id="your-rating-scale-${index}">
+                                    ${[1, 2, 3, 4, 5, 6, 7].map(val => `<div class="scale-cell" data-value="${val}"></div>`).join('')}
+                                </div>
                             </div>
-                            <div class="rating-display">
-                                <div class="label">Average Rating</div>
-                                <div class="value" id="avg-rating-${index}">-</div>
+                            <div class="rating-scale-grid">
+                                <div class="scale-label">Average Rating</div>
+                                <div class="scale-row" id="avg-rating-scale-${index}">
+                                    ${[1, 2, 3, 4, 5, 6, 7].map(val => `<div class="scale-cell" data-value="${val}"></div>`).join('')}
+                                </div>
                             </div>
                         </div>
                         <div class="participant-count" id="count-${index}">
@@ -809,8 +817,37 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
             const average = totalRatings / totalCount;
             const participantCount = ratingValues.length;
             
-            // Update display
-            document.getElementById(`avg-rating-${paperIndex}`).textContent = average.toFixed(1);
+            // Update display with ordinal color scale
+            const avgRounded = Math.round(average);
+            const yourRatingScale = document.getElementById(`your-rating-scale-${paperIndex}`);
+            const avgRatingScale = document.getElementById(`avg-rating-scale-${paperIndex}`);
+            
+            if (yourRatingScale && avgRatingScale) {
+                // Clear previous highlights
+                yourRatingScale.querySelectorAll('.scale-cell').forEach(cell => {
+                    cell.textContent = '';
+                    cell.className = 'scale-cell';
+                });
+                avgRatingScale.querySelectorAll('.scale-cell').forEach(cell => {
+                    cell.textContent = '';
+                    cell.className = 'scale-cell';
+                });
+                
+                // Highlight user rating
+                const yourCell = yourRatingScale.querySelector(`[data-value="${userRating}"]`);
+                if (yourCell) {
+                    yourCell.textContent = userRating;
+                    yourCell.className = `scale-cell active rating-${userRating}`;
+                }
+                
+                // Highlight average rating
+                const avgCell = avgRatingScale.querySelector(`[data-value="${avgRounded}"]`);
+                if (avgCell) {
+                    avgCell.textContent = average.toFixed(1);
+                    avgCell.className = `scale-cell active rating-${avgRounded}`;
+                }
+            }
+            
             document.getElementById(`count-${paperIndex}`).textContent = 
                 `Based on ${participantCount} participant${participantCount !== 1 ? 's' : ''}`;
             
@@ -843,10 +880,13 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
                 // Update total score display with animation
                 const scoreDisplay = document.getElementById('total-score-header');
                 if (scoreDisplay) {
-                    scoreDisplay.textContent = `Score: ${totalScore}`;
+                    scoreDisplay.innerHTML = `<span class="medal-icon">🏆</span> ${totalScore}`;
                     scoreDisplay.style.animation = 'scoreUpdate 0.5s ease';
                     setTimeout(() => scoreDisplay.style.animation = '', 500);
                 }
+                
+                // Update timer to reflect papers remaining
+                updateTimerDisplay();
                 
                 // Save state after score update
                 saveState();
