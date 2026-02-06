@@ -13,6 +13,12 @@ let userPredictions = {}; // Predicted average ratings
 let totalScore = 0;
 let userName = '';
 
+// Counterbalancing state
+let featureOrderConfig = [];
+let assignedListId = null;
+let featureOrder = [];
+let featureLabels = [];
+
 // Session timeout configuration (to prevent excessive Firebase costs)
 const INITIAL_SESSION_DURATION = 30 * 60 * 1000; // 30 minutes initially
 const EXTENSION_DURATION = 5 * 60 * 1000; // 5 minute extensions
@@ -402,7 +408,7 @@ function updateTimerDisplay() {
     
     // Calculate papers remaining
     const papersRated = Object.keys(userRatings).length;
-    const totalPapers = papers.length || 23; // Fallback to 23 if papers not loaded yet
+    const totalPapers = papers.length || 48; // Fallback to 48 if papers not loaded yet
     const papersRemaining = Math.max(0, totalPapers - papersRated);
     
     const timerEl = document.getElementById('session-timer');
@@ -551,15 +557,39 @@ function updateParticipantCount() {
 // Load content from JSON files
 async function loadContent() {
     try {
+        // First, load the feature order configuration
+        const featureOrderResponse = await fetch('feature-order-config.json');
+        featureOrderConfig = await featureOrderResponse.json();
+        
+        // Determine list assignment based on session ID
+        // Extract numeric part from session ID for consistent assignment
+        const sessionNumeric = parseInt(sessionId.split('_')[1]) || Date.now();
+        assignedListId = (sessionNumeric % 6) + 1;
+        
+        // Store list assignment for consistency
+        localStorage.setItem('assignedListId', assignedListId);
+        
+        // Get the feature order configuration for this participant
+        const config = featureOrderConfig.find(c => c.listId === assignedListId);
+        featureOrder = config.featureOrder;
+        featureLabels = config.featureLabels;
+        
+        // Load appropriate rubric version
+        const rubricFile = `rubric-v${assignedListId}.json`;
+        
+        // Load all content in parallel
         const [glossaryData, rubricData, papersData] = await Promise.all([
             fetch('glossary.json').then(r => r.json()),
-            fetch('rubric.json').then(r => r.json()),
+            fetch(rubricFile).then(r => r.json()),
             fetch('papers.json').then(r => r.json())
         ]);
         
         glossary = glossaryData;
         rubric = rubricData;
         papers = papersData;
+        
+        // Log assignment for debugging
+        console.log(`Participant assigned to List ${assignedListId}:`, featureOrder);
         
         // Update total papers count on final page
         document.getElementById('total-papers').textContent = papers.length;
@@ -632,6 +662,17 @@ function generatePaperPages() {
     const paperPagesContainer = document.getElementById('paper-pages');
     
     papers.forEach((paper, index) => {
+        // Generate paper sections in counterbalanced order
+        const paperSectionsHTML = featureOrder.map((feature, position) => {
+            const label = featureLabels[position];
+            const content = paper[feature];
+            return `
+                        <div class="paper-section">
+                            <h3>${label}</h3>
+                            <p>${content}</p>
+                        </div>`;
+        }).join('');
+        
         const pageHTML = `
             <div class="page" id="page-paper-${index}">
                 <div class="container">
@@ -640,37 +681,13 @@ function generatePaperPages() {
                             <div class="paper-id">${paper.id}</div>
                             <h1 class="paper-title">${paper.headline}</h1>
                         </div>
-                        
-                        <div class="paper-section">
-                            <h3>📰 Access</h3>
-                            <p>${paper.access}</p>
-                        </div>
-                        
-                        <div class="paper-section">
-                            <h3>🔬 Study Overview</h3>
-                            <p>${paper.overview}</p>
-                        </div>
-                        
-                        <div class="paper-section">
-                            <h3>📊 Methods & Data</h3>
-                            <p>${paper.methods}</p>
-                        </div>
-                        
-                        <div class="paper-section">
-                            <h3>📝 Conclusion</h3>
-                            <p>${paper.conclusion}</p>
-                        </div>
-                        
-                        <div class="paper-section">
-                            <h3>🏛️ Source</h3>
-                            <p>${paper.source}</p>
-                        </div>
+                        ${paperSectionsHTML}
                     </div>
                     
                     <div class="rating-section" id="rating-section-${index}">
                         <div style="background: #f0f4ff; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #667eea;">
                             <h3 style="margin: 0 0 10px 0; color: #667eea;">1️⃣ Your Scientific Assessment</h3>
-                            <p style="font-size: 0.95rem; color: #444; margin: 0;">Review all six rubric criteria (Access, Headline, Theory, Methods, Conclusion, Source). Then assign your overall quality rating:</p>
+                            <p style="font-size: 0.95rem; color: #444; margin: 0;">Review all six rubric criteria. Then assign your overall quality rating:</p>
                         </div>
                         <div class="rating-scale">
                             ${[1, 2, 3, 4, 5, 6, 7].map(value => `
@@ -833,6 +850,7 @@ async function submitRating(paperIndex, paperId) {
         await set(ratingRef, {
             rating: rating,
             prediction: prediction,
+            listId: assignedListId,
             timestamp: Date.now()
         });
         
@@ -1030,7 +1048,8 @@ function showFinalResults() {
         score: totalScore,
         timestamp: Date.now(),
         papersRated: Object.keys(userRatings).length,
-        userName: userName
+        userName: userName,
+        listId: assignedListId
     }).then(() => {
         console.log('Score saved successfully');
     }).catch((error) => {

@@ -46,5 +46,41 @@
     {
         "term": "Statistical Significance",
         "definition": "A measure of whether results are likely due to chance or represent a real effect. Typically set at p < 0.05, but context matters."
+    },
+    {
+        "term": "Abstract",
+        "definition": "A brief summary at the beginning of a research paper outlining the study's purpose, methods, results, and conclusions."
+    },
+    {
+        "term": "Citation",
+        "definition": "A reference to another study or source, showing where information came from and allowing readers to verify claims."
+    },
+    {
+        "term": "Conflict of Interest",
+        "definition": "When researchers have financial, professional, or personal interests that could influence their work. Good studies declare these transparently."
+    },
+    {
+        "term": "Data",
+        "definition": "The information collected during a study, which can include measurements, observations, survey responses, or other recorded facts."
+    },
+    {
+        "term": "Hypothesis",
+        "definition": "A testable prediction about what will happen in a study, based on existing knowledge or theory."
+    },
+    {
+        "term": "Methods",
+        "definition": "The section describing how the study was conducted, including participants, materials, procedures, and analysis techniques."
+    },
+    {
+        "term": "Results",
+        "definition": "The section presenting what the study found, including statistical outcomes and data visualizations."
+    },
+    {
+        "term": "Theory",
+        "definition": "A well-established explanation for a phenomenon, supported by substantial evidence from multiple studies."
+    },
+    {
+        "term": "Variable",
+        "definition": "Any factor that can change or be measured in a study, such as age, temperature, or test scores."
     }
 ]

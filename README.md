@@ -18,18 +18,18 @@ Unlock the Lab is an educational tool designed to develop science literacy by tr
 
 ### Core Functionality
 
-- **Interactive Workshop Flow**: Guided progression through educational content, evaluation rubric, and 23 fictional research scenarios
+- **Interactive Workshop Flow**: Guided progression through educational content, evaluation rubric, and 48 fictional research scenarios
 - **Dual Assessment System**: Participants rate both research quality (1-7 scale) and predict peer consensus
 - **Real-time Leaderboard**: Rankings based on prediction accuracy with 24-hour and all-time views (top 200)
-- **Live Analytics Dashboard**: Public visualization of aggregate ratings, participant statistics, and study-level metrics with 95% confidence intervals
+- **Live Analytics Dashboard**: Public visualisation of aggregate ratings, participant statistics, and study-level metrics with 95% confidence intervals
 - **Anonymous Participation**: Automatic assignment of unique usernames (e.g., "Cheerful Penguin") for data privacy
 - **Comprehensive Glossary**: 21 scientific terms with accessible definitions, available throughout the activity
 
 ### Technical Capabilities
 
-- Real-time data synchronization via Firebase Realtime Database
+- Real-time data synchronisation via Firebase Realtime Database
 - Responsive design for desktop and mobile devices
-- Interactive data visualizations using Chart.js
+- Interactive data visualisations using Chart.js
 - Session timeout management (30-minute initial limit, extendable to 2 hours)
 - Active participant tracking (60-second activity window)
 - Percentage-based scoring system (0-100% per study, aggregate score)
@@ -40,17 +40,17 @@ Unlock the Lab is an educational tool designed to develop science literacy by tr
 - Session management controls (end all active sessions)
 - Firebase usage monitoring (concurrent connections, storage, session count)
 - Study detail modals with paper information and DOI links
-- Sortable statistics table with color-coded metrics
+- Sortable statistics table with colour-coded metrics
 
 ## Technology Stack
 
 ### Frontend
 - HTML5, CSS3, JavaScript (ES6+)
-- Chart.js 4.4.0 (data visualization)
+- Chart.js 4.4.0 (data visualisation)
 - Vite 5.4.21 (build tool)
 
 ### Backend
-- Firebase Realtime Database (data storage and synchronization)
+- Firebase Realtime Database (data storage and synchronisation)
 - Firebase Authentication (admin access control)
 - Firebase Hosting (deployment)
 
@@ -107,7 +107,7 @@ firebase deploy --only hosting
 
 1. Navigate to the application URL
 2. Review the educational content, glossary, and rubric
-3. Evaluate 23 research scenarios by rating quality (1-7) and predicting peer ratings
+3. Evaluate 48 research scenarios by rating quality (1-7) and predicting peer ratings
 4. Receive immediate feedback on prediction accuracy
 5. View final score and leaderboard position upon completion
 
@@ -122,8 +122,8 @@ firebase deploy --only hosting
 ## Scoring System
 
 - **Per-Study Score**: `100 - |predicted_rating - actual_average| × 12` (capped at 0-100)
-- **Aggregate Score**: Sum of all 23 study scores
-- **Percentage Display**: `(total_score / 2300) × 100`
+- **Aggregate Score**: Sum of all 48 study scores
+- **Percentage Display**: `(total_score / (num_studies × 100)) × 100`
 - **Leaderboard Ranking**: Based on aggregate score, top 200 displayed
 
 ## Data Management
@@ -134,13 +134,6 @@ firebase deploy --only hosting
 - Anonymous usernames auto-generated and validated for uniqueness
 - Session IDs used as primary identifiers
 - All data fully anonymized for research purposes
-
-### Firebase Free Tier Limits
-
-- 100 concurrent connections
-- 1 GB database storage
-- 10 GB/month data transfer
-- Monitor via admin dashboard to avoid service interruptions
 
 ## Project Structure
 
@@ -164,9 +157,9 @@ firebase deploy --only hosting
 Contributions are welcome through GitHub issues and pull requests. Areas for enhancement include:
 
 - Additional research scenarios
-- Localization/internationalization
+- Localisation/internationalisation
 - Accessibility improvements (WCAG compliance)
-- Mobile experience optimization
+- Mobile experience optimisation
 - Analytics export functionality
 
 See the [issues page](https://github.com/pablobernabeu/Unlock_the_Lab/issues) for current development priorities.
@@ -188,7 +181,7 @@ Department of Education, University of Oxford
 
 ## Version History
 
-- **v1.0** (2026-02): Initial release with 23 scenarios, real-time leaderboard, and analytics dashboard
+- **v1.0** (2026-02): Initial release with 48 scenarios, real-time leaderboard, and analytics dashboard
 
 ## Support
 

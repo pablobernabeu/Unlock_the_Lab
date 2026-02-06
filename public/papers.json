@@ -204,6 +204,229 @@
     "overview": "Mentions ‘collagen boosting peptides’ but provides no explanation of the delivery mechanism—biologically, peptides are large molecules that struggle to penetrate the skin barrier.",
     "methods": "A company-run trial of 30 women. Results were based on the participants' own self-assessment of how their skin looked in the mirror after 4 weeks. No placebo cream was used. Data availability: ‘Data on file’ (i.e., secret).",
     "conclusion": "Marketing dressed up as science. Subjective opinion is presented as objective biological reversal of aging.",
-    "source": "Corporate Marketing Material. Not a study. This is a claim made on a commercial website, referencing internal data that has never been peer-reviewed."
-  }
+    "source": "Corporate Marketing Material. Not a study. This is a claim made on a commercial website, referencing internal data that has never been peer-reviewed."  },
+  {
+    "id": "STUDY-124",
+    "headline": "Systematic Review Finds Mindfulness Meditation Reduces Chronic Pain",
+    "access": "Open Access via Cochrane Library.",
+    "overview": "Meta-analysis of 38 randomised controlled trials investigating mindfulness-based interventions for chronic pain conditions. Uses established frameworks from pain neuroscience and psychological interventions.",
+    "methods": "Systematic review following Cochrane protocols. Included 3,500+ participants across multiple pain conditions. Pre-registered methodology. Independent reviewers assessed bias. Full PRISMA checklist provided. Data availability: All extracted data and analysis code publicly available.",
+    "conclusion": "Cautious and specific. Reports moderate effect size for pain reduction (d=0.33) but notes high heterogeneity between studies. Acknowledges mindfulness works better for some pain types than others and cannot replace medical treatment.",
+    "source": "Cochrane Database of Systematic Reviews. Gold-standard source for evidence synthesis. Rigorous peer review and editorial oversight."
+  },
+  {
+    "id": "STUDY-125",
+    "headline": "Miracle Crystal Water Cures Diabetes, Cancer, and Depression",
+    "access": "Free PDF on alternative health blog.",
+    "overview": "Claims that water exposed to quartz crystals under moonlight restructures H2O molecules to have healing properties. Ignores all established biochemistry and pharmacology.",
+    "methods": "Testimonials from 8 clients of a wellness retreat. No control group, no medical measurements, no comparison to standard treatments. Data availability: Not mentioned.",
+    "conclusion": "Outrageous claims. States crystal water can replace insulin, chemotherapy, and antidepressants based purely on subjective feelings reported by paying customers.",
+    "source": "Alternative Health Blog. Not peer-reviewed. Website also sells crystal water bottles for £89 each."
+  },
+  {
+    "id": "STUDY-126",
+    "headline": "Phase III Trial Shows New Alzheimer's Drug Slows Cognitive Decline by 27%",
+    "access": "Behind paywall (£45 per article).",
+    "overview": "Investigates monoclonal antibody targeting amyloid-beta plaques. Grounded in established Alzheimer's pathology but outcome measure (CDR-SB scale) is somewhat controversial in the field.",
+    "methods": "Randomised, double-blind, placebo-controlled trial. N=1,800 participants across 200 sites. 18-month follow-up. However, dropout rate was high (32%), and post-hoc subgroup analyses not pre-registered. Data availability: Summary statistics only; full data available to qualified researchers upon request.",
+    "conclusion": "The headline overstates findings. The 27% figure refers to relative slowing on one cognitive scale, not functional improvement. Paper acknowledges the drug doesn't restore lost function and has significant side effects (brain swelling in 13% of participants).",
+    "source": "High-Impact Medical Journal. Well-respected but the study was funded entirely by the pharmaceutical company developing the drug."
+  },
+  {
+    "id": "STUDY-127",
+    "headline": "Longitudinal Study Reveals Income Inequality Predicts Population Health Outcomes",
+    "access": "Open Access.",
+    "overview": "Uses 40 years of data across 50 countries to examine Gini coefficient and health metrics. Builds on established social epidemiology theories and addresses confounders like absolute poverty and healthcare spending.",
+    "methods": "Sophisticated multi-level modelling using WHO and World Bank datasets. Pre-registered analysis plan. Extensive sensitivity analyses. Controls for GDP, healthcare access, education. Data availability: All code and datasets publicly archived.",
+    "conclusion": "Robust but carefully worded. Shows strong association between inequality and life expectancy, infant mortality, and mental health even after controlling for absolute wealth. Acknowledges causation cannot be proven from observational data.",
+    "source": "Top-Tier Public Health Journal. Known for rigorous statistical review and replication-friendly practices."
+  },
+  {
+    "id": "STUDY-128",
+    "headline": "Our Energy Drink Improves Athletic Performance by 35%",
+    "access": "Company-funded study summary on corporate website.",
+    "overview": "Tests proprietary caffeine-taurine blend. Ignores decades of sports science showing caffeine effects plateau and vary hugely by individual tolerance.",
+    "methods": "Compared 20 athletes drinking the energy drink vs water. No blinding (athletes knew which drink they got). Performance measured on company-owned equipment. No independent verification. Data availability: Proprietary.",
+    "conclusion": "Cherry-picked results. The 35% figure comes from one specific sprint test; overall performance improvement was minimal and within normal day-to-day variation.",
+    "source": "Corporate White Paper. Research conducted by company's own lab. Lead author is the company's Chief Marketing Officer."
+  },
+  {
+    "id": "STUDY-129",
+    "headline": "Vaccine Injury Rates 1000x Higher Than Reported, Leaked Documents Reveal",
+    "access": "Free PDF on conspiracy theory website.",
+    "overview": "Misinterprets VAERS data (a passive reporting system for any health event after vaccination, not proven causation). Ignores statistical principles and how VAERS actually works.",
+    "methods": "No original research. Selectively quotes decontextualised sentences from regulatory documents. Conflates correlation with causation. No statistical analysis of baseline rates.",
+    "conclusion": "Dangerously misleading. Presents normal background illness rates as vaccine injuries. Does not mention that VAERS reports are unverified and anyone can submit them.",
+    "source": "Conspiracy Website. Anonymous author. Website also promotes COVID denialism and sells unregulated supplements."
+  },
+  {
+    "id": "STUDY-130",
+    "headline": "Mediterranean Diet Linked to Lower Dementia Risk in 25-Year Follow-Up Study",
+    "access": "Behind paywall.",
+    "overview": "Prospective cohort study using validated food frequency questionnaires. Builds on established nutrition epidemiology and neurodegeneration research.",
+    "methods": "Followed 8,000 participants for 25 years. Used standardised dementia assessments. Controlled for education, exercise, smoking, genetics (APOE4). However, diet was self-reported (not objectively measured) and adherence could change over time. Data availability: Aggregate data in appendix; individual data on request.",
+    "conclusion": "Well-balanced. Reports 23% lower dementia incidence in high Mediterranean diet adherence group but acknowledges this is observational and cannot prove the diet caused the reduction (healthier people might choose healthier diets).",
+    "source": "Respected Medical Journal. Good reputation but not top-tier. Appropriately rigorous peer review."
+  },
+  {
+    "id": "STUDY-131",
+    "headline": "Randomised Trial Finds Reading to Infants Daily Improves Language Skills at Age 3",
+    "access": "Open Access.",
+    "overview": "Tests early literacy intervention grounded in developmental psychology and neurolinguistics. Addresses known socioeconomic disparities in language exposure.",
+    "methods": "Cluster-randomised trial (randomisation at community health centre level). N=600 families. Intervention group received books and training. Control group received standard care. Assessments blinded. Pre-registered outcomes. Data availability: De-identified data and analysis scripts on OSF.",
+    "conclusion": "Measured and specific. Reports significant improvements in vocabulary and grammar but notes effects were strongest in lower-income families and attenuated by age 5. Does not claim reading alone solves educational inequality.",
+    "source": "Top-Tier Developmental Psychology Journal. Known for emphasis on replication and open science."
+  },
+  {
+    "id": "STUDY-132",
+    "headline": "5G Towers Cause Cancer, Autism, and Infertility, Scientists Warn",
+    "access": "Shared on social media, links to pseudoscience portal.",
+    "overview": "Conflates 5G radio waves with ionising radiation (completely different types of electromagnetic radiation). Ignores physics and biology of how radiation interacts with tissue.",
+    "methods": "No study. Article cites unnamed 'scientists' and misrepresents quotes from unrelated research on high-dose ionising radiation (like X-rays).",
+    "conclusion": "Pure misinformation. Radio frequency radiation from 5G is non-ionising (cannot break DNA bonds). Claims are biologically impossible at real-world exposure levels.",
+    "source": "Social Media Post / Pseudoscience Website. No peer review. Site also promotes flat Earth theory."
+  },
+  {
+    "id": "STUDY-133",
+    "headline": "Machine Learning Algorithm Detects Early Pancreatic Cancer From Routine Blood Tests With 92% Accuracy",
+    "access": "Open Access.",
+    "overview": "Uses metabolomics and machine learning on electronic health records. Pancreatic cancer is notoriously hard to detect early, so this addresses a critical clinical gap.",
+    "methods": "Analysed blood samples from 500 eventual pancreatic cancer patients and 1,500 matched controls. External validation cohort of 400 patients. Algorithm development properly separated from testing set. Cross-validated. Data availability: Model code open-sourced; patient data available to approved researchers (privacy restrictions).",
+    "conclusion": "Promising but appropriately cautious. Notes the 92% accuracy needs prospective validation before clinical use. Acknowledges false positives would cause anxiety and unnecessary procedures. Calls for multi-site replication.",
+    "source": "High-Impact Medical AI Journal. Requires detailed reporting of AI methods and external validation."
+  },
+  {
+    "id": "STUDY-134",
+    "headline": "Eating Alkaline Foods Prevents Cancer by Balancing Your Blood pH",
+    "access": "Free e-book on wellness influencer's website.",
+    "overview": "Fundamentally misunderstands human physiology. Blood pH is tightly regulated (7.35-7.45) regardless of diet; if it changed significantly, you would die.",
+    "methods": "No research. Cites debunked theories and misunderstands how metabolism works. No mention of actual cancer biology.",
+    "conclusion": "Nonsense. The body maintains pH through breathing and kidney function, not food. Cancer is caused by genetic mutations, not 'acidic blood.'",
+    "source": "Wellness Influencer Blog. Author has no medical or scientific credentials. Sells alkaline water machines and supplements."
+  },
+  {
+    "id": "STUDY-135",
+    "headline": "Urban Green Space Access Associated With Lower Rates of Anxiety and Depression",
+    "access": "Behind paywall.",
+    "overview": "Uses satellite imagery to quantify green space and links to mental health survey data. Grounded in environmental psychology and stress-reduction theories.",
+    "methods": "Cross-sectional study of 15,000 adults across 50 cities. Clever use of objective green space metrics (NDVI from satellites). However, correlation study - can't prove causation (maybe wealthier, less stressed people move near parks). Data availability: Summary stats only.",
+    "conclusion": "Plausible but limited. Shows association but authors acknowledge reverse causation possibility and confounders like income. Calls for experimental interventions.",
+    "source": "Mid-Tier Environmental Health Journal. Legitimate peer review but not the most rigorous in the field."
+  },
+  {
+    "id": "STUDY-136",
+    "headline": "Our Probiotic Yogurt Boosts Immune Function by 80%",
+    "access": "Press release; full study not published.",
+    "overview": "Tests proprietary bacterial strains. Uses 'immune function' vaguely (the immune system has hundreds of components - which one improved?).",
+    "methods": "Company internal study. Measured one non-specific immune marker (IgA in saliva) in 30 people for 2 weeks. No control group, no published protocol. Data availability: None.",
+    "conclusion": "Marketing claims. The 80% refers to a temporary spike in one immune marker, not actual infection resistance or health outcomes.",
+    "source": "Food Company Press Release. Not peer-reviewed. Study conducted by company employees."
+  },
+  {
+    "id": "STUDY-137",
+    "headline": "Double-Blind RCT Shows Psilocybin-Assisted Therapy Reduces Treatment-Resistant Depression",
+    "access": "Open Access.",
+    "overview": "Investigates psychedelic therapy for depression. Builds on neuroscience of serotonin receptors and psychological theories of set/setting in psychedelic therapy.",
+    "methods": "Randomised, double-blind, placebo-controlled trial. N=100 patients who failed at least 2 antidepressants. Rigorous screening, therapy protocol standardised, independent assessors. 6-month follow-up. Pre-registered. Data availability: Full anonymised data on approved repository.",
+    "conclusion": "Careful interpretation. Shows significant symptom reduction but notes therapy protocol was intensive (not just the drug alone), some patients relapsed, and long-term safety still unknown. Calls for larger trials.",
+    "source": "Top-Tier Psychiatry Journal. Known for conservative editorial standards and emphasis on clinical significance."
+  },
+  {
+    "id": "STUDY-138",
+    "headline": "Genetically Modified Crops Are Safe and Pose No Health Risks, Industry Panel Concludes",
+    "access": "Free report on biotech industry association website.",
+    "overview": "Reviews existing literature on GMO safety. However, panel members are all employed by biotech companies - clear conflict of interest.",
+    "methods": "Narrative review (not systematic). Cherry-picks studies showing safety; ignores research raising concerns about pesticide use and biodiversity. No independent critical appraisal.",
+    "conclusion": "Biased summary. While many GMOs are likely safe to eat, the panel ignores environmental concerns and dismisses any contrary evidence as 'anti-science.'",
+    "source": "Industry Association Report. All authors work for GMO-producing companies. Not independent or peer-reviewed."
+  },
+  {
+    "id": "STUDY-139",
+    "headline": "Global Climate Models Show Accelerating Sea Level Rise Through 2100",
+    "access": "Open Access.",
+    "overview": "Uses ensemble of climate models (CMIP6) with updated ice sheet dynamics. Builds on established physics of thermal expansion and glaciology.",
+    "methods": "Multi-model comparison with rigorous uncertainty quantification. Incorporates satellite data, tide gauges, and paleoclimate proxies for validation. Pre-registered methodology. Data availability: All model outputs and code archived in public repositories.",
+    "conclusion": "Sobering but precise. Projects 0.6-1.1m rise by 2100 under current emissions trajectory, with clear uncertainty ranges and regional variations. Acknowledges ice sheet behaviour is the largest source of uncertainty.",
+    "source": "Top-Tier Earth Science Journal. Highest standards for climate model reporting and reproducibility."
+  },
+  {
+    "id": "STUDY-140",
+    "headline": "Chemtrails Proven to Contain Mind-Control Chemicals, Lab Analysis Shows",
+    "access": "Anonymous blog post with blurry photos.",
+    "overview": "Conspiracy theory. Contrails (condensation trails from aircraft) are water vapour, not chemicals. Basic atmospheric science debunks this.",
+    "methods": "No credible methodology. Shows photos of normal contrails. Claims to have 'lab analysis' but provides no chain of custody, no lab credentials, no peer review.",
+    "conclusion": "Fabricated. No evidence provided. Contradicts fundamental chemistry and meteorology.",
+    "source": "Anonymous Blog. No credentials, no review, no accountability. Site also promotes New World Order conspiracy theories."
+  },
+  {
+    "id": "STUDY-141",
+    "headline": "Pre-Exposure Prophylaxis (PrEP) Reduces HIV Transmission Risk by 99% in Real-World Cohort",
+    "access": "Open Access.",
+    "overview": "Follows high-risk individuals taking daily PrEP medication. Grounded in virology and pharmacokinetics of antiretroviral drugs.",
+    "methods": "Prospective cohort of 5,000 participants. Adherence monitored via pharmacy refills and drug level testing. Compared to matched historical controls. Independent outcome ascertainment. Data availability: De-identified data on request.",
+    "conclusion": "Strong evidence but emphasises adherence. Near-perfect protection when taken consistently, but effectiveness drops sharply with missed doses. Notes PrEP doesn't protect against other STIs.",
+    "source": "Top-Tier Infectious Disease Journal. Rigorous review and high clinical relevance standards."
+  },
+  {
+    "id": "STUDY-142",
+    "headline": "Testosterone Therapy Restores Youth and Vitality in Men Over 40",
+    "access": "Published in supplement industry magazine.",
+    "overview": "Promotes off-label testosterone use for 'anti-aging.' Downplays cardiovascular risks and ignores endocrinology showing normal age-related decline isn't a disease.",
+    "methods": "Retrospective review of clinic patients (no control group). Patients self-selected for treatment and reported 'feeling better' (subjective). No long-term safety monitoring. Data availability: None.",
+    "conclusion": "Irresponsible. Conflates correlation with causation and ignores serious side effects (heart attack, stroke, prostate issues). Written by clinic owner who profits from selling testosterone.",
+    "source": "Men's Health Magazine / Clinic Advertising. Not peer-reviewed. Author owns testosterone clinic mentioned in article."
+  },
+  {
+    "id": "STUDY-143",
+    "headline": "CRISPR Gene Editing Corrects Sickle Cell Mutation in Patient Trial",
+    "access": "Behind paywall.",
+    "overview": "Uses CRISPR-Cas9 to edit patient's own hematopoietic stem cells, correcting the genetic mutation causing sickle cell disease. Grounded in molecular biology and gene therapy.",
+    "methods": "Single-arm trial (no control group - unethical to withhold treatment from sick patients). N=15 patients with severe sickle cell disease. 2-year follow-up. Rigorous safety monitoring. Data availability: Patient-level data restricted; summary data in paper.",
+    "conclusion": "Promising but appropriately cautious. All patients showed improvement, but long-term effects unknown. Procedure is extremely expensive and complex. Acknowledges off-target editing detected in 2 patients (monitoring ongoing).",
+    "source": "Top-Tier Medical Journal. Requires independent data monitoring boards for clinical trials."
+  },
+  {
+    "id": "STUDY-144",
+    "headline": "Organic Food Prevents All Diseases, 10-Year Study Proves",
+    "access": "Published on organic food industry website.",
+    "overview": "Massively overstates findings. 'All diseases' claim ignores genetics, smoking, exercise, and countless other factors.",
+    "methods": "Observational study comparing organic food shoppers to general population. No control for income, education, or overall healthy lifestyle (people who buy organic often exercise more, smoke less, etc.). Data availability: Not provided.",
+    "conclusion": "Misleading. Any observed health differences likely due to confounding factors (wealthier, health-conscious people) not the organic label itself.",
+    "source": "Organic Trade Association Report. Study funded by organic industry. Authors work for organic certification bodies."
+  },
+  {
+    "id": "STUDY-145",
+    "headline": "Hourly Breaks From Sitting Reduce Metabolic Risk Markers in Office Workers",
+    "access": "Open Access.",
+    "overview": "Tests interrupting prolonged sitting with short activity breaks. Based on metabolic physiology and epidemiology of sedentary behaviour.",
+    "methods": "Randomised crossover trial. N=40 participants. Measured blood glucose, insulin, and lipids after 8-hour sitting vs sitting interrupted by 3-minute walks every hour. Lab-controlled conditions. Pre-registered. Data availability: Full data on OSF.",
+    "conclusion": "Measured findings. Shows improvements in glucose metabolism but notes this was short-term, in controlled conditions. Doesn't claim breaks alone prevent diabetes or heart disease.",
+    "source": "Respected Exercise Physiology Journal. Good methodological standards."
+  },
+  {
+    "id": "STUDY-146",
+    "headline": "Detox Tea Flushes Toxins and Melts Belly Fat Overnight",
+    "access": "Influencer Instagram post with affiliate link.",
+    "overview": "Scientifically nonsensical. The liver and kidneys detoxify the body; no tea can 'flush toxins.' 'Belly fat' cannot be spot-reduced.",
+    "methods": "No study. Influencer's personal testimonial plus paid actors in before/after photos. No measurements, no controls, no biology.",
+    "conclusion": "Fraudulent marketing. The tea is a laxative causing temporary water weight loss (and dehydration), not fat loss.",
+    "source": "Social Media Influencer. Paid promotion. No scientific credentials. FTC violations for undisclosed advertising."
+  },
+  {
+    "id": "STUDY-147",
+    "headline": "Participatory Budgeting Increases Civic Engagement in Marginalised Communities",
+    "access": "Open Access.",
+    "overview": "Studies democratic innovation where residents directly decide local spending. Grounded in political science theories of deliberative democracy and empowerment.",
+    "methods": "Mixed methods: quantitative analysis of voting records across 30 cities plus qualitative interviews with participants. Pre-registered analysis. Control cities matched on demographics. Data availability: Quantitative data public; interview transcripts available on request (privacy).",
+    "conclusion": "Nuanced. Shows increased participation in marginalised groups but notes effects vary by implementation quality and existing political culture. Doesn't claim participatory budgeting solves all governance problems.",
+    "source": "Top-Tier Political Science Journal. Known for rigorous mixed-methods standards."
+  },
+  {
+    "id": "STUDY-148",
+    "headline": "Magnets Cure Arthritis Pain by Realigning Your Body's Energy Fields",
+    "access": "Free PDF on magnet therapy sales website.",
+    "overview": "Pseudoscience. The human body has no 'energy fields' that magnets could affect. Static magnets used in therapy are far too weak to penetrate tissue.",
+    "methods": "No controlled study. Testimonials from customers who bought magnetic bracelets. No comparison to placebo (which is powerful for subjective pain). Data availability: None.",
+    "conclusion": "Placebo effect being sold as medicine. Systematic reviews of actual controlled trials show magnetic therapy performs no better than fake magnets.",
+    "source": "Magnet Therapy Company Website. Selling magnets for £150 each. Site also claims magnets cure diabetes and cancer."  }
 ]
