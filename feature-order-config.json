@@ -1,0 +1,38 @@
+[
+  {
+    "listId": 1,
+    "featureOrder": ["headline", "access", "overview", "methods", "conclusion", "source"],
+    "featureLabels": ["📰 Headline", "📚 Access", "🔬 Study Overview", "📊 Methods & Data", "📝 Conclusion", "🏛️ Source"],
+    "rubricOrder": ["headline", "access", "theory", "methods", "conclusion", "source"]
+  },
+  {
+    "listId": 2,
+    "featureOrder": ["access", "overview", "methods", "conclusion", "source", "headline"],
+    "featureLabels": ["📚 Access", "🔬 Study Overview", "📊 Methods & Data", "📝 Conclusion", "🏛️ Source", "📰 Headline"],
+    "rubricOrder": ["access", "theory", "methods", "conclusion", "source", "headline"]
+  },
+  {
+    "listId": 3,
+    "featureOrder": ["overview", "methods", "conclusion", "source", "headline", "access"],
+    "featureLabels": ["🔬 Study Overview", "📊 Methods & Data", "📝 Conclusion", "🏛️ Source", "📰 Headline", "📚 Access"],
+    "rubricOrder": ["theory", "methods", "conclusion", "source", "headline", "access"]
+  },
+  {
+    "listId": 4,
+    "featureOrder": ["methods", "conclusion", "source", "headline", "access", "overview"],
+    "featureLabels": ["📊 Methods & Data", "📝 Conclusion", "🏛️ Source", "📰 Headline", "📚 Access", "🔬 Study Overview"],
+    "rubricOrder": ["methods", "conclusion", "source", "headline", "access", "theory"]
+  },
+  {
+    "listId": 5,
+    "featureOrder": ["conclusion", "source", "headline", "access", "overview", "methods"],
+    "featureLabels": ["📝 Conclusion", "🏛️ Source", "📰 Headline", "📚 Access", "🔬 Study Overview", "📊 Methods & Data"],
+    "rubricOrder": ["conclusion", "source", "headline", "access", "theory", "methods"]
+  },
+  {
+    "listId": 6,
+    "featureOrder": ["source", "headline", "access", "overview", "methods", "conclusion"],
+    "featureLabels": ["🏛️ Source", "📰 Headline", "📚 Access", "🔬 Study Overview", "📊 Methods & Data", "📝 Conclusion"],
+    "rubricOrder": ["source", "headline", "access", "theory", "methods", "conclusion"]
+  }
+]

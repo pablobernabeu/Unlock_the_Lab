@@ -1,0 +1,38 @@
+[
+    {
+        "name": "1. Access",
+        "low": "Impossible: Behind a paywall ($30+), no link provided, or 'Contact author' with no reply.",
+        "medium": "Difficult: Requires university login, searching through specific databases, or requesting via forums.",
+        "high": "Open: One-click access to the full PDF. Free for everyone (Open Access)."
+    },
+    {
+        "name": "2. Theory",
+        "low": "Nonsense: Ignores all previous science. Invents new laws of physics/biology without proof.",
+        "medium": "Standard: Repeats what we already know without adding much new value.",
+        "high": "Robust: Fills a clear gap in knowledge. Uses past research responsibly to build a new argument."
+    },
+    {
+        "name": "3. Methods & Data",
+        "low": "Flawed & Closed: Tiny sample size. No control group. Data is secret/hidden.",
+        "medium": "Acceptable: Decent sample size. Standard methods. Data available upon request.",
+        "high": "Rigorous & Open: Preregistration, large sample size, gold-standard controls, and fully available materials and data."
+    },
+    {
+        "name": "4. Conclusion",
+        "low": "Overblown: Claims a fact based on a guess. Confuses correlation with causation.",
+        "medium": "Logical: Conclusion mostly fits the results but ignores some alternative explanations.",
+        "high": "Nuanced: Very careful. Admits what they don't know. Claims only what the data proves."
+    },
+    {
+        "name": "5. Source",
+        "low": "Suspicious: Marketing blogs, 'Predatory' journals (pay-to-publish), or corporate white papers.",
+        "medium": "Unverified: Preprints (not yet reviewed), or mid-tier journals that sometimes favour hype.",
+        "high": "Trusted: Top-tier peer-reviewed journals, reputable independent research institutes, or government bodies."
+    },
+    {
+        "name": "6. Headline",
+        "low": "Clickbait: Uses words like 'Miracle,' 'Proven,' 'Cure.' Scarier or better than the actual data.",
+        "medium": "Modest: Describes the finding but might leave out limitations to sound more interesting.",
+        "high": "Accurate: Boring but true. Describes exactly what happened (e.g., 'Correlation observed in mice')."
+    }
+]
