@@ -375,10 +375,6 @@
     <div class="container">
         <header>
             <h1><img src="unlock-lab-icon.svg" alt="Unlock the Lab" style="height: 1.8em; vertical-align: middle; margin-top: -0.15em;"> Unlock the Lab - Live Dashboard</h1>
-            <div class="status">
-                <div class="status-indicator"></div>
-                <span>Connected to Firebase • Real-time updates</span>
-            </div>
         </header>
 
         <div class="stats-grid">
@@ -591,6 +587,9 @@
                     <button class="btn-danger" onclick="endAllSessions()" id="endSessionsBtn">
                         ⏹️ End all active sessions
                     </button>
+                    <button class="btn-danger" onclick="deleteAllRatingsData()" id="deleteDataBtn" style="margin-top: 10px;">
+                        🗑️ Delete all ratings data
+                    </button>
                 </div>
                 <div class="admin-buttons" style="margin-top: 15px;">
                     <button class="btn-cancel" onclick="adminSignOut()" style="background: #ef4444; color: white;">Sign out</button>
@@ -602,7 +601,7 @@
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getDatabase, ref, onValue, set, remove, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
         const firebaseConfig = {
@@ -986,16 +985,34 @@
                     }
                 });
                 
-                // Include seed scores in calculation (weighted as 10 participants)
-                const seedScore = seedScores[paperId] || 4;
-                const allValues = [...values, ...Array(seedWeight).fill(seedScore)];
+                totalRatings += values.length;
+            });
+            
+            // Determine if we have any participant data
+            const hasParticipants = uniqueUsers.size > 0;
+            
+            // Calculate stats - only include seed scores if we have participants
+            paperIds.forEach(paperId => {
+                const paperRatings = ratingsData[paperId] || {};
+                const values = Object.values(paperRatings)
+                    .filter(v => v !== null && v !== undefined)
+                    .map(v => v.rating || v);
+                
+                let allValues;
+                if (hasParticipants) {
+                    // Include seed scores in calculation (weighted as 100 participants)
+                    const seedScore = seedScores[paperId] || 4;
+                    allValues = [...values, ...Array(seedWeight).fill(seedScore)];
+                } else {
+                    // No participants - use empty array for stats
+                    allValues = [];
+                }
                 
                 stats[paperId] = {
                     ...calculateStats(allValues),
                     count: values.length, // Show only real participant count
                     totalCount: allValues.length // Total including seed
                 };
-                totalRatings += values.length;
             });
             
             // Store stats for modal access
@@ -1029,51 +1046,63 @@
             // Update leaderboard table
             updateLeaderboardTable(leaderboardData);
 
-            // Update charts
-            const errorBars = {};
-            paperIds.forEach((id, index) => {
-                errorBars[index] = {
-                    lower: parseFloat(stats[id].ci95Lower),
-                    upper: parseFloat(stats[id].ci95Upper)
-                };
-            });
-            
-            ratingsChart.data.datasets[0].data = paperIds.map(id => stats[id].mean);
-            ratingsChart.data.datasets[0].errorBars = errorBars;
-            ratingsChart.update();
+            // Update charts and table based on participant data
+            if (hasParticipants) {
+                // Update charts
+                const errorBars = {};
+                paperIds.forEach((id, index) => {
+                    errorBars[index] = {
+                        lower: parseFloat(stats[id].ci95Lower),
+                        upper: parseFloat(stats[id].ci95Upper)
+                    };
+                });
+                
+                ratingsChart.data.datasets[0].data = paperIds.map(id => stats[id].mean);
+                ratingsChart.data.datasets[0].errorBars = errorBars;
+                ratingsChart.update();
 
-            // Update table
-            const tbody = document.getElementById('statsTableBody');
-            tbody.innerHTML = paperIds.map(paperId => {
-                const stat = stats[paperId];
-                const quality = paperQualities[paperId];
-                const qualityClass = quality === 'high' ? 'quality-high' : quality === 'medium' ? 'quality-medium' : 'quality-low';
-                
-                // Calculate color scales (consistent: green=high, red=low; reduced intensity)
-                const meanColor = getColorScale(stat.mean, 1, 7, true, true); // Higher rating = green
-                const stdDevColor = getColorScale(stat.stdDev, 0, 3, false, true); // Lower stdDev = green
-                const agreementPercent = parseFloat(stat.agreement);
-                const agreementColor = getColorScale(agreementPercent, 0, 100, true, true); // Higher = green
-                const responseColor = getColorScale(stat.count, 0, Math.max(...paperIds.map(id => stats[id].count)), true, true);
-                
-                return `
-                    <tr data-study="${paperId}" data-quality="${quality}" data-responses="${stat.count}" 
-                        data-mean="${stat.mean}" data-stddev="${stat.stdDev}" data-min="${stat.min}" 
-                        data-max="${stat.max}" data-agreement="${agreementPercent}">
-                        <td><strong><a href="#" onclick="showStudyDetails('${paperId}'); return false;" style="color: #667eea; text-decoration: none; cursor: pointer;">${paperId}</a></strong></td>
-                        <td>
-                            <span class="quality-indicator ${qualityClass}"></span>
-                            ${quality.charAt(0).toUpperCase() + quality.slice(1)}
-                        </td>
-                        <td class="color-scale" style="background: ${responseColor}; color: #1f2937; font-weight: 600;">${stat.count}</td>
-                        <td class="color-scale" style="background: ${meanColor}; color: #1f2937; font-weight: 600;">${stat.mean}</td>
-                        <td class="color-scale" style="background: ${stdDevColor}; color: #1f2937; font-weight: 600;">${stat.stdDev}</td>
-                        <td>${stat.min}</td>
-                        <td>${stat.max}</td>
-                        <td class="color-scale" style="background: ${agreementColor}; color: #1f2937; font-weight: 600;">${stat.agreement}%</td>
-                    </tr>
-                `;
-            }).join('');
+                // Update table
+                const tbody = document.getElementById('statsTableBody');
+                tbody.innerHTML = paperIds.map(paperId => {
+                    const stat = stats[paperId];
+                    const quality = paperQualities[paperId];
+                    const qualityClass = quality === 'high' ? 'quality-high' : quality === 'medium' ? 'quality-medium' : 'quality-low';
+                    
+                    // Calculate color scales (consistent: green=high, red=low; reduced intensity)
+                    const meanColor = getColorScale(stat.mean, 1, 7, true, true); // Higher rating = green
+                    const stdDevColor = getColorScale(stat.stdDev, 0, 3, false, true); // Lower stdDev = green
+                    const agreementPercent = parseFloat(stat.agreement);
+                    const agreementColor = getColorScale(agreementPercent, 0, 100, true, true); // Higher = green
+                    const responseColor = getColorScale(stat.count, 0, Math.max(...paperIds.map(id => stats[id].count)), true, true);
+                    
+                    return `
+                        <tr data-study="${paperId}" data-quality="${quality}" data-responses="${stat.count}" 
+                            data-mean="${stat.mean}" data-stddev="${stat.stdDev}" data-min="${stat.min}" 
+                            data-max="${stat.max}" data-agreement="${agreementPercent}">
+                            <td><strong><a href="#" onclick="showStudyDetails('${paperId}'); return false;" style="color: #667eea; text-decoration: none; cursor: pointer;">${paperId}</a></strong></td>
+                            <td>
+                                <span class="quality-indicator ${qualityClass}"></span>
+                                ${quality.charAt(0).toUpperCase() + quality.slice(1)}
+                            </td>
+                            <td class="color-scale" style="background: ${responseColor}; color: #1f2937; font-weight: 600;">${stat.count}</td>
+                            <td class="color-scale" style="background: ${meanColor}; color: #1f2937; font-weight: 600;">${stat.mean}</td>
+                            <td class="color-scale" style="background: ${stdDevColor}; color: #1f2937; font-weight: 600;">${stat.stdDev}</td>
+                            <td>${stat.min}</td>
+                            <td>${stat.max}</td>
+                            <td class="color-scale" style="background: ${agreementColor}; color: #1f2937; font-weight: 600;">${stat.agreement}%</td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                // No participants - clear chart and show message
+                ratingsChart.data.datasets[0].data = [];
+                ratingsChart.data.datasets[0].errorBars = {};
+                ratingsChart.update();
+
+                // Show "no data" message in table
+                const tbody = document.getElementById('statsTableBody');
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #999; padding: 3rem;">📊 No participant data yet. Complete the workshop to see ratings appear here.</td></tr>';
+            }
         }
 
         // Listen to real-time updates
@@ -1240,6 +1269,69 @@
                         btn.disabled = false;
                         btn.textContent = '⏹️ End all active sessions';
                     });
+            }
+        };
+
+        window.deleteAllRatingsData = async function() {
+            const ratingsRef = ref(database, 'ratings');
+            const leaderboardRef = ref(database, 'leaderboard');
+            
+            try {
+                const ratingsSnapshot = await get(ratingsRef);
+                const leaderboardSnapshot = await get(leaderboardRef);
+                
+                const hasRatings = ratingsSnapshot.exists();
+                const hasLeaderboard = leaderboardSnapshot.exists();
+                
+                if (!hasRatings && !hasLeaderboard) {
+                    alert('ℹ️ No data to delete.');
+                    return;
+                }
+                
+                let totalRatings = 0;
+                let totalParticipants = 0;
+                
+                if (hasRatings) {
+                    const ratings = ratingsSnapshot.val();
+                    Object.values(ratings).forEach(paper => {
+                        totalRatings += Object.keys(paper).length;
+                    });
+                }
+                
+                if (hasLeaderboard) {
+                    totalParticipants = Object.keys(leaderboardSnapshot.val()).length;
+                }
+                
+                const confirmMsg = `⚠️ WARNING: You are about to permanently delete:\n• ${totalRatings} rating(s)\n• ${totalParticipants} participant(s) from leaderboard\n\nThis action CANNOT be undone!\n\nType "DELETE" to confirm:`;
+                const userInput = prompt(confirmMsg);
+                
+                if (userInput !== 'DELETE') {
+                    alert('❌ Deletion cancelled.');
+                    return;
+                }
+                
+                const btn = document.getElementById('deleteDataBtn');
+                btn.disabled = true;
+                btn.textContent = 'Deleting data...';
+                
+                // Delete both ratings and leaderboard
+                await Promise.all([
+                    hasRatings ? remove(ratingsRef) : Promise.resolve(),
+                    hasLeaderboard ? remove(leaderboardRef) : Promise.resolve()
+                ]);
+                
+                alert('✅ All ratings and leaderboard data has been permanently deleted.');
+                
+                // Reload the page to refresh all data
+                window.location.reload();
+                
+            } catch (error) {
+                alert('❌ Error deleting data: ' + error.message);
+                const btn = document.getElementById('deleteDataBtn');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '🗑️ Delete all ratings data';
+                }
             }
         };
 

@@ -5,17 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unlock the Lab Workshop</title>
     <link rel="icon" type="image/x-icon" href="/assets/favicon-CLtBlbIg.ico">
-  <script type="module" crossorigin src="/assets/main-D8C2A9p-.js"></script>
+  <script type="module" crossorigin src="/assets/main-Cik7LQNF.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase-4YSElDcj.js">
-  <link rel="modulepreload" crossorigin href="/assets/firebase-config-SXTUs8DI.js">
-  <link rel="stylesheet" crossorigin href="/assets/firebase-config-NA4G7z8U.css">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-BPW_mu1B.js">
+  <link rel="stylesheet" crossorigin href="/assets/firebase-config-BzxMrCtE.css">
 </head>
 <body>
     <div id="app">
         <!-- Score Display (appears after first rating) -->
         <div id="score-banner" class="score-banner" style="display: none;">
             <span id="total-score-header"><span class="medal-icon">🏆</span> 0</span>
+            <div class="navbar-center">
+                <img id="navbar-logo" src="unlock-lab-icon.svg" alt="Logo" class="navbar-logo">
+            </div>
             <div class="navbar-right">
                 <span id="navbar-paper-number" class="navbar-paper-number" style="display: none;"></span>
                 <span id="navbar-username" class="navbar-username"></span>
@@ -25,7 +28,7 @@
         <!-- Page 1: Welcome -->
         <div class="page active" id="page-welcome">
             <div class="container">
-                <h1><img id="logo-icon" src="unlock-lab-icon.svg" alt="Unlock the Lab" style="height: 1.8em; vertical-align: middle; margin-right: 0.3em; margin-top: -0.15em; cursor: pointer;"> Unlock the Lab</h1>
+                <h1><img id="logo-icon" src="unlock-lab-icon.svg" alt="Unlock the Lab" style="height: 1.8em; vertical-align: middle; margin-right: 0.15em; margin-top: -0.15em; cursor: pointer;"> <span class="logo-text">Unlock the Lab</span></h1>
                 <h2>Your Guide to Reading Science Like a Scientist</h2>
                 
                 <div class="content">
@@ -96,6 +99,9 @@
         <!-- Page 2: Glossary and Rubric -->
         <div class="page" id="page-guide">
             <div class="container">
+                <div class="page-logo-header">
+                    <img id="guide-logo" src="unlock-lab-icon.svg" alt="Logo" class="page-logo">
+                </div>
                 <h1>📚 Before We Begin</h1>
                 
                 <div class="content">
@@ -130,6 +136,9 @@
         <!-- Final Page: Recap -->
         <div class="page" id="page-final">
             <div class="container">
+                <div class="page-logo-header">
+                    <img id="final-logo" src="unlock-lab-icon.svg" alt="Logo" class="page-logo">
+                </div>
                 <h1>🎉 Workshop Complete!</h1>
                 
                 <div class="content">
@@ -152,8 +161,8 @@
                             </p>
                         </div>
                         
-                        <div class="leaderboard" style="background: rgba(255,255,255,0.95); border-radius: 8px; padding: 1.5rem; margin-top: 1.5rem;">
-                            <h3 style="color: #059669; margin-top: 0;">🏆 Top Predictors</h3>
+                        <div class="leaderboard" style="background: rgba(255,255,255,0.95); border-radius: 8px; padding: 1.25rem; margin-top: 1.25rem;">
+                            <h3 style="color: #059669; margin-top: 0; text-shadow: none;">🏆 Top Predictors</h3>
                             <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
                                 See how your prediction accuracy compares to other participants
                             </p>
@@ -162,47 +171,47 @@
                     </div>
                     
                     <!-- PART 2: YOUR RATING PROFILE -->
-                    <div style="margin-bottom: 3rem; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
-                        <h2 style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem; font-weight: 600;">
+                    <div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+                        <h2 style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
                             📊 Part 2: Your Rating Profile
                         </h2>
-                        <p style="font-size: 1.05rem; margin-bottom: 1.5rem; font-weight: 400;">
+                        <p style="font-size: 1.05rem; margin-bottom: 1.5rem; font-weight: 300;">
                             How did your own quality ratings compare to the crowd's ratings?
                         </p>
                         
                         <!-- Personalized Rating Analysis -->
                         <div id="rating-analysis" style="display: none;">
-                            <div style="background: rgba(255,255,255,0.95); color: #1f2937; padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">
+                            <div style="background: rgba(255,255,255,0.95); color: #1f2937; padding: 1rem; border-radius: 10px; margin: 1rem 0;">
                                 <p id="analysis-summary" style="font-size: 1.05rem; line-height: 1.7; margin: 0;"></p>
                             </div>
-                            <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 1rem 0;">
-                                <h3 style="color: #20B2AA; margin-top: 0;">Your Ratings vs. Crowd Average</h3>
+                            <div style="background: white; border-radius: 10px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 1rem 0;">
+                                <h3 style="color: #20B2AA; margin-top: 0; text-shadow: none;">Your Ratings vs. Crowd Average</h3>
                                 <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
                                     This chart shows how your quality ratings (purple line) compared to what other participants rated on average (green dashed line).
                                 </p>
-                                <canvas id="comparison-chart" style="max-height: 250px; width: 100%;"></canvas>
+                                <canvas id="comparison-chart" style="height: 180px; width: 100%; display: block;"></canvas>
                             </div>
                         </div>
                     </div>
                     
                     <h2>You've evaluated <span id="total-papers">0</span> research papers!</h2>
-                    <ul style="line-height: 1.8;">
-                        <li><strong>🔓 Open Access</strong> — Paywalls hide science from public scrutiny. Demand transparency!</li>
-                        <li><strong>🚨 Spotting Clickbait</strong> — Sensational headlines usually mean weak science underneath</li>
-                        <li><strong>🔬 Methodology Matters</strong> — Sample sizes, controls, and open data separate real from fake</li>
-                        <li><strong>📚 Source Credibility</strong> — Predatory journals publish anything for money. Trust matters</li>
-                        <li><strong>⚖️ Nuanced Conclusions</strong> — Good scientists admit what they don't know. Beware certainty!</li>
-                        <li><strong>🌐 Crowd vs. Experts</strong> — You learned how public perception differs from scientific quality</li>
+                    <ul style="line-height: 1.8; padding-left: 2rem; margin: 1.5rem 0;">
+                        <li style="margin-bottom: 0.75rem;"><strong>🔓 Open Access</strong> — Paywalls hide science from public scrutiny. Demand transparency!</li>
+                        <li style="margin-bottom: 0.75rem;"><strong>🚨 Spotting Clickbait</strong> — Sensational titles usually mean weak science underneath</li>
+                        <li style="margin-bottom: 0.75rem;"><strong>🔬 Methodology Matters</strong> — Sample sizes, controls, and open data separate real from fake</li>
+                        <li style="margin-bottom: 0.75rem;"><strong>📚 Source Credibility</strong> — Predatory journals publish anything for money. Trust matters</li>
+                        <li style="margin-bottom: 0.75rem;"><strong>⚖️ Nuanced Conclusions</strong> — Good scientists admit what they don't know. Beware certainty!</li>
+                        <li style="margin-bottom: 0.75rem;"><strong>🌐 Crowd vs. Experts</strong> — You learned how public perception differs from scientific quality</li>
                     </ul>
                     
                     <div class="info-box">
                         <h3>Keep Exploring Science!</h3>
                         <p>When reading science news:</p>
-                        <ul>
-                            <li>Look for the original research paper</li>
-                            <li>Check if data is openly available</li>
-                            <li>Question sensational claims</li>
-                            <li>Consider the source and methodology</li>
+                        <ul style="line-height: 1.7; padding-left: 2rem; margin: 0.75rem 0;">
+                            <li style="margin-bottom: 0.5rem;">Look for the original research paper</li>
+                            <li style="margin-bottom: 0.5rem;">Check if data is openly available</li>
+                            <li style="margin-bottom: 0.5rem;">Question sensational claims</li>
+                            <li style="margin-bottom: 0.5rem;">Consider the source and methodology</li>
                         </ul>
                     </div>
                     
@@ -217,15 +226,19 @@
                         </p>
                         
                         <!-- Save Your Results Section -->
-                        <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
-                            <h3 style="margin-top: 0; color: white; font-weight: 600;">💾 Save Your Results</h3>
+                        <div id="save-results-section" style="margin-top: 2rem; padding: 1.25rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: rgba(255,255,255,0.95);">
+                            <h3 style="margin-top: 0; color: white; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">💾 Save Your Results</h3>
+                            <div style="background: rgba(255,255,255,0.15); padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">
+                                <p style="margin: 0; font-size: 0.9rem; font-weight: 400; opacity: 0.9;">Your username:</p>
+                                <p style="margin: 0.25rem 0 0 0; font-size: 1.1rem; font-weight: 700; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.2);" id="username-display-save"></p>
+                            </div>
                             <p style="margin-bottom: 1rem; font-size: 0.95rem; font-weight: 400;">
                                 Want to review your personalized analysis later? Save your results link now! You can return to this page anytime to see:
                             </p>
-                            <ul style="margin-bottom: 1rem; padding-left: 1.5rem; font-size: 0.9rem; list-style: disc; list-style-position: outside; font-weight: 400;">
-                                <li style="margin-bottom: 0.5rem;">Your rating profile and statistical comparison</li>
-                                <li style="margin-bottom: 0.5rem;">How your ratings compare to the crowd average</li>
-                                <li style="margin-bottom: 0.5rem;">Your complete prediction accuracy scores</li>
+                            <ul style="margin-bottom: 1rem; padding-left: 2.25rem; font-size: 0.95rem; line-height: 1.8; list-style: disc; list-style-position: outside; font-weight: 400; color: rgba(255,255,255,0.98);">
+                                <li style="margin-bottom: 0.65rem;">Your rating profile and statistical comparison</li>
+                                <li style="margin-bottom: 0.65rem;">How your ratings compare to the crowd average</li>
+                                <li style="margin-bottom: 0.65rem;">Your complete prediction accuracy scores</li>
                             </ul>
                             <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
                                 <button id="save-results-link" class="btn-secondary" style="display: none; padding: 0.75rem 1.5rem; background: white; color: #667eea; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600;" onclick="copyResultsLink()">
@@ -239,7 +252,7 @@
                                 ✓ Link copied! Save it to return to your results anytime.
                             </p>
                             <p style="margin-top: 1.5rem; font-size: 0.9rem; font-weight: 400; text-align: center;">
-                                Or visit the <a href="dashboard.html" style="color: white; text-decoration: underline; font-weight: bold; text-shadow: 0 1px 3px rgba(0,0,0,0.4);">live dashboard</a> and enter your name (<strong id="username-display-inline" style="font-weight: 600;"></strong>) to find your results.
+                                Or visit the <a href="dashboard.html" style="color: white; text-decoration: underline; font-weight: bold;">live dashboard</a> and enter your name (<strong id="username-display-inline" style="font-weight: 600;"></strong>) to find your results.
                             </p>
                         </div>
                         

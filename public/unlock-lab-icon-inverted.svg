@@ -1,0 +1,16 @@
+<svg viewBox="0 0 750 750" xmlns="http://www.w3.org/2000/svg">
+  <g transform="rotate(180 375 375)">
+    <!-- Key -->
+    <circle cx="130" cy="380" r="100" fill="none" stroke="#3B7EA1" stroke-width="40"/>
+    <rect x="220" y="355" width="260" height="50" fill="#3B7EA1"/>
+    <rect x="350" y="270" width="130" height="80" fill="#fff"/>
+    
+    <!-- Flask -->
+    <path d="M 480 270 L 480 360 L 380 560 Q 380 600 420 600 L 620 600 Q 660 600 660 560 L 560 360 L 560 270 Z" 
+          fill="none" stroke="#3B7EA1" stroke-width="35"/>
+    
+    <!-- Key teeth -->
+    <rect x="480" y="270" width="40" height="50" fill="#3B7EA1"/>
+    <rect x="640" y="270" width="40" height="50" fill="#3B7EA1"/>
+  </g>
+</svg>

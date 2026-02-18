@@ -2,37 +2,37 @@
   {
     "listId": 1,
     "featureOrder": ["title", "access", "overview", "methods", "conclusion", "source"],
-    "featureLabels": ["📰 Headline", "📚 Access", "🔬 Study Overview", "📊 Methods & Data", "📝 Conclusion", "🏛️ Source"],
+    "featureLabels": ["📰 Title", "📚 Access", "🔬 Study Overview", "📊 Methods & Data", "📝 Conclusion", "🏛️ Source"],
     "rubricOrder": ["title", "access", "theory", "methods", "conclusion", "source"]
   },
   {
     "listId": 2,
     "featureOrder": ["access", "overview", "methods", "conclusion", "source", "title"],
-    "featureLabels": ["📚 Access", "🔬 Study Overview", "📊 Methods & Data", "📝 Conclusion", "🏛️ Source", "📰 Headline"],
+    "featureLabels": ["📚 Access", "🔬 Study Overview", "📊 Methods & Data", "📝 Conclusion", "🏛️ Source", "📰 Title"],
     "rubricOrder": ["access", "theory", "methods", "conclusion", "source", "title"]
   },
   {
     "listId": 3,
     "featureOrder": ["overview", "methods", "conclusion", "source", "title", "access"],
-    "featureLabels": ["🔬 Study Overview", "📊 Methods & Data", "📝 Conclusion", "🏛️ Source", "📰 Headline", "📚 Access"],
+    "featureLabels": ["🔬 Study Overview", "📊 Methods & Data", "📝 Conclusion", "🏛️ Source", "📰 Title", "📚 Access"],
     "rubricOrder": ["theory", "methods", "conclusion", "source", "title", "access"]
   },
   {
     "listId": 4,
     "featureOrder": ["methods", "conclusion", "source", "title", "access", "overview"],
-    "featureLabels": ["📊 Methods & Data", "📝 Conclusion", "🏛️ Source", "📰 Headline", "📚 Access", "🔬 Study Overview"],
+    "featureLabels": ["📊 Methods & Data", "📝 Conclusion", "🏛️ Source", "📰 Title", "📚 Access", "🔬 Study Overview"],
     "rubricOrder": ["methods", "conclusion", "source", "title", "access", "theory"]
   },
   {
     "listId": 5,
     "featureOrder": ["conclusion", "source", "title", "access", "overview", "methods"],
-    "featureLabels": ["📝 Conclusion", "🏛️ Source", "📰 Headline", "📚 Access", "🔬 Study Overview", "📊 Methods & Data"],
+    "featureLabels": ["📝 Conclusion", "🏛️ Source", "📰 Title", "📚 Access", "🔬 Study Overview", "📊 Methods & Data"],
     "rubricOrder": ["conclusion", "source", "title", "access", "theory", "methods"]
   },
   {
     "listId": 6,
     "featureOrder": ["source", "title", "access", "overview", "methods", "conclusion"],
-    "featureLabels": ["🏛️ Source", "📰 Headline", "📚 Access", "🔬 Study Overview", "📊 Methods & Data", "📝 Conclusion"],
+    "featureLabels": ["🏛️ Source", "📰 Title", "📚 Access", "🔬 Study Overview", "📊 Methods & Data", "📝 Conclusion"],
     "rubricOrder": ["source", "title", "access", "theory", "methods", "conclusion"]
   }
 ]

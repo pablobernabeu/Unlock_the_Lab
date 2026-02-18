@@ -1,10 +1,10 @@
 [
   {
     "id": "STUDY-1",
-    "title": "Chocolate breakfasts boost math scores by 50%!",
+    "title": "The impact of chocolate-based breakfasts on mathematical performance in school-aged children",
     "access": "Accessible only via a £35 paywall on the publisher's site.",
     "overview": "The study relies on the simplified premise that glucose provides immediate fuel for the brain. However, it fails to engage with the substantial body of existing literature describing the ‘sugar crash’ effect and the impact of sustained energy release on cognitive concentration.",
-    "methods": "The researchers observed N=12 children in a single classroom for three days. There was no control group (e.g., children eating a standard breakfast) to compare against. Data availability: The authors state that raw data and individual test scores are ‘not shared due to commercial sensitivity regarding the chocolate brand involved.’",
+    "methods": "The researchers observed <i>N</i>=12 children in a single classroom for three days. There was no control group (e.g., children eating a standard breakfast) to compare against. Data availability: The authors state that raw data and individual test scores are ‘not shared due to commercial sensitivity regarding the chocolate brand involved.’",
     "conclusion": "The authors conclude that chocolate should be mandatory in school breakfasts to improve national grades. This is a massive generalisation based on a tiny, uncontrolled sample.",
     "source": "Predatory Journal. Published in a ‘pay-to-publish’ outlet with no rigorous peer review process, often used for marketing stunts disguised as science."
   },
@@ -19,7 +19,7 @@
   },
   {
     "id": "STUDY-3",
-    "title": "Screens before bed might delay sleep onset",
+    "title": "The effect of pre-sleep screen time on sleep onset latency",
     "access": "Accessible with difficulty (requires searching the DOI in a university library or using Sci-Hub).",
     "overview": "The hypothesis is grounded in well-established theories regarding blue light emission and the suppression of melatonin (the sleep hormone). It cites robust prior research on circadian rhythms.",
     "methods": "The study surveyed 2,000 adults. However, it relied entirely on self-reported data (participants estimated how much they slept), which is often inaccurate compared to objective tracking. Data availability: Summary tables are provided in the appendix, but raw participant data is not available to protect privacy.",
@@ -28,7 +28,7 @@
   },
   {
     "id": "STUDY-4",
-    "title": "Drinking this herbal tea every morning prevents Alzheimer's",
+    "title": "The neuroprotective effects of a daily herbal tea infusion on Alzheimer's disease prevention",
     "access": "Behind a publisher paywall (£49 for 24 hours access).",
     "overview": "The premise is loosely based on traditional folk medicine practices. It ignores current neurological understanding of amyloid plaques and tau tangles, which are the primary biological markers of Alzheimer's disease.",
     "methods": "A 6-week observational study of 40 people who already chose to drink the tea daily. There was no randomised control group. Cognition was measured via brief phone interviews rather than clinical scanning. Data availability: ‘Raw data unavailable due to participant confidentiality.’",
@@ -46,7 +46,7 @@
   },
   {
     "id": "STUDY-6",
-    "title": "Instagram use is the primary cause of teen anxiety",
+    "title": "A causal link between Instagram use and adolescent anxiety",
     "access": "Accessible with difficulty (via university library subscription).",
     "overview": "Uses standard social psychology theories regarding ‘social comparison’ and self-esteem. However, it assumes a direct causal vector without accounting for the complexity of adolescent mental health.",
     "methods": "A cross-sectional survey of 5,000 teenagers taken at a single point in time. While the sample size is large, the method relies entirely on self-reporting for both ‘hours used’ and ‘anxiety levels.’ Data availability: Summary statistics provided; raw data available only upon request to the lead author.",
@@ -55,7 +55,7 @@
   },
   {
     "id": "STUDY-7",
-    "title": "New AI hiring tool eliminates gender bias in recruitment",
+    "title": "Eliminating gender bias in recruitment with a novel AI hiring tool",
     "access": "A white paper published directly on the tech company’s website (free, but requires an email sign-up).",
     "overview": "The approach assumes that simply removing names from CVs is sufficient to de-bias an algorithmic process. It fails to engage with literature on ‘proxy variables’ (how AI finds other patterns that correlate with gender).",
     "methods": "The developers tested the AI using CVs from their own previous hiring rounds. They did not account for the fact that their historical hiring data was already biased against women, meaning the AI learned to replicate that bias. Data availability: ‘Data and algorithms are proprietary intellectual property and cannot be shared.’",
@@ -73,7 +73,7 @@
   },
   {
     "id": "STUDY-9",
-    "title": "Violent video games desensitise brain to real-world pain",
+    "title": "Cognitive desensitisation to real-world pain imagery following violent video game exposure",
     "access": "Behind a paywall.",
     "overview": "Relies on theories of cognitive desensitisation but attempts to map complex behavioural psychology onto simple blood-flow changes in the brain without sufficient justification.",
     "methods": "A laboratory study of 60 university students. Half played a violent game for 20 minutes, half played a puzzle game, then viewed images of injuries whilst in an fMRI scanner. The analysis of specific brain regions was NOT preregistered. Data availability: Data not shared.",
@@ -82,7 +82,7 @@
   },
   {
     "id": "STUDY-10",
-    "title": "Microplastics found in bloodstream of 80% of people tested",
+    "title": "Prevalence of microplastic contamination in human blood samples",
     "access": "Open Access.",
     "overview": "Investigates the bioaccumulation of polymers in the human body. This is a novel field, so the theoretical framework is exploratory rather than established.",
     "methods": "The team developed a novel, highly sensitive chemical analysis method (mass spectrometry) to detect tiny plastic particles. Stringent contamination controls were used to ensure plastics from the lab equipment didn't affect results. Data availability: Full methodology and anonymised data concentrations are freely available.",
@@ -91,7 +91,7 @@
   },
   {
     "id": "STUDY-11",
-    "title": "Why tall men make better CEOs: It's evolution",
+    "title": "An evolutionary explanation for the correlation between height and CEO status in males",
     "access": "Accessible with difficulty (requires requesting a copy on a scientific social network).",
     "overview": "Uses evolutionary psychology to suggest height signals dominance. It fails to account for the ‘halo effect’ (social bias) and treats modern corporate structures as if they are prehistoric hunter-gatherer societies.",
     "methods": "The authors looked at the height of CEOs in Fortune 500 companies and compared them to the national average. No measure of actual company performance, profit or leadership skill was included. Data availability: A spreadsheet of CEO heights is available on request.",
@@ -100,7 +100,7 @@
   },
   {
     "id": "STUDY-12",
-    "title": "Lavender essential oil cures insomnia faster than sleeping pills",
+    "title": "Comparative Efficacy of Lavender Essential Oil vs. Hypnotic Drugs in the Treatment of Insomnia",
     "access": "Behind paywall.",
     "overview": "Based on aromatherapy principles suggesting lavender affects GABA neurotransmitters. However, the mechanism is poorly understood and the study ignores the pharmacological complexity of benzodiazepines.",
     "methods": "A pilot randomised trial of 60 people with mild insomnia. Participants were assigned to lavender oil inhalation, placebo scent, or no treatment. Sleep was measured via self-reported diaries only (no objective actigraphy). The study was not blinded—participants knew if they received lavender. Data availability: Summary statistics only.",
@@ -108,7 +108,7 @@
     "source": "Low-Tier Complementary Medicine Journal. A peer-reviewed journal, but one that publishes small, underpowered aromatherapy studies with weak methodology."  },
   {
     "id": "STUDY-13",
-    "title": "Urban foxes adapt diet to include high levels of human food waste",
+    "title": "Dietary Adaptation of Urban Foxes to Include High Levels of Anthropogenic Food Waste",
     "access": "Behind a paywall.",
     "overview": "Relies on standard ecological theory regarding ‘dietary plasticity’ in opportunistic omnivores (animals that eat anything). It fits well with existing urban ecology literature.",
     "methods": "Rigorous analysis of stomach contents of 300 deceased foxes collected over five years across three cities. Results were compared against rural fox diets. Data availability: Summary tables provided in the paper; full dietary datasets available on request to bona fide researchers.",
@@ -117,7 +117,7 @@
   },
   {
     "id": "STUDY-14",
-    "title": "Simulated Martian soil supports growth of edible crops",
+        "title": "The viability of edible crop cultivation in simulated Martian regolith",
     "access": "Open Access.",
     "overview": "Addresses a crucial gap in knowledge regarding ‘In-Situ Resource Utilisation’ for future space missions. It applies standard botanical knowledge to a novel soil environment.",
     "methods": "A greenhouse experiment using NASA-developed Mars soil simulant (Regolith). Tested various crop types with different fertiliser additives. Control groups used standard Earth soil. Data availability: All plant growth metrics, soil composition analysis and watering schedules are freely downloadable.",
@@ -126,7 +126,7 @@
   },
   {
     "id": "STUDY-15",
-    "title": "Listening to classical music while studying raises IQ",
+    "title": "The Effect of Passive Listening to Classical Music on Abstract Reasoning Performance",
     "access": "Behind a paywall.",
     "overview": "A rehash of the ‘Mozart Effect,’ a theory largely debunked by modern psychology. It suggests passive listening boosts general intelligence, rather than just temporary arousal or mood.",
     "methods": "30 students took a short logic test after 10 minutes of Mozart, and another test after 10 minutes of silence. It did not measure IQ (which is a stable trait), but rather performance on one specific puzzle. The hypothesis was not preregistered. Data availability: Not provided.",
@@ -135,7 +135,7 @@
   },
   {
     "id": "STUDY-16",
-    "title": "Electric vehicle range drops by up to 30% in freezing temperatures",
+    "title": "The Impact of Freezing Temperatures on Electric Vehicle Battery Range",
     "access": "Open Access.",
     "overview": "Based on known electrochemical properties of lithium-ion batteries. Electrolyte fluid becomes more viscous and internal resistance increases in cold climates; the theory is solid physics.",
     "methods": "Tested five popular EV models in climate-controlled chambers running standard driving cycles at +20°C and -10°C to ensure fair comparison. Data availability: Full test protocols and detailed discharge curves for all vehicles are available on the institute's website.",
@@ -144,7 +144,7 @@
   },
   {
     "id": "STUDY-17",
-    "title": "Remote workers are 40% more productive than office workers",
+    "title": "A Self-Reported Analysis of Productivity in Remote vs. Office-Based Work Environments",
     "access": "A PDF report downloadable from a website.",
     "overview": "N/A. This is a purely explorative survey with no grounding in management theory or organisational psychology.",
     "methods": "An online survey of 2,000 workers. Productivity was measured solely by asking participants: ‘Do you feel more productive at home?’ Data availability: Proprietary data, not shared.",
@@ -153,7 +153,7 @@
   },
   {
     "id": "STUDY-18",
-    "title": "Gut bacteria imbalance is the root cause of all depression",
+    "title": "The Role of Gut Microbiota Imbalance as a Primary Causal Factor in Depression",
     "access": "Accessible with difficulty (specialist microbiology journal).",
     "overview": "Investigates the ‘gut-brain axis,’ a legitimate and exciting new field. However, the theory reduces a complex biopsychosocial disorder (depression) to a single biological cause.",
     "methods": "Transferred fecal microbiota from depressed humans into sterile mice. The specific behavioural scoring criteria were preregistered. The mice showed behavioural changes associated with rodent stress. Data availability: Data available upon request.",
@@ -162,7 +162,7 @@
   },
   {
     "id": "STUDY-19",
-    "title": "Northern hemisphere summer temperatures over past 2,000 years reconstructed",
+        "title": "A 2,000-year reconstruction of Northern Hemisphere summer temperatures",
     "access": "Open Access.",
     "overview": "Dendroclimatology (using tree rings as proxies for past climate). The study uses established protocols for calibrating tree ring width against known temperature records.",
     "methods": "Combined thousands of tree-ring datasets from across Europe and Asia. Used rigorous statistical modelling to account for uncertainties and outliers. Data availability: The entire dataset of proxy records and the reconstruction code are hosted on the NOAA Paleoclimatology database.",
@@ -171,7 +171,7 @@
   },
   {
     "id": "STUDY-20",
-    "title": "Bitcoin adopted as primary currency in developing nation stabilises local economy",
+        "title": "The stabilising effect of Bitcoin adoption on the economy of a developing nation",
     "access": "A PDF uploaded to a crypto-enthusiast server.",
     "overview": "Relies on unorthodox economic theories promoted by cryptocurrency advocates, often ignoring standard monetary policy principles regarding inflation and liquidity.",
     "methods": "Looks at economic indicators in the country over a very short period (3 months) after adoption. It ignores massive external factors, such as global oil prices, which affected that economy simultaneously. Data availability: Links to some public charts provided, but no raw economic dataset included.",
@@ -180,7 +180,7 @@
   },
   {
     "id": "STUDY-21",
-    "title": "Vertical farms produce higher yields but have higher carbon footprint than traditional agriculture",
+    "title": "A Comparative Life-Cycle Assessment of Vertical Farming and Traditional Agriculture",
     "access": "Open Access.",
     "overview": "Uses ‘Life-Cycle Assessment’ (LCA), a standardised framework for assessing environmental impacts associated with all stages of a product's life.",
     "methods": "Compared data from three operational vertical farms against average data for conventional field farming of lettuce. Accounted for energy use for lighting/heating vs diesel for tractors/transport. Data availability: Full LCA assumptions and input data tables provided in the appendix.",
@@ -189,7 +189,7 @@
   },
   {
     "id": "STUDY-22",
-    "title": "Late-night smartphone use linked to lower sleep quality in adolescents via objective tracking",
+    "title": "Objective Tracking of Late-Night Smartphone Use and its Association with Lower Sleep Quality in Adolescents",
     "access": "Behind a paywall.",
     "overview": "Builds on previous survey data but aims to correct the ‘recall bias’ (memory errors) of those studies by using digital tracking.",
     "methods": "500 teenagers installed an app that tracked exact phone usage times and wore an actigraphy wristband to measure actual sleep patterns for two weeks. The statistical analysis plan was preregistered on OSF to prevent p-hacking. Data availability: Anonymised, aggregated data is available on the Open Science Framework (OSF), but individual raw traces are hidden for privacy.",
@@ -198,7 +198,7 @@
   },
   {
     "id": "STUDY-23",
-    "title": "New peptide cream reverses skin aging by 20 years",
+    "title": "The efficacy of a novel peptide cream in reversing signs of dermal aging",
     "access": "Behind paywall.",
     "overview": "Investigates topical peptides for collagen synthesis. The biological mechanism (peptide penetration through the stratum corneum) is questionable, and the study does not address bioavailability concerns raised in dermatology literature.",
     "methods": "Company-sponsored trial of 120 women aged 40-60. Participants applied the cream twice daily for 12 weeks. Outcomes measured via participant self-assessment questionnaires ('How old does your skin look?') and non-blinded researcher ratings of photographs. No placebo cream control. Data availability: Published summary only; raw data proprietary.",
@@ -206,7 +206,7 @@
     "source": "Low-Tier Dermatology Journal. Peer-reviewed but known for accepting industry-sponsored cosmetic studies with weak controls."  },
   {
     "id": "STUDY-24",
-    "title": "Systematic review finds mindfulness meditation reduces chronic pain",
+    "title": "The efficacy of mindfulness meditation as an intervention for chronic pain: a systematic review",
     "access": "Open Access via Cochrane Library.",
     "overview": "Meta-analysis of 38 randomised controlled trials investigating mindfulness-based interventions for chronic pain conditions. Uses established frameworks from pain neuroscience and psychological interventions.",
     "methods": "Systematic review following Cochrane protocols. Included 3,500+ participants across multiple pain conditions. Pre-registered methodology. Independent reviewers assessed bias. Full PRISMA checklist provided. Data availability: All extracted data and analysis code publicly available.",
@@ -215,7 +215,7 @@
   },
   {
     "id": "STUDY-25",
-    "title": "Structured water therapy shows promise for chronic disease management",
+    "title": "The application of structured water therapy in chronic disease management",
     "access": "Open access in complementary medicine journal.",
     "overview": "Tests the hypothesis that magnetically-treated water alters H2O molecular clusters, potentially affecting cellular hydration. The proposed mechanism conflicts with established chemistry, but the study attempts to investigate outcomes empirically.",
     "methods": "A non-randomised trial of 80 adults with various chronic conditions (diabetes, arthritis, depression). Half received 'structured water' treatment (water exposed to magnetic fields), half received regular water, but assignment was not blinded. Outcomes measured via self-reported symptom questionnaires over 8 weeks. No objective biomarkers (blood glucose, inflammation markers) were measured. Data availability: Full dataset provided in supplementary materials.",
@@ -223,16 +223,16 @@
     "source": "Low-Tier Complementary Medicine Journal. Peer-reviewed but specialises in alternative therapies and has lower methodological standards than mainstream medical journals."  },
   {
     "id": "STUDY-26",
-    "title": "Phase III trial shows new Alzheimer's drug slows cognitive decline by 27%",
+    "title": "A phase III trial of a novel Alzheimer's drug and its effect on cognitive decline",
     "access": "Behind paywall (£45 per article).",
     "overview": "Investigates monoclonal antibody targeting amyloid-beta plaques. Grounded in established Alzheimer's pathology but outcome measure (CDR-SB scale) is somewhat controversial in the field.",
-    "methods": "Randomised, double-blind, placebo-controlled trial. N=1,800 participants across 200 sites. 18-month follow-up. However, dropout rate was high (32%), and post-hoc subgroup analyses not pre-registered. Data availability: Summary statistics only; full data available to qualified researchers upon request.",
+    "methods": "Randomised, double-blind, placebo-controlled trial. <i>N</i>=1,800 participants across 200 sites. 18-month follow-up. However, dropout rate was high (32%), and post-hoc subgroup analyses not pre-registered. Data availability: Summary statistics only; full data available to qualified researchers upon request.",
     "conclusion": "The title overstates findings. The 27% figure refers to relative slowing on one cognitive scale, not functional improvement. Paper acknowledges the drug doesn't restore lost function and has significant side effects (brain swelling in 13% of participants).",
     "source": "High-Impact Medical Journal. Well-respected but the study was funded entirely by the pharmaceutical company developing the drug."
   },
   {
     "id": "STUDY-27",
-    "title": "Longitudinal study reveals income inequality predicts population health outcomes",
+    "title": "The predictive relationship between income inequality and population health outcomes: a longitudinal study",
     "access": "Open Access.",
     "overview": "Uses 40 years of data across 50 countries to examine Gini coefficient and health metrics. Builds on established social epidemiology theories and addresses confounders like absolute poverty and healthcare spending.",
     "methods": "Sophisticated multi-level modelling using WHO and World Bank datasets. Pre-registered analysis plan. Extensive sensitivity analyses. Controls for GDP, healthcare access, education. Data availability: All code and datasets publicly archived.",
@@ -241,7 +241,7 @@
   },
   {
     "id": "STUDY-28",
-    "title": "Our energy drink improves athletic performance by 35%",
+    "title": "The effect of a proprietary energy drink formula on athletic performance",
     "access": "Company-funded study summary on corporate website.",
     "overview": "Tests proprietary caffeine-taurine blend. Ignores decades of sports science showing caffeine effects plateau and vary hugely by individual tolerance.",
     "methods": "Compared 20 athletes drinking the energy drink vs water. No blinding (athletes knew which drink they got). Performance measured on company-owned equipment. No independent verification. Data availability: Proprietary.",
@@ -250,7 +250,7 @@
   },
   {
     "id": "STUDY-29",
-    "title": "Vaccine injury rates 1000x higher than reported, leaked documents reveal",
+    "title": "An analysis of leaked documents purporting to show underreported vaccine injury rates",
     "access": "Free PDF on conspiracy theory website.",
     "overview": "Misinterprets VAERS data (a passive reporting system for any health event after vaccination, not proven causation). Ignores statistical principles and how VAERS actually works.",
     "methods": "No original research. Selectively quotes decontextualised sentences from regulatory documents. Conflates correlation with causation. No statistical analysis of baseline rates.",
@@ -259,7 +259,7 @@
   },
   {
     "id": "STUDY-30",
-    "title": "Mediterranean diet linked to lower dementia risk in 25-year follow-up study",
+    "title": "Association between Mediterranean diet adherence and dementia risk: a 25-year follow-up study",
     "access": "Behind paywall.",
     "overview": "Prospective cohort study using validated food frequency questionnaires. Builds on established nutrition epidemiology and neurodegeneration research.",
     "methods": "Followed 8,000 participants for 25 years. Used standardised dementia assessments. Controlled for education, exercise, smoking, genetics (APOE4). However, diet was self-reported (not objectively measured) and adherence could change over time. Data availability: Aggregate data in appendix; individual data on request.",
@@ -268,16 +268,16 @@
   },
   {
     "id": "STUDY-31",
-    "title": "Randomised trial finds reading to infants daily improves language skills at age 3",
+    "title": "The impact of daily reading to infants on language skill acquisition at age 3: a randomised trial",
     "access": "Open Access.",
     "overview": "Tests early literacy intervention grounded in developmental psychology and neurolinguistics. Addresses known socioeconomic disparities in language exposure.",
-    "methods": "Cluster-randomised trial (randomisation at community health centre level). N=600 families. Intervention group received books and training. Control group received standard care. Assessments blinded. Pre-registered outcomes. Data availability: De-identified data and analysis scripts on OSF.",
+    "methods": "Cluster-randomised trial (randomisation at community health centre level). <i>N</i>=600 families. Intervention group received books and training. Control group received standard care. Assessments blinded. Pre-registered outcomes. Data availability: De-identified data and analysis scripts on OSF.",
     "conclusion": "Measured and specific. Reports significant improvements in vocabulary and grammar but notes effects were strongest in lower-income families and attenuated by age 5. Does not claim reading alone solves educational inequality.",
     "source": "Top-Tier Developmental Psychology Journal. Known for emphasis on replication and open science."
   },
   {
     "id": "STUDY-32",
-    "title": "5G towers cause cancer, autism, and infertility, scientists warn",
+        "title": "A review of claims linking 5G mobile networks to cancer, autism, and infertility",
     "access": "Shared on social media, links to pseudoscience portal.",
     "overview": "Conflates 5G radio waves with ionising radiation (completely different types of electromagnetic radiation). Ignores physics and biology of how radiation interacts with tissue.",
     "methods": "No study. Article cites unnamed 'scientists' and misrepresents quotes from unrelated research on high-dose ionising radiation (like X-rays).",
@@ -286,7 +286,7 @@
   },
   {
     "id": "STUDY-33",
-    "title": "Machine learning algorithm detects early pancreatic cancer from routine blood tests with 92% accuracy",
+    "title": "A machine learning algorithm for early detection of pancreatic cancer from routine blood tests",
     "access": "Open Access.",
     "overview": "Uses metabolomics and machine learning on electronic health records. Pancreatic cancer is notoriously hard to detect early, so this addresses a critical clinical gap.",
     "methods": "Analysed blood samples from 500 eventual pancreatic cancer patients and 1,500 matched controls. External validation cohort of 400 patients. Algorithm development properly separated from testing set. Cross-validated. Data availability: Model code open-sourced; patient data available to approved researchers (privacy restrictions).",
@@ -295,7 +295,7 @@
   },
   {
     "id": "STUDY-34",
-    "title": "Eating alkaline foods prevents cancer by balancing your blood pH",
+    "title": "The role of an alkaline diet in cancer prevention through blood pH regulation",
     "access": "Free e-book on wellness influencer's website.",
     "overview": "Fundamentally misunderstands human physiology. Blood pH is tightly regulated (7.35-7.45) regardless of diet; if it changed significantly, you would die.",
     "methods": "No research. Cites debunked theories and misunderstands how metabolism works. No mention of actual cancer biology.",
@@ -304,7 +304,7 @@
   },
   {
     "id": "STUDY-35",
-    "title": "Urban green space access associated with lower rates of anxiety and depression",
+    "title": "Association between urban green space access and rates of anxiety and depression",
     "access": "Behind paywall.",
     "overview": "Uses satellite imagery to quantify green space and links to mental health survey data. Grounded in environmental psychology and stress-reduction theories.",
     "methods": "Cross-sectional study of 15,000 adults across 50 cities. Clever use of objective green space metrics (NDVI from satellites). However, correlation study - can't prove causation (maybe wealthier, less stressed people move near parks). Data availability: Summary stats only.",
@@ -313,7 +313,7 @@
   },
   {
     "id": "STUDY-36",
-    "title": "Our probiotic yogurt boosts immune function by 80%",
+    "title": "The effect of a probiotic yogurt on immune function markers",
     "access": "Press release; full study not published.",
     "overview": "Tests proprietary bacterial strains. Uses 'immune function' vaguely (the immune system has hundreds of components - which one improved?).",
     "methods": "Company internal study. Measured one non-specific immune marker (IgA in saliva) in 30 people for 2 weeks. No control group, no published protocol. Data availability: None.",
@@ -322,16 +322,16 @@
   },
   {
     "id": "STUDY-37",
-    "title": "Double-blind RCT shows psilocybin-assisted therapy reduces treatment-resistant depression",
+    "title": "Psilocybin-assisted therapy for treatment-resistant depression: a double-blind RCT",
     "access": "Open Access.",
     "overview": "Investigates psychedelic therapy for depression. Builds on neuroscience of serotonin receptors and psychological theories of set/setting in psychedelic therapy.",
-    "methods": "Randomised, double-blind, placebo-controlled trial. N=100 patients who failed at least 2 antidepressants. Rigorous screening, therapy protocol standardised, independent assessors. 6-month follow-up. Pre-registered. Data availability: Full anonymised data on approved repository.",
+    "methods": "Randomised, double-blind, placebo-controlled trial. <i>N</i>=100 patients who failed at least 2 antidepressants. Rigorous screening, therapy protocol standardised, independent assessors. 6-month follow-up. Pre-registered. Data availability: Full anonymised data on approved repository.",
     "conclusion": "Careful interpretation. Shows significant symptom reduction but notes therapy protocol was intensive (not just the drug alone), some patients relapsed, and long-term safety still unknown. Calls for larger trials.",
     "source": "Top-Tier Psychiatry Journal. Known for conservative editorial standards and emphasis on clinical significance."
   },
   {
     "id": "STUDY-38",
-    "title": "Genetically modified crops are safe and pose no health risks, industry panel concludes",
+    "title": "A review of the health risks of genetically modified crops by an industry panel",
     "access": "Free report on biotech industry association website.",
     "overview": "Reviews existing literature on GMO safety. However, panel members are all employed by biotech companies - clear conflict of interest.",
     "methods": "Narrative review (not systematic). Cherry-picks studies showing safety; ignores research raising concerns about pesticide use and biodiversity. No independent critical appraisal.",
@@ -340,7 +340,7 @@
   },
   {
     "id": "STUDY-39",
-    "title": "Global climate models show accelerating sea level rise through 2100",
+    "title": "Accelerating sea level rise through 2100: an analysis of global climate models",
     "access": "Open Access.",
     "overview": "Uses ensemble of climate models (CMIP6) with updated ice sheet dynamics. Builds on established physics of thermal expansion and glaciology.",
     "methods": "Multi-model comparison with rigorous uncertainty quantification. Incorporates satellite data, tide gauges, and paleoclimate proxies for validation. Pre-registered methodology. Data availability: All model outputs and code archived in public repositories.",
@@ -349,7 +349,7 @@
   },
   {
     "id": "STUDY-40",
-    "title": "Chemtrails proven to contain mind-control chemicals, lab analysis shows",
+    "title": "A laboratory analysis of alleged mind-control chemicals in aircraft contrails ('chemtrails')",
     "access": "Anonymous blog post with blurry photos.",
     "overview": "Conspiracy theory. Contrails (condensation trails from aircraft) are water vapour, not chemicals. Basic atmospheric science debunks this.",
     "methods": "No credible methodology. Shows photos of normal contrails. Claims to have 'lab analysis' but provides no chain of custody, no lab credentials, no peer review.",
@@ -358,7 +358,7 @@
   },
   {
     "id": "STUDY-41",
-    "title": "Pre-exposure prophylaxis (PrEP) reduces HIV transmission risk by 99% in real-world cohort",
+    "title": "Efficacy of pre-exposure prophylaxis (PrEP) in reducing HIV transmission risk in a real-world cohort",
     "access": "Open Access.",
     "overview": "Follows high-risk individuals taking daily PrEP medication. Grounded in virology and pharmacokinetics of antiretroviral drugs.",
     "methods": "Prospective cohort of 5,000 participants. Adherence monitored via pharmacy refills and drug level testing. Compared to matched historical controls. Independent outcome ascertainment. Data availability: De-identified data on request.",
@@ -367,7 +367,7 @@
   },
   {
     "id": "STUDY-42",
-    "title": "Testosterone therapy restores youth and vitality in men over 40",
+    "title": "The effect of testosterone therapy on youth and vitality in men over 40",
     "access": "Published in supplement industry magazine.",
     "overview": "Promotes off-label testosterone use for 'anti-aging.' Downplays cardiovascular risks and ignores endocrinology showing normal age-related decline isn't a disease.",
     "methods": "Retrospective review of clinic patients (no control group). Patients self-selected for treatment and reported 'feeling better' (subjective). No long-term safety monitoring. Data availability: None.",
@@ -376,16 +376,16 @@
   },
   {
     "id": "STUDY-43",
-    "title": "CRISPR gene editing corrects sickle cell mutation in patient trial",
+    "title": "Correction of the sickle cell mutation in a human patient trial using CRISPR gene editing",
     "access": "Behind paywall.",
     "overview": "Uses CRISPR-Cas9 to edit patient's own hematopoietic stem cells, correcting the genetic mutation causing sickle cell disease. Grounded in molecular biology and gene therapy.",
-    "methods": "Single-arm trial (no control group - unethical to withhold treatment from sick patients). N=15 patients with severe sickle cell disease. 2-year follow-up. Rigorous safety monitoring. Data availability: Patient-level data restricted; summary data in paper.",
+    "methods": "Single-arm trial (no control group - unethical to withhold treatment from sick patients). <i>N</i>=15 patients with severe sickle cell disease. 2-year follow-up. Rigorous safety monitoring. Data availability: Patient-level data restricted; summary data in paper.",
     "conclusion": "Promising but appropriately cautious. All patients showed improvement, but long-term effects unknown. Procedure is extremely expensive and complex. Acknowledges off-target editing detected in 2 patients (monitoring ongoing).",
     "source": "Top-Tier Medical Journal. Requires independent data monitoring boards for clinical trials."
   },
   {
     "id": "STUDY-44",
-    "title": "Organic food prevents all diseases, 10-year study proves",
+    "title": "The efficacy of an organic diet in preventing all diseases: a 10-year study",
     "access": "Published on organic food industry website.",
     "overview": "Massively overstates findings. 'All diseases' claim ignores genetics, smoking, exercise, and countless other factors.",
     "methods": "Observational study comparing organic food shoppers to general population. No control for income, education, or overall healthy lifestyle (people who buy organic often exercise more, smoke less, etc.). Data availability: Not provided.",
@@ -394,16 +394,16 @@
   },
   {
     "id": "STUDY-45",
-    "title": "Hourly breaks from sitting reduce metabolic risk markers in office workers",
+    "title": "The effect of hourly breaks from sitting on metabolic risk markers in office workers",
     "access": "Open Access.",
     "overview": "Tests interrupting prolonged sitting with short activity breaks. Based on metabolic physiology and epidemiology of sedentary behaviour.",
-    "methods": "Randomised crossover trial. N=40 participants. Measured blood glucose, insulin, and lipids after 8-hour sitting vs sitting interrupted by 3-minute walks every hour. Lab-controlled conditions. Pre-registered. Data availability: Full data on OSF.",
+    "methods": "Randomised crossover trial. <i>N</i>=40 participants. Measured blood glucose, insulin, and lipids after 8-hour sitting vs sitting interrupted by 3-minute walks every hour. Lab-controlled conditions. Pre-registered. Data availability: Full data on OSF.",
     "conclusion": "Measured findings. Shows improvements in glucose metabolism but notes this was short-term, in controlled conditions. Doesn't claim breaks alone prevent diabetes or heart disease.",
     "source": "Respected Exercise Physiology Journal. Good methodological standards."
   },
   {
     "id": "STUDY-46",
-    "title": "Detox tea flushes toxins and melts belly fat overnight",
+    "title": "The efficacy of a 'detox' tea for toxin removal and adipose tissue reduction",
     "access": "Influencer Instagram post with affiliate link.",
     "overview": "Scientifically nonsensical. The liver and kidneys detoxify the body; no tea can 'flush toxins.' 'Belly fat' cannot be spot-reduced.",
     "methods": "No study. Influencer's personal testimonial plus paid actors in before/after photos. No measurements, no controls, no biology.",
@@ -412,7 +412,7 @@
   },
   {
     "id": "STUDY-47",
-    "title": "Participatory budgeting increases civic engagement in marginalised communities",
+    "title": "The impact of participatory budgeting on civic engagement in marginalised communities",
     "access": "Open Access.",
     "overview": "Studies democratic innovation where residents directly decide local spending. Grounded in political science theories of deliberative democracy and empowerment.",
     "methods": "Mixed methods: quantitative analysis of voting records across 30 cities plus qualitative interviews with participants. Pre-registered analysis. Control cities matched on demographics. Data availability: Quantitative data public; interview transcripts available on request (privacy).",
@@ -421,7 +421,7 @@
   },
   {
     "id": "STUDY-48",
-    "title": "Magnets cure arthritis pain by realigning your body's energy fields",
+    "title": "The efficacy of magnets in curing arthritis pain by realigning 'body energy fields'",
     "access": "Free PDF on magnet therapy sales website.",
     "overview": "Pseudoscience. The human body has no 'energy fields' that magnets could affect. Static magnets used in therapy are far too weak to penetrate tissue.",
     "methods": "No controlled study. Testimonials from customers who bought magnetic bracelets. No comparison to placebo (which is powerful for subjective pain). Data availability: None.",

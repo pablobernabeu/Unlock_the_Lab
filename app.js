@@ -10,9 +10,13 @@ let rubric = [];
 let sessionId = null;
 let userRatings = {}; // Personal ratings
 let userPredictions = {}; // Predicted average ratings
+let paperScores = {}; // Individual scores per paper (for restoring after refresh)
 let totalScore = 0;
 let userName = '';
 let hasUsedBackButton = false; // Track if user has used their one-time back navigation
+let celebratedPapers = new Set(); // Track papers where 90%+ was achieved
+let pageDisplayTimestamps = {}; // Track when each paper page is displayed for response time calculation
+let isViewingResults = false; // Flag to indicate viewing someone else's results (read-only mode)
 
 // Counterbalancing state
 let featureOrderConfig = [];
@@ -69,7 +73,7 @@ const seedScores = {
     'STUDY-14': 4,  // Mars soil crops - good methods but title misleads on safety
     'STUDY-18': 4,  // Gut bacteria depression - good mouse study, overblown conclusions
     'STUDY-26': 4,  // Alzheimer's drug - high dropout rate, pharma funded
-    'STUDY-27': 4,  // Income inequality health - observational only, can't prove causation
+    'STUDY-27': 4,  // Income inequality health - observational only, cannot prove causation
     'STUDY-30': 4,  // Mediterranean diet - good observational study, self-reported
     'STUDY-35': 4,  // Green space mental health - correlation only, income confounders
     'STUDY-48': 4,  // Magnet arthritis - weak evidence, likely placebo effect
@@ -109,58 +113,243 @@ function getPerformanceIcon(percentage) {
     return '🥉'; // Bronze medal
 }
 
-// Logo animation handler
-function initLogoAnimation() {
-    const logo = document.getElementById('logo-icon');
+// Setup animation for a single logo
+function setupLogoAnimation(logoId) {
+    const logo = document.getElementById(logoId);
     if (!logo) return;
     
     let isAnimating = false;
+    let hoverTimer = null;
     
-    logo.addEventListener('click', () => {
+    // Define drop types
+    const dropTypes = ['slime', 'slime-star', 'slime-heart', 'slime-sparkle', 'slime-bubble'];
+    
+    // Trigger animation after 900ms of hover (desktop)
+    logo.addEventListener('mouseenter', () => {
         if (isAnimating) return;
-        isAnimating = true;
         
-        // Add flip animation to logo
-        logo.classList.add('flipping');
-        
-        // Create slime container
-        const slimeContainer = document.createElement('div');
-        slimeContainer.className = 'slime-container';
-        document.body.appendChild(slimeContainer);
-        
-        // Get logo position
-        const logoRect = logo.getBoundingClientRect();
-        const startX = logoRect.left + logoRect.width / 2;
-        const startY = logoRect.top + logoRect.height;
-        
-        // Create multiple slime drops with expanding positions
-        const slimeCount = 7;
-        for (let i = 0; i < slimeCount; i++) {
+        hoverTimer = setTimeout(() => {
+            startAnimation(logo);
+        }, 900);
+    });
+    
+    logo.addEventListener('mouseleave', () => {
+        if (hoverTimer) {
+            clearTimeout(hoverTimer);
+            hoverTimer = null;
+        }
+    });
+    
+    // Trigger animation on click (desktop)
+    logo.addEventListener('click', (e) => {
+        if (isAnimating) return;
+        e.preventDefault();
+        if (hoverTimer) {
+            clearTimeout(hoverTimer);
+            hoverTimer = null;
+        }
+        startAnimation(logo);
+    });
+    
+    // Trigger animation immediately on touch/tap (mobile)
+    logo.addEventListener('touchstart', (e) => {
+        if (isAnimating) return;
+        e.preventDefault(); // Prevent double firing with mouse events
+        startAnimation(logo);
+    }, { passive: false });
+    
+    // Listen for celebration event (triggered when score >= 90%)
+    logo.addEventListener('celebrate', () => {
+        startAnimation(logo, 'celebration');
+    });
+    
+    // Periodic shake increase every 8 seconds for 2 seconds (for main logo and navbar logo)
+    if (logoId === 'logo-icon' || logoId === 'navbar-logo') {
+        setInterval(() => {
+            if (!isAnimating) {
+                logo.classList.add('shake-intense');
+                setTimeout(() => {
+                    logo.classList.remove('shake-intense');
+                }, 2000);
+            }
+        }, 8000);
+    }
+    
+    function startAnimation(logoElement, dropType = 'mixed') {
+            if (isAnimating && dropType !== 'celebration') return; // Allow celebration to override
+            isAnimating = true;
+            
+            // Define drop types
+            const dropTypes = ['slime', 'slime-star', 'slime-heart', 'slime-sparkle', 'slime-bubble'];
+            
+            // Check if this is a celebration animation
+            const isCelebration = dropType === 'celebration';
+            
+            // Add flip animation with accelerated shake to logo
+            logoElement.classList.add('flipping');
+            
+            // Store original src and swap to inverted version when upside down
+            const originalSrc = logoElement.src;
+            const invertedSrc = originalSrc.replace('unlock-lab-icon.svg', 'unlock-lab-icon-inverted.svg');
+            
+            // Swap to inverted image when logo is upside down (at 15% of 4s animation = 600ms)
             setTimeout(() => {
+                logoElement.src = invertedSrc;
+            }, 600);
+            
+            // Refill step: drops rain from top into logo (starts at 2500ms, before final rotation)
+            // Skip refill for celebration animations
+            if (!isCelebration) {
+                setTimeout(() => {
+                const refillRect = logoElement.getBoundingClientRect();
+                const targetX = refillRect.left + refillRect.width; // Upper right corner X
+                const targetY = refillRect.top; // Upper right corner Y
+                
+                const refillDropCount = dropType === 'celebration' ? 20 : 12;
+                const startTopPosition = 0; // Start from top of viewport
+                
+                for (let i = 0; i < refillDropCount; i++) {
+                    const refillDrop = document.createElement('div');
+                    
+                    // For celebration refills, use a special class that does not repeat the main animation
+                    if (isCelebration) {
+                        refillDrop.className = 'slime slime-celebration-refill slime-refill';
+                    } else if (dropType === 'mixed') {
+                        const randomType = dropTypes[Math.floor(Math.random() * dropTypes.length)];
+                        refillDrop.className = `slime ${randomType} slime-refill`;
+                    } else {
+                        refillDrop.className = `slime ${dropType} slime-refill`;
+                    }
+                    
+                    // Start from random positions at top of screen, spread horizontally
+                    const startX = targetX + (Math.random() - 0.5) * window.innerWidth * 0.4;
+                    const jitterTargetX = (Math.random() - 0.5) * 20;
+                    const jitterTargetY = (Math.random() - 0.5) * 20;
+                    
+                    // Calculate distance drop needs to travel from top to logo
+                    const travelDistance = targetY - startTopPosition + jitterTargetY;
+                    
+                    refillDrop.style.left = `${startX}px`;
+                    refillDrop.style.top = `${startTopPosition}px`;
+                    refillDrop.style.width = `${2 + Math.random() * 0.5}vw`;
+                    refillDrop.style.height = `${(2 + Math.random() * 0.5) * 1.2}vw`;
+                    refillDrop.style.setProperty('--travel-distance', `${travelDistance}px`);
+                    refillDrop.style.animationDelay = `${i * 45}ms`;
+                    
+                    slimeContainer.appendChild(refillDrop);
+                }
+                }, 2500);
+            } // End of refill section (skipped for celebration)
+            
+            // Swap back to original after refill completes (at 3800ms, before final rotation)
+            // This happens for both regular and celebration animations
+            setTimeout(() => {
+                logoElement.src = originalSrc;
+            }, 3800);
+            
+            // Create slime container
+            const slimeContainer = document.createElement('div');
+            slimeContainer.className = 'slime-container';
+            document.body.appendChild(slimeContainer);
+            
+            // Get logo position
+            const logoRect = logoElement.getBoundingClientRect();
+            
+            // Adjust drop count and size for celebration
+            const dropCount = dropType === 'celebration' ? 15 : 8;
+            
+            // For celebration, drops fall from top center of screen
+            // For regular animations, drops come from logo position
+            const upperRightX = isCelebration ? window.innerWidth / 2 : logoRect.left + logoRect.width;
+            const upperRightY = isCelebration ? 0 : logoRect.top;
+            
+            // Create drops boiling out from upper right corner
+            for (let i = 0; i < dropCount; i++) {
                 const slime = document.createElement('div');
-                slime.className = 'slime';
                 
-                // Vary horizontal position (expanding outward)
-                const spread = (i - slimeCount / 2) * 40;
-                const jitter = (Math.random() - 0.5) * 30;
-                const size = 60 + Math.random() * 40;
+                // Assign drop class based on type
+                if (isCelebration) {
+                    slime.className = 'slime slime-celebration';
+                } else if (dropType === 'mixed') {
+                    // Randomly pick a drop type
+                    const randomType = dropTypes[Math.floor(Math.random() * dropTypes.length)];
+                    slime.className = `slime ${randomType}`;
+                } else {
+                    slime.className = `slime ${dropType}`;
+                }
                 
-                slime.style.left = `${startX + spread + jitter}px`;
-                slime.style.top = `${startY}px`;
-                slime.style.width = `${size}px`;
-                slime.style.height = `${size}px`;
+                // Small random spread around upper right corner
+                // For celebration, spread drops across full viewport width
+                const jitterX = isCelebration 
+                    ? (Math.random() - 0.5) * window.innerWidth * 1.5
+                    : (Math.random() - 0.5) * 20;
+                const jitterY = (Math.random() - 0.5) * (isCelebration ? 40 : 20);
+                // Use viewport-relative sizing for growth
+                const size = isCelebration ? 1.5 + Math.random() : 1 + Math.random() * 0.5;
+                const delay = i * (isCelebration ? 40 : 50); // Faster stagger for celebration
+                
+                slime.style.left = `${upperRightX + jitterX}px`;
+                slime.style.top = `${upperRightY + jitterY}px`;
+                slime.style.width = `${size}vw`;
+                slime.style.height = `${size * 1.2}vw`;
+                slime.style.animationDelay = `${delay}ms`;
                 
                 slimeContainer.appendChild(slime);
-            }, i * 100);
+            }
+            
+            // After flip (600ms), create drops from bottom left corner
+            setTimeout(() => {
+                const updatedRect = logoElement.getBoundingClientRect();
+                const bottomLeftX = updatedRect.left;
+                const bottomLeftY = updatedRect.top + updatedRect.height;
+                
+                for (let i = 0; i < dropCount; i++) {
+                    const slime = document.createElement('div');
+                    
+                    // Assign drop class based on type
+                    if (isCelebration) {
+                        slime.className = 'slime slime-celebration';
+                    } else if (dropType === 'mixed') {
+                        const randomType = dropTypes[Math.floor(Math.random() * dropTypes.length)];
+                        slime.className = `slime ${randomType}`;
+                    } else {
+                        slime.className = `slime ${dropType}`;
+                    }
+                    
+                    const jitterX = isCelebration 
+                        ? (Math.random() - 0.5) * window.innerWidth * 1.5
+                        : (Math.random() - 0.5) * 20;
+                    const jitterY = (Math.random() - 0.5) * (isCelebration ? 40 : 20);
+                    // Use viewport-relative sizing for growth
+                    const size = isCelebration ? 1.5 + Math.random() : 1 + Math.random() * 0.5;
+                    
+                    slime.style.left = `${bottomLeftX + jitterX}px`;
+                    slime.style.top = `${bottomLeftY + jitterY}px`;
+                    slime.style.width = `${size}vw`;
+                    slime.style.height = `${size * 1.2}vw`;
+                    
+                    slimeContainer.appendChild(slime);
+                }
+            }, 600);
+            
+            // Clean up after animation completes
+            setTimeout(() => {
+                logoElement.classList.remove('flipping');
+                slimeContainer.remove();
+                if (dropType !== 'celebration') {
+                    isAnimating = false;
+                } else {
+                    // Allow immediate new animation after celebration
+                    setTimeout(() => { isAnimating = false; }, 500);
+                }
+            }, 4000);
         }
-        
-        // Clean up after animation completes
-        setTimeout(() => {
-            logo.classList.remove('flipping');
-            slimeContainer.remove();
-            isAnimating = false;
-        }, 4000);
-    });
+}
+
+// Initialize animations for main logos
+function initLogoAnimation() {
+    const logos = ['logo-icon', 'navbar-logo', 'guide-logo', 'final-logo'];
+    logos.forEach(logoId => setupLogoAnimation(logoId));
 }
 
 // Initialize app
@@ -173,6 +362,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sessionParam = urlParams.get('session');
     
     if (sessionParam) {
+        // Hide welcome page immediately to prevent flash
+        document.getElementById('page-welcome').classList.remove('active');
         // Load and display results for specified session
         await loadSessionResults(sessionParam);
         return;
@@ -199,17 +390,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Load content - MUST complete before generating pages
     await loadContent();
     console.log('Content loaded. Papers:', papers.length);
+    console.log('Glossary items:', glossary ? glossary.length : 'NOT LOADED');
+    console.log('Rubric categories:', rubric ? rubric.length : 'NOT LOADED');
+    console.log('Paper data sample (first paper):', papers[0]);
     
     // Generate paper pages AFTER content is loaded
     generatePaperPages();
     console.log('Paper pages generated');
     
-    // Initialize glossary and rubric AFTER pages exist
-    renderGlossary();
-    renderRubric();
+    // Initialize animations for all paper page logos
+    papers.forEach((paper, index) => {
+        setupLogoAnimation(`paper-logo-${index}`);
+    });
+    
+    console.log('Checking if paper pages were created...');
+    for (let i = 0; i < Math.min(10, papers.length); i++) {
+        const pageElement = document.getElementById(`page-paper-${i}`);
+        console.log(`Paper ${i} (${papers[i].id}) page element:`, pageElement ? 'EXISTS' : 'NOT FOUND');
+    }
     
     // Display username at bottom of all pages AFTER pages are generated
     displayUsername();
+    
+    // Initialize glossary and rubric AFTER pages exist
+    console.log('Rendering glossary and rubric...');
+    console.log('Glossary data:', glossary);
+    console.log('Rubric data:', rubric);
+    renderGlossary();
+    renderRubric();
+    console.log('Glossary and rubric rendered');
+    
+    // Verify rendering worked
+    const glossaryContent = document.getElementById('glossary-content');
+    const rubricContent = document.getElementById('rubric-content');
+    console.log('After rendering - glossary-content has HTML:', glossaryContent ? (glossaryContent.innerHTML.length > 0 ? 'YES (' + glossaryContent.innerHTML.length + ' chars)' : 'NO (empty)') : 'ELEMENT NOT FOUND');
+    console.log('After rendering - rubric-content has HTML:', rubricContent ? (rubricContent.innerHTML.length > 0 ? 'YES (' + rubricContent.innerHTML.length + ' chars)' : 'NO (empty)') : 'ELEMENT NOT FOUND');
     
     // Restore previously submitted ratings if resuming
     if (hasState && Object.keys(userRatings).length > 0) {
@@ -328,9 +543,12 @@ function saveState() {
         currentPage,
         userRatings,
         userPredictions,
+        paperScores,
         totalScore,
         sessionId,
-        hasUsedBackButton
+        hasUsedBackButton,
+        celebratedPapers: Array.from(celebratedPapers),
+        pageDisplayTimestamps
     };
     localStorage.setItem('workshopState', JSON.stringify(state));
 }
@@ -344,9 +562,12 @@ function loadState() {
             currentPage = state.currentPage || 0;
             userRatings = state.userRatings || {};
             userPredictions = state.userPredictions || {};
+            paperScores = state.paperScores || {};
             totalScore = state.totalScore || 0;
             sessionId = state.sessionId || null;
             hasUsedBackButton = state.hasUsedBackButton || false;
+            celebratedPapers = new Set(state.celebratedPapers || []);
+            pageDisplayTimestamps = state.pageDisplayTimestamps || {};
             return true; // State was loaded
         }
     } catch (error) {
@@ -367,6 +588,18 @@ function restoreSubmittedRatings() {
             if (ratingSection) ratingSection.style.display = 'none';
             if (resultsBox) {
                 resultsBox.style.display = 'block';
+                
+                // Restore the score display if we have it saved
+                const savedScore = paperScores[paperId];
+                if (savedScore !== undefined) {
+                    const scoreElement = document.getElementById(`score-${paperIndex}`);
+                    if (scoreElement) {
+                        scoreElement.textContent = `${savedScore}%`;
+                        scoreElement.style.fontSize = '2rem';
+                        scoreElement.style.fontWeight = 'bold';
+                    }
+                }
+                
                 // Re-fetch and show results
                 const rating = userRatings[paperId];
                 const prediction = userPredictions[paperId];
@@ -386,13 +619,16 @@ function displayUsername() {
         navbarUsername.textContent = userName;
     }
     
-    // Only add username footer to final results page
-    const finalPage = document.getElementById('page-final');
-    if (finalPage && !finalPage.querySelector('.username-footer')) {
-        const footer = document.createElement('div');
-        footer.className = 'username-footer';
-        footer.innerHTML = `Your username is <span style="color: #667eea; font-weight: 600;">${userName}</span>`;
-        finalPage.querySelector('.container').appendChild(footer);
+    // Update username in Save Your Results section
+    const usernameSaveDisplay = document.getElementById('username-display-save');
+    if (usernameSaveDisplay) {
+        usernameSaveDisplay.textContent = userName;
+    }
+    
+    // Also update the inline username reference
+    const usernameInline = document.getElementById('username-display-inline');
+    if (usernameInline) {
+        usernameInline.textContent = userName;
     }
 }
 
@@ -673,6 +909,12 @@ function updateParticipantCount() {
 
 // Shuffle papers array using Fisher-Yates algorithm with seeded randomization
 function shufflePapers() {
+    // Safety check
+    if (!papers || !papers.length || !sessionId) {
+        console.warn('Cannot shuffle papers: papers or sessionId not initialized');
+        return;
+    }
+    
     // Use session ID as seed for consistent randomization per participant
     let seed = 0;
     for (let i = 0; i < sessionId.length; i++) {
@@ -694,22 +936,25 @@ function shufflePapers() {
 }
 
 // Load content from JSON files
-async function loadContent() {
+async function loadContent(shouldShuffle = true) {
     try {
         // First, load the feature order configuration
-        const featureOrderResponse = await fetch('feature-order-config.json');
+        const featureOrderResponse = await fetch('/feature-order-config.json');
+        if (!featureOrderResponse.ok) {
+            throw new Error(`Failed to load feature-order-config.json: ${featureOrderResponse.status}`);
+        }
         featureOrderConfig = await featureOrderResponse.json();
         
         // Load all 6 rubric versions for within-participant rotation
         const [glossaryData, rubric1, rubric2, rubric3, rubric4, rubric5, rubric6, papersData] = await Promise.all([
-            fetch('glossary.json').then(r => r.json()),
-            fetch('rubric-v1.json').then(r => r.json()),
-            fetch('rubric-v2.json').then(r => r.json()),
-            fetch('rubric-v3.json').then(r => r.json()),
-            fetch('rubric-v4.json').then(r => r.json()),
-            fetch('rubric-v5.json').then(r => r.json()),
-            fetch('rubric-v6.json').then(r => r.json()),
-            fetch('papers.json').then(r => r.json())
+            fetch('/glossary.json').then(r => { if (!r.ok) throw new Error(`glossary.json: ${r.status}`); return r.json(); }),
+            fetch('/rubric-v1.json').then(r => { if (!r.ok) throw new Error(`rubric-v1.json: ${r.status}`); return r.json(); }),
+            fetch('/rubric-v2.json').then(r => { if (!r.ok) throw new Error(`rubric-v2.json: ${r.status}`); return r.json(); }),
+            fetch('/rubric-v3.json').then(r => { if (!r.ok) throw new Error(`rubric-v3.json: ${r.status}`); return r.json(); }),
+            fetch('/rubric-v4.json').then(r => { if (!r.ok) throw new Error(`rubric-v4.json: ${r.status}`); return r.json(); }),
+            fetch('/rubric-v5.json').then(r => { if (!r.ok) throw new Error(`rubric-v5.json: ${r.status}`); return r.json(); }),
+            fetch('/rubric-v6.json').then(r => { if (!r.ok) throw new Error(`rubric-v6.json: ${r.status}`); return r.json(); }),
+            fetch('/papers.json').then(r => { if (!r.ok) throw new Error(`papers.json: ${r.status}`); return r.json(); })
         ]);
         
         glossary = glossaryData;
@@ -720,23 +965,38 @@ async function loadContent() {
         papers = papersData;
         
         // Shuffle papers for this participant (consistent across page reloads)
-        shufflePapers();
+        // Skip shuffling if loading session results (no sessionId yet)
+        if (shouldShuffle && sessionId) {
+            shufflePapers();
+        }
         
-        // Update total papers count on final page
-        document.getElementById('total-papers').textContent = papers.length;
+        // Update total papers count on final page (will be updated when results load)
+        const totalPapersElement = document.getElementById('total-papers');
+        if (totalPapersElement) {
+            totalPapersElement.textContent = Object.keys(userRatings).length || 0;
+        }
     } catch (error) {
         console.error('Error loading content:', error);
-        alert('Error loading workshop content. Please refresh the page.');
+        console.error('Error details:', error.message);
+        alert(`Error loading workshop content: ${error.message}\n\nPlease try:\n1. Hard refresh (Ctrl+Shift+R or Cmd+Shift+R)\n2. Clear browser cache\n3. Contact support if issue persists`);
     }
 }
 
 // Render glossary
 function renderGlossary() {
+    console.log('renderGlossary called');
     const glossaryContent = document.getElementById('glossary-content');
     const modalGlossary = document.getElementById('modal-glossary');
     
+    console.log('Glossary content element:', glossaryContent);
+    console.log('Modal glossary element:', modalGlossary);
+    console.log('Glossary data:', glossary);
+    
     if (!glossary || glossary.length === 0) {
-        console.error('Glossary data not loaded');
+        console.error('Glossary data not loaded or empty', glossary);
+        const errorHTML = '<p style="color: red;">Error: Glossary data failed to load. Please refresh the page.</p>';
+        if (glossaryContent) glossaryContent.innerHTML = errorHTML;
+        if (modalGlossary) modalGlossary.innerHTML = errorHTML;
         return;
     }
     
@@ -747,19 +1007,50 @@ function renderGlossary() {
         </div>
     `).join('');
     
-    if (glossaryContent) glossaryContent.innerHTML = glossaryHTML;
-    if (modalGlossary) modalGlossary.innerHTML = glossaryHTML;
+    console.log('Generated glossary HTML length:', glossaryHTML.length);
+    console.log('Generated glossary HTML (first 200 chars):', glossaryHTML.substring(0, 200));
+    
+    if (glossaryContent) {
+        glossaryContent.innerHTML = glossaryHTML;
+        console.log('Glossary content updated. Element now contains:', glossaryContent.innerHTML.substring(0, 200));
+    } else {
+        console.error('glossary-content element not found in DOM');
+    }
+    
+    if (modalGlossary) {
+        modalGlossary.innerHTML = glossaryHTML;
+        console.log('Modal glossary updated');
+    } else {
+        console.warn('modal-glossary element not found in DOM (this is OK if modal not on current page)');
+    }
 }
 
 // Render rubric
 function renderRubric() {
+    console.log('renderRubric called');
     const rubricContent = document.getElementById('rubric-content');
     const modalRubric = document.getElementById('modal-rubric');
     
+    console.log('Rubric content element:', rubricContent);
+    console.log('Modal rubric element:', modalRubric);
+    console.log('Rubric data:', rubric);
+    
     if (!rubric || rubric.length === 0) {
-        console.error('Rubric data not loaded');
+        console.error('Rubric data not loaded or empty', rubric);
+        const errorHTML = '<p style="color: red;">Error: Rubric data failed to load. Please refresh the page.</p>';
+        if (rubricContent) rubricContent.innerHTML = errorHTML;
+        if (modalRubric) modalRubric.innerHTML = errorHTML;
         return;
     }
+    
+    // Helper function to bold text up to and including the first colon
+    const boldUpToColon = (text) => {
+        const colonIndex = text.indexOf(':');
+        if (colonIndex === -1) return text; // No colon found, return as is
+        const beforeColon = text.substring(0, colonIndex + 1); // Include the colon
+        const afterColon = text.substring(colonIndex + 1);
+        return `<strong>${beforeColon}</strong>${afterColon}`;
+    };
     
     const rubricHTML = `
         <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
@@ -776,9 +1067,9 @@ function renderRubric() {
                     ${rubric.map(category => `
                         <tr>
                             <td><strong>${category.name}</strong></td>
-                            <td>${category.low}</td>
-                            <td>${category.medium}</td>
-                            <td>${category.high}</td>
+                            <td>${boldUpToColon(category.low)}</td>
+                            <td>${boldUpToColon(category.medium)}</td>
+                            <td>${boldUpToColon(category.high)}</td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -786,8 +1077,22 @@ function renderRubric() {
         </div>
     `;
     
-    if (rubricContent) rubricContent.innerHTML = rubricHTML;
-    if (modalRubric) modalRubric.innerHTML = rubricHTML;
+    console.log('Generated rubric HTML length:', rubricHTML.length);
+    console.log('Generated rubric HTML (first 200 chars):', rubricHTML.substring(0, 200));
+    
+    if (rubricContent) {
+        rubricContent.innerHTML = rubricHTML;
+        console.log('Rubric content updated. Element now contains:', rubricContent.innerHTML.substring(0, 200));
+    } else {
+        console.error('rubric-content element not found in DOM');
+    }
+    
+    if (modalRubric) {
+        modalRubric.innerHTML = rubricHTML;
+        console.log('Modal rubric updated');
+    } else {
+        console.warn('modal-rubric element not found in DOM (this is OK if modal not on current page)');
+    }
 }
 
 // Generate paper pages dynamically
@@ -802,15 +1107,22 @@ function generatePaperPages() {
         const paperFeatureLabels = config.featureLabels;
         
         // Generate paper sections in counterbalanced order for this rubric version
-        const paperSectionsHTML = paperFeatureOrder.map((feature, position) => {
-            const label = paperFeatureLabels[position];
-            const content = paper[feature];
-            return `
+        // Filter out 'title' feature since it is already displayed in the header
+        const paperSectionsHTML = paperFeatureOrder
+            .map((feature, originalPosition) => {
+                // Skip title feature since it is already displayed in the header
+                if (feature === 'title') return '';
+                
+                const label = paperFeatureLabels[originalPosition];
+                const content = paper[feature];
+                return `
                         <div class="paper-section">
                             <h3>${label}</h3>
                             <p>${content}</p>
                         </div>`;
-        }).join('');
+            })
+            .filter(html => html !== '') // Remove empty strings
+            .join('');
         
         const pageHTML = `
             <div class="page" id="page-paper-${index}">
@@ -881,14 +1193,14 @@ function generatePaperPages() {
                         </div>
                         <div class="rating-comparison">
                             <div class="rating-scale-grid">
-                                <div class="scale-label">Your Rating</div>
-                                <div class="scale-row" id="your-rating-scale-${index}">
+                                <div class="scale-label">Average Rating</div>
+                                <div class="scale-row" id="avg-rating-scale-${index}">
                                     ${[1, 2, 3, 4, 5, 6, 7].map(val => `<div class="scale-cell" data-value="${val}"></div>`).join('')}
                                 </div>
                             </div>
                             <div class="rating-scale-grid">
-                                <div class="scale-label">Average Rating</div>
-                                <div class="scale-row" id="avg-rating-scale-${index}">
+                                <div class="scale-label">Your Rating</div>
+                                <div class="scale-row" id="your-rating-scale-${index}">
                                     ${[1, 2, 3, 4, 5, 6, 7].map(val => `<div class="scale-cell" data-value="${val}"></div>`).join('')}
                                 </div>
                             </div>
@@ -904,6 +1216,10 @@ function generatePaperPages() {
                                 Finish & View Results
                             </button>
                         </div>
+                    </div>
+                    
+                    <div class="page-logo-footer">
+                        <img id="paper-logo-${index}" src="unlock-lab-icon.svg" alt="Logo" class="page-logo">
                     </div>
                 </div>
             </div>
@@ -927,18 +1243,26 @@ function showPage(pageIndex) {
         targetPage = document.getElementById('page-welcome');
         if (paperNumberElement) paperNumberElement.style.display = 'none';
         if (navbarUsername) navbarUsername.style.display = 'none';
+        // Hide help button on welcome page
+        document.getElementById('help-button').classList.remove('visible');
     } else if (pageIndex === 1) {
         targetPage = document.getElementById('page-guide');
         if (paperNumberElement) paperNumberElement.style.display = 'none';
         if (navbarUsername) navbarUsername.style.display = 'none';
+        // Hide help button on guide page
+        document.getElementById('help-button').classList.remove('visible');
     } else if (pageIndex <= papers.length + 1) {
         const paperIndex = pageIndex - 2;
         targetPage = document.getElementById(`page-paper-${paperIndex}`);
         // Show help button on paper pages
         document.getElementById('help-button').classList.add('visible');
-        // Update paper number in navbar
+        // Record timestamp when paper page is displayed (for response time tracking)
+        const paperId = papers[paperIndex].id;
+        pageDisplayTimestamps[paperId] = Date.now();
+        // Update paper count in navbar (show number of papers rated)
         if (paperNumberElement) {
-            paperNumberElement.textContent = `Paper ${paperIndex + 1} of ${papers.length}`;
+            const ratedCount = Object.keys(userRatings).length;
+            paperNumberElement.textContent = `${ratedCount}`;
             paperNumberElement.style.display = 'inline';
         }
         // Hide username on paper pages
@@ -1040,6 +1364,13 @@ async function submitRating(paperIndex, paperId) {
         return;
     }
     
+    // Check if user has already reached maximum rating limit
+    const currentRatingCount = Object.keys(userRatings).length;
+    if (currentRatingCount >= 24) {
+        alert('You have reached the maximum of 24 ratings. Please proceed to view your results.');
+        return;
+    }
+    
     const rating = parseInt(selectedRating.value);
     const prediction = parseInt(selectedPrediction.value);
     
@@ -1083,12 +1414,18 @@ async function submitRating(paperIndex, paperId) {
         // Calculate rubric version used for this study (1-6)
         const rubricVersion = (paperIndex % 6) + 1;
         
+        // Calculate response time (time from page display to submission)
+        const responseTime = pageDisplayTimestamps[paperId] 
+            ? Date.now() - pageDisplayTimestamps[paperId]
+            : null; // null if timestamp was not recorded (should not occur)
+        
         // NOW save rating to Firebase (after calculating prediction score)
         const userRatingRef = ref(database, `ratings/${paperId}/${sessionId}`);
         await set(userRatingRef, {
             rating: rating,
             prediction: prediction,
             rubricVersion: rubricVersion, // Record which rubric version was shown
+            responseTime: responseTime, // Time in milliseconds from page display to submission
             timestamp: Date.now()
         });
         
@@ -1115,13 +1452,12 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
         if (!scoreElement.textContent) {
             const difference = Math.abs(userPrediction - preCalculatedAverage);
             const score = Math.max(0, 100 - Math.round(difference * 12));
-            totalScore += score;
-            
+                paperScores[paperId] = score; // Store individual score for this paper
             // Display score with detailed feedback
             scoreElement.textContent = `${score}%`;
             scoreElement.style.fontSize = '2rem';
             scoreElement.style.fontWeight = 'bold';
-            scoreElement.style.color = score >= 88 ? '#10b981' : score >= 76 ? '#3b82f6' : score >= 64 ? '#f59e0b' : '#ef4444';
+            // Color is white (from CSS) for best contrast against orange/yellow gradient background
             
             const msgElement = document.getElementById(`score-msg-${paperIndex}`);
             msgElement.innerHTML = 
@@ -1133,6 +1469,20 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
                 `<strong>💪 Keep learning!</strong><br>Predicted ${userPrediction}, actual ${preCalculatedAverage.toFixed(1)} — science perception is tricky!`;
             msgElement.style.fontSize = '0.95rem';
             msgElement.style.lineHeight = '1.5';
+            
+            // Trigger celebration animation if score >= 90% and not already celebrated for this paper
+            if (score >= 90 && !celebratedPapers.has(paperId)) {
+                celebratedPapers.add(paperId);
+                
+                // Find the paper page logo for this specific paper
+                const paperLogo = document.getElementById(`paper-logo-${paperIndex}`);
+                if (paperLogo) {
+                    // Delay briefly to let score display first
+                    setTimeout(() => {
+                        paperLogo.dispatchEvent(new CustomEvent('celebrate'));
+                    }, 500);
+                }
+            }
             
             // Update total score display with animation
             const scoreDisplay = document.getElementById('total-score-header');
@@ -1159,6 +1509,23 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
             
             // Check if user has rated at least 12 studies
             const totalRated = Object.keys(userRatings).length;
+            
+            // Special celebration for exactly 12 ratings
+            if (totalRated === 12) {
+                // Trigger celebration animation on the current paper page logo
+                const paperLogo = document.getElementById(`paper-logo-${paperIndex}`);
+                if (paperLogo) {
+                    setTimeout(() => {
+                        paperLogo.dispatchEvent(new CustomEvent('celebrate'));
+                    }, 800);
+                }
+                
+                // Show popup after short delay to let score display first
+                setTimeout(() => {
+                    alert('Rated 12 papers! Rate a few more papers (recommended) or proceed to view your results.');
+                }, 1200);
+            }
+            
             if (totalRated >= 12 && paperIndex < papers.length - 1) {
                 // Show Finish button
                 const finishBtn = document.getElementById(`finish-btn-${paperIndex}`);
@@ -1225,6 +1592,7 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
                 const difference = Math.abs(userPrediction - average);
                 // Improved scoring: 100 pts for perfect, loses 12 pts per point of error (gentler penalty)
                 const score = Math.max(0, 100 - Math.round(difference * 12));
+                paperScores[paperId] = score; // Store individual score for this paper
                 totalScore += score;
                 
                 // Display score with detailed feedback
@@ -1334,28 +1702,54 @@ window.addEventListener('keydown', function(event) {
 
 // Show final results and leaderboard
 function showFinalResults() {
+    // Ensure glossary and rubric are rendered for the help modal
+    renderGlossary();
+    renderRubric();
+    
+    // Only recalculate totalScore from paperScores if NOT viewing read-only results
+    if (!isViewingResults) {
+        totalScore = Object.values(paperScores).reduce((sum, score) => sum + score, 0);
+    }
+    
     // Display final score as average prediction accuracy percentage
     const ratedCount = Object.keys(userRatings).length;
     const percentageScore = ratedCount > 0 ? Math.round(totalScore / ratedCount) : 0;
     document.getElementById('final-score').textContent = `${percentageScore}%`;
     
-    // Save score to leaderboard
-    const scoresRef = ref(database, `leaderboard/${sessionId}`);
-    set(scoresRef, {
-        score: totalScore,
-        timestamp: Date.now(),
-        papersRated: Object.keys(userRatings).length,
-        userName: userName,
-        listId: assignedListId
-    }).then(() => {
-        // Show link copying and email buttons after save
-        document.getElementById('save-results-link').style.display = 'inline-block';
-        document.getElementById('email-results-link').style.display = 'inline-block';
-        // Display username inline
+    // Update total papers count
+    const totalPapersElement = document.getElementById('total-papers');
+    if (totalPapersElement) {
+        totalPapersElement.textContent = ratedCount;
+    }
+    
+    // Only save score to leaderboard if NOT viewing read-only results
+    if (!isViewingResults) {
+        const scoresRef = ref(database, `leaderboard/${sessionId}`);
+        set(scoresRef, {
+            score: totalScore,
+            timestamp: Date.now(),
+            papersRated: Object.keys(userRatings).length,
+            userName: userName,
+            listId: assignedListId
+        }).then(() => {
+            // Show link copying and email buttons after save
+            document.getElementById('save-results-link').style.display = 'inline-block';
+            document.getElementById('email-results-link').style.display = 'inline-block';
+            // Display username in Save Results section and inline
+            document.getElementById('username-display-save').textContent = userName;
+            document.getElementById('username-display-inline').textContent = userName;
+        }).catch((error) => {
+            console.error('Error saving score:', error);
+        });
+    } else {
+        // In viewing mode, hide the save results section and update username displays
+        const saveSection = document.getElementById('save-results-section');
+        if (saveSection) {
+            saveSection.style.display = 'none';
+        }
+        document.getElementById('username-display-save').textContent = userName;
         document.getElementById('username-display-inline').textContent = userName;
-    }).catch((error) => {
-        console.error('Error saving score:', error);
-    });
+    }
     
     // Calculate rating analysis comparing user to crowd
     calculateRatingAnalysis();
@@ -1370,7 +1764,8 @@ function showFinalResults() {
                 id,
                 score: data.score,
                 timestamp: data.timestamp,
-                userName: data.userName || 'Anonymous'
+                userName: data.userName || 'Anonymous',
+                papersRated: data.papersRated || 0
             }));
             
             // Sort by score (descending)
@@ -1386,12 +1781,15 @@ function showFinalResults() {
             const leaderboardHTML = top5.map((entry, index) => {
                 const isUser = entry.id === sessionId;
                 const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                const percentageScore = entry.papersRated > 0 ? Math.round(entry.score / entry.papersRated) : 0;
                 return `
                     <div class="leaderboard-entry ${isUser ? 'current-user' : ''}">
                         <span class="rank">${medal || `#${index + 1}`}</span>
-                        <span class="username">${entry.userName}</span>
-                        <span class="score">${entry.score} pts</span>
-                        ${isUser ? '<span class="you-badge">You!</span>' : ''}
+                        <div class="username-container">
+                            <span class="username">${entry.userName}</span>
+                            ${isUser ? '<span class="you-badge">You!</span>' : ''}
+                        </div>
+                        <span class="score">${percentageScore}%</span>
                     </div>
                 `;
             }).join('');
@@ -1462,13 +1860,13 @@ async function calculateRatingAnalysis() {
         let summaryText = '';
         
         if (meanAbsDeviation < 0.5 && stdDev < 0.8) {
-            // Very close to average
+            // High alignment with average ratings
             summaryText = `🎯 <strong>Spot-On Evaluator!</strong> Your ratings are remarkably well-aligned with the crowd. On average, you deviated by just ${meanAbsDeviation.toFixed(2)} points from other participants' ratings. Your assessments are well backed by both the baseline quality indicators and the collective wisdom of other evaluators. You're in sync with the scientific consensus!`;
         } else if (meanAbsDeviation < 1.0 && stdDev < 1.5) {
             // Close to average
             summaryText = `✓ <strong>Calibrated Scientist.</strong> Your ratings align well with the crowd, averaging ${meanAbsDeviation.toFixed(2)} points from the consensus. You're consistently backed by other participants' evaluations, showing you've developed a reliable eye for research quality that matches the collective assessment.`;
         } else if (meanAbsDeviation > 2.0 || stdDev > 2.5) {
-            // Very different from average
+            // Substantial deviation from average ratings
             summaryText = `🌟 <strong>Breaking the Mould!</strong> Your ratings deviate substantially from the crowd (average difference: ${meanAbsDeviation.toFixed(2)} points). You're seeing research quality through a unique lens—perhaps you're more critical of methodological flaws, or more generous with preliminary findings. Your independent perspective challenges the consensus!`;
         } else {
             // Moderately different
@@ -1624,8 +2022,15 @@ window.emailResultsLink = emailResultsLink;
 // Load and display results for a specific session
 async function loadSessionResults(targetSessionId) {
     try {
-        // Load basic content first
-        await loadContent();
+        // Set flag to indicate viewing of read-only results
+        isViewingResults = true;
+        
+        // Load basic content first (skip shuffling when viewing results)
+        await loadContent(false);
+        
+        // Render glossary and rubric for the help modal
+        renderGlossary();
+        renderRubric();
         
         // Helper function to normalize username for comparison
         const normalizeUsername = (username) => {
@@ -1669,6 +2074,11 @@ async function loadSessionResults(targetSessionId) {
         userName = sessionData.userName || 'Anonymous';
         totalScore = sessionData.score || 0;
         
+        // Verify papers loaded successfully
+        if (!papers || !papers.length) {
+            throw new Error('Papers data failed to load');
+        }
+        
         // Load user's ratings from Firebase
         const ratingsPromises = papers.map(async (paper) => {
             const ratingRef = ref(database, `ratings/${paper.id}/${actualSessionId}`);
@@ -1690,7 +2100,10 @@ async function loadSessionResults(targetSessionId) {
         showFinalResults();
         
         // Update page title
-        document.getElementById('total-papers').textContent = Object.keys(userRatings).length;
+        const totalPapersElement = document.getElementById('total-papers');
+        if (totalPapersElement) {
+            totalPapersElement.textContent = Object.keys(userRatings).length;
+        }
         
     } catch (error) {
         console.error('Error loading session results:', error);

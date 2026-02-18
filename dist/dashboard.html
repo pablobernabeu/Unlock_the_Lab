@@ -370,17 +370,13 @@
             color: #20B2AA !important;
         }
     </style>
-  <script type="module" crossorigin src="/assets/dashboard-D0inix6Y.js"></script>
+  <script type="module" crossorigin src="/assets/dashboard-ClCtN5Ys.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
 </head>
 <body>
     <div class="container">
         <header>
             <h1><img src="unlock-lab-icon.svg" alt="Unlock the Lab" style="height: 1.8em; vertical-align: middle; margin-top: -0.15em;"> Unlock the Lab - Live Dashboard</h1>
-            <div class="status">
-                <div class="status-indicator"></div>
-                <span>Connected to Firebase • Real-time updates</span>
-            </div>
         </header>
 
         <div class="stats-grid">
@@ -592,6 +588,9 @@
                 <div class="admin-actions">
                     <button class="btn-danger" onclick="endAllSessions()" id="endSessionsBtn">
                         ⏹️ End all active sessions
+                    </button>
+                    <button class="btn-danger" onclick="deleteAllRatingsData()" id="deleteDataBtn" style="margin-top: 10px;">
+                        🗑️ Delete all ratings data
                     </button>
                 </div>
                 <div class="admin-buttons" style="margin-top: 15px;">

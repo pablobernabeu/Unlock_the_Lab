@@ -21,7 +21,7 @@
     },
     {
         "term": "Sample Size",
-        "definition": "The number of participants or observations in a study. Larger samples generally provide more reliable results."
+        "definition": "The number of participants (<i>N</i>) or observations in a study. Larger samples generally provide more reliable results."
     },
     {
         "term": "Control Group",
