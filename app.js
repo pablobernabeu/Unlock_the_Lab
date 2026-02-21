@@ -893,11 +893,16 @@ function shufflePapers() {
 // Load content from JSON files
 async function loadContent(shouldShuffle = true) {
     try {
+        const baseUrl = import.meta.env.BASE_URL || '/';
+        const glossaryUrl = `${baseUrl}glossary.json`;
+        const rubricUrl = `${baseUrl}rubric.json`;
+        const papersUrl = `${baseUrl}papers.json`;
+
         // Load content - using single rubric for all participants
         const [glossaryData, rubricData, papersData] = await Promise.all([
-            fetch('/glossary.json').then(r => { if (!r.ok) throw new Error(`glossary.json: ${r.status}`); return r.json(); }),
-            fetch('/rubric.json').then(r => { if (!r.ok) throw new Error(`rubric.json: ${r.status}`); return r.json(); }),
-            fetch('/papers.json').then(r => { if (!r.ok) throw new Error(`papers.json: ${r.status}`); return r.json(); })
+            fetch(glossaryUrl).then(r => { if (!r.ok) throw new Error(`glossary.json: ${r.status}`); return r.json(); }),
+            fetch(rubricUrl).then(r => { if (!r.ok) throw new Error(`rubric.json: ${r.status}`); return r.json(); }),
+            fetch(papersUrl).then(r => { if (!r.ok) throw new Error(`papers.json: ${r.status}`); return r.json(); })
         ]);
         
         glossary = glossaryData;
