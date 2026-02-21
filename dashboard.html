@@ -518,6 +518,7 @@
     <!-- Authorship & Project Info -->
     <div style="max-width: 1400px; margin: 2rem auto 0; padding: 1.25rem; background: #f8fafc; border-radius: 8px; font-size: 0.9rem; color: #64748b;">
         <p style="margin-bottom: 0.5rem;"><strong>Author:</strong> Dr Pablo Bernabeu, Department of Education, University of Oxford</p>
+        <p style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #64748b;"><strong>Legal disclaimer:</strong> This app and workshop were created by Dr Pablo Bernabeu in a personal capacity during spare time. The employer is not affiliated with, does not endorse, and bears no liability for this app or workshop.</p>
         <p style="margin-bottom: 0.5rem;"><strong>Materials:</strong> <a href="https://github.com/pablobernabeu/Unlock_the_Lab" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; border-bottom: 1px solid #2563eb;">github.com/pablobernabeu/Unlock_the_Lab</a></p>
         <p style="margin-bottom: 0.5rem;"><strong>Licence:</strong> <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none;">CC BY 4.0</a> — Free to use with attribution</p>
         <p style="margin-bottom: 0; font-size: 0.85rem; font-style: italic;">💡 Contributions welcome! Suggest improvements or report issues on <a href="https://github.com/pablobernabeu/Unlock_the_Lab/issues" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; border-bottom: 1px solid #2563eb;">GitHub</a>.</p>
@@ -980,18 +981,33 @@
             let allScores = [];
             const uniqueUsers = new Set();
 
+            const getValidRatingEntries = (paperRatings) => {
+                return Object.entries(paperRatings || {}).reduce((entries, [userId, value]) => {
+                    let rating = null;
+
+                    if (typeof value === 'number') {
+                        rating = value;
+                    } else if (value && typeof value === 'object') {
+                        rating = value.rating;
+                    }
+
+                    if (Number.isFinite(rating) && rating >= 1 && rating <= 7) {
+                        entries.push({ userId, rating });
+                    }
+
+                    return entries;
+                }, []);
+            };
+
             // Calculate stats for each paper
             paperIds.forEach(paperId => {
                 const paperRatings = ratingsData[paperId] || {};
-                const values = Object.values(paperRatings)
-                    .filter(v => v !== null && v !== undefined)
-                    .map(v => v.rating || v); // Handle both old format (number) and new format (object with rating)
+                const validEntries = getValidRatingEntries(paperRatings);
+                const values = validEntries.map(entry => entry.rating);
                 
                 // Track unique user IDs
-                Object.keys(paperRatings).forEach(userId => {
-                    if (paperRatings[userId] !== null && paperRatings[userId] !== undefined) {
-                        uniqueUsers.add(userId);
-                    }
+                validEntries.forEach(entry => {
+                    uniqueUsers.add(entry.userId);
                 });
                 
                 totalRatings += values.length;
@@ -1003,9 +1019,8 @@
             // Calculate stats - only include seed scores if we have participants
             paperIds.forEach(paperId => {
                 const paperRatings = ratingsData[paperId] || {};
-                const values = Object.values(paperRatings)
-                    .filter(v => v !== null && v !== undefined)
-                    .map(v => v.rating || v);
+                const validEntries = getValidRatingEntries(paperRatings);
+                const values = validEntries.map(entry => entry.rating);
                 
                 let allValues;
                 if (hasParticipants) {

@@ -34,6 +34,8 @@ const CRITERIA = [
 const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // Disconnect after 10 minutes of inactivity
 const INACTIVITY_WARNING = 5 * 60 * 1000;  // Warn when 5 minutes of inactivity remain
 const ABSOLUTE_MAX_DURATION = 50 * 60 * 1000; // Hard cap: disconnect after 50 minutes regardless
+const ACTIVITY_RESET_DEBOUNCE = 5000; // Avoid resetting timers too frequently
+const ACTIVITY_EVENTS = ['click', 'keydown', 'touchstart', 'scroll', 'mousemove'];
 let lastActivityTime = null;
 let sessionTimeoutId = null;
 let warningTimeoutId = null;
@@ -107,6 +109,20 @@ const seedScores = {
     'STUDY-47': 7   // Participatory budgeting - mixed methods, preregistered, nuanced conclusions
 };
 const seedWeight = 100; // Each seed score counts as 100 participants
+
+function extractValidRatings(ratingsData) {
+    if (!ratingsData || typeof ratingsData !== 'object') {
+        return [];
+    }
+
+    return Object.values(ratingsData)
+        .map(entry => {
+            if (typeof entry === 'number') return entry;
+            if (entry && typeof entry === 'object') return entry.rating;
+            return null;
+        })
+        .filter(rating => Number.isFinite(rating) && rating >= 1 && rating <= 7);
+}
 
 // Helper function to get performance icon based on percentage
 function getPerformanceIcon(percentage) {
@@ -643,7 +659,7 @@ function startSessionTimeout() {
     resetInactivityTimer();
 
     // Listen for user activity to reset the inactivity timer
-    ['click', 'keydown', 'touchstart', 'scroll'].forEach(event => {
+    ACTIVITY_EVENTS.forEach(event => {
         document.addEventListener(event, onUserActivity, { passive: true });
     });
 
@@ -659,9 +675,19 @@ function startSessionTimeout() {
 
 // Called on any user interaction — resets the inactivity countdown
 function onUserActivity() {
-    lastActivityTime = Date.now();
+    const now = Date.now();
+    if (lastActivityTime && (now - lastActivityTime) < ACTIVITY_RESET_DEBOUNCE) {
+        return;
+    }
+
+    lastActivityTime = now;
     inactivityWarningShown = false;
     resetInactivityTimer();
+}
+
+function getRemainingInactivityMs() {
+    if (!lastActivityTime) return INACTIVITY_TIMEOUT;
+    return INACTIVITY_TIMEOUT - (Date.now() - lastActivityTime);
 }
 
 // (Re)start the inactivity disconnect timer
@@ -671,7 +697,8 @@ function resetInactivityTimer() {
 
     // Warn at 5 minutes of inactivity
     warningTimeoutId = setTimeout(() => {
-        if (!inactivityWarningShown) {
+        const remaining = getRemainingInactivityMs();
+        if (!inactivityWarningShown && remaining > 0 && remaining <= INACTIVITY_WARNING) {
             inactivityWarningShown = true;
             alert('⏰ 5 minutes until your session disconnects due to inactivity.');
         }
@@ -685,8 +712,7 @@ function resetInactivityTimer() {
 
 // Update timer display
 function updateTimerDisplay() {
-    const inactiveFor = Date.now() - lastActivityTime;
-    const remaining = INACTIVITY_TIMEOUT - inactiveFor;
+    const remaining = getRemainingInactivityMs();
     const minutes = Math.max(0, Math.floor(remaining / 60000));
 
     // Calculate papers remaining
@@ -726,7 +752,7 @@ function endSession() {
     if (absoluteTimeoutId) clearTimeout(absoluteTimeoutId);
 
     // Remove activity listeners
-    ['click', 'keydown', 'touchstart', 'scroll'].forEach(event => {
+    ACTIVITY_EVENTS.forEach(event => {
         document.removeEventListener(event, onUserActivity);
     });
     
@@ -967,6 +993,9 @@ function renderRubric() {
     };
     
     const rubricHTML = `
+        <div class="info-box" style="margin-bottom: 1rem; background: #f3e5f5; border-left: 4px solid #9c27b0;">
+            <p style="margin: 0;"><strong>💡 Scoring Strategy:</strong> You can freely weigh some criteria more strongly than others when forming your overall rating.</p>
+        </div>
         <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
             <table class="rubric-table">
                 <thead>
@@ -1426,7 +1455,7 @@ async function submitRating(paperIndex, paperId) {
         
         let averageWithoutUser = 4; // Default if no ratings yet
         if (currentRatings) {
-            const ratingValues = Object.values(currentRatings).map(r => r.rating);
+            const ratingValues = extractValidRatings(currentRatings);
             const seedScore = seedScores[paperId] || 4;
             const totalRatings = ratingValues.reduce((a, b) => a + b, 0) + (seedScore * seedWeight);
             const totalCount = ratingValues.length + seedWeight;
@@ -1577,7 +1606,7 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
         const ratings = snapshot.val();
         
         if (ratings) {
-            const ratingValues = Object.values(ratings).map(r => r.rating);
+            const ratingValues = extractValidRatings(ratings);
             
             // Include seed score in average calculation (weighted as 100 participants)
             const seedScore = seedScores[paperId] || 4;
@@ -1891,7 +1920,7 @@ async function calculateRatingAnalysis() {
             const ratings = snapshot.val();
             
             if (ratings) {
-                const ratingValues = Object.values(ratings).map(r => r.rating);
+                const ratingValues = extractValidRatings(ratings);
                 // Include seed scores
                 const seedScore = seedScores[paper.id] || 4;
                 const totalRatings = ratingValues.reduce((a, b) => a + b, 0) + (seedScore * seedWeight);
