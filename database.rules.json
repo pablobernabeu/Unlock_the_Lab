@@ -1,7 +1,10 @@
 {
   "rules": {
-    ".read": true,
+    ".read": false,
+    ".write": false,
     "ratings": {
+      ".read": true,
+      ".write": "auth != null",
       "$paperId": {
         "$sessionId": {
           ".write": true
@@ -9,16 +12,22 @@
       }
     },
     "leaderboard": {
+      ".read": true,
+      ".write": "auth != null",
       "$sessionId": {
         ".write": true
       }
     },
     "rankings": {
+      ".read": true,
+      ".write": "auth != null",
       "$sessionId": {
         ".write": true
       }
     },
     "active": {
+      ".read": true,
+      ".write": "auth != null",
       "$sessionId": {
         ".write": true
       }

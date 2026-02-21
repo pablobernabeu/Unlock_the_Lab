@@ -1,0 +1,57 @@
+[debug] [2026-02-21T22:15:44.731Z] ----------------------------------------------------------------------
+[debug] [2026-02-21T22:15:44.738Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\pablob\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only database --non-interactive --debug
+[debug] [2026-02-21T22:15:44.738Z] CLI Version:   15.5.1
+[debug] [2026-02-21T22:15:44.738Z] Platform:      win32
+[debug] [2026-02-21T22:15:44.738Z] Node Version:  v24.12.0
+[debug] [2026-02-21T22:15:44.738Z] Time:          Sat Feb 21 2026 22:15:44 GMT+0000 (Greenwich Mean Time)
+[debug] [2026-02-21T22:15:44.738Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-02-21T22:15:48.414Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-02-21T22:15:48.415Z] > authorizing via signed-in user (pablodejuanbernabeu@gmail.com)
+[debug] [2026-02-21T22:15:48.415Z] [iam] checking project unlock-the-lab-workshop for permissions ["firebase.projects.get","firebasedatabase.instances.update"]
+[debug] [2026-02-21T22:15:48.416Z] Checked if tokens are valid: true, expires at: 1771715227402
+[debug] [2026-02-21T22:15:48.417Z] Checked if tokens are valid: true, expires at: 1771715227402
+[debug] [2026-02-21T22:15:48.417Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/unlock-the-lab-workshop:testIamPermissions [none]
+[debug] [2026-02-21T22:15:48.417Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/unlock-the-lab-workshop:testIamPermissions  x-goog-user-project=unlock-the-lab-workshop
+[debug] [2026-02-21T22:15:48.417Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/unlock-the-lab-workshop:testIamPermissions {"permissions":["firebase.projects.get","firebasedatabase.instances.update"]}
+[debug] [2026-02-21T22:15:49.093Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/unlock-the-lab-workshop:testIamPermissions 200
+[debug] [2026-02-21T22:15:49.093Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/unlock-the-lab-workshop:testIamPermissions {"permissions":["firebase.projects.get","firebasedatabase.instances.update"]}
+[debug] [2026-02-21T22:15:49.093Z] Checked if tokens are valid: true, expires at: 1771715227402
+[debug] [2026-02-21T22:15:49.093Z] Checked if tokens are valid: true, expires at: 1771715227402
+[debug] [2026-02-21T22:15:49.094Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/unlock-the-lab-workshop [none]
+[debug] [2026-02-21T22:15:49.440Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/unlock-the-lab-workshop 200
+[debug] [2026-02-21T22:15:49.440Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/unlock-the-lab-workshop {"projectId":"unlock-the-lab-workshop","projectNumber":"604889899913","displayName":"Unlock-the-Lab-workshop","name":"projects/unlock-the-lab-workshop","resources":{"hostingSite":"unlock-the-lab-workshop","realtimeDatabaseInstance":"unlock-the-lab-workshop-default-rtdb"},"state":"ACTIVE","etag":"1_a5281561-82a4-4f0f-961a-3a719b390eb0"}
+[info] 
+[info] === Deploying to 'unlock-the-lab-workshop'...
+[info] 
+[info] i  deploying database 
+[info] i  database: checking rules syntax... 
+[debug] [2026-02-21T22:15:49.444Z] Checked if tokens are valid: true, expires at: 1771715227402
+[debug] [2026-02-21T22:15:49.444Z] Checked if tokens are valid: true, expires at: 1771715227402
+[debug] [2026-02-21T22:15:49.444Z] >>> [apiv2][query] GET https://firebasedatabase.googleapis.com/v1beta/projects/unlock-the-lab-workshop/locations/-/instances/unlock-the-lab-workshop-default-rtdb [none]
+[debug] [2026-02-21T22:15:50.198Z] <<< [apiv2][status] GET https://firebasedatabase.googleapis.com/v1beta/projects/unlock-the-lab-workshop/locations/-/instances/unlock-the-lab-workshop-default-rtdb 200
+[debug] [2026-02-21T22:15:50.198Z] <<< [apiv2][body] GET https://firebasedatabase.googleapis.com/v1beta/projects/unlock-the-lab-workshop/locations/-/instances/unlock-the-lab-workshop-default-rtdb {"name":"projects/604889899913/locations/europe-west1/instances/unlock-the-lab-workshop-default-rtdb","project":"projects/604889899913","databaseUrl":"https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app","type":"DEFAULT_DATABASE","state":"ACTIVE"}
+[debug] [2026-02-21T22:15:50.198Z] Checked if tokens are valid: true, expires at: 1771715227402
+[debug] [2026-02-21T22:15:50.198Z] Checked if tokens are valid: true, expires at: 1771715227402
+[debug] [2026-02-21T22:15:50.199Z] >>> [apiv2][query] PUT https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/.settings/rules.json dryRun=true
+[debug] [2026-02-21T22:15:50.199Z] >>> [apiv2][body] PUT https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/.settings/rules.json "{\r\n  \"rules\": {\r\n    \".read\": false,\r\n    \".write\": false,\r\n    \"ratings\": {\r\n      \".read\": true,\r\n      \".write\": \"auth != null\",\r\n      \"$paperId\": {\r\n        \"$sessionId\": {\r\n          \".write\": true\r\n        }\r\n      }\r\n    },\r\n    \"leaderboard\": {\r\n      \".read\": true,\r\n      \".write\": \"auth != null\",\r\n      \"$sessionId\": {\r\n        \".write\": true\r\n      }\r\n    },\r\n    \"rankings\": {\r\n      \".read\": true,\r\n      \".write\": \"auth != null\",\r\n      \"$sessionId\": {\r\n        \".write\": true\r\n      }\r\n    },\r\n    \"active\": {\r\n      \".read\": true,\r\n      \".write\": \"auth != null\",\r\n      \"$sessionId\": {\r\n        \".write\": true\r\n      }\r\n    }\r\n  }\r\n}\r\n"
+[debug] [2026-02-21T22:15:50.320Z] <<< [apiv2][status] PUT https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/.settings/rules.json 200
+[debug] [2026-02-21T22:15:50.320Z] <<< [apiv2][body] PUT https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/.settings/rules.json {"status":"ok"}
+[info] +  database: rules syntax for database unlock-the-lab-workshop-default-rtdb is valid 
+[info] i  database: releasing rules... 
+[debug] [2026-02-21T22:15:50.321Z] Checked if tokens are valid: true, expires at: 1771715227402
+[debug] [2026-02-21T22:15:50.321Z] Checked if tokens are valid: true, expires at: 1771715227402
+[debug] [2026-02-21T22:15:50.321Z] >>> [apiv2][query] GET https://firebasedatabase.googleapis.com/v1beta/projects/unlock-the-lab-workshop/locations/-/instances/unlock-the-lab-workshop-default-rtdb [none]
+[debug] [2026-02-21T22:15:50.519Z] <<< [apiv2][status] GET https://firebasedatabase.googleapis.com/v1beta/projects/unlock-the-lab-workshop/locations/-/instances/unlock-the-lab-workshop-default-rtdb 200
+[debug] [2026-02-21T22:15:50.519Z] <<< [apiv2][body] GET https://firebasedatabase.googleapis.com/v1beta/projects/unlock-the-lab-workshop/locations/-/instances/unlock-the-lab-workshop-default-rtdb {"name":"projects/604889899913/locations/europe-west1/instances/unlock-the-lab-workshop-default-rtdb","project":"projects/604889899913","databaseUrl":"https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app","type":"DEFAULT_DATABASE","state":"ACTIVE"}
+[debug] [2026-02-21T22:15:50.520Z] Checked if tokens are valid: true, expires at: 1771715227402
+[debug] [2026-02-21T22:15:50.520Z] Checked if tokens are valid: true, expires at: 1771715227402
+[debug] [2026-02-21T22:15:50.520Z] >>> [apiv2][query] PUT https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/.settings/rules.json 
+[debug] [2026-02-21T22:15:50.520Z] >>> [apiv2][body] PUT https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/.settings/rules.json "{\r\n  \"rules\": {\r\n    \".read\": false,\r\n    \".write\": false,\r\n    \"ratings\": {\r\n      \".read\": true,\r\n      \".write\": \"auth != null\",\r\n      \"$paperId\": {\r\n        \"$sessionId\": {\r\n          \".write\": true\r\n        }\r\n      }\r\n    },\r\n    \"leaderboard\": {\r\n      \".read\": true,\r\n      \".write\": \"auth != null\",\r\n      \"$sessionId\": {\r\n        \".write\": true\r\n      }\r\n    },\r\n    \"rankings\": {\r\n      \".read\": true,\r\n      \".write\": \"auth != null\",\r\n      \"$sessionId\": {\r\n        \".write\": true\r\n      }\r\n    },\r\n    \"active\": {\r\n      \".read\": true,\r\n      \".write\": \"auth != null\",\r\n      \"$sessionId\": {\r\n        \".write\": true\r\n      }\r\n    }\r\n  }\r\n}\r\n"
+[debug] [2026-02-21T22:15:50.780Z] <<< [apiv2][status] PUT https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/.settings/rules.json 200
+[debug] [2026-02-21T22:15:50.780Z] <<< [apiv2][body] PUT https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/.settings/rules.json {"status":"ok"}
+[info] +  database: rules for database unlock-the-lab-workshop-default-rtdb released successfully 
+[info] 
+[info] +  Deploy complete! 
+[info] 
+[info] Project Console: https://console.firebase.google.com/project/unlock-the-lab-workshop/overview
