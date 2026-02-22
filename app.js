@@ -2,6 +2,9 @@
 import { database } from './firebase-config.js';
 import { ref, set, get, onValue } from 'firebase/database';
 import Chart from 'chart.js/auto';
+import glossaryData from './public/glossary.json';
+import rubricData from './public/rubric.json';
+import papersData from './public/papers.json';
 
 // Application State
 let currentPage = 0;
@@ -890,24 +893,12 @@ function shufflePapers() {
     }
 }
 
-// Load content from JSON files
+// Load content from bundled JSON imports
 async function loadContent(shouldShuffle = true) {
     try {
-        const baseUrl = import.meta.env.BASE_URL || '/';
-        const glossaryUrl = `${baseUrl}glossary.json`;
-        const rubricUrl = `${baseUrl}rubric.json`;
-        const papersUrl = `${baseUrl}papers.json`;
-
-        // Load content - using single rubric for all participants
-        const [glossaryData, rubricData, papersData] = await Promise.all([
-            fetch(glossaryUrl).then(r => { if (!r.ok) throw new Error(`glossary.json: ${r.status}`); return r.json(); }),
-            fetch(rubricUrl).then(r => { if (!r.ok) throw new Error(`rubric.json: ${r.status}`); return r.json(); }),
-            fetch(papersUrl).then(r => { if (!r.ok) throw new Error(`papers.json: ${r.status}`); return r.json(); })
-        ]);
-        
         glossary = glossaryData;
         rubric = rubricData;
-        papers = papersData;
+        papers = [...papersData]; // spread to avoid mutating the import
         
         // Shuffle papers for this participant (consistent across page reloads)
         // Skip shuffling if loading session results (no sessionId yet)
@@ -922,7 +913,6 @@ async function loadContent(shouldShuffle = true) {
         }
     } catch (error) {
         console.error('Error loading content:', error);
-        console.error('Error details:', error.message);
         alert(`Error loading workshop content: ${error.message}\n\nPlease try:\n1. Hard refresh (Ctrl+Shift+R or Cmd+Shift+R)\n2. Clear browser cache\n3. Contact support if issue persists`);
     }
 }
