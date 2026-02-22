@@ -495,6 +495,28 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 12px 8px;
+            }
+
+            header {
+                padding: 16px 14px 10px;
+            }
+
+            .stat-card,
+            .chart-card,
+            .data-table {
+                padding: 16px 12px;
+            }
+
+            .section-panel {
+                padding: 1.25rem 0.875rem !important;
+            }
+
+            #results-access-section {
+                padding: 16px 12px !important;
+            }
+
             .charts-grid {
                 grid-template-columns: 1fr;
             }
@@ -509,6 +531,28 @@
         }
         
         @media (max-width: 480px) {
+            body {
+                padding: 8px 4px;
+            }
+
+            header {
+                padding: 12px 10px 8px;
+            }
+
+            .stat-card,
+            .chart-card,
+            .data-table {
+                padding: 12px 8px;
+            }
+
+            .section-panel {
+                padding: 1rem 0.625rem !important;
+            }
+
+            #results-access-section {
+                padding: 12px 8px !important;
+            }
+
             #leaderboardGrid {
                 grid-template-columns: 1fr !important;
             }
@@ -612,7 +656,7 @@
         </div>
 
         <!-- SECTION 1: PREDICTION PERFORMANCE -->
-        <div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; color: white;">
+        <div class="section-panel" style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; color: white;">
             <h2 style="margin-top: 0; color: white; font-size: 1.8rem; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 0.75rem;">
                 🎯 Part 1: Prediction Performance
             </h2>
@@ -644,14 +688,14 @@
         <!-- SECTION 1b: CRITERION IMPORTANCE -->
         <div class="data-table" style="margin-bottom: 40px;">
             <h2 style="color: #d97706; margin-bottom: 10px;">⚖️ Criterion Importance</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Average percentage of tokens assigned to each criterion by participants, reflecting what they considered most important when evaluating study quality.</p>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Average percentage of tokens assigned to each criterion by participants, reflecting what they considered most important when evaluating study quality. <span id="criterion-importance-count"></span></p>
             <div id="criterion-importance-container">
                 <p style="text-align: center; color: #999; padding: 2rem 0;">No data yet.</p>
             </div>
         </div>
 
         <!-- SECTION 2: RATING PATTERNS -->
-        <div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+        <div class="section-panel" style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
             <h2 style="margin-top: 0; color: white; font-size: 1.8rem; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 0.75rem; font-weight: 600;">
                 📊 Part 2: Rating Patterns
             </h2>
@@ -1171,7 +1215,7 @@
                         max: 7,
                         title: { 
                             display: true, 
-                            text: 'Rating (1-7 scale)',
+                            text: 'Rating',
                             font: {
                                 size: 14,
                                 weight: 'bold'
@@ -1217,8 +1261,13 @@
                         
                         const { lower, upper } = errorBars[index];
                         const x = bar.x;
-                        const yLower = chart.scales.y.getPixelForValue(lower);
-                        const yUpper = chart.scales.y.getPixelForValue(upper);
+
+                        // Compute CI offsets relative to the mean in pixel space,
+                        // then pin them to bar.y so they track the animated bar perfectly.
+                        const mean = chart.data.datasets[0].data[index] || 0;
+                        const yMean   = chart.scales.y.getPixelForValue(mean);
+                        const yLower  = bar.y + (chart.scales.y.getPixelForValue(lower) - yMean);
+                        const yUpper  = bar.y + (chart.scales.y.getPixelForValue(upper) - yMean);
                         
                         ctx.save();
                         ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
@@ -1390,13 +1439,14 @@
             }).length : 0;
             document.getElementById('activeParticipants').textContent = activeCount;
             
-            const completedCount = leaderboardData ? Object.keys(leaderboardData).length : 0;
+            const activeLeaderboard = leaderboardData
+                ? Object.fromEntries(Object.entries(leaderboardData).filter(([, e]) => (e.score || 0) > 0))
+                : {};
+            const completedCount = Object.keys(activeLeaderboard).length;
             
-            if (leaderboardData) {
-                allScores = Object.values(leaderboardData).map(entry => entry.score || 0);
-                const avgScore = allScores.length > 0 
-                    ? (allScores.reduce((a, b) => a + b, 0) / allScores.length)
-                    : 0;
+            if (Object.keys(activeLeaderboard).length > 0) {
+                allScores = Object.values(activeLeaderboard).map(entry => entry.score || 0);
+                const avgScore = allScores.reduce((a, b) => a + b, 0) / allScores.length;
                 // Convert to percentage (each completed session has 23 papers × 100 pts each = 2300 max)
                 const avgPercentage = Math.round((avgScore / 2300) * 100);
                 document.getElementById('avgScore').textContent = `${avgPercentage}%`;
@@ -1490,8 +1540,14 @@
 
         onValue(ref(database, 'rankings'), (snapshot) => {
             rankingsData = snapshot.val() || {};
-            updateCriterionImportance(rankingsData);
+            updateCriterionImportance(getFilteredRankings());
         });
+
+        function getFilteredRankings() {
+            return Object.fromEntries(
+                Object.entries(rankingsData).filter(([sid]) => (cachedLeaderboardData[sid]?.score || 0) > 0)
+            );
+        }
 
         // Criterion importance visualisation
         const CRITERIA_KEYS = [
@@ -1524,23 +1580,22 @@
             const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0);
             const n = entries.length;
 
+            // Update participant count in section header
+            const countSpan = document.getElementById('criterion-importance-count');
+            if (countSpan) countSpan.textContent = `Showing pooled responses from ${n} participant${n !== 1 ? 's' : ''}.`;
+
             // Build bar chart
             container.innerHTML = `
-                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Based on ${n} participant${n !== 1 ? 's' : ''}</p>
                 ${CRITERIA_KEYS.map(c => {
                     const pct = grandTotal > 0 ? Math.round((totals[c.key] / grandTotal) * 100) : 0;
-                    const avgTokens = (totals[c.key] / n).toFixed(1);
                     return `
-                        <div style="margin-bottom: 0.9rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                                <span style="font-weight: 600; font-size: 0.9rem;">${c.label}</span>
-                                <span style="font-weight: 400; color: #9ca3af; font-size: 0.8rem;">avg ${avgTokens}/20</span>
-                            </div>
-                            <div style="position: relative; padding: 0.1rem 0;">
-                                <div style="background: #e5e7eb; border-radius: 4px; height: 14px; overflow: hidden;">
-                                    <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, #f59e0b, #d97706); border-radius: 4px;"></div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                            <span style="min-width: 120px; flex-shrink: 0; font-weight: 600; font-size: 0.85rem; color: #374151; white-space: nowrap;" title="${c.label}">${c.label}</span>
+                            <div style="flex: 1; position: relative; height: 26px;">
+                                <div style="position: absolute; top: 50%; transform: translateY(-50%); left: 0; right: 0; height: 18px; background: #e5e7eb; border-radius: 6px; overflow: hidden;">
+                                    <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, #f59e0b, #d97706); border-radius: 6px;"></div>
                                 </div>
-                                <span style="position: absolute; top: 50%; left: min(calc(${pct}% + 8px), calc(100% - 34px)); transform: translateY(-50%); font-weight: 700; color: #d97706; font-size: 0.85rem; line-height: 1;">${pct}%</span>
+                                <span style="position: absolute; top: 50%; transform: translateY(-50%); left: min(calc(${pct}% + 6px), calc(100% - 32px)); font-weight: 700; color: #d97706; font-size: 0.82rem; white-space: nowrap;">${pct}%</span>
                             </div>
                         </div>`;
                 }).join('')}
@@ -1875,6 +1930,7 @@
         function updateLeaderboardTable(leaderboardData) {
             cachedLeaderboardData = leaderboardData || {};
             renderLeaderboard();
+            updateCriterionImportance(getFilteredRankings());
         }
         
         function switchLeaderboardTab(tab) {
@@ -1923,6 +1979,9 @@
                 timestamp: data.timestamp || 0
             }));
             
+            // Always exclude 0% prediction scores
+            entries = entries.filter(entry => entry.score > 0);
+
             // Filter by 24 hours if that tab is active
             if (currentLeaderboardTab === '24h') {
                 const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
