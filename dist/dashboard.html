@@ -34,10 +34,23 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
+        header h1 {
+            background: linear-gradient(135deg, #20B2AA 0%, #48d1cc 30%, #ff9a56 70%, #ff6b35 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            line-height: 1;
+        }
+
         .dashboard-logo {
-            height: 1.8em;
-            vertical-align: middle;
-            margin-top: -0.15em;
+            height: 2rem;
+            flex-shrink: 0;
+            margin-bottom: 0.3rem;
             cursor: pointer;
             animation: logoShake 2s ease-in-out infinite;
             transform-origin: center;
@@ -604,7 +617,7 @@
             color: #20B2AA !important;
         }
     </style>
-  <script type="module" crossorigin src="/assets/dashboard-WsZvkzmG.js"></script>
+  <script type="module" crossorigin src="/assets/dashboard-_pFfDtv8.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
 </head>
 <body>
@@ -670,7 +683,7 @@
         <!-- Leaderboard Section -->
         <div class="data-table" style="margin-bottom: 40px;">
             <h2 style="color: #059669; margin-bottom: 10px;">🏆 Top Predictors</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 15px;">Top performers ranked by prediction accuracy. Scores show how well participants predicted crowd ratings. This leaderboard includes only participants who completed at least 12 ratings.</p>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 15px;">Top performers ranked by prediction accuracy. Scores show how well participants predicted crowd ratings. The leaderboard includes all participants who have submitted at least one rating. <strong>Click any entry to view that participant's personalised results page.</strong></p>
             
             <!-- Leaderboard Tabs -->
             <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
@@ -689,8 +702,8 @@
 
         <!-- SECTION 1b: CRITERION IMPORTANCE -->
         <div class="data-table" style="margin-bottom: 40px;">
-            <h2 style="color: #d97706; margin-bottom: 10px;">⚖️ Criterion Importance</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Average percentage of tokens assigned to each criterion by participants, reflecting what they considered most important when evaluating study quality. <span id="criterion-importance-count"></span></p>
+            <h2 id="criterion-importance-heading" style="color: #d97706; margin-bottom: 10px;">⚖️ Criterion Importance</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Average percentage of tokens assigned to each criterion by participants, reflecting what they considered most important when evaluating study quality. Error bars show 95% confidence intervals for the mean percentage across participants. <span id="criterion-importance-count"></span></p>
             <div id="criterion-importance-container">
                 <p style="text-align: center; color: #999; padding: 2rem 0;">No data yet.</p>
             </div>
@@ -708,8 +721,8 @@
 
         <div class="charts-grid">
             <div class="chart-card" style="grid-column: 1 / -1;">
-                <h2>📊 Average Quality Ratings by Study</h2>
-                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. Data includes only participants who completed at least 12 ratings. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
+                <h2 id="ratings-chart-heading">📊 Average Quality Ratings by Study</h2>
+                <p id="ratings-chart-desc" style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. All participants with at least one valid rating are included. The leaderboard shows the subset who completed the full workshop. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
                 <div class="chart-container">
                     <canvas id="ratingsChart"></canvas>
                 </div>

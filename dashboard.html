@@ -34,10 +34,23 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
+        header h1 {
+            background: linear-gradient(135deg, #20B2AA 0%, #48d1cc 30%, #ff9a56 70%, #ff6b35 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            line-height: 1;
+        }
+
         .dashboard-logo {
-            height: 1.8em;
-            vertical-align: middle;
-            margin-top: -0.15em;
+            height: 2rem;
+            flex-shrink: 0;
+            margin-bottom: 0.3rem;
             cursor: pointer;
             animation: logoShake 2s ease-in-out infinite;
             transform-origin: center;
@@ -668,7 +681,7 @@
         <!-- Leaderboard Section -->
         <div class="data-table" style="margin-bottom: 40px;">
             <h2 style="color: #059669; margin-bottom: 10px;">🏆 Top Predictors</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 15px;">Top performers ranked by prediction accuracy. Scores show how well participants predicted crowd ratings. This leaderboard includes only participants who completed at least 12 ratings.</p>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 15px;">Top performers ranked by prediction accuracy. Scores show how well participants predicted crowd ratings. The leaderboard includes all participants who have submitted at least one rating. <strong>Click any entry to view that participant's personalised results page.</strong></p>
             
             <!-- Leaderboard Tabs -->
             <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
@@ -687,8 +700,8 @@
 
         <!-- SECTION 1b: CRITERION IMPORTANCE -->
         <div class="data-table" style="margin-bottom: 40px;">
-            <h2 style="color: #d97706; margin-bottom: 10px;">⚖️ Criterion Importance</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Average percentage of tokens assigned to each criterion by participants, reflecting what they considered most important when evaluating study quality. <span id="criterion-importance-count"></span></p>
+            <h2 id="criterion-importance-heading" style="color: #d97706; margin-bottom: 10px;">⚖️ Criterion Importance</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Average percentage of tokens assigned to each criterion by participants, reflecting what they considered most important when evaluating study quality. Error bars show 95% confidence intervals for the mean percentage across participants. <span id="criterion-importance-count"></span></p>
             <div id="criterion-importance-container">
                 <p style="text-align: center; color: #999; padding: 2rem 0;">No data yet.</p>
             </div>
@@ -706,8 +719,8 @@
 
         <div class="charts-grid">
             <div class="chart-card" style="grid-column: 1 / -1;">
-                <h2>📊 Average Quality Ratings by Study</h2>
-                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. Data includes only participants who completed at least 12 ratings. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
+                <h2 id="ratings-chart-heading">📊 Average Quality Ratings by Study</h2>
+                <p id="ratings-chart-desc" style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. All participants with at least one valid rating are included. The leaderboard shows the subset who completed the full workshop. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
                 <div class="chart-container">
                     <canvas id="ratingsChart"></canvas>
                 </div>
@@ -1367,6 +1380,7 @@
             let totalRatings = 0;
             let allScores = [];
             const uniqueUsers = new Set();
+            const userRatingCounts = {};
 
             const getValidRatingEntries = (paperRatings) => {
                 return Object.entries(paperRatings || {}).reduce((entries, [userId, value]) => {
@@ -1392,22 +1406,25 @@
                 const validEntries = getValidRatingEntries(paperRatings);
                 const values = validEntries.map(entry => entry.rating);
                 
-                // Track unique user IDs
+                // Track unique user IDs and per-user rating counts
                 validEntries.forEach(entry => {
                     uniqueUsers.add(entry.userId);
+                    userRatingCounts[entry.userId] = (userRatingCounts[entry.userId] || 0) + 1;
                 });
                 
                 totalRatings += values.length;
             });
+
+            const qualifiedUserCount = Object.values(userRatingCounts).filter(c => c >= 12).length;
             
             // Determine if we have any participant data
             const hasParticipants = uniqueUsers.size > 0;
             
-            // Calculate stats - only include seed scores if we have participants
+            // Calculate stats using all available ratings from every participant.
             paperIds.forEach(paperId => {
                 const paperRatings = ratingsData[paperId] || {};
-                const validEntries = getValidRatingEntries(paperRatings);
-                const values = validEntries.map(entry => entry.rating);
+                const allEntries = getValidRatingEntries(paperRatings);
+                const values = allEntries.map(entry => entry.rating);
                 
                 let allValues;
                 if (hasParticipants) {
@@ -1421,7 +1438,7 @@
                 
                 stats[paperId] = {
                     ...calculateStats(allValues),
-                    count: values.length, // Show only real participant count
+                    count: values.length,
                     totalCount: allValues.length // Total including seed
                 };
             });
@@ -1431,6 +1448,10 @@
 
             // Update summary stats
             document.getElementById('uniqueParticipants').textContent = uniqueUsers.size;
+            const ratingsHeading = document.getElementById('ratings-chart-heading');
+            if (ratingsHeading) ratingsHeading.innerHTML = `📊 Average Quality Ratings by Study (<i>N</i>&nbsp;=&nbsp;${uniqueUsers.size})`;
+            const ratingsDesc = document.getElementById('ratings-chart-desc');
+            if (ratingsDesc) ratingsDesc.innerHTML = `Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. All ${uniqueUsers.size} participant${uniqueUsers.size !== 1 ? 's' : ''} with at least one valid rating are included. The leaderboard shows the subset who completed the full workshop. <strong>Click on any bar to view detailed statistics and study information.</strong>`;
             document.getElementById('totalRatings').textContent = totalRatings;
             
             const activeCount = activeData ? Object.keys(activeData).filter(key => {
@@ -1569,33 +1590,78 @@
                 return;
             }
 
-            // Sum tokens per criterion across all participants
-            const totals = { title: 0, access: 0, source: 0, theory: 0, methods: 0, conclusion: 0 };
+            // Build participant-level criterion shares for CI calculation
+            const sharesByCriterion = Object.fromEntries(CRITERIA_KEYS.map(c => [c.key, []]));
             entries.forEach(entry => {
+                const participantTotal = CRITERIA_KEYS.reduce((sum, c) => sum + (Number(entry[c.key]) || 0), 0);
+                if (participantTotal <= 0) return;
+
                 CRITERIA_KEYS.forEach(c => {
-                    totals[c.key] += (entry[c.key] || 0);
+                    sharesByCriterion[c.key].push((Number(entry[c.key]) || 0) / participantTotal);
                 });
             });
 
-            const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0);
-            const n = entries.length;
+            const n = sharesByCriterion[CRITERIA_KEYS[0].key]?.length || 0;
+            if (n === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem 0;">No valid token allocations yet.</p>';
+                return;
+            }
+
+            const z95 = 1.96;
+            const criterionStats = CRITERIA_KEYS.map(c => {
+                const values = sharesByCriterion[c.key];
+                const mean = values.reduce((sum, value) => sum + value, 0) / n;
+
+                let ciHalf = 0;
+                if (n > 1) {
+                    const variance = values.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / (n - 1);
+                    const standardError = Math.sqrt(variance / n);
+                    ciHalf = z95 * standardError;
+                }
+
+                const meanPct = mean * 100;
+                const ciHalfPct = ciHalf * 100;
+                const ciLowPct = Math.max(0, meanPct - ciHalfPct);
+                const ciHighPct = Math.min(100, meanPct + ciHalfPct);
+
+                return {
+                    ...c,
+                    meanPct,
+                    ciHalfPct,
+                    ciLowPct,
+                    ciHighPct
+                };
+            });
+
+            const formatPct = (value) => `${value.toFixed(1)}%`;
 
             // Update participant count in section header
             const countSpan = document.getElementById('criterion-importance-count');
-            if (countSpan) countSpan.textContent = `Showing pooled responses from ${n} participant${n !== 1 ? 's' : ''}.`;
+            if (countSpan) countSpan.textContent = `Showing pooled responses from ${n} participant${n !== 1 ? 's' : ''} with valid token allocations.`;
+            const ciHeading = document.getElementById('criterion-importance-heading');
+            if (ciHeading) ciHeading.innerHTML = `⚖️ Criterion Importance (<i>N</i>&nbsp;=&nbsp;${n})`;
 
             // Build bar chart
             container.innerHTML = `
-                ${CRITERIA_KEYS.map(c => {
-                    const pct = grandTotal > 0 ? Math.round((totals[c.key] / grandTotal) * 100) : 0;
+                ${criterionStats.map(stat => {
+                    const meanPctText = formatPct(stat.meanPct);
+                    const ciWidth = Math.max(0, stat.ciHighPct - stat.ciLowPct);
                     return `
                         <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
-                            <span style="min-width: 120px; flex-shrink: 0; font-weight: 600; font-size: 0.85rem; color: #374151; white-space: nowrap;" title="${c.label}">${c.label}</span>
-                            <div style="flex: 1; position: relative; height: 26px;">
-                                <div style="position: absolute; top: 50%; transform: translateY(-50%); left: 0; right: 0; height: 18px; background: #e5e7eb; border-radius: 6px; overflow: hidden;">
-                                    <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, #f59e0b, #d97706); border-radius: 6px;"></div>
-                                </div>
-                                <span style="position: absolute; top: 50%; transform: translateY(-50%); left: min(calc(${pct}% + 6px), calc(100% - 32px)); font-weight: 700; color: #d97706; font-size: 0.82rem; white-space: nowrap;">${pct}%</span>
+                            <span style="min-width: 120px; flex-shrink: 0; font-weight: 600; font-size: 0.85rem; color: #374151; white-space: nowrap;" title="${stat.label}">${stat.label}</span>
+                            <div style="flex: 1; position: relative; height: 22px;">
+                                <!-- Background track -->
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 100%; background: #e5e7eb; border-radius: 6px;"></div>
+                                <!-- Mean bar -->
+                                <div style="position: absolute; top: 0; left: 0; width: ${stat.meanPct}%; height: 100%; background: linear-gradient(90deg, #f59e0b, #d97706); border-radius: 6px;"></div>
+                                <!-- CI horizontal spine centred on bar height -->
+                                <div style="position: absolute; top: 50%; transform: translateY(-50%); left: ${stat.ciLowPct}%; width: ${ciWidth}%; height: 2px; background: #b45309;"></div>
+                                <!-- CI low tick (full bar height) -->
+                                <div style="position: absolute; top: 0; bottom: 0; left: ${stat.ciLowPct}%; width: 1.5px; background: #b45309; transform: translateX(-50%);"></div>
+                                <!-- CI high tick (full bar height) -->
+                                <div style="position: absolute; top: 0; bottom: 0; left: ${stat.ciHighPct}%; width: 1.5px; background: #b45309; transform: translateX(-50%);"></div>
+                                <!-- Mean percentage label, placed after right CI tick -->
+                                <span style="position: absolute; top: 50%; transform: translateY(-50%); left: calc(${stat.ciHighPct}% + 8px); font-weight: 700; color: #d97706; font-size: 0.82rem; white-space: nowrap;">${meanPctText}</span>
                             </div>
                         </div>`;
                 }).join('')}
@@ -2021,7 +2087,7 @@
                 const scoreColor = percentageScore >= 80 ? '#10b981' : percentageScore >= 60 ? '#3b82f6' : percentageScore >= 40 ? '#f59e0b' : '#ef4444';
                 
                 return `
-                    <div style="
+                    <div role="link" tabindex="0" title="View ${entry.userName}'s results" onclick="window.location.href='../?session=${encodeURIComponent(entry.sessionId)}'" onkeydown="if(event.key==='Enter'||event.key===' ')window.location.href='../?session=${encodeURIComponent(entry.sessionId)}'" style="
                         background: ${bgColor};
                         border: 1px solid ${borderColor};
                         border-radius: 6px;
@@ -2031,7 +2097,8 @@
                         justify-content: space-between;
                         gap: 8px;
                         transition: transform 0.2s, box-shadow 0.2s;
-                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                        cursor: pointer;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
                         <div style="font-size: 0.8rem; font-weight: bold; color: #6b7280; flex-shrink: 0;">${displayRank}</div>
                         <div style="font-size: 0.85rem; color: #1f2937; font-weight: ${fontWeight}; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${entry.userName}${medal}</div>
                         <div style="font-size: 0.9rem; font-weight: bold; color: ${scoreColor}; flex-shrink: 0;">${percentageScore}%</div>
@@ -2100,8 +2167,8 @@
                     
                     <div style="margin-top: 1.5rem;">
                         <h3 style="margin-top: 0; color: #20B2AA;">Study Details</h3>
-                        <div style="background: #ffffff; padding: 1rem; border-left: 4px solid #20B2AA; margin-bottom: 1rem;">
-                            <h4 style="margin: 0 0 0.5rem 0; color: #374151; font-size: 1rem;">${paperInfo.title}</h4>
+                        <div style="background: #ffffff; padding: 0.4rem 1rem; border-left: 4px solid #20B2AA; margin-bottom: 1rem;">
+                            <h4 style="margin: 0; color: #374151; font-size: 1rem;">${paperInfo.title}</h4>
                         </div>
                         
                         <div style="margin-bottom: 1.25rem;">

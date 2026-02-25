@@ -4,32 +4,35 @@
     ".write": false,
     "ratings": {
       ".read": true,
-      ".write": "auth != null",
+      ".write": "auth != null && auth.token.firebase.sign_in_provider === 'password'",
       "$paperId": {
         "$sessionId": {
-          ".write": true
+          ".write": "auth != null && (auth.token.firebase.sign_in_provider === 'password' || !data.exists())",
+          ".validate": "newData.hasChildren(['rating', 'timestamp', 'uid']) && newData.child('rating').isNumber() && newData.child('rating').val() >= 1 && newData.child('rating').val() <= 7 && newData.child('uid').val() === auth.uid"
         }
       }
     },
     "leaderboard": {
       ".read": true,
-      ".write": "auth != null",
+      ".write": "auth != null && auth.token.firebase.sign_in_provider === 'password'",
       "$sessionId": {
-        ".write": true
+        ".write": "auth != null && (auth.token.firebase.sign_in_provider === 'password' || !data.exists() || data.child('uid').val() === auth.uid)",
+        ".validate": "newData.hasChildren(['score', 'timestamp', 'uid']) && newData.child('score').isNumber() && newData.child('uid').val() === auth.uid"
       }
     },
     "rankings": {
       ".read": true,
-      ".write": "auth != null",
+      ".write": "auth != null && auth.token.firebase.sign_in_provider === 'password'",
       "$sessionId": {
-        ".write": true
+        ".write": "auth != null && (auth.token.firebase.sign_in_provider === 'password' || !data.exists())",
+        ".validate": "newData.hasChildren(['timestamp', 'uid']) && newData.child('uid').val() === auth.uid"
       }
     },
     "active": {
       ".read": true,
-      ".write": "auth != null",
+      ".write": "auth != null && auth.token.firebase.sign_in_provider === 'password'",
       "$sessionId": {
-        ".write": true
+        ".write": "auth != null && (auth.token.firebase.sign_in_provider === 'password' || !data.exists() || data.child('uid').val() === auth.uid)"
       }
     }
   }

@@ -1,12 +1,14 @@
 // Import Firebase modules
-import { database } from './firebase-config.js';
+import { database, auth } from './firebase-config.js';
 import { ref, set, get, onValue } from 'firebase/database';
+import { signInAnonymously } from 'firebase/auth';
 import Chart from 'chart.js/auto';
 import glossaryData from './public/glossary.json';
 import rubricData from './public/rubric.json';
 import papersData from './public/papers.json';
 
 // Application State
+let firebaseUid = null; // Set after anonymous auth on init
 let currentPage = 0;
 let papers = [];
 let glossary = [];
@@ -391,74 +393,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     
-    // Try to load saved state first
+    // Load saved state first
     const hasState = loadState();
     
     // Generate or restore session ID
     if (!sessionId) {
         sessionId = generateSessionId();
     }
-    
-    // Generate or retrieve username
-    userName = localStorage.getItem('userName');
-    if (!userName) {
-        userName = await generateUniqueUsername();
-        localStorage.setItem('userName', userName);
-    }
-    
-    // Start session timeout
-    startSessionTimeout();
-    
-    // Load content - MUST complete before generating pages
+
+    // Load content and build all pages SYNCHRONOUSLY before any async work.
+    // This ensures papers[], glossary, and rubric are ready before the page is
+    // shown and before any user interaction can occur.
     await loadContent();
-    console.log('Content loaded. Papers:', papers.length);
-    console.log('Glossary items:', glossary ? glossary.length : 'NOT LOADED');
-    console.log('Rubric categories:', rubric ? rubric.length : 'NOT LOADED');
-    console.log('Paper data sample (first paper):', papers[0]);
-    
-    // Generate paper pages AFTER content is loaded
     generatePaperPages();
-    console.log('Paper pages generated');
-    
+
     // Initialize animations for all paper page logos
     papers.forEach((paper, index) => {
         setupLogoAnimation(`paper-logo-${index}`);
     });
-    
-    console.log('Checking if paper pages were created...');
-    for (let i = 0; i < Math.min(10, papers.length); i++) {
-        const pageElement = document.getElementById(`page-paper-${i}`);
-        console.log(`Paper ${i} (${papers[i].id}) page element:`, pageElement ? 'EXISTS' : 'NOT FOUND');
-    }
-    
-    // Display username at bottom of all pages AFTER pages are generated
-    displayUsername();
-    
-    // Initialize glossary and rubric AFTER pages exist
-    console.log('Rendering glossary and rubric...');
-    console.log('Glossary data:', glossary);
-    console.log('Rubric data:', rubric);
+
+    // Render guide-page content (glossary + rubric)
     renderGlossary();
     renderRubric();
-    console.log('Glossary and rubric rendered');
-    
-    // Verify rendering worked
-    const glossaryContent = document.getElementById('glossary-content');
-    const rubricContent = document.getElementById('rubric-content');
-    console.log('After rendering - glossary-content has HTML:', glossaryContent ? (glossaryContent.innerHTML.length > 0 ? 'YES (' + glossaryContent.innerHTML.length + ' chars)' : 'NO (empty)') : 'ELEMENT NOT FOUND');
-    console.log('After rendering - rubric-content has HTML:', rubricContent ? (rubricContent.innerHTML.length > 0 ? 'YES (' + rubricContent.innerHTML.length + ' chars)' : 'NO (empty)') : 'ELEMENT NOT FOUND');
-    
+
     // Restore previously submitted ratings if resuming
     if (hasState && Object.keys(userRatings).length > 0) {
         restoreSubmittedRatings();
     }
-    
-    // Track active participants
-    trackParticipant();
-    
-    // Update participant count
-    updateParticipantCount();
-    
+
     // Update score display if resuming with existing score
     if (totalScore > 0) {
         const scoreDisplay = document.getElementById('total-score-header');
@@ -470,11 +432,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('score-banner').style.display = 'flex';
         }
     }
-    
-    // IMPORTANT: Show saved page if state exists, otherwise start from beginning
+
+    // Show the correct page NOW — content is ready, no race condition possible
     const pageToShow = (hasState && currentPage > 0) ? currentPage : 0;
-    console.log('Showing page:', pageToShow, 'hasState:', hasState, 'currentPage:', currentPage);
     showPage(pageToShow);
+
+    // === Async work that must not block page display ===
+
+    // Sign in anonymously so all subsequent Firebase writes carry a verified auth token.
+    // auth.currentUser persists across page reloads via Firebase's local persistence.
+    if (auth.currentUser) {
+        firebaseUid = auth.currentUser.uid;
+    } else {
+        const cred = await signInAnonymously(auth);
+        firebaseUid = cred.user.uid;
+    }
+
+    // Generate or retrieve username (may require a Firebase round-trip)
+    userName = localStorage.getItem('userName');
+    if (!userName) {
+        userName = await generateUniqueUsername();
+        localStorage.setItem('userName', userName);
+    }
+
+    // Update username placeholders now that the value is known
+    displayUsername();
+
+    // Start session timeout
+    startSessionTimeout();
+
+    // Track active participants
+    trackParticipant();
+
+    // Update participant count
+    updateParticipantCount();
 });
 
 // Expose functions to global scope for HTML onclick handlers
@@ -805,14 +796,16 @@ function trackParticipant() {
     // Mark as active
     set(participantRef, {
         joinedAt: Date.now(),
-        lastActive: Date.now()
+        lastActive: Date.now(),
+        uid: firebaseUid
     });
     
     // Update activity every 30 seconds
     setInterval(() => {
         set(participantRef, {
             joinedAt: Date.now(),
-            lastActive: Date.now()
+            lastActive: Date.now(),
+            uid: firebaseUid
         });
     }, 30000);
     
@@ -1187,6 +1180,9 @@ function showPage(pageIndex) {
         if (navbarUsername) navbarUsername.style.display = 'none';
         // Hide help button on guide page
         document.getElementById('help-button').classList.remove('visible');
+        // Always ensure glossary/rubric content is rendered when this page is shown
+        if (glossary && glossary.length > 0) renderGlossary();
+        if (rubric && rubric.length > 0) renderRubric();
     } else if (pageIndex <= papers.length + 1) {
         const paperIndex = pageIndex - 2;
         targetPage = document.getElementById(`page-paper-${paperIndex}`);
@@ -1259,11 +1255,11 @@ function previousPage() {
     }
 }
 
-// Finish early after rating at least 12 studies
+// Finish early
 function finishEarly() {
     const totalRated = Object.keys(userRatings).length;
-    if (totalRated < 12) {
-        alert('Please rate at least 12 studies before finishing.');
+    if (totalRated < 1) {
+        alert('Please rate at least one study before finishing.');
         return;
     }
     
@@ -1376,7 +1372,8 @@ window.submitRanking = async function() {
         await set(rankingRef, {
             ...criterionTokens,
             userName: userName,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            uid: firebaseUid
         });
     } catch (error) {
         console.error('Error saving criterion ranking:', error);
@@ -1427,13 +1424,6 @@ async function submitRating(paperIndex, paperId) {
         return;
     }
     
-    // Check if user has already reached maximum rating limit
-    const currentRatingCount = Object.keys(userRatings).length;
-    if (currentRatingCount >= 24) {
-        alert('You have reached the maximum of 24 ratings. Please proceed to view your results.');
-        return;
-    }
-    
     const rating = parseInt(selectedRating.value);
     const prediction = parseInt(selectedPrediction.value);
     
@@ -1479,13 +1469,24 @@ async function submitRating(paperIndex, paperId) {
             ? Date.now() - pageDisplayTimestamps[paperId]
             : null; // null if timestamp was not recorded (should not occur)
         
+        // Ensure anonymous auth is ready before writing (auth may still be resolving on page load)
+        if (!firebaseUid) {
+            if (auth.currentUser) {
+                firebaseUid = auth.currentUser.uid;
+            } else {
+                const cred = await signInAnonymously(auth);
+                firebaseUid = cred.user.uid;
+            }
+        }
+
         // NOW save rating to Firebase (after calculating prediction score)
         const userRatingRef = ref(database, `ratings/${paperId}/${sessionId}`);
         await set(userRatingRef, {
             rating: rating,
             prediction: prediction,
             responseTime: responseTime, // Time in milliseconds from page display to submission
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            uid: firebaseUid
         });
         
     } catch (error) {
@@ -1566,31 +1567,26 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
             // Save state after score update
             saveState();
             
-            // Check if user has rated at least 12 studies
+            // Show Finish Early button after any rating (if not on the last paper)
             const totalRated = Object.keys(userRatings).length;
-            
-            // Special celebration for exactly 12 ratings
+            if (totalRated >= 1 && paperIndex < papers.length - 1) {
+                const finishBtn = document.getElementById(`finish-btn-${paperIndex}`);
+                if (finishBtn) {
+                    finishBtn.style.display = 'block';
+                }
+            }
+
+            // Special celebration at exactly 12 ratings milestone
             if (totalRated === 12) {
-                // Trigger celebration animation on the current paper page logo
                 const paperLogo = document.getElementById(`paper-logo-${paperIndex}`);
                 if (paperLogo) {
                     setTimeout(() => {
                         paperLogo.dispatchEvent(new CustomEvent('celebrate'));
                     }, 800);
                 }
-                
-                // Show popup after short delay to let score display first
                 setTimeout(() => {
-                    alert('Rated 12 papers! Rate a few more papers (recommended) or proceed to view your results.');
+                    alert('🎉 You\'ve rated 12 studies! Feel free to keep going or finish early whenever you\'re ready.');
                 }, 1200);
-            }
-            
-            if (totalRated >= 12 && paperIndex < papers.length - 1) {
-                // Show Finish button
-                const finishBtn = document.getElementById(`finish-btn-${paperIndex}`);
-                if (finishBtn) {
-                    finishBtn.style.display = 'block';
-                }
             }
         }
     }
@@ -1694,10 +1690,22 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
                 // Save state after score update
                 saveState();
                 
-                // Check if user has rated at least 12 studies
+                // Progressively update leaderboard so all raters appear, not just those who reach the results page
+                if (firebaseUid && sessionId && userName) {
+                    const ratedCount = Object.keys(userRatings).length;
+                    const partialRef = ref(database, `leaderboard/${sessionId}`);
+                    set(partialRef, {
+                        score: totalScore,
+                        timestamp: Date.now(),
+                        papersRated: ratedCount,
+                        userName: userName,
+                        uid: firebaseUid
+                    }).catch(err => console.warn('[Leaderboard] Progressive update failed:', err));
+                }
+                
+                // Show Finish Early button after any rating (if not on the last paper)
                 const totalRated = Object.keys(userRatings).length;
-                if (totalRated >= 12 && paperIndex < papers.length - 1) {
-                    // Show Finish button
+                if (totalRated >= 1 && paperIndex < papers.length - 1) {
                     const finishBtn = document.getElementById(`finish-btn-${paperIndex}`);
                     if (finishBtn) {
                         finishBtn.style.display = 'block';
@@ -1835,7 +1843,8 @@ function showFinalResults() {
             score: totalScore,
             timestamp: Date.now(),
             papersRated: Object.keys(userRatings).length,
-            userName: userName
+            userName: userName,
+            uid: firebaseUid
         }).then(() => {
             // Show link copying and email buttons after save
             document.getElementById('save-results-link').style.display = 'inline-block';
