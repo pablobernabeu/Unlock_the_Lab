@@ -1261,8 +1261,8 @@ function previousPage() {
 // Finish early
 function finishEarly() {
     const totalRated = Object.keys(userRatings).length;
-    if (totalRated < 1) {
-        alert('Please rate at least one study before finishing.');
+    if (totalRated < 10) {
+        alert('Please rate at least 10 studies before finishing.');
         return;
     }
     
@@ -1570,9 +1570,9 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
             // Save state after score update
             saveState();
             
-            // Show Finish Early button after any rating (if not on the last paper)
+            // Show Finish Early button after 10 ratings (if not on the last paper)
             const totalRated = Object.keys(userRatings).length;
-            if (totalRated >= 1 && paperIndex < papers.length - 1) {
+            if (totalRated >= 10 && paperIndex < papers.length - 1) {
                 const finishBtn = document.getElementById(`finish-btn-${paperIndex}`);
                 if (finishBtn) {
                     finishBtn.style.display = 'block';
@@ -1706,9 +1706,9 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
                     }).catch(err => console.warn('[Leaderboard] Progressive update failed:', err));
                 }
                 
-                // Show Finish Early button after any rating (if not on the last paper)
+                // Show Finish Early button after 10 ratings (if not on the last paper)
                 const totalRated = Object.keys(userRatings).length;
-                if (totalRated >= 1 && paperIndex < papers.length - 1) {
+                if (totalRated >= 10 && paperIndex < papers.length - 1) {
                     const finishBtn = document.getElementById(`finish-btn-${paperIndex}`);
                     if (finishBtn) {
                         finishBtn.style.display = 'block';
