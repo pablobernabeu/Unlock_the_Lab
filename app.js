@@ -1885,8 +1885,8 @@ function showFinalResults() {
                     userName: data.userName || 'Anonymous',
                     papersRated: data.papersRated || 0
                 }))
-                // Hide the Anonymous placeholder from all leaderboard displays
-                .filter(entry => entry.userName !== 'Anonymous');
+                // Hide the Anonymous placeholder and 0% users from all leaderboard displays
+                .filter(entry => entry.userName !== 'Anonymous' && entry.score > 0);
             
             // Sort by score (descending)
             scoresArray.sort((a, b) => b.score - a.score);
