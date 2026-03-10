@@ -55,7 +55,7 @@
                     
                     <div style="margin-top: 2rem; padding: 1.25rem; background: #fff3e0; border: 2px solid #ff9800; border-radius: 8px;">
                         <h3 style="margin-top: 0; color: #e65100; font-size: 1rem;">🏆 Leaderboard & Anonymous Usernames</h3>
-                        <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem;">Complete the workshop (or finish early after rating at least 10 papers) to appear on the <strong>public leaderboard</strong> and to review and compare your ratings with the crowd.</p>
+                        <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem;">Your results contribute to the <strong>public leaderboard</strong> as you go. Complete the workshop (or finish early after rating at least 10 papers) to review and compare your ratings with the crowd.</p>
                         <ul style="font-size: 0.9rem; line-height: 1.6; margin: 0.75rem 0; padding-left: 1.5rem;">
                             <li>You'll be assigned a <strong>unique anonymous username</strong> (e.g., "Red Fox", "Wise Owl") automatically.</li>
                             <li>Your username will be displayed on the <strong>results page at the end</strong>.</li>
@@ -167,16 +167,17 @@
                     
                     <!-- PART 1: PREDICTION PERFORMANCE -->
                     <div style="margin-bottom: 3rem; padding: 2rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; color: white;">
-                        <h2 style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem;">
+                        <h2 id="final-part1-heading" style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem;">
                             🎯 Part 1: Your Prediction Performance
                         </h2>
-                        <p style="font-size: 1.05rem; margin-bottom: 1.5rem;">
+                        <p id="final-part1-desc" style="font-size: 1.05rem; margin-bottom: 1.5rem;">
                             How well did you predict what others would rate each study?
                         </p>
                         
                         <div class="final-score-card" style="background: white; color: #1f2937;">
-                            <h3 style="color: #059669;">Your Prediction Accuracy Score</h3>
+                            <h3 id="final-score-heading" style="color: #059669;">Your Prediction Accuracy Score</h3>
                             <div class="final-score" id="final-score">0</div>
+                            <p id="final-papers-count" style="font-size: 0.9rem; color: #666; margin: 0.5rem 0 0 0;">Based on <span id="total-papers">0</span> paper</p>
                             <div class="score-rank" id="score-rank">Calculating rank...</div>
                             <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
                                 This score measures how accurately you predicted the crowd's average ratings. Higher scores mean better predictions!
@@ -185,7 +186,7 @@
                         
                         <div class="leaderboard" style="background: rgba(255,255,255,0.95); border-radius: 8px; padding: 1.25rem; margin-top: 1.25rem;">
                             <h3 style="color: #059669; margin-top: 0; text-shadow: none;">🏆 Top Predictors</h3>
-                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                            <p id="final-leaderboard-desc" style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
                                 See how your prediction accuracy compares to other participants
                             </p>
                             <div id="leaderboard-list">Loading...</div>
@@ -194,10 +195,10 @@
                     
                     <!-- PART 2: YOUR RATING PROFILE -->
                     <div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
-                        <h2 style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+                        <h2 id="final-part2-heading" style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
                             📊 Part 2: Your Rating Profile
                         </h2>
-                        <p style="font-size: 1.05rem; margin-bottom: 1.5rem; font-weight: 300;">
+                        <p id="final-part2-desc" style="font-size: 1.05rem; margin-bottom: 1.5rem; font-weight: 300; color: white;">
                             How did your own quality ratings compare to the crowd's ratings?
                         </p>
                         
@@ -207,8 +208,8 @@
                                 <p id="analysis-summary" style="font-size: 1.05rem; line-height: 1.7; margin: 0;"></p>
                             </div>
                             <div style="background: white; border-radius: 10px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 1rem 0;">
-                                <h3 style="color: #20B2AA; margin-top: 0; text-shadow: none;">Your Ratings vs. Crowd Average</h3>
-                                <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                                <h3 id="final-chart-heading" style="color: #20B2AA; margin-top: 0; text-shadow: none;">Your Ratings vs. Crowd Average</h3>
+                                <p id="final-chart-desc" style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
                                     This chart shows how your quality ratings (purple line) compared to what other participants rated on average (green dashed line).
                                 </p>
                                 <div style="position: relative; height: 220px;">
@@ -220,10 +221,10 @@
                     
                     <!-- PART 3: CRITERION IMPORTANCE -->
                     <div id="criterion-importance-section" style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 12px; color: white;">
-                        <h2 style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+                        <h2 id="final-part3-heading" style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
                             ⚖️ Part 3: Your Criterion Weightings
                         </h2>
-                        <p style="font-size: 1.05rem; margin-bottom: 1rem; font-weight: 300;">
+                        <p id="final-part3-desc" style="font-size: 1.05rem; margin-bottom: 1rem; font-weight: 300;">
                             Here is how you weighted the six evaluation criteria.
                         </p>
                         <div id="criterion-importance-bars" style="background: rgba(255,255,255,0.95); color: #1f2937; padding: 1rem; border-radius: 10px;">
@@ -231,8 +232,9 @@
                         </div>
                     </div>
 
-                    <h2>You've evaluated <span id="total-papers">0</span> research papers!</h2>
-                    <ul style="line-height: 1.8; padding-left: 2rem; margin: 1.5rem 0;">
+                    <h2 id="final-evaluated-heading">You've evaluated <span id="total-papers-below">0</span> research papers!</h2>
+                    <h3 style="margin-top: 2rem; margin-bottom: 0.5rem;">Key Takeaways</h3>
+                    <ul style="line-height: 1.8; padding-left: 2rem; margin: 0.5rem 0 1.5rem 0;">
                         <li style="margin-bottom: 0.75rem;"><strong>🔓 Open Access</strong> — Paywalls hide science from public scrutiny. Demand transparency!</li>
                         <li style="margin-bottom: 0.75rem;"><strong>🚨 Spotting Clickbait</strong> — Sensational titles usually mean weak science underneath</li>
                         <li style="margin-bottom: 0.75rem;"><strong>🔬 Methodology Matters</strong> — Sample sizes, controls, and open data separate real from fake</li>

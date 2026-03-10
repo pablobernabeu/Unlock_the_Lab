@@ -36,9 +36,9 @@ const CRITERIA = [
 ];
 
 // Session timeout configuration — inactivity-based disconnect
-const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // Disconnect after 10 minutes of inactivity
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // Disconnect after 30 minutes of inactivity
 const INACTIVITY_WARNING = 5 * 60 * 1000;  // Warn when 5 minutes of inactivity remain
-const ABSOLUTE_MAX_DURATION = 50 * 60 * 1000; // Hard cap: disconnect after 50 minutes regardless
+const ABSOLUTE_MAX_DURATION = 120 * 60 * 1000; // Hard cap: disconnect after 2 hours regardless
 const ACTIVITY_RESET_DEBOUNCE = 5000; // Avoid resetting timers too frequently
 const ACTIVITY_EVENTS = ['click', 'keydown', 'touchstart', 'scroll', 'mousemove'];
 let lastActivityTime = null;
@@ -1532,6 +1532,10 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
                 `<strong>💪 Keep learning!</strong><br>Predicted ${userPrediction}, actual ${preCalculatedAverage.toFixed(1)} — science perception is tricky!`;
             msgElement.style.fontSize = '0.95rem';
             msgElement.style.lineHeight = '1.5';
+
+            // Update total score (must be done here since the onValue block is skipped
+            // when scoreElement.textContent is already populated)
+            totalScore += score;
             
             // Trigger celebration animation if score >= 90% and not already celebrated for this paper
             if (score >= 90 && !celebratedPapers.has(paperId)) {
@@ -1569,6 +1573,19 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
             
             // Save state after score update
             saveState();
+
+            // Progressively update leaderboard so all raters appear from first rating
+            if (firebaseUid && sessionId && userName) {
+                const ratedCount = Object.keys(userRatings).length;
+                const partialRef = ref(database, `leaderboard/${sessionId}`);
+                set(partialRef, {
+                    score: totalScore,
+                    timestamp: Date.now(),
+                    papersRated: ratedCount,
+                    userName: userName,
+                    uid: firebaseUid
+                }).catch(err => console.warn('[Leaderboard] Progressive update failed:', err));
+            }
             
             // Show Finish Early button after 10 ratings (if not on the last paper)
             const totalRated = Object.keys(userRatings).length;
@@ -1811,12 +1828,38 @@ function showFinalResults() {
     const percentageScore = ratedCount > 0 ? Math.round(totalScore / ratedCount) : 0;
     document.getElementById('final-score').textContent = `${percentageScore}%`;
     
-    // Update total papers count
-    const totalPapersElement = document.getElementById('total-papers');
-    if (totalPapersElement) {
-        totalPapersElement.textContent = ratedCount;
+    // Update total papers count — score card (top) and heading (below)
+    const paperWord = ratedCount === 1 ? 'paper' : 'papers';
+    const totalPapersEl = document.getElementById('total-papers');
+    if (totalPapersEl) {
+        totalPapersEl.textContent = ratedCount;
+        // Fix the surrounding text to use correct singular/plural
+        const countPara = document.getElementById('final-papers-count');
+        if (countPara) countPara.innerHTML = `Based on <span id="total-papers">${ratedCount}</span> ${paperWord}`;
     }
-    
+    const totalPapersBelowEl = document.getElementById('total-papers-below');
+    if (totalPapersBelowEl) totalPapersBelowEl.textContent = ratedCount;
+
+    // Update headings and descriptions when viewing another participant's results
+    if (isViewingResults) {
+        const poss = `${userName}'s`;
+        document.getElementById('final-part1-heading').textContent = '🎯 Part 1: Prediction Performance';
+        document.getElementById('final-part1-desc').textContent = `How well did ${userName} predict what others would rate each study?`;
+        document.getElementById('final-score-heading').textContent = 'Prediction Accuracy Score';
+        document.getElementById('final-leaderboard-desc').textContent = `See how ${poss} prediction accuracy compares to other participants`;
+        document.getElementById('final-part2-heading').textContent = '📊 Part 2: Rating Profile';
+        document.getElementById('final-part2-desc').textContent = `How did ${poss} quality ratings compare to the crowd's ratings?`;
+        document.getElementById('final-chart-heading').textContent = `${poss} Ratings vs. Crowd Average`;
+        document.getElementById('final-chart-desc').textContent = `This chart shows how ${poss} quality ratings (purple line) compared to what other participants rated on average (green dashed line).`;
+        document.getElementById('final-part3-heading').textContent = '⚖️ Part 3: Criterion Weightings';
+        document.getElementById('final-part3-desc').textContent = `Here is how ${userName} weighted the six evaluation criteria.`;
+        const evalHeading = document.getElementById('final-evaluated-heading');
+        if (evalHeading) {
+            const paperWord = ratedCount === 1 ? 'paper' : 'papers';
+            evalHeading.innerHTML = `${userName} evaluated <span id="total-papers-below">${ratedCount}</span> research ${paperWord}!`;
+        }
+    }
+
     // Render criterion importance bars — always load from Firebase as source of truth
     const criterionBarSessionId = sessionId;
     if (criterionBarSessionId) {
@@ -1893,8 +1936,9 @@ function showFinalResults() {
             
             // Find user's rank
             const userRank = scoresArray.findIndex(s => s.id === sessionId) + 1;
-            document.getElementById('score-rank').textContent = 
-                `You ranked #${userRank} out of ${scoresArray.length} participant${scoresArray.length !== 1 ? 's' : ''}!`;
+            document.getElementById('score-rank').textContent = isViewingResults
+                ? `${userName} ranked #${userRank} out of ${scoresArray.length} participant${scoresArray.length !== 1 ? 's' : ''}!`
+                : `You ranked #${userRank} out of ${scoresArray.length} participant${scoresArray.length !== 1 ? 's' : ''}!`;
             
             // Display top 5
             const top5 = scoresArray.slice(0, 5);
@@ -1907,7 +1951,7 @@ function showFinalResults() {
                         <span class="rank">${medal || `#${index + 1}`}</span>
                         <div class="username-container">
                             <span class="username">${entry.userName}</span>
-                            ${isUser ? '<span class="you-badge">You!</span>' : ''}
+                            ${isUser && !isViewingResults ? '<span class="you-badge">You!</span>' : ''}
                         </div>
                         <span class="score">${percentageScore}%</span>
                     </div>
@@ -1978,26 +2022,27 @@ async function calculateRatingAnalysis() {
         
         // Generate personalized summary
         let summaryText = '';
-        
+        const poss = isViewingResults ? `${userName}'s` : 'Your';
+
         if (meanAbsDeviation < 0.5 && stdDev < 0.8) {
             // High alignment with average ratings
-            summaryText = `🎯 <strong>Spot-On Evaluator!</strong> Your ratings are remarkably well-aligned with the crowd. On average, you deviated by just ${meanAbsDeviation.toFixed(2)} points from other participants' ratings. Your assessments are well backed by both the baseline quality indicators and the collective wisdom of other evaluators. You're in sync with the scientific consensus!`;
+            summaryText = `🎯 <strong>Spot-On Evaluator!</strong> ${poss} ratings are remarkably well-aligned with the crowd—only ${meanAbsDeviation.toFixed(2)} points off on average. ${poss} assessments are well grounded in the baseline quality indicators and the collective wisdom of other evaluators.`;
         } else if (meanAbsDeviation < 1.0 && stdDev < 1.5) {
             // Close to average
-            summaryText = `✓ <strong>Calibrated Scientist.</strong> Your ratings align well with the crowd, averaging ${meanAbsDeviation.toFixed(2)} points from the consensus. You're consistently backed by other participants' evaluations, showing you've developed a reliable eye for research quality that matches the collective assessment.`;
+            summaryText = `✓ <strong>Calibrated Scientist.</strong> ${poss} ratings align well with the crowd, averaging ${meanAbsDeviation.toFixed(2)} points from the consensus. Other participants' evaluations are consistent with this, showing a reliable eye for research quality.`;
         } else if (meanAbsDeviation > 2.0 || stdDev > 2.5) {
             // Substantial deviation from average ratings
-            summaryText = `🌟 <strong>Breaking the Mould!</strong> Your ratings deviate substantially from the crowd (average difference: ${meanAbsDeviation.toFixed(2)} points). You're seeing research quality through a unique lens—perhaps you're more critical of methodological flaws, or more generous with preliminary findings. Your independent perspective challenges the consensus!`;
+            summaryText = `🌟 <strong>Breaking the Mould!</strong> ${poss} ratings deviate substantially from the crowd (average difference: ${meanAbsDeviation.toFixed(2)} points), seeing research quality through a unique lens—perhaps more critical of methodological flaws, or more generous with preliminary findings. This independent perspective challenges the consensus!`;
         } else {
             // Moderately different
-            summaryText = `⚖️ <strong>Balanced Contrarian.</strong> Your ratings show notable differences from the average (typical deviation: ${meanAbsDeviation.toFixed(2)} points). You're neither slavishly following the crowd nor wildly divergent—you're bringing a thoughtful, independent perspective whilst still engaging with the scientific consensus.`;
+            summaryText = `⚖️ <strong>Balanced Contrarian.</strong> ${poss} ratings show notable differences from the average (typical deviation: ${meanAbsDeviation.toFixed(2)} points)—neither slavishly following the crowd nor wildly divergent, but bringing a thoughtful, independent perspective whilst still engaging with the scientific consensus.`;
         }
         
         document.getElementById('analysis-summary').innerHTML = summaryText;
         document.getElementById('rating-analysis').style.display = 'block';
         
         // Create comparison chart
-        createComparisonChart(paperLabels, userRatingsArr, avgRatingsArr);
+        createComparisonChart(paperLabels, userRatingsArr, avgRatingsArr, isViewingResults ? `${userName}'s Ratings` : 'Your Ratings');
         
     } catch (error) {
         console.error('Error calculating rating analysis:', error);
@@ -2005,7 +2050,7 @@ async function calculateRatingAnalysis() {
 }
 
 // Create Chart.js visualization comparing user ratings to average
-function createComparisonChart(labels, userRatings, avgRatings) {
+function createComparisonChart(labels, userRatings, avgRatings, seriesLabel = 'Your Ratings') {
     const ctx = document.getElementById('comparison-chart');
     if (!ctx) return;
     
@@ -2015,7 +2060,7 @@ function createComparisonChart(labels, userRatings, avgRatings) {
             labels: labels,
             datasets: [
                 {
-                    label: 'Your Ratings',
+                    label: seriesLabel,
                     data: userRatings,
                     borderColor: '#667eea',
                     backgroundColor: 'rgba(102, 126, 234, 0.1)',
@@ -2217,12 +2262,6 @@ async function loadSessionResults(targetSessionId) {
         
         // Display results
         showFinalResults();
-        
-        // Update page title
-        const totalPapersElement = document.getElementById('total-papers');
-        if (totalPapersElement) {
-            totalPapersElement.textContent = Object.keys(userRatings).length;
-        }
         
     } catch (error) {
         console.error('Error loading session results:', error);
