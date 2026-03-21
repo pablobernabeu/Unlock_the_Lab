@@ -2,9 +2,11 @@
 
 A web-based application for teaching critical evaluation of scientific research through interactive peer assessment.
 
+[![DOI](https://zenodo.org/badge/1102647925.svg)](https://doi.org/10.5281/zenodo.19153148)
+
 ## Overview
 
-Unlock the Lab is an educational tool designed to develop science literacy by training participants to evaluate research quality using evidence-based criteria. The application presents fictional research scenarios and challenges users to predict peer consensus on research quality, creating an engaging environment for learning to distinguish rigorous science from sensationalized claims.
+Unlock the Lab is an educational tool designed to develop science literacy by training participants to evaluate research quality using evidence-based criteria. The application presents fictional research scenarios and challenges users to predict peer consensus on research quality, creating an engaging environment for learning to distinguish rigorous science from sensationalised claims.
 
 ### Educational Objectives
 
@@ -18,11 +20,11 @@ Unlock the Lab is an educational tool designed to develop science literacy by tr
 
 ### Core Functionality
 
-- **Interactive Workshop Flow**: Guided progression through educational content, evaluation rubric, and 48 fictional research scenarios
+- **Interactive Workshop Flow**: Guided progression through educational content, evaluation rubric and 48 fictional research scenarios
 - **Dual Assessment System**: Participants rate both research quality (1-7 scale) and predict peer consensus
 - **Real-time Leaderboard**: Rankings based on prediction accuracy with 24-hour and all-time views (top 200)
-- **Live Analytics Dashboard**: Public visualisation of aggregate ratings, participant statistics, and study-level metrics with 95% confidence intervals
-- **Anonymous Participation**: Automatic assignment of unique usernames (e.g., "Cheerful Penguin") for data privacy
+- **Live Analytics Dashboard**: Public visualisation of aggregate ratings, participant statistics and study-level metrics with 95% confidence intervals
+- **Anonymous Participation**: Automatic assignment of unique usernames (e.g., 'Cheerful Penguin') for data privacy
 - **Comprehensive Glossary**: 21 scientific terms with accessible definitions, available throughout the activity
 
 ### Technical Capabilities
@@ -106,7 +108,7 @@ firebase deploy --only hosting
 ### For Participants
 
 1. Navigate to the application URL
-2. Review the educational content, glossary, and rubric
+2. Review the educational content, glossary and rubric
 3. Evaluate 48 research scenarios by rating quality (1-7) and predicting peer ratings
 4. Receive immediate feedback on prediction accuracy
 5. View final score and leaderboard position upon completion
@@ -166,7 +168,9 @@ See the [issues page](https://github.com/pablobernabeu/Unlock_the_Lab/issues) fo
 
 ## Licence
 
-This project is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) - free to use with attribution.
+This project is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) - free to use with attribution. The following reference should be used:
+
+
 
 ## Author
 
@@ -181,7 +185,7 @@ Department of Education, University of Oxford
 
 ## Version History
 
-- **v1.0** (2026-02): Initial release with 48 scenarios, real-time leaderboard, and analytics dashboard
+- **v1.0** (2026-03): Initial release with 48 scenarios, real-time leaderboard and analytics dashboard
 
 ## Support
 
