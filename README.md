@@ -170,7 +170,7 @@ See the [issues page](https://github.com/pablobernabeu/Unlock_the_Lab/issues) fo
 
 This project is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) - free to use with attribution. The following reference should be used:
 
-Bernabeu, P. (2025). *Unlock the Lab: Your guide to reading science like a scientist* (Version 1.0.0) [Computer software]. Zenodo. [https://doi.org/10.5281/zenodo.17624830](https://orcid.org/0000-0003-1083-2460)
+Bernabeu, P. (2025). *Unlock the Lab: Your guide to reading science like a scientist* (Version 1.0.0) [Computer software]. Zenodo. [https://doi.org/10.5281/zenodo.19153148](https://doi.org/10.5281/zenodo.19153148)
 
 ## Author
 
