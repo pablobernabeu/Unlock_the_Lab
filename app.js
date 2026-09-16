@@ -876,6 +876,11 @@ function shufflePapers() {
         seed = seed & seed; // Convert to 32-bit integer
     }
     
+    // The hash is negative for about half of all session IDs, and % keeps the
+    // sign, so a negative seed gave negative indices that swapped undefined
+    // entries into papers. Non-negative seeds keep the same sequence.
+    seed = Math.abs(seed) % 233280;
+    
     // Seeded random number generator
     function seededRandom() {
         seed = (seed * 9301 + 49297) % 233280;
