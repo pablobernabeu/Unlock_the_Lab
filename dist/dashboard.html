@@ -617,7 +617,7 @@
             color: #20B2AA !important;
         }
     </style>
-  <script type="module" crossorigin src="/assets/dashboard-zBQvN8z5.js"></script>
+  <script type="module" crossorigin src="/assets/dashboard-BZfVW3ZS.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
 </head>
 <body>
@@ -722,7 +722,7 @@
         <div class="charts-grid">
             <div class="chart-card" style="grid-column: 1 / -1;">
                 <h2 id="ratings-chart-heading">📊 Average Quality Ratings by Study</h2>
-                <p id="ratings-chart-desc" style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Bars show the mean quality rating that participants gave each study (1-7 scale). Error bars show the 95% confidence interval for that mean, computed from participant ratings only with the t distribution. An interval is wide when participants disagree or when few have rated the study, and none is drawn for a study with fewer than two ratings. The diamond marks the expert rating, which is not included in the bar. All participants with at least one valid rating are included. The leaderboard shows the subset who completed the full workshop. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
+                <p id="ratings-chart-desc" style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Bars show the mean quality rating that participants gave each study (1-7 scale). Error bars show the 95% confidence interval for that mean, computed from participant ratings only with the t distribution. An interval is wide when participants disagree or when few have rated the study, and none is drawn for a study with fewer than two ratings. Where an interval runs off the chart, it stops at the edge without an end cap, and hovering over the bar shows its full limits. The diamond marks the expert rating, which is not included in the bar. (The game scores predictions against a different average, which counts the expert rating as 100 participants.) All participants with at least one valid rating are included. The leaderboard shows the subset who completed the full workshop. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
                 <div class="chart-container">
                     <canvas id="ratingsChart"></canvas>
                 </div>
