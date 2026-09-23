@@ -16,7 +16,7 @@
     "firebase"
   ],
   "author": "",
-  "license": "MIT",
+  "license": "CC-BY-4.0",
   "dependencies": {
     "chart.js": "^4.5.1",
     "firebase": "^10.7.1"

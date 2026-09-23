@@ -720,7 +720,7 @@
         <div class="charts-grid">
             <div class="chart-card" style="grid-column: 1 / -1;">
                 <h2 id="ratings-chart-heading">📊 Average Quality Ratings by Study</h2>
-                <p id="ratings-chart-desc" style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. All participants with at least one valid rating are included. The leaderboard shows the subset who completed the full workshop. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
+                <p id="ratings-chart-desc" style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Bars show the mean quality rating that participants gave each study (1-7 scale). Error bars show the 95% confidence interval for that mean, computed from participant ratings only with the t distribution. An interval is wide when participants disagree or when few have rated the study, and none is drawn for a study with fewer than two ratings. The diamond marks the expert rating, which is not included in the bar. All participants with at least one valid rating are included. The leaderboard shows the subset who completed the full workshop. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
                 <div class="chart-container">
                     <canvas id="ratingsChart"></canvas>
                 </div>
@@ -729,7 +729,7 @@
 
         <div class="data-table">
             <h2 style="color: #20B2AA; margin-bottom: 10px;">📈 Detailed Rating Statistics</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Complete breakdown of how participants rated each study's quality. Std Dev measures disagreement (higher = more variable ratings). Agreement % shows consensus level. Color scales highlight relative values. <strong>Click study names to view detailed information.</strong> Click column headers to sort.</p>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Complete breakdown of how participants rated each study's quality. Every statistic uses participant ratings only, and the expert rating is listed in its own column. 95% CI is the confidence interval for the mean. Std Dev is the sample standard deviation and measures disagreement (higher = more variable ratings). Agreement % shows consensus level. A dash means too few ratings to estimate the value. Color scales highlight relative values. <strong>Click study names to view detailed information.</strong> Click column headers to sort.</p>
             <table id="statsTable">
                 <thead>
                     <tr>
@@ -737,14 +737,16 @@
                         <th class="sortable" onclick="sortTable(1, 'string')" title="Click to sort">Quality</th>
                         <th class="sortable" onclick="sortTable(2, 'number')" title="Click to sort">Responses</th>
                         <th class="sortable" onclick="sortTable(3, 'number')" title="Click to sort">Mean Rating</th>
-                        <th class="sortable" onclick="sortTable(4, 'number')" title="Click to sort">Std Dev</th>
-                        <th class="sortable" onclick="sortTable(5, 'number')" title="Click to sort">Min</th>
-                        <th class="sortable" onclick="sortTable(6, 'number')" title="Click to sort">Max</th>
-                        <th class="sortable" onclick="sortTable(7, 'number')" title="Click to sort">Agreement %</th>
+                        <th class="sortable" onclick="sortTable(4, 'number')" title="Click to sort by lower limit">95% CI</th>
+                        <th class="sortable" onclick="sortTable(5, 'number')" title="Click to sort">Std Dev</th>
+                        <th class="sortable" onclick="sortTable(6, 'number')" title="Click to sort">Min</th>
+                        <th class="sortable" onclick="sortTable(7, 'number')" title="Click to sort">Max</th>
+                        <th class="sortable" onclick="sortTable(8, 'number')" title="Click to sort">Agreement %</th>
+                        <th class="sortable" onclick="sortTable(9, 'number')" title="Click to sort">Expert Rating</th>
                     </tr>
                 </thead>
                 <tbody id="statsTableBody">
-                    <tr><td colspan="8" style="text-align: center; color: #999;">Loading data...</td></tr>
+                    <tr><td colspan="10" style="text-align: center; color: #999;">Loading data...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -910,7 +912,10 @@
             'STUDY-45': 'medium', 'STUDY-46': 'low', 'STUDY-47': 'high', 'STUDY-48': 'medium'
         };
         
-        // Seed scores (vetted expert ratings) - weighted as 100 participants each
+        // Seed scores (vetted expert ratings). The game (app.js) counts each one
+        // as 100 participants in the peer average it scores predictions against.
+        // The dashboard does not: its statistics use participant ratings only and
+        // it shows the expert rating separately.
         // Distribution: ~7 papers per quality score (1-7) for balanced assessment
         const seedScores = {
             // Score 1 (Predatory/Pseudoscience) - 7 papers
@@ -928,7 +933,6 @@
             // Score 7 (Gold Standard) - 6 papers
             'STUDY-8': 7, 'STUDY-19': 7, 'STUDY-24': 7, 'STUDY-39': 7, 'STUDY-43': 7, 'STUDY-47': 7
         };
-        const seedWeight = 100;
 
         // Check if user has a session ID from completing the workshop
         const userSessionId = localStorage.getItem('sessionId');
@@ -1194,12 +1198,32 @@
                     },
                     borderWidth: 2,
                     borderRadius: 6,
-                    errorBars: {}
+                    errorBars: {},
+                    order: 2
+                }, {
+                    // Expert rating, drawn as a marker over each bar and kept out of
+                    // the participant statistics.
+                    type: 'line',
+                    label: 'Expert rating',
+                    data: [],
+                    showLine: false,
+                    pointStyle: 'rectRot',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#1f2937',
+                    pointBorderWidth: 2,
+                    clip: 10, // keep markers at 7 whole
+                    order: 1
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 onClick: (event, activeElements, chart) => {
                     // Check if clicked on a bar
                     if (activeElements.length > 0) {
@@ -1251,14 +1275,49 @@
                 },
                 plugins: {
                     tooltip: {
+                        itemSort: (a, b) => a.datasetIndex - b.datasetIndex,
                         callbacks: {
                             label: function(context) {
-                                return `Rating: ${context.parsed.y.toFixed(2)} (click for details)`;
+                                const stat = currentStats[paperIds[context.dataIndex]];
+                                if (context.datasetIndex === 1) {
+                                    return `Expert rating: ${context.parsed.y}`;
+                                }
+                                if (!stat || stat.count === 0) return 'No participant ratings yet';
+                                const ciText = stat.ciLower === null
+                                    ? 'no 95% CI with fewer than 2 ratings'
+                                    : `95% CI ${stat.ciLower.toFixed(2)} to ${stat.ciUpper.toFixed(2)}`;
+                                return `Participant mean: ${stat.mean.toFixed(2)} (${ciText}; n = ${stat.count})`;
+                            },
+                            footer: function() {
+                                return 'Click for details';
                             }
                         }
                     },
                     legend: {
-                        display: false
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            generateLabels: function(chart) {
+                                return [{
+                                    text: 'Participant mean with 95% CI (colour: intended quality)',
+                                    pointStyle: 'rect',
+                                    fillStyle: 'rgba(107, 114, 128, 0.5)',
+                                    strokeStyle: 'rgba(31, 41, 55, 0.8)',
+                                    lineWidth: 1,
+                                    hidden: !chart.isDatasetVisible(0),
+                                    datasetIndex: 0
+                                }, {
+                                    text: 'Expert rating',
+                                    pointStyle: 'rectRot',
+                                    fillStyle: '#ffffff',
+                                    strokeStyle: '#1f2937',
+                                    lineWidth: 2,
+                                    hidden: !chart.isDatasetVisible(1),
+                                    datasetIndex: 1
+                                }];
+                            }
+                        }
                     }
                 }
             },
@@ -1268,10 +1327,11 @@
                     const ctx = chart.ctx;
                     const meta = chart.getDatasetMeta(0);
                     const errorBars = chart.data.datasets[0].errorBars;
-                    
+                    if (!chart.isDatasetVisible(0)) return;
+
                     meta.data.forEach((bar, index) => {
                         if (!errorBars[index]) return;
-                        
+
                         const { lower, upper } = errorBars[index];
                         const x = bar.x;
 
@@ -1281,8 +1341,16 @@
                         const yMean   = chart.scales.y.getPixelForValue(mean);
                         const yLower  = bar.y + (chart.scales.y.getPixelForValue(lower) - yMean);
                         const yUpper  = bar.y + (chart.scales.y.getPixelForValue(upper) - yMean);
-                        
+
                         ctx.save();
+                        // With few ratings an interval can run past the axis. Clip the
+                        // drawing to the plot area, so a missing cap marks a limit
+                        // beyond it (the tooltip and the study details give the
+                        // unclipped limits).
+                        const area = chart.chartArea;
+                        ctx.beginPath();
+                        ctx.rect(area.left, area.top, area.right - area.left, area.bottom - area.top);
+                        ctx.clip();
                         ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
                         ctx.lineWidth = 2;
                         
@@ -1310,34 +1378,87 @@
             }]
         });
 
+        // Two-sided 95% critical value of Student's t for df degrees of freedom,
+        // i.e. qt(0.975, df). Found by bisection on the exact closed-form CDF for
+        // integer df (Abramowitz & Stegun, 1964, eqs. 26.7.3 and 26.7.4), which
+        // matches R's qt() to six decimals; very large df take the normal limit.
+        const tCriticalCache = new Map();
+        function tCritical95(df) {
+            if (!Number.isInteger(df) || df < 1) return NaN;
+            if (df > 100000) return 1.959964;
+            if (tCriticalCache.has(df)) return tCriticalCache.get(df);
+
+            // P(|T| < t) for T ~ t(df)
+            const centralProbability = (t) => {
+                const theta = Math.atan(t / Math.sqrt(df));
+                const sinTheta = Math.sin(theta);
+                const cosTheta = Math.cos(theta);
+                const cos2 = cosTheta * cosTheta;
+                let sum = 0;
+                if (df % 2 === 1) {
+                    let term = cosTheta;
+                    for (let k = 1; 2 * k + 1 <= df; k++) {
+                        sum += term;
+                        term *= cos2 * (2 * k) / (2 * k + 1);
+                    }
+                    return (2 / Math.PI) * (theta + sinTheta * sum);
+                }
+                let term = 1;
+                for (let k = 1; 2 * k <= df; k++) {
+                    sum += term;
+                    term *= cos2 * (2 * k - 1) / (2 * k);
+                }
+                return sinTheta * sum;
+            };
+
+            let lo = 0;
+            let hi = 64; // qt(0.975, 1) = 12.71, the largest value needed
+            for (let i = 0; i < 60; i++) {
+                const mid = (lo + hi) / 2;
+                if (centralProbability(mid) < 0.95) lo = mid; else hi = mid;
+            }
+            const t = (lo + hi) / 2;
+            tCriticalCache.set(df, t);
+            return t;
+        }
+
+        // Summary of one study's participant ratings. Values that cannot be
+        // estimated are null: everything when n = 0, and the SD, agreement and
+        // confidence interval when n = 1. The SD is the sample SD (n - 1) and the
+        // 95% CI for the mean uses the t distribution with n - 1 df. The CI is not
+        // clamped to the 1-7 scale, so with few ratings it can run past it.
         function calculateStats(values) {
-            if (!values || values.length === 0) return { mean: 0, stdDev: 0, min: 0, max: 0, agreement: 0, ci95Lower: 0, ci95Upper: 0 };
-            
-            const n = values.length;
+            const n = values ? values.length : 0;
+            const empty = { count: n, mean: null, stdDev: null, min: null, max: null, agreement: null, ciLower: null, ciUpper: null };
+            if (n === 0) return empty;
+
             const mean = values.reduce((a, b) => a + b, 0) / n;
-            const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / n;
-            const stdDev = Math.sqrt(variance);
             const min = Math.min(...values);
             const max = Math.max(...values);
-            
-            // Calculate 95% confidence interval
-            const stderr = stdDev / Math.sqrt(n);
-            const tValue = 1.96; // Approximate for large n, exact for n>30
-            const ci95Lower = Math.max(1, mean - tValue * stderr); // Clamp to scale minimum
-            const ci95Upper = Math.min(7, mean + tValue * stderr); // Clamp to scale maximum
-            
+            if (n < 2) return { ...empty, mean, min, max };
+
+            const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (n - 1);
+            const stdDev = Math.sqrt(variance);
+            const halfWidth = tCritical95(n - 1) * stdDev / Math.sqrt(n);
+
             // Agreement % (inverse of coefficient of variation, capped at 100%)
-            const agreement = mean === 0 ? 0 : Math.min(100, 100 * (1 - stdDev / mean));
-            
-            return { 
-                mean: mean.toFixed(2), 
-                stdDev: stdDev.toFixed(2), 
-                min: min.toFixed(1), 
-                max: max.toFixed(1),
-                agreement: agreement.toFixed(0),
-                ci95Lower: ci95Lower.toFixed(2),
-                ci95Upper: ci95Upper.toFixed(2)
+            const agreement = Math.min(100, 100 * (1 - stdDev / mean));
+
+            return {
+                count: n,
+                mean,
+                stdDev,
+                min,
+                max,
+                agreement,
+                ciLower: mean - halfWidth,
+                ciUpper: mean + halfWidth
             };
+        }
+
+        // Display helper: fixed decimals, or an en dash when a value is missing
+        function fmt(value, digits) {
+            return value === null || value === undefined || !Number.isFinite(value) ? '–' : value.toFixed(digits);
         }
 
         // Color scale function - generates background colors based on value
@@ -1373,6 +1494,10 @@
                     return `rgb(${r}, ${g}, ${b})`;
                 }
             }
+        }
+
+        function ratingsChartDescription(participantCount) {
+            return `Bars show the mean quality rating that participants gave each study (1-7 scale). Error bars show the 95% confidence interval for that mean, computed from participant ratings only with the t distribution. An interval is wide when participants disagree or when few have rated the study, and none is drawn for a study with fewer than two ratings. The diamond marks the expert rating, which is not included in the bar. (The game scores predictions against a different average, which counts the expert rating as 100 participants.) All ${participantCount} participant${participantCount !== 1 ? 's' : ''} with at least one valid rating are included. The leaderboard shows the subset who completed the full workshop. <strong>Click on any bar to view detailed statistics and study information.</strong>`;
         }
 
         function updateDashboard(ratingsData, activeData, leaderboardData) {
@@ -1434,20 +1559,11 @@
                 const allEntries = getValidRatingEntries(paperRatings);
                 const values = allEntries.map(entry => entry.rating);
                 
-                let allValues;
-                if (hasParticipants) {
-                    // Include seed scores in calculation (weighted as 100 participants)
-                    const seedScore = seedScores[paperId] || 4;
-                    allValues = [...values, ...Array(seedWeight).fill(seedScore)];
-                } else {
-                    // No participants - use empty array for stats
-                    allValues = [];
-                }
-                
+                // Participant ratings only. The expert rating is reported
+                // alongside, never mixed into the participant statistics.
                 stats[paperId] = {
-                    ...calculateStats(allValues),
-                    count: values.length,
-                    totalCount: allValues.length // Total including seed
+                    ...calculateStats(values),
+                    expert: seedScores[paperId] ?? null
                 };
             });
             
@@ -1459,7 +1575,7 @@
             const ratingsHeading = document.getElementById('ratings-chart-heading');
             if (ratingsHeading) ratingsHeading.innerHTML = `📊 Average Quality Ratings by Study (<i>N</i>&nbsp;=&nbsp;${uniqueUsers.size})`;
             const ratingsDesc = document.getElementById('ratings-chart-desc');
-            if (ratingsDesc) ratingsDesc.innerHTML = `Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. All ${uniqueUsers.size} participant${uniqueUsers.size !== 1 ? 's' : ''} with at least one valid rating are included. The leaderboard shows the subset who completed the full workshop. <strong>Click on any bar to view detailed statistics and study information.</strong>`;
+            if (ratingsDesc) ratingsDesc.innerHTML = ratingsChartDescription(uniqueUsers.size);
             document.getElementById('totalRatings').textContent = totalRatings;
             
             const activeCount = activeData ? Object.keys(activeData).filter(key => {
@@ -1494,16 +1610,20 @@
             // Update charts and table based on participant data
             if (hasParticipants) {
                 // Update charts
+                // No bar for a study nobody has rated, and no interval below n = 2
                 const errorBars = {};
                 paperIds.forEach((id, index) => {
-                    errorBars[index] = {
-                        lower: parseFloat(stats[id].ci95Lower),
-                        upper: parseFloat(stats[id].ci95Upper)
-                    };
+                    if (stats[id].ciLower !== null) {
+                        errorBars[index] = {
+                            lower: stats[id].ciLower,
+                            upper: stats[id].ciUpper
+                        };
+                    }
                 });
                 
                 ratingsChart.data.datasets[0].data = paperIds.map(id => stats[id].mean);
                 ratingsChart.data.datasets[0].errorBars = errorBars;
+                ratingsChart.data.datasets[1].data = paperIds.map(id => stats[id].expert);
                 ratingsChart.update();
 
                 // Update table
@@ -1513,28 +1633,32 @@
                     const quality = paperQualities[paperId];
                     const qualityClass = quality === 'high' ? 'quality-high' : quality === 'medium' ? 'quality-medium' : 'quality-low';
                     
-                    // Calculate color scales (consistent: green=high, red=low; reduced intensity)
-                    const meanColor = getColorScale(stat.mean, 1, 7, true, true); // Higher rating = green
-                    const stdDevColor = getColorScale(stat.stdDev, 0, 3, false, true); // Lower stdDev = green
-                    const agreementPercent = parseFloat(stat.agreement);
-                    const agreementColor = getColorScale(agreementPercent, 0, 100, true, true); // Higher = green
-                    const responseColor = getColorScale(stat.count, 0, Math.max(...paperIds.map(id => stats[id].count)), true, true);
+                    // Calculate color scales (consistent: green=high, red=low; reduced intensity).
+                    // Missing values (too few ratings) get no colour.
+                    const scale = (value, ...args) => value === null ? 'transparent' : getColorScale(value, ...args);
+                    const meanColor = scale(stat.mean, 1, 7, true, true); // Higher rating = green
+                    const stdDevColor = scale(stat.stdDev, 0, 3, false, true); // Lower stdDev = green
+                    const agreementColor = scale(stat.agreement, 0, 100, true, true); // Higher = green
+                    const responseColor = getColorScale(stat.count, 0, Math.max(1, ...paperIds.map(id => stats[id].count)), true, true);
+                    const ciText = stat.ciLower === null ? '–' : `${fmt(stat.ciLower, 2)} to ${fmt(stat.ciUpper, 2)}`;
                     
                     return `
                         <tr data-study="${paperId}" data-quality="${quality}" data-responses="${stat.count}" 
-                            data-mean="${stat.mean}" data-stddev="${stat.stdDev}" data-min="${stat.min}" 
-                            data-max="${stat.max}" data-agreement="${agreementPercent}">
+                            data-mean="${stat.mean ?? ''}" data-ci="${stat.ciLower ?? ''}" data-stddev="${stat.stdDev ?? ''}" data-min="${stat.min ?? ''}" 
+                            data-max="${stat.max ?? ''}" data-agreement="${stat.agreement ?? ''}" data-expert="${stat.expert ?? ''}">
                             <td><strong><a href="#" onclick="showStudyDetails('${paperId}'); return false;" style="color: #667eea; text-decoration: none; cursor: pointer;">${paperId}</a></strong></td>
                             <td>
                                 <span class="quality-indicator ${qualityClass}"></span>
                                 ${quality.charAt(0).toUpperCase() + quality.slice(1)}
                             </td>
                             <td class="color-scale" style="background: ${responseColor}; color: #1f2937; font-weight: 600;">${stat.count}</td>
-                            <td class="color-scale" style="background: ${meanColor}; color: #1f2937; font-weight: 600;">${stat.mean}</td>
-                            <td class="color-scale" style="background: ${stdDevColor}; color: #1f2937; font-weight: 600;">${stat.stdDev}</td>
-                            <td>${stat.min}</td>
-                            <td>${stat.max}</td>
-                            <td class="color-scale" style="background: ${agreementColor}; color: #1f2937; font-weight: 600;">${stat.agreement}%</td>
+                            <td class="color-scale" style="background: ${meanColor}; color: #1f2937; font-weight: 600;">${fmt(stat.mean, 2)}</td>
+                            <td style="white-space: nowrap;">${ciText}</td>
+                            <td class="color-scale" style="background: ${stdDevColor}; color: #1f2937; font-weight: 600;">${fmt(stat.stdDev, 2)}</td>
+                            <td>${fmt(stat.min, 1)}</td>
+                            <td>${fmt(stat.max, 1)}</td>
+                            <td class="color-scale" style="background: ${agreementColor}; color: #1f2937; font-weight: 600;">${stat.agreement === null ? '–' : fmt(stat.agreement, 0) + '%'}</td>
+                            <td>${stat.expert ?? '–'}</td>
                         </tr>
                     `;
                 }).join('');
@@ -1542,11 +1666,12 @@
                 // No participants - clear chart and show message
                 ratingsChart.data.datasets[0].data = [];
                 ratingsChart.data.datasets[0].errorBars = {};
+                ratingsChart.data.datasets[1].data = [];
                 ratingsChart.update();
 
                 // Show "no data" message in table
                 const tbody = document.getElementById('statsTableBody');
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #999; padding: 3rem;">📊 No participant data yet. Complete the workshop to see ratings appear here.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #999; padding: 3rem;">📊 No participant data yet. Complete the workshop to see ratings appear here.</td></tr>';
             }
         }
 
@@ -1626,29 +1751,8 @@
             const CI_MIN_N = 10;
             const showCI = n >= CI_MIN_N;
 
-            // t-distribution critical values for 95% two-sided CI (df = n-1).
-            // For n >= CI_MIN_N the values are already close to z=1.96; we use a
-            // lookup table with linear interpolation for accuracy.
-            function getTCritical(df) {
-                const table = [
-                    [9, 2.262], [10, 2.228], [11, 2.201], [12, 2.179], [13, 2.160],
-                    [14, 2.145], [15, 2.131], [19, 2.093], [24, 2.064], [29, 2.045],
-                    [39, 2.023], [59, 2.001], [99, 1.984], [Infinity, 1.960]
-                ];
-                for (let i = 0; i < table.length; i++) {
-                    if (df <= table[i][0]) {
-                        if (i === 0) return table[0][1];
-                        // Linear interpolation between table entries
-                        const [df0, t0] = table[i - 1];
-                        const [df1, t1] = table[i];
-                        const frac = (df - df0) / (df1 - df0);
-                        return t0 + frac * (t1 - t0);
-                    }
-                }
-                return 1.960;
-            }
-
-            const tCrit = showCI ? getTCritical(n - 1) : 0;
+            // 95% two-sided t critical value with n - 1 df (sample SD below)
+            const tCrit = showCI ? tCritical95(n - 1) : 0;
 
             const criterionStats = CRITERIA_KEYS.map(c => {
                 const values = sharesByCriterion[c.key];
@@ -1959,7 +2063,7 @@
             });
             
             // Get data attributes mapping
-            const dataAttrs = ['study', 'quality', 'responses', 'mean', 'stddev', 'min', 'max', 'agreement'];
+            const dataAttrs = ['study', 'quality', 'responses', 'mean', 'ci', 'stddev', 'min', 'max', 'agreement', 'expert'];
             const attr = dataAttrs[columnIndex];
             
             // Quality ordering for logical sorting
@@ -1977,6 +2081,10 @@
                 } else if (dataType === 'number') {
                     aVal = parseFloat(aVal);
                     bVal = parseFloat(bVal);
+                    // Missing values (too few ratings) always sort last
+                    if (Number.isNaN(aVal) || Number.isNaN(bVal)) {
+                        return Number.isNaN(aVal) - Number.isNaN(bVal);
+                    }
                 } else {
                     aVal = aVal.toLowerCase();
                     bVal = bVal.toLowerCase();
@@ -2159,6 +2267,37 @@
         // Study details modal functions
         let currentStats = {};
         
+        // The study modal's rating statistics (participant ratings only)
+        function ratingStatsRows(stats) {
+            const row = (label, value, last = false) => `
+                            <tr${last ? '' : ' style="border-bottom: 1px solid #e5e7eb;"'}>
+                                <td style="padding: 0.75rem; font-weight: 600;">${label}</td>
+                                <td style="padding: 0.75rem;">${value}</td>
+                            </tr>`;
+            const dash = '\u2013';
+            const ciText = stats.ciLower === null
+                ? 'Needs at least 2 ratings'
+                : `${fmt(stats.ciLower, 2)} to ${fmt(stats.ciUpper, 2)}`;
+            const meaning = stats.agreement === null
+                ? 'Too few ratings to judge agreement yet.'
+                : stats.agreement > 70 ? 'High agreement among participants - ratings are consistent.'
+                : stats.agreement > 40 ? 'Moderate agreement - some variation in ratings.'
+                : 'Low agreement - participants have quite different opinions about this study.';
+            return `
+                        <table style="width: 100%; border-collapse: collapse;">
+                            ${row('Participants:', stats.count)}
+                            ${row('Participant Mean:', stats.mean === null ? dash : `${fmt(stats.mean, 2)} / 7`)}
+                            ${row('95% CI for the Mean:', ciText)}
+                            ${row('Std Deviation:', fmt(stats.stdDev, 2))}
+                            ${row('Range:', stats.min === null ? dash : `${fmt(stats.min, 1)} - ${fmt(stats.max, 1)}`)}
+                            ${row('Agreement:', stats.agreement === null ? dash : `${fmt(stats.agreement, 0)}%`)}
+                            ${row('Expert Rating:', stats.expert === null ? dash : `${stats.expert} / 7 (not included above)`, true)}
+                        </table>
+                        <p style="font-size: 0.85rem; color: #6b7280; margin-top: 1rem; margin-bottom: 0;">
+                            <strong>What this means:</strong> ${meaning}
+                        </p>`;
+        }
+
         window.showStudyDetails = function(studyId) {
             const modal = document.getElementById('studyModal');
             const quality = paperQualities[studyId];
@@ -2181,35 +2320,7 @@
                 studyDetailsHtml = `
                     <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
                         <h3 style="margin-top: 0; color: #20B2AA;">Rating Statistics</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr style="border-bottom: 1px solid #e5e7eb;">
-                                <td style="padding: 0.75rem; font-weight: 600;">Participants:</td>
-                                <td style="padding: 0.75rem;">${stats.count}</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e5e7eb;">
-                                <td style="padding: 0.75rem; font-weight: 600;">Mean Rating:</td>
-                                <td style="padding: 0.75rem;">${stats.mean} / 7</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e5e7eb;">
-                                <td style="padding: 0.75rem; font-weight: 600;">95% CI:</td>
-                                <td style="padding: 0.75rem;">[${stats.ci95Lower}, ${stats.ci95Upper}]</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e5e7eb;">
-                                <td style="padding: 0.75rem; font-weight: 600;">Std Deviation:</td>
-                                <td style="padding: 0.75rem;">${stats.stdDev}</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e5e7eb;">
-                                <td style="padding: 0.75rem; font-weight: 600;">Range:</td>
-                                <td style="padding: 0.75rem;">${stats.min} - ${stats.max}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 0.75rem; font-weight: 600;">Agreement:</td>
-                                <td style="padding: 0.75rem;">${stats.agreement}%</td>
-                            </tr>
-                        </table>
-                        <p style="font-size: 0.85rem; color: #6b7280; margin-top: 1rem; margin-bottom: 0;">
-                            <strong>What this means:</strong> ${parseInt(stats.agreement) > 70 ? 'High agreement among participants - ratings are consistent.' : parseInt(stats.agreement) > 40 ? 'Moderate agreement - some variation in ratings.' : 'Low agreement - participants have quite different opinions about this study.'}
-                        </p>
+                        ${ratingStatsRows(stats)}
                     </div>
                     
                     <hr style="margin: 2rem 0; border: none; border-top: 2px solid #e5e7eb;">
@@ -2250,35 +2361,7 @@
                 studyDetailsHtml = `
                     <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
                         <h3 style="margin-top: 0; color: #20B2AA;">Rating Statistics</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr style="border-bottom: 1px solid #e5e7eb;">
-                                <td style="padding: 0.75rem; font-weight: 600;">Participants:</td>
-                                <td style="padding: 0.75rem;">${stats.count}</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e5e7eb;">
-                                <td style="padding: 0.75rem; font-weight: 600;">Mean Rating:</td>
-                                <td style="padding: 0.75rem;">${stats.mean} / 7</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e5e7eb;">
-                                <td style="padding: 0.75rem; font-weight: 600;">95% CI:</td>
-                                <td style="padding: 0.75rem;">[${stats.ci95Lower}, ${stats.ci95Upper}]</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e5e7eb;">
-                                <td style="padding: 0.75rem; font-weight: 600;">Std Deviation:</td>
-                                <td style="padding: 0.75rem;">${stats.stdDev}</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e5e7eb;">
-                                <td style="padding: 0.75rem; font-weight: 600;">Range:</td>
-                                <td style="padding: 0.75rem;">${stats.min} - ${stats.max}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 0.75rem; font-weight: 600;">Agreement:</td>
-                                <td style="padding: 0.75rem;">${stats.agreement}%</td>
-                            </tr>
-                        </table>
-                        <p style="font-size: 0.85rem; color: #6b7280; margin-top: 1rem; margin-bottom: 0;">
-                            <strong>What this means:</strong> ${parseInt(stats.agreement) > 70 ? 'High agreement among participants - ratings are consistent.' : parseInt(stats.agreement) > 40 ? 'Moderate agreement - some variation in ratings.' : 'Low agreement - participants have quite different opinions about this study.'}
-                        </p>
+                        ${ratingStatsRows(stats)}
                     </div>
                 `;
             }

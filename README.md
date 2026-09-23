@@ -23,7 +23,7 @@ Unlock the Lab is an educational tool designed to develop science literacy by tr
 - **Interactive Workshop Flow**: Guided progression through educational content, evaluation rubric and 48 fictional research scenarios
 - **Dual Assessment System**: Participants rate both research quality (1-7 scale) and predict peer consensus
 - **Real-time Leaderboard**: Rankings based on prediction accuracy with 24-hour and all-time views (top 200)
-- **Live Analytics Dashboard**: Public visualisation of aggregate ratings, participant statistics and study-level metrics with 95% confidence intervals
+- **Live Analytics Dashboard**: Public visualisation of aggregate ratings, participant statistics and study-level metrics. Each study's mean rating comes from participant ratings only, with a 95% confidence interval based on the t distribution, and the expert rating is shown beside it
 - **Anonymous Participation**: Automatic assignment of unique usernames (e.g., 'Cheerful Penguin') for data privacy
 - **Comprehensive Glossary**: 21 scientific terms with accessible definitions, available throughout the activity
 
@@ -48,7 +48,7 @@ Unlock the Lab is an educational tool designed to develop science literacy by tr
 
 ### Frontend
 - HTML5, CSS3, JavaScript (ES6+)
-- Chart.js 4.4.0 (data visualisation)
+- Chart.js (data visualisation): 4.5.1 from npm in the workshop app, 4.4.0 from jsDelivr on the dashboard
 - Vite 5.4.21 (build tool)
 
 ### Backend
@@ -147,11 +147,16 @@ firebase deploy --only hosting
 ├── app.js              # Core application logic
 ├── styles.css          # Global styles
 ├── firebase-config.js  # Firebase configuration
-├── glossary.json       # Scientific terminology definitions
-├── rubric.json         # Evaluation criteria
-├── papers.json         # Research scenario data
-└── public/
-    └── unlock-lab-icon.svg  # Application logo
+├── vite.config.js      # Build configuration
+├── firebase.json       # Firebase Hosting and database configuration
+├── database.rules.json # Realtime Database security rules
+└── public/             # Static files copied as-is into the build
+    ├── glossary.json               # Scientific terminology definitions
+    ├── rubric.json                 # Evaluation criteria
+    ├── papers.json                 # Research scenario data
+    ├── feature-order-config.json   # Study feature orderings (not read by the current code)
+    ├── unlock-lab-icon.svg         # Application logo
+    └── unlock-lab-icon-inverted.svg
 ```
 
 ## Contributing
