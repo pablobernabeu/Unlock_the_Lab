@@ -1,3 +1,12 @@
+# Licence for the content
+
+The educational content of Unlock the Lab is licensed under the Creative Commons Attribution 4.0 International Public License (CC BY 4.0), reproduced below. This covers the study scenarios, expert ratings and feedback, rubric and glossary in `src/content/`, the workshop materials and artwork in `materials/` and the icons in `public/`.
+
+The source code is licensed separately under the MIT License (see `LICENSE`).
+
+Attribution: Bernabeu, P. (2026). _Unlock the Lab: Your guide to reading science like a scientist_ [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.19153148
+
+---
 
 # Creative Commons Attribution 4.0 International Public License
 
