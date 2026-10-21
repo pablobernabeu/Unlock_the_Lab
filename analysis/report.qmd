@@ -1,0 +1,1472 @@
+---
+title: 'Unlock the Lab: analysis of workshop data'
+subtitle: 'Quality ratings, predictions and criterion weights'
+date: today
+date-format: 'D MMMM YYYY'
+lang: en-GB
+bibliography: references.bib
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    code-fold: true
+    code-summary: 'Code'
+    code-tools: true
+    fig-width: 7
+    fig-height: 4.5
+    fig-dpi: 150
+    tbl-cap-location: top
+execute:
+  echo: true
+  warning: false
+  message: false
+params:
+  data_dir: data
+  repo_root: ..
+  min_ratings_per_session: 5
+  rt_floor_s: 5
+  straightline_min_n: 6
+  exclude_pre_revision: false
+  conf_level: 0.95
+  n_boot: 2000
+  n_sim: 1000
+  seed: 20260221
+---
+
+```{r}
+#| label: setup
+#| code-summary: 'Code: packages, helpers and the app''s constants'
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(tidyr)
+    library(purrr)
+    library(tibble)
+    library(ggplot2)
+    library(patchwork)
+})
+for (file in list.files('R', pattern = '\\.R$', full.names = TRUE)) source(file)
+
+level <- params$conf_level
+ci_label <- paste(fmt_pct(level), 'CI')
+
+# Scoring constants, patterns, studies and expert ratings come from the app's
+# own source files, so the analysis cannot drift from what participants saw.
+config <- read_app_config(params$repo_root)
+studies <- read_studies(params$repo_root)
+revisions <- read_content_revisions('reference/content-revisions.csv')
+criterion_labels <- read_criterion_labels(params$repo_root, config$criteria)
+scale_limits <- c(config$RATING_MIN, config$RATING_MAX)
+scale_mid <- mean(scale_limits)
+scale_text <- paste0(config$RATING_MIN, '–', config$RATING_MAX)
+
+# Minimum data for an estimate. These are not exclusions: below them an
+# analysis is skipped and the text says why.
+minimum <- list(
+    model_ratings = 20,
+    model_sessions = 5,
+    model_studies = 5,
+    correlation = 4,
+    shares = 5,
+    bootstrap_sessions = 5,
+    random_slopes_sessions = 10
+)
+enough_for_model <- function(data) {
+    nrow(data) >= minimum$model_ratings &&
+        n_distinct(data$session_id) >= minimum$model_sessions &&
+        n_distinct(data$study_id) >= minimum$model_studies
+}
+
+theme_set(theme_report())
+```
+
+```{r}
+#| label: data
+#| code-summary: 'Code: read the snapshot and derive the analysis set'
+snapshot <- read_snapshot(params$data_dir)
+snap_time <- snapshot_time(snapshot)
+leaderboard <- flatten_leaderboard(snapshot$nodes$leaderboard)
+rankings_all <- flatten_rankings(snapshot$nodes$rankings, config$criteria)
+sessions <- flatten_sessions(snapshot$nodes$sessions)
+
+ratings_base <- flatten_ratings(snapshot$nodes$ratings) |>
+    annotate_ratings(studies, config, snap_time$time) |>
+    assign_content_versions(revisions) |>
+    assign_trials()
+
+# Each session's study order is recomputed from its id; it checks the trial
+# order and gives v1 trial numbers that survive a missing rating.
+study_order <- read_study_order(params$repo_root)
+order_checks <- check_study_orders(ratings_base, study_order)
+ratings_base <- use_order_positions(ratings_base, order_checks)
+
+# Targets for v1 ratings are reconstructed; the leaderboard totals the app
+# stored decide which expert ratings were live before the revision commit.
+expert_check <- choose_expert_assumption(ratings_base, leaderboard,
+                                         config$SEED_WEIGHT, config$SCORE_PENALTY)
+ratings_all <- expert_check$ratings
+
+straight_liners <- straight_lining_sessions(ratings_all, params$straightline_min_n)
+exclusions <- apply_exclusions(ratings_all, straight_liners, params$rt_floor_s * 1000,
+                               params$exclude_pre_revision)
+
+analysed <- exclusions$data |>
+    mutate(
+        expert_c = expert_at_time - scale_mid,
+        rating_c = rating - scale_mid,
+        band = quality_band(expert_at_time)
+    )
+
+session_sizes <- count(analysed, session_id, name = 'n_ratings')
+participant_ids <- session_sizes$session_id[session_sizes$n_ratings >= params$min_ratings_per_session]
+
+predictions <- analysed |>
+    filter(valid_prediction, !is.na(target)) |>
+    mutate(
+        abs_error = abs(prediction - target),
+        own_abs_error = abs(rating - target),
+        trial10 = (trial - 1) / 10
+    )
+```
+
+# About this report
+
+```{r}
+#| label: about
+#| echo: false
+#| results: asis
+prose("
+In the Unlock the Lab workshop, participants read short descriptions of fictional studies. For each study they rate its quality on a `r scale_text` scale and predict the average rating it will receive. Predictions are scored against a target that blends the other participants' ratings with an expert rating counted as `r config$SEED_WEIGHT` participants (@sec-predictions). At the end, participants distribute `r config$TOKEN_BUDGET` tokens across `r length(config$criteria)` quality criteria to show how much each matters to them.
+
+This report describes one snapshot of the workshop database. Every number in the text is computed when the report is rendered, from the stored data or from the app's own settings, and the exclusion rules are parameters listed in @sec-appendix. The code behind each result is folded beneath it, and 'Code' at the top of the page shows the full source. The expert ratings, scoring constants and validation patterns are read from the app's source files rather than copied.
+
+The data are pseudonymous. Records are keyed by random session identifiers, some also carry an anonymous authentication identifier, and usernames are randomly generated. No names, contact details or demographic information are collected. Identifiers are used here only to group records, and none is shown.
+")
+```
+
+# Data snapshot and sample {#sec-sample}
+
+```{r}
+#| label: sample
+node_table <- tibble(
+    node = paste0('/', SNAPSHOT_NODES),
+    file = ifelse(snapshot$present, 'present', 'absent'),
+    records = map_int(SNAPSHOT_NODES, function(node) count_records(node, snapshot$nodes[[node]]))
+)
+missing_nodes <- SNAPSHOT_NODES[!snapshot$present & SNAPSHOT_NODES != 'active']
+present_nodes <- SNAPSHOT_NODES[snapshot$present]
+
+valid_all <- filter(ratings_all, valid_record)
+has_ratings <- nrow(valid_all) > 0
+
+per_session <- count(valid_all, session_id, name = 'n')
+per_study <- studies |>
+    left_join(count(valid_all, study_id, name = 'n'), by = 'study_id') |>
+    mutate(n = coalesce(n, 0L))
+session_counts <- median_iqr(per_session$n)
+study_counts <- median_iqr(per_study$n)
+n_finished <- sum(per_session$n >= config$MIN_STUDIES_TO_FINISH)
+time_range <- if (has_ratings) range(valid_all$time, na.rm = TRUE) else as.POSIXct(c(NA, NA))
+
+shapes <- list(
+    object = sum(ratings_all$shape == 'object'),
+    number = sum(ratings_all$shape == 'number'),
+    other = sum(ratings_all$shape == 'other'),
+    with_uid = sum(!is.na(ratings_all$uid)),
+    stamped = sum(ratings_all$stamped),
+    unstamped = sum(!ratings_all$stamped)
+)
+
+ranked <- filter(leaderboard, !is.na(papers_rated), papers_rated >= config$MIN_STUDIES_TO_RANK,
+                 !is.na(score))
+ranked_accuracy <- median_iqr(ranked$score / ranked$papers_rated)
+lb_empty_names <- sum(leaderboard$user_name == '')
+
+v1_written <- if (shapes$unstamped == 0) {
+    'none was written by v1'
+} else if (shapes$unstamped == nrow(ratings_all)) {
+    'all of them were written by v1'
+} else {
+    paste('the other', fmt_int(shapes$unstamped), 'were written by v1')
+}
+session_count_text <- if (nrow(per_session) == 1) {
+    paste('The only session rated', plural(per_session$n, 'study', 'studies'))
+} else if (nrow(per_session) > 1) {
+    paste0('Sessions rated a median of ', plural(session_counts$median, 'study', 'studies'),
+           ' (interquartile range ', fmt_count(session_counts$q1), ' to ',
+           fmt_count(session_counts$q3), '; range ', fmt_int(min(per_session$n)), ' to ',
+           fmt_int(max(per_session$n)), ')')
+} else {
+    ''
+}
+finished_text <- if (nrow(per_session) == 1) {
+    if (n_finished == 1) 'so reached' else 'so fell short of'
+} else {
+    paste(count_phrase(n_finished, 'session'), 'rated at least')
+}
+# Sessions whose length was capped by the v1 shuffle defect (@sec-order).
+stopped_at_gap <- filter(order_checks, follows == 'defective', last_position == defective_limit)
+```
+
+```{r}
+#| label: sample-text
+#| echo: false
+#| results: asis
+prose("
+The snapshot was taken on `r fmt_datetime(snap_time$time)` (from `r snap_time$source`). It holds `r fmt_list(paste0('/', present_nodes))`.
+")
+prose(when = !is.null(snapshot$fetch), "
+`r provenance_text(snapshot$fetch)`
+")
+prose(when = length(missing_nodes) > 0, "
+The snapshot has no `r fmt_list(paste0('/', missing_nodes), 'or')` file. Backups made by v1 never included /rankings or /sessions, so a snapshot from a v1 backup cannot contain them; the analyses that need them are skipped below. A v2 backup or the admin panel's export includes both.
+")
+prose(when = snapshot$present[['active']], "
+The /active node (presence) is listed for completeness. It is short-lived by design and is not analysed: in v1 its `joinedAt` field was overwritten on every heartbeat, so it does not record when people joined.
+")
+```
+
+```{r}
+#| label: tbl-nodes
+#| tbl-cap: 'Database nodes in the snapshot.'
+node_table |>
+    rename(Node = node, File = file, Records = records) |>
+    md_table()
+```
+
+```{r}
+#| label: sample-ratings-text
+#| echo: false
+#| results: asis
+prose(when = !has_ratings, "
+The snapshot contains no valid ratings, so none of the analyses below can be run.
+")
+prose(when = has_ratings, "
+The /ratings node holds `r plural(nrow(ratings_all), 'rating record')`, of which `r fmt_int(nrow(valid_all))` `r agree(nrow(valid_all), 'is', 'are')` valid (@sec-quality). They come from `r plural(n_distinct(valid_all$session_id), 'session')` and cover `r fmt_int(sum(per_study$n > 0))` of the `r fmt_int(nrow(studies))` studies, and were given `r fmt_date_span(time_range[1], time_range[2])`. Of all records, `r fmt_int(shapes$object)` are objects and `r count_or_none(shapes$number)` are bare numbers (the oldest format, with no prediction or time), and an authentication identifier is present in `r count_or_none(shapes$with_uid)`. A content version, which marks records written by v2, is present in `r count_or_none(shapes$stamped)`; `r v1_written`.
+
+`r session_count_text`, and `r finished_text` `r config$MIN_STUDIES_TO_FINISH`, the number v2 requires before a participant can finish early`r if (shapes$unstamped > 0) ' (in v1 the threshold changed over time)' else ''`.`r if (nrow(stopped_at_gap) > 0) paste0(' In ', plural(nrow(stopped_at_gap), 'v1 session'), ' the participant could not go further because of a defect in the study order (@sec-order).') else ''` Studies received a median of `r plural(study_counts$median, 'rating')` (range `r fmt_int(min(per_study$n))` to `r fmt_int(max(per_study$n))`)`r if (any(per_study$n == 0)) paste0('; ', plural(sum(per_study$n == 0), 'study', 'studies'), ' received none') else ', so every study was rated at least once'`. @fig-sample shows both distributions.
+")
+prose(when = nrow(leaderboard) > 0, "
+The leaderboard holds `r plural(nrow(leaderboard), 'entry', 'entries')``r if (lb_empty_names > 0) paste0(', ', fmt_int(lb_empty_names), ' of them with an empty username (a known v1 defect when its username set-up had not finished)') else ''`. Under the v2 rule, entries are ranked by mean points per study once they have rated at least `r config$MIN_STUDIES_TO_RANK` studies; `r count_phrase(nrow(ranked), 'entry', 'entries')` `r agree(nrow(ranked), 'qualifies', 'qualify')``r if (nrow(ranked) > 0) paste0(', with a median mean accuracy of ', fmt_num(ranked_accuracy$median, 1), ' points per study (range ', fmt_num(min(ranked$score / ranked$papers_rated), 1), ' to ', fmt_num(max(ranked$score / ranked$papers_rated), 1), ')') else ''`.
+")
+```
+
+```{r}
+#| label: fig-sample
+#| eval: !expr has_ratings
+#| include: !expr has_ratings
+#| echo: !expr has_ratings
+#| fig-cap: 'Number of valid ratings per session (left) and per study (right).'
+#| fig-alt: 'Two bar charts. The left shows how many sessions rated each number of studies; the right shows how many studies received each number of ratings.'
+#| fig-height: 3.2
+per_session_plot <- ggplot(per_session, aes(n)) +
+    geom_bar(fill = PALETTE$series[['blue']], width = 0.8) +
+    scale_x_continuous(breaks = scales::breaks_pretty()) +
+    scale_y_continuous(breaks = scales::breaks_pretty()) +
+    labs(x = 'Ratings in the session', y = 'Sessions')
+per_study_plot <- ggplot(per_study, aes(n)) +
+    geom_bar(fill = PALETTE$series[['blue']], width = 0.8) +
+    scale_x_continuous(breaks = scales::breaks_pretty()) +
+    scale_y_continuous(breaks = scales::breaks_pretty()) +
+    labs(x = 'Ratings of the study', y = 'Studies')
+per_session_plot + per_study_plot
+```
+
+# Data quality and exclusions {#sec-quality}
+
+```{r}
+#| label: quality
+lb_counts <- leaderboard |>
+    left_join(count(ratings_all, session_id, name = 'found'), by = 'session_id') |>
+    mutate(found = coalesce(found, 0L))
+rating_sessions <- unique(ratings_all$session_id)
+stamped_sessions <- unique(ratings_all$session_id[ratings_all$stamped])
+
+checks <- tribble(
+    ~Check, ~Unit, ~Count,
+    'Study id malformed or not among the current studies', 'ratings',
+        sum(!ratings_all$valid_study_id | !ratings_all$known_study),
+    'Session id malformed', 'ratings', sum(!ratings_all$valid_session_id),
+    paste('Rating not a whole number from', config$RATING_MIN, 'to', config$RATING_MAX), 'ratings',
+        sum(!ratings_all$valid_rating),
+    'Stored as a bare number (no prediction, time or identifier)', 'ratings',
+        sum(ratings_all$shape == 'number'),
+    'Prediction missing or invalid', 'ratings', sum(!ratings_all$valid_prediction),
+    'Response time missing', 'ratings', sum(is.na(ratings_all$response_time_ms)),
+    'Response time negative', 'ratings', sum(ratings_all$negative_rt),
+    'Timestamp missing', 'ratings', sum(is.na(ratings_all$timestamp_ms)),
+    'Timestamp later than the snapshot', 'ratings', sum(ratings_all$future_timestamp),
+    'Sessions with ratings but no leaderboard entry', 'sessions',
+        sum(!rating_sessions %in% leaderboard$session_id),
+    'Leaderboard entries whose count differs from the ratings found', 'entries',
+        sum(!is.na(lb_counts$papers_rated) & lb_counts$papers_rated != lb_counts$found),
+    'Leaderboard entries with an empty username', 'entries', lb_empty_names,
+    'Sessions flagged for straight-lining', 'sessions', length(straight_liners),
+    'Sessions whose ratings follow neither seeded study order', 'sessions',
+        sum(order_checks$follows == 'neither')
+)
+if (snapshot$present[['sessions']]) {
+    checks <- bind_rows(checks, tribble(
+        ~Check, ~Unit, ~Count,
+        'v2 sessions with ratings but no /sessions record', 'sessions',
+            sum(!stamped_sessions %in% sessions$session_id)
+    ))
+}
+if (snapshot$present[['rankings']]) {
+    valid_rankings <- valid_allocations(rankings_all, config$criteria, config$TOKEN_BUDGET)
+    checks <- bind_rows(checks, tribble(
+        ~Check, ~Unit, ~Count,
+        'Invalid token allocations', 'allocations', nrow(rankings_all) - nrow(valid_rankings)
+    ))
+}
+
+median_words <- median(studies$words, na.rm = TRUE)
+pre_revision <- filter(ratings_all, valid_record, before_revision)
+pre_revision_changed <- filter(ratings_all, valid_record, pre_revision_changed)
+n_expert_changed <- sum(revisions$expert_before != revisions$expert_after)
+n_text_changed <- sum(revisions$text_fields_changed != '')
+revision_time <- if (nrow(revisions) > 0) min(revisions$revised_at) else as.POSIXct(NA)
+revision_current <- revisions |>
+    left_join(select(studies, study_id, expert), by = 'study_id') |>
+    filter(expert_after != expert)
+check <- expert_check$check
+n_pre_expert_changed <- sum(ratings_all$valid_record & !is.na(ratings_all$expert_earlier) &
+                                ratings_all$expert_earlier != ratings_all$expert)
+n_participant_ratings <- sum(analysed$session_id %in% participant_ids)
+
+# Study orders (@sec-order).
+orders <- list(
+    checked = nrow(order_checks),
+    working = sum(order_checks$follows == 'working'),
+    defective = sum(order_checks$follows == 'defective'),
+    neither = sum(order_checks$follows == 'neither'),
+    complete = sum(order_checks$complete),
+    negative = sum(order_checks$negative_seed)
+)
+first_trials <- filter(ratings_all, valid_record, trial == 1)
+first_studies <- count(first_trials, study_id, sort = TRUE)
+v1_sessions_with_positions <- n_distinct(
+    ratings_all$session_id[ratings_all$trial_source == 'seeded order']
+)
+```
+
+```{r}
+#| label: tbl-checks
+#| tbl-cap: 'Data quality checks. Records failing the first three checks are excluded; the others are reported for information.'
+md_table(checks)
+```
+
+```{r}
+#| label: exclusions-text
+#| echo: false
+#| results: asis
+prose("
+Three rules, set as parameters, define the analysis set. A session is flagged for straight-lining when it has at least `r plural(params$straightline_min_n, 'valid rating')` that all take the same value. The expert ratings of the studies span the whole scale, so identical ratings across that many studies suggest the participant was not responding to the content, and all of the session's ratings are removed. A rating given in less than `r fmt_num(params$rt_floor_s, 0)` s is removed, since the median study description is `r fmt_int(median_words)` words long and is unlikely to have been read in that time.`r if (shapes$unstamped > 0) ' Because v1 restarted the clock when a study was shown again (@sec-rt), a short v1 time can also follow a reload, so the rule may remove some considered v1 ratings.' else ''` Ratings without a response time are kept. The third rule, removing ratings of revised studies given before the content revision was committed, is `r if (params$exclude_pre_revision) 'applied' else 'available but not applied'` (see below). @tbl-exclusions shows what each step removed.
+
+Participant-level summaries (@sec-participants) and the learning analysis (@sec-learning) use only sessions with at least `r plural(params$min_ratings_per_session, 'rating')` in the analysis set`r if (length(participant_ids) > 0) paste0(': ', fmt_int(length(participant_ids)), ' of ', plural(n_distinct(analysed$session_id), 'session'), ', with ', plural(n_participant_ratings, 'rating')) else if (nrow(analysed) > 0) paste0(', which none of the ', plural(n_distinct(analysed$session_id), 'session'), ' reaches') else ''`. Rating-level models use every session, since their random intercepts accommodate sessions with few ratings.
+")
+```
+
+```{r}
+#| label: tbl-exclusions
+#| tbl-cap: 'Exclusion steps, applied in order.'
+exclusions$flow |>
+    rename(Step = step, Removed = removed, `Ratings left` = ratings,
+           `Sessions left` = sessions, `Studies left` = studies) |>
+    md_table()
+```
+
+## Study order and trial numbers {#sec-order}
+
+```{r}
+#| label: order-text
+#| echo: false
+#| results: asis
+n_following <- orders$working + orders$defective
+completeness_text <- if (n_following == 0) {
+    ''
+} else if (orders$complete == n_following) {
+    paste0(' In ', if (n_following == 1) 'that session' else if (n_following == 2) 'both' else
+               paste('all', n_following, 'of them'),
+           ' the ratings are exactly the first studies of the order.')
+} else if (orders$complete == 0) {
+    paste0(' In ', if (n_following == 1) 'that session' else paste('all', n_following, 'of them'),
+           ' at least one rating is missing from the snapshot (it failed to save or was deleted).')
+} else {
+    paste0(' In ', fmt_int(orders$complete), ' of the ', fmt_int(n_following),
+           ' the ratings are exactly the first studies of the order; in the ',
+           agree(n_following - orders$complete, 'other', 'others'), ' at least one rating is',
+           ' missing from the snapshot (it failed to save or was deleted).')
+}
+seed_text <- if (orders$checked == 1) {
+    paste('The only session with timed ratings', if (orders$negative == 1) 'has' else 'does not have',
+          'a negative seed.')
+} else {
+    paste0('Of the ', plural(orders$checked, 'session'), ' with timed ratings, ',
+           count_or_none(orders$negative), ' ', agree(orders$negative, 'has', 'have'),
+           ' a negative seed.')
+}
+follow_text <- paste0(
+    'The ratings of ', plural(orders$working, 'session'), ' follow the working order',
+    if (orders$defective > 0) paste0(' and those of ', plural(orders$defective, 'session'),
+                                     ' the defective one') else '',
+    if (orders$neither > 0) paste0('; ', fmt_int(orders$neither), ' ',
+                                   agree(orders$neither, 'follows', 'follow'),
+                                   ' neither, because a rating is out of place') else '',
+    '.'
+)
+stopped_text <- if (nrow(stopped_at_gap) == 0) {
+    'none stopped exactly at the first gap'
+} else {
+    paste0(fmt_int(nrow(stopped_at_gap)), ' stopped exactly at the first gap, after ',
+           fmt_count_range(stopped_at_gap$last_position, 'study', 'studies'),
+           ', so their length reflects the defect rather than a choice to stop')
+}
+prose(when = orders$checked > 0, "
+Each session sees the studies in an order shuffled with its session id as the seed. The report recomputes every session's order with the app's algorithm and compares it with the ratings, sorted by trial number (stored by v2, from timestamps for v1). Until a fix committed on `r fmt_date(SHUFFLE_FIX$time)` (`r SHUFFLE_FIX$commit`), v1 mishandled negative seeds, which about half of all session ids produce: the first study (`r study_order[1]`) never moved, and gaps entered the order, after which the app could not show another study. `r seed_text`
+
+`r follow_text``r completeness_text``r if (v1_sessions_with_positions > 0) paste0(' For v1 sessions that follow an order (', fmt_int(v1_sessions_with_positions), '), the trial number is the study\\'s position in that order, which stays right when an earlier rating is missing; other v1 ratings keep their rank by timestamp.') else ''`
+")
+prose(when = orders$checked == 0, "
+No session has ratings with a trial number, so study orders cannot be checked.
+")
+prose(when = orders$defective > 0, "
+The defective order always begins with `r study_order[1]`. Of the `r plural(orders$defective, 'session')` that followed it, `r stopped_text`. Because these sessions share a beginning, trial position is tied to particular studies: `r first_studies$study_id[1]` was the first study in `r fmt_int(first_studies$n[1])` of the `r plural(nrow(first_trials), 'session')` with a rating at trial 1. @sec-learning allows for this.
+")
+```
+
+## Content revision and reconstructed scores
+
+```{r}
+#| label: revision-text
+#| echo: false
+#| results: asis
+prose(when = nrow(revisions) > 0, "
+On `r fmt_datetime(revision_time)` a revision of the v1 content was committed. It changed the text of `r plural(n_text_changed, 'study', 'studies')` and the expert rating of `r fmt_int(n_expert_changed)`. v1 ratings carry no content version, so which version a rating saw has to be inferred from its timestamp. `r if (nrow(pre_revision) == 0) 'No valid rating in the snapshot was given before the commit.' else paste0('The snapshot has ', plural(nrow(pre_revision), 'valid rating'), ' given before the commit, ', count_or_none(nrow(pre_revision_changed)), ' of them on revised studies.')`
+")
+prose(when = nrow(revision_current) > 0, "
+Warning: `r plural(nrow(revision_current), 'study', 'studies')` (`r fmt_list(revision_current$study_id)`) now have an expert rating that differs from the value set by the v1 revision. Reconstructed v1 targets use the current values and are wrong for these studies; reference/content-revisions.csv needs updating.
+")
+assumption_text <- if (n_pre_expert_changed == 0) {
+    paste(' No rating given before the commit concerns a study whose expert rating changed,',
+          'so the reconstruction does not depend on which expert ratings were live then.')
+} else if (expert_check$decisive == 0) {
+    paste0(' Of the ratings given before the commit, ', fmt_int(n_pre_expert_changed), ' ',
+           agree(n_pre_expert_changed, 'concerns', 'concern'), ' a study whose expert rating',
+           ' changed, but none belongs to a session that can be checked, so the check cannot',
+           ' tell which expert ratings were live then; the report assumes the revised ones.')
+} else {
+    paste0(' Of the ratings given before the commit, ', fmt_int(n_pre_expert_changed), ' ',
+           agree(n_pre_expert_changed, 'concerns', 'concern'), ' a study whose expert rating',
+           ' changed; they make the totals of ', plural(expert_check$decisive, 'checkable session'),
+           ' depend on which expert ratings were live then. Scored against the revised expert',
+           ' ratings, ', fmt_int(expert_check$decisive_matched[['revised']]), ' of these ',
+           fmt_int(expert_check$decisive), ' totals are reproduced; scored against the earlier',
+           ' ones, ', fmt_int(expert_check$decisive_matched[['earlier']]), '. ',
+           if (expert_check$decisive_matched[['revised']] == expert_check$decisive_matched[['earlier']]) {
+               'The check does not separate the two, so the report keeps the revised expert ratings.'
+           } else if (expert_check$choice == 'revised') {
+               paste('The report therefore assumes that the revised expert ratings were live before',
+                     'the revision was committed, presumably because it was deployed first.')
+           } else {
+               'The report therefore assumes that the earlier expert ratings were live until the commit.'
+           })
+}
+sensitivity_feasible <- any(analysed$pre_revision_changed) && enough_for_model(analysed) &&
+    enough_for_model(filter(analysed, !pre_revision_changed))
+prose(when = expert_check$compared > 0, "
+The v1 app stored no per-study targets or scores, only each session's running total on the leaderboard. The report therefore reconstructs every v1 target from the snapshot: the ratings of the same study by other sessions with an earlier timestamp, blended with the expert rating as the app did. Summed by session, the reconstructed scores reproduce the stored total exactly for `r fmt_int(expert_check$matched[[expert_check$choice]])` of the `r plural(expert_check$compared, 'session')` that can be checked (those whose leaderboard count matches the ratings found)`r if (any(check$difference != 0)) paste0('; the largest discrepancy is ', plural(max(abs(check$difference)), 'point')) else ''`.`r assumption_text`
+")
+prose(when = expert_check$compared == 0 && n_pre_expert_changed > 0, "
+No leaderboard total can be compared with the reconstructed scores, so the report assumes that the revised expert ratings were live throughout. This affects the reconstructed targets of `r plural(n_pre_expert_changed, 'rating')` given before the commit.
+")
+prose(when = any(analysed$pre_revision_changed) && !params$exclude_pre_revision, "
+The leaderboard check concerns expert ratings only; it cannot show which study texts participants read before the commit. The analysis set keeps the `r plural(sum(analysed$pre_revision_changed), 'rating')` of revised studies given before the commit`r if (sensitivity_feasible) ', and @sec-expert reports how the main estimate changes without them' else ''`.
+")
+```
+
+# Participant ratings versus expert ratings {#sec-expert}
+
+```{r}
+#| label: expert-study
+mean_predictions <- analysed |>
+    group_by(study_id) |>
+    summarise(mean_prediction = mean(prediction, na.rm = TRUE), .groups = 'drop')
+study_summary <- grouped_mean_ci(analysed, 'study_id', 'rating', level) |>
+    left_join(mean_predictions, by = 'study_id') |>
+    right_join(select(studies, study_id, study_number, title, expert, band), by = 'study_id') |>
+    mutate(n = coalesce(n, 0L)) |>
+    arrange(study_number)
+rated_studies <- filter(study_summary, n > 0)
+# Intervals from two ratings span most of the scale and hide the points, so the
+# figure draws them from this many ratings; the table lists all of them.
+plot_min_n <- 3
+ok_study_cor <- nrow(rated_studies) >= minimum$correlation
+pearson <- cor_ci(rated_studies$mean, rated_studies$expert, 'pearson', level)
+spearman <- cor_ci(rated_studies$mean, rated_studies$expert, 'spearman', level)
+```
+
+```{r}
+#| label: expert-study-text
+#| echo: false
+#| results: asis
+prose(when = !has_ratings, "
+There are no valid ratings to compare with the expert ratings.
+")
+prose(when = has_ratings, "
+@tbl-studies lists each study's mean participant rating with a `r ci_label` from the t distribution (shown when a study has at least two ratings) and @fig-study-means plots the means against the expert ratings. The means describe participants only; the expert rating is not blended into them.
+")
+prose(when = has_ratings && !ok_study_cor, "
+With `r plural(nrow(rated_studies), 'rated study', 'rated studies')`, too few to estimate a correlation (at least `r minimum$correlation` are needed), the study-level comparison is descriptive only.
+")
+prose(when = ok_study_cor, "
+Across the `r nrow(rated_studies)` rated studies, mean participant ratings and expert ratings were correlated at r = `r fmt_est(pearson$estimate, pearson$lower, pearson$upper, 2, level)` (Pearson, `r fmt_p(pearson$p)`) and ρ = `r fmt_est(spearman$estimate, spearman$lower, spearman$upper, 2, level)` (Spearman, `r fmt_p(spearman$p)`), a `r strength(pearson$estimate)` association by conventional labels. Both intervals come from Fisher's z transformation, for ρ with the standard error of @bonett2000. Each study counts equally whatever its number of ratings (median `r fmt_count(median(rated_studies$n))`). Study means contain rating noise, which attenuates both coefficients relative to the agreement that more ratings per study would show; @sec-reliability estimates how reliable the means are.
+")
+```
+
+```{r}
+#| label: fig-study-means
+#| eval: !expr has_ratings
+#| include: !expr has_ratings
+#| echo: !expr has_ratings
+#| fig-cap: !expr paste0('Mean participant rating per study against the expert rating, with ', ci_label, 's for studies with at least ', plot_min_n, ' ratings (@tbl-studies gives every interval). Points are offset horizontally to reduce overlap; their area shows the number of ratings, and their fill and shape the expert quality band. The diagonal marks equality.')
+#| fig-alt: 'Scatter plot of mean participant rating against expert rating per study, with vertical interval bars and a diagonal line of equality. Points are coloured and shaped by expert quality band.'
+#| fig-height: 5
+set.seed(params$seed)
+plot_data <- rated_studies |> mutate(x = expert + runif(n(), -0.22, 0.22))
+ggplot(plot_data, aes(x, mean)) +
+    geom_abline(slope = 1, intercept = 0, colour = PALETTE$muted, linewidth = 0.4) +
+    # Neutral intervals and dark outlines keep the light 'low' band visible on white.
+    geom_linerange(data = filter(plot_data, n >= plot_min_n),
+                   aes(ymin = lower, ymax = upper), colour = PALETTE$muted, linewidth = 0.45,
+                   alpha = 0.7, na.rm = TRUE) +
+    geom_point(aes(size = n, fill = band, shape = band), colour = PALETTE$ink, stroke = 0.35) +
+    band_scales() +
+    scale_size_area(name = 'Ratings', max_size = 5, breaks = scales::breaks_pretty(3)) +
+    guides(size = guide_legend(override.aes = list(shape = 21, fill = PALETTE$muted)),
+           fill = guide_legend(override.aes = list(size = 3.5)),
+           shape = guide_legend(override.aes = list(size = 3.5))) +
+    rating_scale('x', 'Expert rating', scale_limits) +
+    scale_y_continuous(name = 'Mean participant rating', breaks = seq(scale_limits[1], scale_limits[2]),
+                       expand = expansion(add = 0.3)) +
+    coord_cartesian(ylim = scale_limits + c(-0.6, 0.6))
+```
+
+```{r}
+#| label: tbl-studies
+#| eval: !expr has_ratings
+#| include: !expr has_ratings
+#| echo: !expr has_ratings
+#| tbl-cap: !expr paste0('Participant ratings by study (', ci_label, ' from the t distribution; mean prediction for comparison). Intervals based on very few ratings are wide and can extend beyond the scale.', if (any(rated_studies$n > 1 & rated_studies$sd == 0, na.rm = TRUE)) ' An interval of zero width means that the ratings were identical, not that the mean is known exactly.' else '')
+rated_studies |>
+    transmute(
+        Study = study_number,
+        Title = short_title(title, 55),
+        Expert = expert,
+        n = n,
+        Mean = mean,
+        SD = sd,
+        CI = fmt_ci(lower, upper, 2, ''),
+        `Mean prediction` = mean_prediction
+    ) |>
+    rename_column('CI', ci_label) |>
+    md_table()
+```
+
+## Mixed model
+
+```{r}
+#| label: expert-model
+ok_expert_model <- enough_for_model(analysed)
+expert_model <- if (ok_expert_model) {
+    fit_lmer(rating ~ expert_c + (1 | session_id) + (1 | study_id), analysed)
+} else {
+    NULL
+}
+ok_expert_model <- isTRUE(expert_model$ok)
+if (ok_expert_model) {
+    expert_effects <- fixed_effects(expert_model, level)
+    slope <- term_row(expert_effects, 'expert_c')
+    intercept <- term_row(expert_effects, '(Intercept)')
+    expert_vc <- variance_components(expert_model$fit)
+    slope_vs_one <- position(slope$lower, slope$upper, 1)
+    slope_vs_zero <- position(slope$lower, slope$upper, 0)
+    intercept_vs_mid <- position(intercept$lower, intercept$upper, scale_mid)
+    study_share <- expert_vc$share[expert_vc$group == 'study_id']
+    session_share <- expert_vc$share[expert_vc$group == 'session_id']
+    median_raters <- median(count(analysed, study_id)$n)
+    # Explains a singular fit by naming the variance that was estimated at zero.
+    singular_text <- function(model, components) {
+        if (!isTRUE(model$singular)) return('')
+        zero <- components$group[components$group != 'Residual' & components$share < 1e-4]
+        parts <- c(
+            if ('study_id' %in% zero) paste0(
+                ' The study variance was estimated at zero: given the expert rating, the data show',
+                ' no further systematic differences between studies, though such differences could',
+                ' exist and be too small to detect with a median of ',
+                plural(median_raters, 'rating'), ' per study.'),
+            if ('session_id' %in% zero) paste0(
+                ' The session variance was estimated at zero: the data show no detectable',
+                ' differences in leniency between participants.')
+        )
+        paste0(' The fit is singular (a variance estimated at the boundary of zero).',
+               paste(parts, collapse = ''))
+    }
+
+    ordinal_model <- fit_clmm(factor(rating, ordered = TRUE) ~ expert_c + (1 | session_id) +
+                                  (1 | study_id), analysed)
+    ordinal_slope <- term_row(clmm_effects(ordinal_model, level), 'expert_c')
+    ordinal_vs_zero <- if (is.null(ordinal_slope)) 'unknown' else
+        position(ordinal_slope$lower, ordinal_slope$upper, 0)
+    agreement_sentence <- function(ordinal, linear) {
+        if (ordinal != linear) {
+            return(paste('Its interval and that of the linear slope differ in relation to zero, so',
+                         'the conclusion about direction depends on the scale assumption.'))
+        }
+        switch(ordinal,
+            above = paste('Like the linear slope, it is positive with an interval that excludes zero,',
+                          'so the direction of the association does not depend on treating ratings',
+                          'as interval data.'),
+            below = paste('Like the linear slope, it is negative with an interval that excludes zero,',
+                          'so the direction of the association does not depend on treating ratings',
+                          'as interval data.'),
+            includes = 'Like that of the linear slope, its interval includes zero.',
+            ''
+        )
+    }
+
+    # Sensitivity: without ratings of revised studies given before the commit.
+    sensitivity_data <- filter(analysed, !pre_revision_changed)
+    run_sensitivity <- nrow(sensitivity_data) < nrow(analysed) && enough_for_model(sensitivity_data)
+    if (run_sensitivity) {
+        sensitivity_model <- fit_lmer(rating ~ expert_c + (1 | session_id) + (1 | study_id),
+                                      sensitivity_data)
+        sensitivity_slope <- term_row(fixed_effects(sensitivity_model, level), 'expert_c')
+        run_sensitivity <- !is.null(sensitivity_slope)
+    }
+}
+```
+
+```{r}
+#| label: expert-model-text
+#| echo: false
+#| results: asis
+prose(when = !ok_expert_model, "
+The mixed model needs at least `r minimum$model_ratings` ratings from `r minimum$model_sessions` sessions on `r minimum$model_studies` studies`r if (!is.null(expert_model) && !isTRUE(expert_model$ok)) paste0(', and fitting it failed (', expert_model$error, ')') else ''`; the snapshot does not support it.
+")
+prose(when = ok_expert_model, "
+Each participant rated a different random subset of studies, so sessions and studies are crossed but the design is far from complete. To use every rating while allowing for this, ratings were modelled with a linear mixed model with the expert rating as a fixed effect, centred at the scale midpoint (`r fmt_num(scale_mid, 0)`), and random intercepts for session and study, fitted by REML with lme4 [@bates2015]; intervals and p values use t distributions with Satterthwaite's degrees of freedom from lmerTest [@kuznetsova2017]. The model treats the `r scale_text` ratings as interval data, an approximation that can mislead when responses bunch at the ends of the scale [@liddell2018], so a cumulative link mixed model that treats them as ordered categories serves as a check [@christensen2023]. The model used `r plural(nobs(expert_model$fit), 'rating')` from `r plural(n_distinct(analysed$session_id), 'session')` on `r plural(n_distinct(analysed$study_id), 'study', 'studies')``r if (length(fit_notes(expert_model)) > 0) paste0(' (', fmt_list(fit_notes(expert_model)), ')') else ''`.
+
+The expert slope was b = `r fmt_est(slope$estimate, slope$lower, slope$upper, 2, level)` (t(`r fmt_num(slope$df, 1)`), `r fmt_p(slope$p)`). `r switch(slope_vs_zero, above = 'Participants rated studies higher the higher the expert rated them', below = 'Participants rated studies lower the higher the expert rated them', includes = 'The interval includes zero, so the data do not establish that participants\\' ratings rose with the expert rating', unknown = 'The interval could not be estimated')`. `r switch(slope_vs_one, below = 'The slope is below 1: a one-point difference in expert rating went with a smaller difference in participants\\' ratings, so participants spread these studies over less of the scale than the expert did', above = 'The slope is above 1: participants spread these studies over more of the scale than the expert did', includes = 'The interval includes 1, so the data are consistent with participants spreading the studies over the scale as much as the expert did', unknown = '')`. A study the expert rated `r fmt_num(scale_mid, 0)` was expected to receive `r fmt_est(intercept$estimate, intercept$lower, intercept$upper, 2, level)` from participants, `r switch(intercept_vs_mid, above = 'above the expert rating', below = 'below the expert rating', includes = 'an interval that includes the expert rating', unknown = 'with no estimable interval')`.
+
+Of the variance left after the expert rating, sessions (differences in how leniently participants rated) accounted for `r fmt_pct(session_share)` and studies for `r fmt_pct(study_share)`, with `r fmt_pct(1 - session_share - study_share)` residual (@tbl-expert-vc).`r singular_text(expert_model, expert_vc)`
+")
+prose(when = ok_expert_model && !is.null(ordinal_slope), "
+In the cumulative link mixed model the expert effect was `r fmt_est(ordinal_slope$estimate, ordinal_slope$lower, ordinal_slope$upper, 2, level)` on the log-odds scale per expert point (Wald interval, `r fmt_p(ordinal_slope$p)`)`r if (length(fit_notes(ordinal_model)) > 0) paste0(' (', fmt_list(fit_notes(ordinal_model)), ')') else ''`. `r agreement_sentence(ordinal_vs_zero, slope_vs_zero)`
+")
+prose(when = ok_expert_model && is.null(ordinal_slope), "
+The cumulative link mixed model could not be fitted`r if (!isTRUE(ordinal_model$ok)) paste0(' (', ordinal_model$error, ')') else ''`, so the interval-scale assumption could not be checked.
+")
+prose(when = ok_expert_model && isTRUE(run_sensitivity), "
+Without the `r plural(nrow(analysed) - nrow(sensitivity_data), 'rating')` of revised studies given before the revision commit, the expert slope was `r fmt_est(sensitivity_slope$estimate, sensitivity_slope$lower, sensitivity_slope$upper, 2, level)`, a change of `r fmt_num(sensitivity_slope$estimate - slope$estimate, 2)`.
+")
+```
+
+```{r}
+#| label: tbl-expert-vc
+#| eval: !expr ok_expert_model
+#| include: !expr ok_expert_model
+#| echo: !expr ok_expert_model
+#| tbl-cap: 'Variance components of the model rating ~ expert + (1 | session) + (1 | study).'
+expert_vc |>
+    transmute(Component = recode(group, session_id = 'Session', study_id = 'Study',
+                                 Residual = 'Residual'),
+              Variance = variance, SD = sd, Share = fmt_pct(share)) |>
+    md_table(digits = 3)
+```
+
+## Agreement by participant {#sec-participants}
+
+```{r}
+#| label: participants
+participant_agreement <- analysed |>
+    filter(session_id %in% participant_ids) |>
+    group_by(session_id) |>
+    summarise(
+        n = n(),
+        varied = isTRUE(sd(rating) > 0 && sd(expert_at_time) > 0),
+        rho = if (varied) cor(rating, expert_at_time, method = 'spearman') else NA_real_,
+        mad = mean(abs(rating - expert_at_time)),
+        .groups = 'drop'
+    )
+ok_participants <- nrow(participant_agreement) > 0
+if (ok_participants) {
+    rho_summary <- median_iqr(participant_agreement$rho)
+    mad_summary <- median_iqr(participant_agreement$mad)
+    n_rho <- sum(!is.na(participant_agreement$rho))
+    n_positive <- sum(participant_agreement$rho > 0, na.rm = TRUE)
+}
+```
+
+```{r}
+#| label: participants-text
+#| echo: false
+#| results: asis
+prose(when = !ok_participants, "
+No session has the `r plural(params$min_ratings_per_session, 'rating')` needed for a participant-level summary.
+")
+n_sessions_pa <- if (ok_participants) nrow(participant_agreement) else 0
+rho_text <- if (!ok_participants || n_rho == 0) {
+    'No session\'s ratings varied, so no correlation can be computed'
+} else if (n_rho == 1) {
+    paste0('Only one session\'s ratings varied; its correlation was ',
+           fmt_num(rho_summary$median, 2))
+} else {
+    paste0('Across the ', plural(n_rho, 'session'), ' whose ratings varied, the median correlation was ',
+           fmt_num(rho_summary$median, 2), ' (interquartile range ', fmt_num(rho_summary$q1, 2), ' to ',
+           fmt_num(rho_summary$q3, 2), '), and ', if (n_positive == n_rho) 'all' else fmt_int(n_positive),
+           ' of them had a positive correlation')
+}
+prose(when = n_sessions_pa == 1, "
+Only one session has at least `r plural(params$min_ratings_per_session, 'rating')`. `r if (n_rho == 1) paste0('The Spearman correlation between its ratings and the expert ratings, which summarises how well the participant ordered the studies they saw, was ', fmt_num(rho_summary$median, 2)) else 'Its ratings, or the expert ratings of the studies it saw, did not vary, so no correlation can be computed'`, and the mean absolute difference from the expert ratings was `r fmt_num(mad_summary$median, 2)` scale points, from `r plural(participant_agreement$n, 'rating')`. A single session says nothing about how participants differ.
+")
+prose(when = n_sessions_pa > 1, "
+For each of the `r plural(n_sessions_pa, 'session')` with at least `r plural(params$min_ratings_per_session, 'rating')`, the Spearman correlation between the participant's ratings and the expert ratings summarises how well that person ordered the studies they saw. `r rho_text``r if (n_rho < n_sessions_pa) paste0('; ', plural(n_sessions_pa - n_rho, 'session'), ' gave the same rating throughout or saw studies with a single expert rating') else ''`. The mean absolute difference between a participant's ratings and the expert ratings had a median of `r fmt_num(mad_summary$median, 2)` scale points (interquartile range `r fmt_num(mad_summary$q1, 2)` to `r fmt_num(mad_summary$q3, 2)`). Each of these values rests on `r fmt_count_range(participant_agreement$n, 'rating')` and is imprecise on its own; together they describe how much participants differ`r if (n_rho > 1) ' (@fig-participants)' else ''`.
+")
+```
+
+```{r}
+#| label: fig-participants
+#| eval: !expr ok_participants && sum(!is.na(participant_agreement$rho)) > 1
+#| include: !expr ok_participants && sum(!is.na(participant_agreement$rho)) > 1
+#| echo: !expr ok_participants && sum(!is.na(participant_agreement$rho)) > 1
+#| fig-cap: 'Spearman correlation between each participant''s ratings and the expert ratings, for sessions with enough ratings.'
+#| fig-alt: 'Histogram of per-participant correlations with the expert ratings, on a scale from minus one to one.'
+#| fig-height: 2.8
+ggplot(filter(participant_agreement, !is.na(rho)), aes(rho)) +
+    geom_histogram(binwidth = 0.1, boundary = 0, fill = PALETTE$series[['blue']], colour = 'white') +
+    geom_vline(xintercept = 0, colour = PALETTE$muted, linewidth = 0.4) +
+    scale_x_continuous(name = 'Correlation with the expert ratings (Spearman)', limits = c(-1, 1),
+                       breaks = seq(-1, 1, 0.5)) +
+    scale_y_continuous(name = 'Sessions', breaks = scales::breaks_pretty())
+```
+
+# Reliability of study means {#sec-reliability}
+
+```{r}
+#| label: reliability
+ok_reliability <- enough_for_model(analysed)
+if (ok_reliability) {
+    null_model <- fit_lmer(rating ~ 1 + (1 | session_id) + (1 | study_id), analysed)
+    ok_reliability <- isTRUE(null_model$ok)
+}
+if (ok_reliability) {
+    icc <- icc_from_fit(null_model$fit)
+    null_vc <- variance_components(null_model$fit)
+    raters <- count(analysed, study_id)$n
+    k_harmonic <- harmonic_mean(raters)
+    k_median <- median(raters)
+    reliability_at_k <- spearman_brown(icc[['agreement']], k_harmonic)
+    icc_boot <- boot_icc(null_model$fit, k_harmonic, params$n_sim, params$seed, level)
+    targets <- c(0.7, 0.8, 0.9)
+    needed <- tibble(
+        Reliability = targets,
+        `Ratings per study` = raters_needed(icc[['agreement']], targets)
+    )
+}
+```
+
+```{r}
+#| label: reliability-text
+#| echo: false
+#| results: asis
+prose(when = !ok_reliability, "
+Estimating the reliability of study means needs the same minimum as the mixed model (@sec-expert); the snapshot does not support it.
+")
+prose(when = ok_reliability, "
+How far do study means reflect stable differences between studies rather than who happened to rate them? A crossed random-intercept model without the expert rating splits the rating variance into parts due to studies, sessions and residual noise. Because each study was rated by different people, differences in leniency between raters add noise to study means, so the relevant single-rating intraclass correlation is the agreement form, which counts session variance as error [@shrout1979; @mcgraw1996]. It was `r fmt_num(icc[['agreement']], 2)``r if (!is.null(icc_boot)) paste0(', ', ci_label, ' ', fmt_ci(icc_boot$icc[1], icc_boot$icc[2]), ' (percentile interval from a parametric bootstrap with ', fmt_int(icc_boot$n), ' successful simulations, which redraws the random effects and residuals from the fitted model and refits it)') else ''`. The consistency form, which would apply if every study were rated by the same people, was `r fmt_num(icc[['consistency']], 2)`.
+
+Studies received a median of `r plural(k_median, 'rating')` in the analysis set (harmonic mean `r fmt_num(k_harmonic, 2)`, the usual summary for unbalanced designs). By the Spearman-Brown formula [@spearman1910; @brown1910], a study mean based on `r fmt_num(k_harmonic, 2)` ratings has a reliability of `r fmt_num(reliability_at_k, 2)``r if (!is.null(icc_boot)) paste0(', ', ci_label, ' ', fmt_ci(icc_boot$reliability[1], icc_boot$reliability[2])) else ''`. @tbl-raters-needed gives the number of ratings per study needed for conventional reliability levels if the single-rating correlation were as estimated, and @fig-reliability shows the projection. The estimates assume normally distributed random effects, and their precision depends on the number of studies and of ratings per study.`r if (isTRUE(null_model$singular)) paste0(' The fit is singular: ', if (null_vc$share[null_vc$group == 'study_id'] < 1e-4) 'the study variance was estimated at zero, so the correlation is at its lower boundary.' else 'a variance component was estimated at zero.') else ''`
+")
+```
+
+```{r}
+#| label: tbl-raters-needed
+#| eval: !expr ok_reliability
+#| include: !expr ok_reliability
+#| echo: !expr ok_reliability
+#| tbl-cap: 'Ratings per study needed for a given reliability of the study mean (Spearman-Brown, agreement ICC).'
+md_table(needed)
+```
+
+```{r}
+#| label: fig-reliability
+#| eval: !expr ok_reliability
+#| include: !expr ok_reliability
+#| echo: !expr ok_reliability
+#| fig-cap: !expr paste0('Projected reliability of a study mean by number of ratings (Spearman-Brown). The band is the ', ci_label, ' from the parametric bootstrap; the dot marks the harmonic mean number of ratings per study in this snapshot.')
+#| fig-alt: 'Line chart of projected reliability rising with the number of ratings per study, with an uncertainty band and a dot at the current number of ratings.'
+#| fig-height: 3.6
+k_grid <- seq(1, max(40, ceiling(max(raters) * 1.5)))
+projection <- tibble(k = k_grid, reliability = spearman_brown(icc[['agreement']], k_grid))
+if (!is.null(icc_boot)) {
+    band <- t(vapply(k_grid, function(k) {
+        stats::quantile(spearman_brown(icc_boot$draws, k), c((1 - level) / 2, 1 - (1 - level) / 2),
+                        names = FALSE)
+    }, numeric(2)))
+    projection$lower <- band[, 1]
+    projection$upper <- band[, 2]
+}
+reliability_plot <- ggplot(projection, aes(k, reliability))
+if (!is.null(icc_boot)) {
+    reliability_plot <- reliability_plot +
+        geom_ribbon(aes(ymin = lower, ymax = upper), fill = PALETTE$series[['blue']], alpha = 0.18)
+}
+reliability_plot +
+    geom_line(colour = PALETTE$series[['blue']], linewidth = 0.7) +
+    annotate('point', x = k_harmonic, y = reliability_at_k, size = 3, colour = PALETTE$ink) +
+    scale_y_continuous(name = 'Reliability of the study mean', limits = c(0, 1),
+                       breaks = seq(0, 1, 0.2)) +
+    scale_x_continuous(name = 'Ratings per study', breaks = scales::breaks_pretty())
+```
+
+# Predictions {#sec-predictions}
+
+```{r}
+#| label: predictions
+has_predictions <- nrow(predictions) > 0
+if (has_predictions) {
+    weights <- predictions$expert_weight[!is.na(predictions$expert_weight)]
+    max_other <- max(predictions$n_other, na.rm = TRUE)
+    max_gap <- max(abs(predictions$target - predictions$expert_at_time), na.rm = TRUE)
+    best_is_expert <- mean(abs(predictions$target - predictions$expert_at_time) < 0.5)
+    error_summary <- median_iqr(predictions$abs_error)
+    target_sources <- count(predictions, target_source)
+    n_reconstructed <- sum(predictions$target_source == 'reconstructed')
+    n_stored <- sum(predictions$target_source == 'stored')
+    stored_check <- filter(predictions, !is.na(target_stored), !is.na(target_reconstructed))
+    stored_agree <- sum(abs(stored_check$target_stored - stored_check$target_reconstructed) < 0.001)
+
+    nearest <- mean(predictions$abs_error <= 0.5)
+    same_as_own <- mean(predictions$prediction == predictions$rating)
+    same_as_expert <- mean(predictions$prediction == predictions$expert_at_time)
+    expert_error <- mean(abs(predictions$prediction - predictions$expert_at_time))
+    own_difference <- cluster_boot_mean(predictions$prediction - predictions$rating,
+                                        predictions$session_id, params$n_boot, params$seed, level,
+                                        minimum$bootstrap_sessions)
+    own_vs_prediction <- cluster_boot_mean(predictions$own_abs_error - predictions$abs_error,
+                                           predictions$session_id, params$n_boot, params$seed, level,
+                                           minimum$bootstrap_sessions)
+    boot_interval_text <- function(result) {
+        if (is.na(result$lower)) {
+            return(paste0('no interval with fewer than ', minimum$bootstrap_sessions, ' sessions'))
+        }
+        paste0(ci_label, ' ', fmt_ci(result$lower, result$upper), ', percentile bootstrap with ',
+               fmt_int(params$n_boot), ' resamples of whole sessions')
+    }
+    own_difference_pos <- position(own_difference$lower, own_difference$upper, 0)
+    own_vs_prediction_pos <- position(own_vs_prediction$lower, own_vs_prediction$upper, 0)
+
+    spearman_table <- tribble(
+        ~Pair, ~rho,
+        'Prediction and target', cor(predictions$prediction, predictions$target, method = 'spearman'),
+        'Prediction and own rating', cor(predictions$prediction, predictions$rating, method = 'spearman'),
+        'Prediction and expert rating', cor(predictions$prediction, predictions$expert_at_time,
+                                             method = 'spearman'),
+        'Own rating and expert rating', cor(predictions$rating, predictions$expert_at_time,
+                                             method = 'spearman')
+    )
+}
+```
+
+```{r}
+#| label: predictions-text
+#| echo: false
+#| results: asis
+prose(when = !has_predictions, "
+There are no valid predictions with a target in the analysis set.
+")
+prose(when = has_predictions, "
+Each prediction is scored against a target, (sum of the other participants' ratings + `r config$SEED_WEIGHT` × expert rating) / (n + `r config$SEED_WEIGHT`), where n is the number of other ratings of the study at the time, and earns max(0, 100 − round(`r config$SCORE_PENALTY` × |prediction − target|)) points. The expert rating's weight in the target is `r config$SEED_WEIGHT` / (n + `r config$SEED_WEIGHT`). `r if (max_other == 0) 'In this snapshot no prediction was made after another participant had rated the same study, so every target equalled the expert rating.' else paste0('In this snapshot no study had more than ', plural(max_other, 'earlier rating'), ' by others when a prediction was made, so the expert\\'s weight never fell below ', fmt_pct(min(weights), 1), ' and the target never differed from the expert rating by more than ', fmt_num(max_gap, 2), ' scale points.')` Predictions are whole numbers, so whenever the target lies within half a point of the (whole-number) expert rating, the best possible prediction is the expert rating itself. This held for `r fmt_share(best_is_expert, 'predictions')`, for which scoring well meant matching the expert rating, whatever participants believed they were predicting. v1 asked participants to predict the average rating of all participants without explaining the expert weighting; v2 explains it before the first study and after each one.
+
+Targets and scores are stored with v2 ratings (`r fmt_int(n_stored)` here). For the `r fmt_int(n_reconstructed)` v1 ratings they were reconstructed as described in @sec-quality`r if (nrow(stored_check) > 0) paste0('; for the ', fmt_int(nrow(stored_check)), ' v2 ratings that allow the comparison, the stored and reconstructed targets agree to within 0.001 for ', fmt_int(stored_agree)) else ''`.
+
+Across `r plural(nrow(predictions), 'prediction')`, the absolute difference between prediction and target had a mean of `r fmt_num(mean(predictions$abs_error), 2)` and a median of `r fmt_num(error_summary$median, 2)` scale points, and predictions earned a mean of `r fmt_num(mean(predictions$score), 1)` points. In `r fmt_pct(nearest)` of cases the prediction was the scale point nearest the target (within 0.5).
+
+Predictions equalled the participant's own rating in `r fmt_pct(same_as_own)` of cases and were on average `r fmt_num(abs(own_difference$estimate), 2)` points `r if (own_difference$estimate >= 0) 'higher' else 'lower'` than it (`r boot_interval_text(own_difference)`); `r switch(own_difference_pos, above = 'predictions were systematically higher than own ratings', below = 'predictions were systematically lower than own ratings', includes = 'the interval includes zero, so there is no evidence of a systematic difference', unknown = 'without an interval, no conclusion about a systematic difference is drawn')`. Had participants entered their own rating as the prediction, the mean absolute error would have been `r fmt_num(mean(predictions$own_abs_error), 2)` instead of `r fmt_num(mean(predictions$abs_error), 2)` (difference `r fmt_num(own_vs_prediction$estimate, 2)`, `r boot_interval_text(own_vs_prediction)`); `r switch(own_vs_prediction_pos, above = 'predictions were more accurate than own ratings would have been', below = 'predictions were less accurate than own ratings would have been', includes = 'the data do not show that predictions were more or less accurate than own ratings would have been', unknown = 'without an interval, no comparison is drawn')`. Predictions matched the expert rating exactly in `r fmt_pct(same_as_expert)` of cases and differed from it by `r fmt_num(expert_error, 2)` points on average.
+")
+```
+
+```{r}
+#| label: fig-predictions
+#| eval: !expr has_predictions
+#| include: !expr has_predictions
+#| echo: !expr has_predictions
+#| fig-cap: 'Predictions against the scoring target (left; points jittered vertically) and against the participant''s own rating (right; area shows the number of ratings). Diagonals mark equality.'
+#| fig-alt: 'Two panels. Left, a scatter of predictions against scoring targets with a diagonal. Right, a grid of circles whose size shows how often each combination of own rating and prediction occurred.'
+#| fig-height: 3.8
+set.seed(params$seed)
+target_plot <- ggplot(predictions, aes(target, prediction)) +
+    geom_abline(slope = 1, intercept = 0, colour = PALETTE$muted, linewidth = 0.4) +
+    geom_jitter(width = 0, height = 0.15, colour = PALETTE$series[['blue']], alpha = 0.6, size = 1.6) +
+    rating_scale('x', 'Scoring target', scale_limits) +
+    rating_scale('y', 'Prediction', scale_limits)
+own_plot <- ggplot(predictions, aes(rating, prediction)) +
+    geom_abline(slope = 1, intercept = 0, colour = PALETTE$muted, linewidth = 0.4) +
+    geom_count(colour = PALETTE$series[['orange']], alpha = 0.85) +
+    scale_size_area(name = 'Ratings', max_size = 6, breaks = scales::breaks_pretty(3)) +
+    rating_scale('x', 'Own rating', scale_limits) +
+    rating_scale('y', 'Prediction', scale_limits)
+target_plot + own_plot
+```
+
+```{r}
+#| label: prediction-model
+ok_prediction_model <- has_predictions && enough_for_model(predictions)
+if (ok_prediction_model) {
+    prediction_model <- fit_lmer(prediction ~ expert_c + rating_c + (1 | session_id) + (1 | study_id),
+                                 predictions)
+    ok_prediction_model <- isTRUE(prediction_model$ok)
+}
+if (ok_prediction_model) {
+    prediction_effects <- fixed_effects(prediction_model, level)
+    own_slope <- term_row(prediction_effects, 'rating_c')
+    expert_slope <- term_row(prediction_effects, 'expert_c')
+    slope_difference <- fixed_contrast(prediction_model, c(0, -1, 1), level)
+    difference_pos <- position(slope_difference$lower, slope_difference$upper, 0)
+    rating_expert_r <- cor(predictions$rating, predictions$expert_at_time)
+}
+```
+
+```{r}
+#| label: prediction-model-text
+#| echo: false
+#| results: asis
+prose(when = has_predictions && nrow(predictions) >= minimum$correlation, "
+@tbl-prediction-cor gives rank correlations at the level of single ratings. They are descriptive: ratings by the same participant are not independent, so no intervals are shown.
+")
+prose(when = ok_prediction_model, "
+A linear mixed model of the prediction with the expert rating and the participant's own rating as fixed effects (both centred at `r fmt_num(scale_mid, 0)`) and random intercepts for session and study separates the two influences`r if (length(fit_notes(prediction_model)) > 0) paste0(' (', fmt_list(fit_notes(prediction_model)), ')') else ''`. Holding the expert rating constant, a one-point higher own rating went with a prediction `r fmt_est(own_slope$estimate, own_slope$lower, own_slope$upper, 2, level)` points higher; holding own rating constant, a one-point higher expert rating went with `r fmt_est(expert_slope$estimate, expert_slope$lower, expert_slope$upper, 2, level)` points. The difference between the two slopes (own minus expert) was `r fmt_est(slope_difference$estimate, slope_difference$lower, slope_difference$upper, 2, level)`: `r switch(difference_pos, above = 'predictions followed participants\\' own ratings more closely than the expert rating, consistent with people projecting their own judgement onto the crowd', below = 'predictions followed the expert rating more closely than participants\\' own ratings', includes = 'the data do not distinguish the two influences', unknown = 'the difference could not be estimated')`. Own and expert ratings are themselves correlated (r = `r fmt_num(rating_expert_r, 2)` across ratings), which widens both intervals.
+")
+prose(when = has_predictions && !ok_prediction_model, "
+The snapshot has too few predictions for a mixed model of predictions (at least `r minimum$model_ratings` from `r minimum$model_sessions` sessions on `r minimum$model_studies` studies are needed).
+")
+```
+
+```{r}
+#| label: tbl-prediction-cor
+#| eval: !expr has_predictions && nrow(predictions) >= minimum$correlation
+#| include: !expr has_predictions && nrow(predictions) >= minimum$correlation
+#| echo: !expr has_predictions && nrow(predictions) >= minimum$correlation
+#| tbl-cap: 'Spearman correlations across single ratings (descriptive; ratings within sessions are not independent).'
+md_table(spearman_table)
+```
+
+# Learning across trials {#sec-learning}
+
+```{r}
+#| label: learning
+learning <- filter(predictions, session_id %in% participant_ids, !is.na(trial))
+ok_learning <- enough_for_model(learning)
+if (ok_learning) {
+    use_slopes <- n_distinct(learning$session_id) >= minimum$random_slopes_sessions
+    learning_model <- if (use_slopes) {
+        fit_lmer(abs_error ~ trial10 + (1 + trial10 | session_id) + (1 | study_id), learning)
+    } else {
+        NULL
+    }
+    if (!isTRUE(learning_model$ok) || isTRUE(learning_model$singular)) {
+        use_slopes <- FALSE
+        learning_model <- fit_lmer(abs_error ~ trial10 + (1 | session_id) + (1 | study_id), learning)
+    }
+    ok_learning <- isTRUE(learning_model$ok)
+}
+if (ok_learning) {
+    trial_slope <- term_row(fixed_effects(learning_model, level), 'trial10')
+    trial_pos <- position(trial_slope$lower, trial_slope$upper, 0)
+    by_trial <- grouped_mean_ci(learning, 'trial', 'abs_error', level)
+    sessions_by_trial <- learning |> group_by(trial) |> summarise(sessions = n_distinct(session_id))
+    max_trial <- max(learning$trial)
+
+    # Sessions with v1's defective order all start with the same study, which
+    # ties early trials to particular studies; refit without them.
+    defective_ids <- order_checks$session_id[order_checks$follows == 'defective']
+    learning_defective <- n_distinct(learning$session_id[learning$session_id %in% defective_ids])
+    learning_without <- filter(learning, !session_id %in% defective_ids)
+    run_learning_sensitivity <- learning_defective > 0 && enough_for_model(learning_without)
+    if (run_learning_sensitivity) {
+        learning_sensitivity <- fit_lmer(stats::formula(learning_model$fit), learning_without)
+        sensitivity_trial <- term_row(fixed_effects(learning_sensitivity, level), 'trial10')
+        run_learning_sensitivity <- !is.null(sensitivity_trial)
+    }
+}
+```
+
+```{r}
+#| label: learning-text
+#| echo: false
+#| results: asis
+prose("
+Each participant saw the studies in an order shuffled with their session id as the seed. With the working shuffle, position in the sequence (the trial) is unrelated to which study is shown.`r if (orders$defective > 0) paste0(' Sessions with v1\\'s defective order are the exception (@sec-order): that order always begins with ', study_order[1], ', so early trials over-represent particular studies. The models below include random intercepts for study, which absorb differences between studies, and are refitted without those sessions.') else ''` v2 stores the trial number with each rating. For a v1 rating it is the study's position in the session's seeded order or, when the session follows neither order, the rank of its timestamp, which a missing rating would shift (@sec-order). v1 showed the target and the score after each prediction, so v1 participants received outcome feedback throughout; v2 shows them too and, when the feedbackShown flag of a rating is true, also the expert's feedback on the study.
+")
+prose(when = !ok_learning, "
+The learning analysis uses sessions with at least `r plural(params$min_ratings_per_session, 'rating')` and needs at least `r minimum$model_ratings` predictions from `r minimum$model_sessions` such sessions on `r minimum$model_studies` studies; the snapshot does not support it.
+")
+prose(when = ok_learning, "
+The analysis uses `r plural(nrow(learning), 'prediction')` from `r plural(n_distinct(learning$session_id), 'session')` with at least `r plural(params$min_ratings_per_session, 'rating')` (`r if (all(learning$trial_source != 'stored')) 'all' else fmt_int(sum(learning$trial_source != 'stored'))` with reconstructed trial numbers). @fig-learning shows the mean absolute prediction error at each trial. A linear mixed model of the absolute error with trial (per 10 trials) as a fixed effect and random intercepts for session and study`r if (use_slopes) ', plus a random slope for trial by session,' else ''` estimated a change of `r fmt_est(trial_slope$estimate, trial_slope$lower, trial_slope$upper, 2, level)` points per 10 trials`r if (length(fit_notes(learning_model)) > 0) paste0(' (', fmt_list(fit_notes(learning_model)), ')') else ''`. `r switch(trial_pos, below = 'Errors became smaller over the sequence', above = 'Errors became larger over the sequence', includes = paste0('The interval includes no change, so the data provide no evidence of a trend, though they are compatible with changes from ', fmt_num(trial_slope$lower, 2), ' to ', fmt_num(trial_slope$upper, 2), ' points per 10 trials'), unknown = 'The interval could not be estimated')`.`r if (isTRUE(run_learning_sensitivity)) paste0(' Without the ', plural(learning_defective, 'session'), ' that followed the defective order, the change was ', fmt_est(sensitivity_trial$estimate, sensitivity_trial$lower, sensitivity_trial$upper, 2, level), ' points per 10 trials.') else if (learning_defective > 0) paste0(' Without the ', plural(learning_defective, 'session'), ' that followed the defective order, too few data remain to refit the model.') else ''`
+
+Later trials rest on fewer sessions (`r plural(sessions_by_trial$sessions[sessions_by_trial$trial == max_trial], 'session')` reached trial `r max_trial`): participants could stop at any point`r if (nrow(stopped_at_gap) > 0) ', some v1 sessions could not go past a gap in their order,' else ''` and those who continue may differ from those who stop. Absolute errors are bounded at zero and skewed, so the linear trend is an approximation, and there is no comparison group that did not receive feedback.
+")
+```
+
+```{r}
+#| label: fig-learning
+#| eval: !expr ok_learning
+#| include: !expr ok_learning
+#| echo: !expr ok_learning
+#| fig-cap: !expr paste0('Mean absolute difference between prediction and target by trial, with ', ci_label, 's (t distribution) where a trial has at least two predictions. Point area shows the number of predictions; the line is the fixed-effect trend from the mixed model.')
+#| fig-alt: 'Points with interval bars showing mean absolute prediction error at each trial position, with a straight trend line.'
+#| fig-height: 3.8
+trend <- tibble(trial = seq(1, max_trial)) |>
+    mutate(fit = lme4::fixef(learning_model$fit)[['(Intercept)']] +
+               lme4::fixef(learning_model$fit)[['trial10']] * (trial - 1) / 10)
+ggplot(by_trial, aes(trial, mean)) +
+    geom_line(data = trend, aes(trial, fit), colour = PALETTE$series[['orange']], linewidth = 0.7) +
+    geom_linerange(aes(ymin = lower, ymax = upper), colour = PALETTE$series[['blue']],
+                   linewidth = 0.5, na.rm = TRUE) +
+    geom_point(aes(size = n), colour = PALETTE$series[['blue']]) +
+    scale_size_area(name = 'Predictions', max_size = 4, breaks = scales::breaks_pretty(3)) +
+    scale_x_continuous(name = 'Trial', breaks = scales::breaks_pretty()) +
+    scale_y_continuous(name = 'Mean absolute error (scale points)') +
+    coord_cartesian(ylim = c(0, NA))
+```
+
+## Expert feedback and learning
+
+```{r}
+#| label: feedback
+v2_learning <- filter(learning, !is.na(feedback_shown))
+has_v2 <- nrow(v2_learning) > 0
+feedback_levels <- unique(v2_learning$feedback_shown)
+feedback_design <- if (nrow(learning) == 0) {
+    'no-data'
+} else if (!has_v2) {
+    'none'
+} else if (length(feedback_levels) == 2) {
+    'within-v2'
+} else if (any(is.na(learning$feedback_shown))) {
+    'v2-vs-v1'
+} else {
+    'single'
+}
+feedback_data <- switch(feedback_design,
+    'within-v2' = mutate(v2_learning, group = factor(ifelse(feedback_shown, 'shown', 'not shown'),
+                                                     levels = c('not shown', 'shown'))),
+    'v2-vs-v1' = mutate(learning, group = factor(ifelse(is.na(feedback_shown), 'v1',
+                                                        ifelse(feedback_shown, 'v2 shown', 'v2 not shown')))),
+    NULL
+)
+if (feedback_design == 'v2-vs-v1') {
+    feedback_data <- feedback_data |>
+        filter(group %in% c('v1', if (isTRUE(feedback_levels)) 'v2 shown' else 'v2 not shown')) |>
+        mutate(group = droplevels(group))
+}
+ok_feedback <- !is.null(feedback_data) && enough_for_model(feedback_data) &&
+    all(table(feedback_data$group) > 0) && nlevels(feedback_data$group) == 2
+if (ok_feedback) {
+    feedback_model <- fit_lmer(abs_error ~ trial10 * group + (1 | session_id) + (1 | study_id),
+                               feedback_data)
+    ok_feedback <- isTRUE(feedback_model$ok)
+}
+if (ok_feedback) {
+    feedback_effects <- fixed_effects(feedback_model, level)
+    interaction <- feedback_effects[grepl(':', feedback_effects$term), ]
+    interaction_pos <- position(interaction$lower, interaction$upper, 0)
+    group_sessions <- feedback_data |> group_by(group) |> summarise(sessions = n_distinct(session_id))
+}
+```
+
+```{r}
+#| label: feedback-text
+#| echo: false
+#| results: asis
+prose(when = feedback_design == 'none', "
+No rating in the learning data carries the feedbackShown flag: all of them were written by v1, which had no expert feedback panel. Whether expert feedback changes the learning curve can be evaluated once v2 data exist.
+")
+prose(when = feedback_design == 'single', "
+All ratings in the learning data come from v2 with the same feedbackShown value, so there is nothing to compare.
+")
+prose(when = feedback_design == 'no-data', "
+There are no learning data, so the role of expert feedback cannot be examined.
+")
+prose(when = feedback_design %in% c('within-v2', 'v2-vs-v1') && !ok_feedback, "
+The data with and without expert feedback are too few for the interaction model (each group needs ratings, and together they need at least `r minimum$model_ratings` predictions from `r minimum$model_sessions` sessions on `r minimum$model_studies` studies).
+")
+prose(when = ok_feedback, "
+`r if (feedback_design == 'within-v2') 'The v2 data include sessions with and without expert feedback after each study. The feedback mode is set per deployment rather than assigned at random, so differences may also reflect when and with whom the workshop was run.' else 'The v2 ratings all share one feedback mode, so they are compared with v1 ratings, which had no expert feedback panel. This comparison is observational: it is confounded with the app version, the content version and the cohort.'` A model of absolute error with trial, group (`r fmt_list(paste0('\\'', group_sessions$group, '\\' with ', plural(group_sessions$sessions, 'session')))`) and their interaction gave an interaction (difference in the change per 10 trials, `r levels(feedback_data$group)[2]` minus `r levels(feedback_data$group)[1]`) of `r fmt_est(interaction$estimate, interaction$lower, interaction$upper, 2, level)``r if (length(fit_notes(feedback_model)) > 0) paste0(' (', fmt_list(fit_notes(feedback_model)), ')') else ''`. `r switch(interaction_pos, below = paste0('Errors fell faster over trials in the ', levels(feedback_data$group)[2], ' group'), above = paste0('Errors fell more slowly (or rose faster) over trials in the ', levels(feedback_data$group)[2], ' group'), includes = 'The interval includes zero, so the data do not show that the learning curve differs between the groups', unknown = 'The interval could not be estimated')`.
+")
+```
+
+# Criterion weights {#sec-weights}
+
+```{r}
+#| label: weights
+has_rankings_node <- snapshot$present[['rankings']]
+weights_data <- if (has_rankings_node) {
+    valid_allocations(rankings_all, config$criteria, config$TOKEN_BUDGET) |>
+        filter(!session_id %in% straight_liners)
+} else {
+    rankings_all[0, ]
+}
+n_weights <- nrow(weights_data)
+ok_weights <- n_weights >= minimum$shares
+if (n_weights > 0) {
+    shares <- as.matrix(weights_data[, config$criteria]) / config$TOKEN_BUDGET
+    share_summary <- if (ok_weights) {
+        share_ci(shares, params$n_boot, params$seed, level)
+    } else {
+        tibble(criterion = config$criteria, mean = colMeans(shares), lower = NA_real_, upper = NA_real_)
+    }
+    share_summary <- share_summary |>
+        mutate(label = criterion_labels[criterion],
+               vs_equal = map2_chr(lower, upper, position, reference = 1 / length(config$criteria),
+                                   digits = 3)) |>
+        arrange(desc(mean))
+    top <- share_summary[1, ]
+    above_equal <- share_summary$label[share_summary$vs_equal == 'above']
+    below_equal <- share_summary$label[share_summary$vs_equal == 'below']
+}
+```
+
+```{r}
+#| label: weights-text
+#| echo: false
+#| results: asis
+prose(when = !has_rankings_node, "
+The snapshot has no /rankings node, so criterion weights cannot be analysed. Backups made by v1 did not include it; a v2 backup or the admin panel's export does.
+")
+prose(when = has_rankings_node && nrow(rankings_all) == 0, "
+The /rankings node is empty, so there are no criterion weights to summarise.
+")
+prose(when = has_rankings_node && nrow(rankings_all) > 0 && n_weights == 0, "
+The /rankings node holds `r plural(nrow(rankings_all), 'allocation')` but none is valid (whole numbers from 0 to `r config$TOKEN_BUDGET` that sum to `r config$TOKEN_BUDGET`) and outside the excluded sessions, so there is nothing to summarise.
+")
+prose(when = n_weights > 0, "
+Of the `r plural(nrow(rankings_all), 'token allocation')` in /rankings, `r fmt_int(n_weights)` are valid (whole numbers from 0 to `r config$TOKEN_BUDGET` that sum to `r config$TOKEN_BUDGET`) and come from sessions not flagged for straight-lining. A criterion's share is its tokens divided by `r config$TOKEN_BUDGET`; equal weighting would give each of the `r length(config$criteria)` criteria `r fmt_pct(1 / length(config$criteria), 1)`. `r top$label` received the largest mean share, `r fmt_pct(top$mean, 1)``r if (ok_weights) paste0(' (', ci_label, ' [', fmt_pct(top$lower, 1), ', ', fmt_pct(top$upper, 1), '])') else ''`.
+")
+prose(when = ok_weights, "
+@tbl-weights and @fig-weights give every criterion's mean share with a `r ci_label` from `r fmt_int(params$n_boot)` bootstrap resamples of participants (percentile method). `r if (length(above_equal) > 0) paste0('The interval lies above equal weighting for ', fmt_list(above_equal), '. ') else 'No interval lies entirely above equal weighting. '``r if (length(below_equal) > 0) paste0('It lies below for ', fmt_list(below_equal), '.') else 'None lies entirely below it.'` The shares of one participant sum to one, so the `r length(config$criteria)` means are not independent: a larger share for one criterion implies smaller shares elsewhere. `r if (n_weights < 30) 'With so few allocations, percentile intervals tend to be too narrow [@davison1997].' else ''`
+")
+prose(when = n_weights > 0 && !ok_weights, "
+With fewer than `r minimum$shares` valid allocations no interval is estimated; @tbl-weights gives the mean shares only.
+")
+```
+
+```{r}
+#| label: tbl-weights
+#| eval: !expr n_weights > 0
+#| include: !expr n_weights > 0
+#| echo: !expr n_weights > 0
+#| tbl-cap: !expr paste0('Mean share of tokens per criterion (', ci_label, ', percentile bootstrap).')
+share_summary |>
+    transmute(Criterion = label, `Mean share` = fmt_pct(mean, 1),
+              CI = ifelse(is.na(lower), '', paste0('[', fmt_pct(lower, 1), ', ', fmt_pct(upper, 1), ']'))) |>
+    rename_column('CI', ci_label) |>
+    md_table()
+```
+
+```{r}
+#| label: fig-weights
+#| eval: !expr ok_weights
+#| include: !expr ok_weights
+#| echo: !expr ok_weights
+#| fig-cap: !expr paste0('Mean share of tokens per criterion with ', ci_label, 's (percentile bootstrap). The vertical line marks equal weighting.')
+#| fig-alt: 'Dot plot of the mean token share for each criterion with horizontal interval bars and a vertical reference line at equal weighting.'
+#| fig-height: 3.2
+ggplot(share_summary, aes(mean, reorder(label, mean))) +
+    geom_vline(xintercept = 1 / length(config$criteria), colour = PALETTE$muted, linewidth = 0.4) +
+    geom_linerange(aes(xmin = lower, xmax = upper), colour = PALETTE$series[['blue']], linewidth = 0.6) +
+    geom_point(colour = PALETTE$series[['blue']], size = 2.6) +
+    # After the discrete layers, so that the y scale is already discrete.
+    annotate('text', x = 1 / length(config$criteria), y = length(config$criteria) + 0.45,
+             label = 'Equal weighting', hjust = -0.05, size = 3.2, colour = PALETTE$muted) +
+    scale_x_continuous(name = 'Mean share of tokens', labels = scales::label_percent(),
+                       limits = c(0, NA)) +
+    labs(y = NULL)
+```
+
+# Response times {#sec-rt}
+
+```{r}
+#| label: rt
+rt_data <- analysed |>
+    filter(!is.na(response_time_ms), response_time_ms >= 0) |>
+    mutate(seconds = response_time_ms / 1000)
+has_rt <- nrow(rt_data) > 0
+if (has_rt) {
+    rt_overall <- median_iqr(rt_data$seconds)
+    trial_breaks <- c(0, 1, 3, 6, 9, 12, Inf)
+    trial_labels <- c('1', '2–3', '4–6', '7–9', '10–12', '13 and later')
+    rt_data <- rt_data |>
+        mutate(trial_bin = cut(trial, trial_breaks, labels = trial_labels),
+               version = ifelse(stamped, 'v2 (from first display)', 'v1 (from latest display)'))
+    # Groups keep their factor order (trial bins, bands) in the table.
+    summarise_rt <- function(data, grouping, label) {
+        data |>
+            filter(!is.na({{ grouping }})) |>
+            group_by(Group = {{ grouping }}) |>
+            summarise(stats = list(median_iqr(seconds)), .groups = 'drop') |>
+            arrange(Group) |>
+            mutate(Group = as.character(Group)) |>
+            unnest(stats) |>
+            mutate(By = label, .before = 1)
+    }
+    rt_table <- bind_rows(
+        mutate(rt_overall, By = 'All', Group = 'All ratings', .before = 1),
+        summarise_rt(rt_data, version, 'App version'),
+        summarise_rt(rt_data, trial_bin, 'Trial'),
+        summarise_rt(mutate(rt_data, band = factor(BAND_LABELS[as.character(band)], BAND_LABELS)),
+                     band, 'Expert quality band')
+    )
+    first_trial <- median_iqr(rt_data$seconds[rt_data$trial == 1])
+    first_trial_studies <- count(filter(rt_data, trial == 1), study_id, sort = TRUE)
+    late_trials <- median_iqr(rt_data$seconds[rt_data$trial >= config$MIN_STUDIES_TO_FINISH])
+    n_below_floor <- exclusions$flow$removed[exclusions$flow$step == 'Response time below the floor']
+    # Compare the medians as displayed, so the wording never contradicts the numbers shown.
+    compare_medians <- function(first, later) {
+        first <- round(first, 1)
+        later <- round(later, 1)
+        if (later < first) ', shorter later in the sequence'
+        else if (later > first) ', longer later in the sequence'
+        else ', the same at both points'
+    }
+}
+```
+
+```{r}
+#| label: rt-text
+#| echo: false
+#| results: asis
+prose("
+The response time is the time from showing a study to submitting both ratings. v1 restarted the clock whenever the study was shown again (after a reload, a pause or going back), so v1 times can understate the time spent; v2 measures from the first display. Long times include breaks, so medians and interquartile ranges (IQR) are reported rather than means.
+")
+prose(when = !has_rt, "
+No rating in the analysis set has a response time.
+")
+prose(when = has_rt, "
+Across `r plural(nrow(rt_data), 'rating')` with a response time, the median was `r fmt_num(rt_overall$median, 1)` s (IQR `r fmt_num(rt_overall$q1, 1)` to `r fmt_num(rt_overall$q3, 1)` s) and the longest `r fmt_num(max(rt_data$seconds) / 60, 1)` min; `r if (n_below_floor == 0) paste0('no rating fell below the ', fmt_num(params$rt_floor_s, 0), ' s floor') else paste0(plural(n_below_floor, 'rating'), ' fell below the ', fmt_num(params$rt_floor_s, 0), ' s floor and ', agree(n_below_floor, 'was', 'were'), ' excluded')`. `r if (first_trial$n > 0 && late_trials$n > 0) paste0('The median was ', fmt_num(first_trial$median, 1), ' s at the first trial and ', fmt_num(late_trials$median, 1), ' s from trial ', config$MIN_STUDIES_TO_FINISH, ' onwards (', fmt_int(first_trial$n), ' and ', plural(late_trials$n, 'rating'), ')', compare_medians(first_trial$median, late_trials$median), '. The first trial also includes getting used to the task', if (orders$defective > 0) paste0(', and ', fmt_int(first_trial_studies$n[1]), ' of its ', plural(first_trial$n, 'rating'), ' ', agree(first_trial_studies$n[1], 'concerns', 'concern'), ' ', first_trial_studies$study_id[1], ' (@sec-order)') else '', '.') else ''` @tbl-rt breaks the times down and @fig-rt shows them by trial.
+")
+```
+
+```{r}
+#| label: tbl-rt
+#| eval: !expr has_rt
+#| include: !expr has_rt
+#| echo: !expr has_rt
+#| tbl-cap: 'Response times in seconds: median and interquartile range.'
+rt_table |>
+    transmute(By, Group, n, Median = median, Q1 = q1, Q3 = q3) |>
+    md_table(digits = 1)
+```
+
+```{r}
+#| label: fig-rt
+#| eval: !expr has_rt
+#| include: !expr has_rt
+#| echo: !expr has_rt
+#| fig-cap: 'Response times by trial (logarithmic axis). Boxes span the interquartile range, the line marks the median and whiskers reach the most extreme value within 1.5 IQR; points beyond them are drawn individually. The horizontal line marks the exclusion floor.'
+#| fig-alt: 'Box plots of response time in seconds on a logarithmic axis for groups of trial positions.'
+#| fig-height: 3.6
+ggplot(filter(rt_data, !is.na(trial_bin)), aes(trial_bin, seconds)) +
+    geom_hline(yintercept = params$rt_floor_s, colour = PALETTE$muted, linewidth = 0.4) +
+    geom_boxplot(fill = PALETTE$band[['low']], colour = PALETTE$series[['blue']], width = 0.6,
+                 outlier.size = 1.2, outlier.colour = PALETTE$series[['blue']]) +
+    annotate('text', x = 0.55, y = params$rt_floor_s, label = 'Floor', hjust = 0, vjust = -0.5,
+             size = 3.2, colour = PALETTE$muted) +
+    scale_y_log10(name = 'Response time (s)',
+                  labels = scales::label_number(accuracy = 1, big.mark = ','),
+                  breaks = c(1, 3, 10, 30, 100, 300, 1000, 3000)) +
+    labs(x = 'Trial')
+```
+
+# Rooms and content versions {#sec-rooms}
+
+```{r}
+#| label: rooms
+room_values <- unique(na.omit(c(analysed$room, sessions$room, leaderboard$room)))
+has_rooms <- length(room_values) > 0
+if (has_rooms) {
+    room_table <- analysed |>
+        mutate(Room = coalesce(room, '(none)')) |>
+        group_by(Room) |>
+        summarise(
+            Sessions = n_distinct(session_id),
+            Ratings = n(),
+            `Ratings per session` = n() / n_distinct(session_id),
+            `Mean |rating − expert|` = mean(abs(rating - expert_at_time)),
+            `Mean score` = mean(score[valid_prediction], na.rm = TRUE),
+            .groups = 'drop'
+        )
+}
+version_table <- analysed |>
+    group_by(Version = content_label) |>
+    summarise(
+        Sessions = n_distinct(session_id),
+        Ratings = n(),
+        First = fmt_date_range_end(time, 'first'),
+        Last = fmt_date_range_end(time, 'last'),
+        `Mean |rating − expert|` = mean(abs(rating - expert_at_time)),
+        `Mean score` = mean(score[valid_prediction], na.rm = TRUE),
+        .groups = 'drop'
+    )
+locales <- count(filter(analysed, !is.na(locale)), locale)
+
+version_slopes <- analysed |>
+    group_split(content_label) |>
+    keep(enough_for_model) |>
+    map(function(data) {
+        model <- fit_lmer(rating ~ expert_c + (1 | session_id) + (1 | study_id), data)
+        row <- term_row(fixed_effects(model, level), 'expert_c')
+        if (is.null(row)) return(NULL)
+        mutate(row, version = data$content_label[1])
+    }) |>
+    compact() |>
+    bind_rows()
+```
+
+```{r}
+#| label: rooms-text
+#| echo: false
+#| results: asis
+prose(when = !has_rooms, "
+No record in this snapshot carries a room code. Room codes, which let facilitators follow one workshop, were introduced in v2.
+")
+prose(when = has_rooms, "
+The snapshot contains `r plural(length(room_values), 'room code')`. @tbl-rooms summarises the analysed ratings by room. Scoring targets are global, so scores are comparable across rooms, but rooms differ in audience and setting, and differences between them are descriptive.
+")
+prose(when = nrow(analysed) == 0, "
+There are no analysed ratings to summarise by content version.
+")
+prose(when = nrow(analysed) > 0, "
+@tbl-versions summarises the analysed ratings by the content version they saw (stamped for v2, inferred from the timestamp for v1). Versions differ in time and cohort as well as content, so differences between them should not be read as effects of the content changes.`r if (nrow(version_slopes) > 1) paste0(' Fitting the mixed model of @sec-expert separately per version gave expert slopes of ', fmt_list(paste0(fmt_num(version_slopes$estimate, 2), ' ', fmt_ci(version_slopes$lower, version_slopes$upper), ' (', version_slopes$version, ')')), '.') else ''`
+")
+prose(when = nrow(locales) > 0, "
+Ratings that record a locale used `r fmt_list(paste0('\\'', locales$locale, '\\' (', plural(locales$n, 'rating'), ')'))`.
+")
+```
+
+```{r}
+#| label: tbl-rooms
+#| eval: !expr has_rooms
+#| include: !expr has_rooms
+#| echo: !expr has_rooms
+#| tbl-cap: 'Analysed ratings by room.'
+md_table(room_table)
+```
+
+```{r}
+#| label: tbl-versions
+#| eval: !expr nrow(analysed) > 0
+#| include: !expr nrow(analysed) > 0
+#| echo: !expr nrow(analysed) > 0
+#| tbl-cap: 'Analysed ratings by content version.'
+md_table(version_table)
+```
+
+# Assumptions and limitations {#sec-limitations}
+
+```{r}
+#| label: limitations-text
+#| echo: false
+#| results: asis
+prose("
+The participants are a convenience sample of workshop attendees, and the unit of analysis is the session, not the person: one person can start several sessions (on different devices or after choosing to start again), and a shared device can carry one session for several people. The data are pseudonymous, and the report cannot link sessions to individuals or describe the sample's background.
+
+The design is an incomplete crossed one: each session rated the first studies of its shuffled order, so most pairs of session and study are missing`r if (has_ratings) paste0(' and a study mean rests on a median of ', plural(median(rated_studies$n), 'rating')) else ''`. The mixed models assume normally distributed random effects and, in the linear models, interval-scaled ratings; the cumulative link model checks the latter for the main comparison only. Singular fits and convergence warnings are reported where they occur. Intervals are `r fmt_pct(level)` intervals without adjustment for the number of estimates, and the analyses are exploratory.
+
+Several variables are reconstructed for v1 data, which store neither trial numbers, targets, scores, content versions nor feedback flags. Trial numbers come from each session's seeded order, checked against timestamps written by participants' devices, or from the timestamps alone when the ratings follow neither order; targets assume that every rating in the snapshot with an earlier timestamp was present when the participant submitted, which fails if ratings were deleted or written out of order; the content version is inferred from the time of the revision commit, checked against the stored leaderboard totals for expert ratings but not for texts. v1 response times restart when a study is shown again.`r if (orders$defective > 0) paste0(' Until ', format(SHUFFLE_FIX$time, '%B %Y', tz = 'UTC'), ', v1\\'s shuffle defect gave sessions with a negative seed a fixed start and cut some of them short (@sec-order), so in those sessions neither the first studies nor the number of studies rated is random.') else ''`
+
+Because the expert rating counts as `r config$SEED_WEIGHT` participants, the target moves away from it only as ratings accumulate.`r if (has_predictions) paste0(' For ', fmt_share(best_is_expert, 'the predictions analysed here'), ' the best possible prediction was the expert rating itself (@sec-predictions), so prediction accuracy in these data ', if (best_is_expert > 0.5) 'largely' else 'partly', ' reflects agreement with the expert rather than knowledge of what other participants think.') else ''` The learning analysis has no group without outcome feedback, and later trials come from participants who continued.
+
+v1 database rules let any signed-in client create ratings under any session id, so fabricated records cannot be ruled out beyond the checks in @sec-quality; v2 rules bind every record to the session's anonymous account. Records deleted before the snapshot was taken are not visible.
+")
+```
+
+# Appendix {#sec-appendix}
+
+## Parameters
+
+```{r}
+#| label: tbl-params
+#| tbl-cap: 'Report parameters (change them with quarto render report.qmd -P name:value).'
+tribble(
+    ~Parameter, ~Value, ~Meaning,
+    'data_dir', params$data_dir, 'Directory with the snapshot files',
+    'repo_root', params$repo_root, 'Repository root, for the app\'s constants and content',
+    'min_ratings_per_session', format(params$min_ratings_per_session),
+        'Minimum ratings for a session to enter participant-level analyses',
+    'rt_floor_s', format(params$rt_floor_s), 'Ratings faster than this (seconds) are excluded',
+    'straightline_min_n', format(params$straightline_min_n),
+        'Sessions with at least this many identical ratings are excluded',
+    'exclude_pre_revision', format(params$exclude_pre_revision),
+        'Exclude ratings of revised studies given before the v1 revision commit',
+    'conf_level', format(params$conf_level), 'Confidence level of all intervals',
+    'n_boot', format(params$n_boot), 'Nonparametric bootstrap resamples',
+    'n_sim', format(params$n_sim), 'Parametric bootstrap simulations for the ICC',
+    'seed', format(params$seed), 'Random seed'
+) |>
+    md_table()
+```
+
+```{r}
+#| label: tbl-minimum
+#| tbl-cap: 'Minimum data for each kind of estimate (below these an analysis is skipped, not the data excluded).'
+tibble(Requirement = c('Ratings for a mixed model', 'Sessions for a mixed model',
+                       'Studies for a mixed model', 'Studies for a correlation',
+                       'Allocations for share intervals', 'Sessions for bootstrap intervals',
+                       'Sessions for random slopes'),
+       Minimum = unlist(minimum)) |>
+    md_table()
+```
+
+## Data and code
+
+```{r}
+#| label: provenance
+commit <- repo_commit(params$repo_root)
+```
+
+```{r}
+#| label: provenance-text
+#| echo: false
+#| results: asis
+prose("
+Snapshot time: `r fmt_datetime(snap_time$time)` (`r snap_time$source`). Rendered: `r fmt_datetime(Sys.time())` with Quarto `r quarto_version()` and `r R.version.string`. Code: `r if (is.na(commit)) 'commit unknown (not a git checkout)' else paste('commit', commit)`. App constants read from the repository: seed weight `r config$SEED_WEIGHT`, score penalty `r config$SCORE_PENALTY`, token budget `r config$TOKEN_BUDGET`, current content version `r config$CONTENT_VERSION`.
+")
+```
+
+```{r}
+#| label: tbl-files
+#| tbl-cap: 'Snapshot files with their MD5 checksums.'
+snapshot$files |>
+    rename(File = file, Bytes = bytes, MD5 = md5) |>
+    md_table()
+```
+
+## Software
+
+```{r}
+#| label: software
+packages <- c('jsonlite', 'dplyr', 'tidyr', 'purrr', 'tibble', 'readr', 'ggplot2',
+              'scales', 'lme4', 'lmerTest', 'ordinal', 'boot', 'patchwork', 'knitr', 'rmarkdown')
+tibble(Package = packages,
+       Version = vapply(packages, function(p) as.character(packageVersion(p)), character(1))) |>
+    knitr::kable(format = 'pipe')
+sessionInfo()
+```
+
+## References {.unnumbered}
+
+::: {#refs}
+:::

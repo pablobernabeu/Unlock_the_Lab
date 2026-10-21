@@ -1,0 +1,30 @@
+# Studies changed by the v1 content revision (commit 0e44461, 2026-02-21 00:52:17 UTC).
+# Ratings given before revised_at saw the earlier texts and were scored against
+# expert_rating_before. Later v1 ratings saw the revised content, which stayed the
+# same until v2 (ratings stamped with contentVersion). 'overview' is shown as 'Theory'.
+study_id,revised_at,text_fields_changed,expert_rating_before,expert_rating_after
+STUDY-1,2026-02-21T00:52:17Z,access,1,1
+STUDY-2,2026-02-21T00:52:17Z,methods,6,6
+STUDY-4,2026-02-21T00:52:17Z,access,1,1
+STUDY-5,2026-02-21T00:52:17Z,source,5,5
+STUDY-8,2026-02-21T00:52:17Z,access;methods,7,6
+STUDY-9,2026-02-21T00:52:17Z,source,3,3
+STUDY-11,2026-02-21T00:52:17Z,access,2,2
+STUDY-13,2026-02-21T00:52:17Z,methods,5,5
+STUDY-14,2026-02-21T00:52:17Z,,4,5
+STUDY-15,2026-02-21T00:52:17Z,methods,3,3
+STUDY-17,2026-02-21T00:52:17Z,,3,2
+STUDY-18,2026-02-21T00:52:17Z,source,4,4
+STUDY-19,2026-02-21T00:52:17Z,access,7,7
+STUDY-22,2026-02-21T00:52:17Z,methods,6,6
+STUDY-24,2026-02-21T00:52:17Z,title;conclusion,7,7
+STUDY-27,2026-02-21T00:52:17Z,title;methods,4,5
+STUDY-30,2026-02-21T00:52:17Z,title,4,4
+STUDY-31,2026-02-21T00:52:17Z,title;access,6,6
+STUDY-33,2026-02-21T00:52:17Z,methods,6,6
+STUDY-37,2026-02-21T00:52:17Z,title;methods,6,6
+STUDY-39,2026-02-21T00:52:17Z,title,7,7
+STUDY-41,2026-02-21T00:52:17Z,conclusion,6,6
+STUDY-43,2026-02-21T00:52:17Z,conclusion,7,6
+STUDY-44,2026-02-21T00:52:17Z,title,3,2
+STUDY-48,2026-02-21T00:52:17Z,,4,1
