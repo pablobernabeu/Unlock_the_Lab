@@ -21,3 +21,6 @@ analysis/*.html
 
 # Legacy
 ratings.pdf
+
+# Scratch folders used by local checks
+.tmp-*/

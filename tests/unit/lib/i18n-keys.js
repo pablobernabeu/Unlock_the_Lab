@@ -2,18 +2,20 @@
  * Helpers for i18n-coverage.test.js: find every translation key the code and
  * pages use and check it against the English files in src/i18n/en.
  *
- * ENFORCED_NAMESPACES lists the namespaces whose keys must all exist. Each
- * track adds its namespace here when it creates src/i18n/en/<namespace>.json
- * ('app', 'dashboard', 'admin').
+ * ENFORCED_NAMESPACES lists the namespaces whose keys must all exist: every
+ * namespace that has an English file in src/i18n/en.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { lookupMessage, parseAttrSpec, splitKey } from '../../../src/lib/i18n-core.js';
 
-export const ENFORCED_NAMESPACES = ['common'];
-
 export const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
+
+export const ENFORCED_NAMESPACES = readdirSync(join(ROOT, 'src/i18n/en'))
+    .filter((name) => name.endsWith('.json'))
+    .map((name) => name.replace(/\.json$/, ''))
+    .sort();
 
 const PLURAL_CATEGORIES = new Set(['zero', 'one', 'two', 'few', 'many', 'other']);
 
