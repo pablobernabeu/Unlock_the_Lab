@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="noindex" />
+        <title data-i18n="common.notFound.pageTitle">Page not found</title>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/unlock-lab-icon.svg" type="image/svg+xml" />
+        <link rel="stylesheet" href="/src/styles/base.css" />
+        <script type="module" src="/src/lib/static-page.js"></script>
+    </head>
+    <body>
+        <a class="skip-link" href="#main" data-i18n="common.nav.skipToContent"
+            >Skip to main content</a
+        >
+        <header class="site-header">
+            <div class="container site-header__inner">
+                <a class="site-header__brand" href="/">
+                    <img
+                        class="site-header__logo"
+                        src="/unlock-lab-icon.svg"
+                        alt=""
+                        width="32"
+                        height="32"
+                    />
+                    <span data-i18n="common.appName">Unlock the Lab</span>
+                </a>
+                <div data-locale-switcher></div>
+            </div>
+        </header>
+        <main id="main" tabindex="-1">
+            <div class="container page-message">
+                <h1 data-i18n="common.notFound.heading">Page not found</h1>
+                <p data-i18n="common.notFound.message">There is no page at this address.</p>
+                <nav
+                    class="cluster"
+                    data-i18n-attr="aria-label:common.nav.mainLabel"
+                    aria-label="Main"
+                >
+                    <a class="btn btn-primary" href="/" data-i18n="common.notFound.toWorkshop"
+                        >Go to the workshop</a
+                    >
+                    <a
+                        class="btn btn-secondary"
+                        href="/dashboard.html"
+                        data-i18n="common.notFound.toDashboard"
+                    >
+                        Open the live dashboard
+                    </a>
+                </nav>
+            </div>
+        </main>
+        <footer class="site-footer">
+            <div class="container">
+                <p data-i18n-html="common.footer.materials"></p>
+                <p data-i18n-html="common.footer.licence"></p>
+            </div>
+        </footer>
+    </body>
+</html>
