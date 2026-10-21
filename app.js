@@ -3,9 +3,9 @@ import { database, auth } from './firebase-config.js';
 import { ref, set, get, onValue } from 'firebase/database';
 import { signInAnonymously } from 'firebase/auth';
 import Chart from 'chart.js/auto';
-import glossaryData from './public/glossary.json';
-import rubricData from './public/rubric.json';
-import papersData from './public/papers.json';
+import glossaryData from './src/content/en/glossary.json';
+import rubricData from './src/content/en/rubric.json';
+import papersData from './src/content/en/studies.json';
 
 // Application State
 let firebaseUid = null; // Set after anonymous auth on init

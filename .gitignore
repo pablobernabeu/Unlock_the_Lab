@@ -1,2 +1,23 @@
+node_modules/
+dist/
+.firebase/
+*.log
+.env.local
+.env.*.local
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.vite/
+
+# Quarto / R
+analysis/data/
+analysis/*_files/
+analysis/.quarto/
+analysis/*.html
+.Rhistory
+.RData
+.Rproj.user/
+
+# Legacy
 ratings.pdf
-node_modules
