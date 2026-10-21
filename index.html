@@ -1,336 +1,237 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unlock the Lab Workshop</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div id="app">
-        <!-- Score Display (appears after first rating) -->
-        <div id="score-banner" class="score-banner" style="display: none;">
-            <span id="total-score-header"><span class="medal-icon">🏆</span> 0</span>
-            <div class="navbar-center">
-                <img id="navbar-logo" src="unlock-lab-icon.svg" alt="Logo" class="navbar-logo">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title data-i18n="common.appName">Unlock the Lab</title>
+        <meta
+            name="description"
+            data-i18n-attr="content:app.meta.description"
+            content="A science-literacy workshop."
+        />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/unlock-lab-icon.svg" type="image/svg+xml" />
+        <link rel="stylesheet" href="/src/styles/base.css" />
+        <link rel="stylesheet" href="/src/styles/app.css" />
+        <script type="module" src="/src/app/main.js"></script>
+    </head>
+    <body>
+        <a class="skip-link" href="#main" data-i18n="common.nav.skipToContent"
+            >Skip to main content</a
+        >
+        <header class="site-header app-header" id="app-header">
+            <div class="container site-header__inner">
+                <div class="site-header__brand">
+                    <img
+                        class="site-header__logo app-logo"
+                        id="header-logo"
+                        src="/unlock-lab-icon.svg"
+                        alt=""
+                        width="32"
+                        height="32"
+                    />
+                    <span data-i18n="common.appName">Unlock the Lab</span>
+                </div>
+                <dl class="score-banner" id="score-banner" hidden>
+                    <div class="score-banner__item">
+                        <dt data-i18n="app.header.score">Average score</dt>
+                        <dd id="banner-score"></dd>
+                    </div>
+                    <div class="score-banner__item">
+                        <dt data-i18n="app.header.rated">Rated</dt>
+                        <dd id="banner-rated"></dd>
+                    </div>
+                </dl>
+                <p class="app-header__nickname" id="header-nickname" hidden>
+                    <span data-i18n="app.header.nickname">Nickname</span>
+                    <strong id="header-nickname-value"></strong>
+                </p>
             </div>
-            <div class="navbar-right">
-                <span id="navbar-paper-number" class="navbar-paper-number" style="display: none;"></span>
-                <span id="navbar-username" class="navbar-username"></span>
-            </div>
-        </div>
-        
-        <!-- Page 1: Welcome -->
-        <div class="page active" id="page-welcome">
+        </header>
+
+        <main id="main" tabindex="-1">
             <div class="container">
-                <h1><img id="logo-icon" src="unlock-lab-icon.svg" alt="Unlock the Lab" style="height: 3rem; flex-shrink: 0; cursor: pointer;"> <span class="logo-text">Unlock the Lab</span></h1>
-                <h2>Your guide to reading science like a scientist</h2>
-                
-                <div class="content">
-                    <p class="intro-text">"Chocolate makes you smarter!"—Headlines promise miracles and threaten disasters, but what does the actual science say?</p>
-                    
-                    <p>In this interactive workshop, you'll become a science detective. You'll evaluate real-world research scenarios using the same criteria professional scientists use to judge quality.</p>
-                    
-                    <div class="info-box" style="background: #fff3cd; border-left: 4px solid #ffc107;">
-                        <h3 style="margin-top: 0;">🎯 Your mission</h3>
-                        <p><strong>Dual challenge:</strong> For each study, complete both steps in this order:</p>
-                        <ol style="margin: 10px 0; padding-left: 2.5rem;">
-                            <li><strong>Predict the crowd</strong> — Guess how the average participant will rate it (1–7 scale)</li>
-                            <li><strong>Judge the science</strong> — Give your own quality rating using expert criteria (1–7 scale)</li>
+                <div id="app-notice" class="app-notice" hidden></div>
+                <p id="app-loading" class="app-loading" role="status">
+                    <span data-i18n="app.loading">Loading the workshop…</span>
+                </p>
+                <noscript>
+                    <p class="info-box info-box--warning" data-i18n="app.noscript">
+                        This workshop needs JavaScript.
+                    </p>
+                </noscript>
+
+                <div class="view view-welcome" id="view-welcome" hidden>
+                    <div class="welcome-hero">
+                        <img
+                            class="welcome-hero__logo"
+                            id="welcome-logo"
+                            src="/unlock-lab-icon.svg"
+                            alt=""
+                            width="80"
+                            height="80"
+                        />
+                        <h1 class="welcome-hero__title" data-i18n="common.appName">
+                            Unlock the Lab
+                        </h1>
+                        <p class="welcome-hero__tagline" data-i18n="common.tagline">
+                            Your guide to reading science like a scientist
+                        </p>
+                    </div>
+                    <div class="stack" id="welcome-notices"></div>
+                    <div class="flow view-body">
+                        <p class="lead" data-i18n="app.welcome.intro"></p>
+                        <p data-i18n="app.welcome.about"></p>
+                        <p class="info-box info-box--info" data-i18n-html="app.welcome.fictional"></p>
+
+                        <h2 data-i18n="app.welcome.tasksHeading">Your two tasks</h2>
+                        <p data-i18n="app.welcome.tasksIntro"></p>
+                        <ol class="task-list">
+                            <li data-i18n-html="app.welcome.taskPredict"></li>
+                            <li data-i18n-html="app.welcome.taskRate"></li>
                         </ol>
-                        <p style="margin-bottom: 0.75rem;"><strong>Scoring:</strong> Points awarded based on how accurately your crowd prediction matches the actual average. Can you think like a scientist AND anticipate how others perceive research?</p>
-                        <p style="font-size: 0.9rem; color: #856404; margin-bottom: 0;"><strong>Why both?</strong> This dual approach lets you express your own beliefs about research quality while reflecting on how those beliefs might differ from others' perspectives.</p>
+
+                        <h2 data-i18n="app.welcome.scoringHeading">How scoring works</h2>
+                        <p id="welcome-scoring-target"></p>
+                        <p id="welcome-scoring-early"></p>
+                        <p id="welcome-scoring-points"></p>
+                        <p data-i18n="app.welcome.scoringFeedback"></p>
+
+                        <h2 data-i18n="app.welcome.leaderboardHeading">Leaderboard</h2>
+                        <p id="welcome-leaderboard"></p>
+                        <p id="welcome-room" hidden></p>
+
+                        <h2 data-i18n="app.welcome.dataHeading">Your data</h2>
+                        <p data-i18n="app.welcome.dataCollected"></p>
+                        <p data-i18n="app.welcome.dataNoTracking"></p>
+                        <p data-i18n="app.welcome.dataUse"></p>
                     </div>
-                    
-                    <h3>📚 What You'll Learn:</h3>
-                    <ul class="skills-list">
-                        <li>✅ Spot red flags in research (predatory journals, hidden data, clickbait)</li>
-                        <li>✅ Distinguish good science from marketing disguised as research</li>
-                        <li>✅ Understand why open access and transparency matter</li>
-                        <li>✅ Evaluate methodology, sample sizes, and conclusions critically</li>
-                    </ul>
-                    
-                    <p class="highlight" style="font-size: 1.1rem; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.3); font-weight: 500;">💡 First, you'll learn the tools. Then, you'll test your skills on real scenarios!</p>
-                    
-                    <div style="margin-top: 2rem; padding: 1.25rem; background: #fff3e0; border: 2px solid #ff9800; border-radius: 8px;">
-                        <h3 style="margin-top: 0; color: #e65100; font-size: 1rem;">🏆 Leaderboard & Anonymous Usernames</h3>
-                        <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem;">Your results contribute to the <strong>public leaderboard</strong> as you go. Complete the workshop (or finish early after rating at least 10 papers) to review and compare your ratings with the crowd.</p>
-                        <ul style="font-size: 0.9rem; line-height: 1.6; margin: 0.75rem 0; padding-left: 1.5rem;">
-                            <li>You'll be assigned a <strong>unique anonymous username</strong> (e.g., "Red Fox", "Wise Owl") automatically.</li>
-                            <li>Your username will be displayed on the <strong>results page at the end</strong>.</li>
-                            <li>Rankings are based on how accurately you predict the crowd's average ratings.</li>
-                            <li>Earn badges (🏆🥇🥈🥉) based on your prediction accuracy score.</li>
+                    <div class="view-actions">
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="welcome-start"
+                            data-i18n="app.welcome.start"
+                        >
+                            Get started
+                        </button>
+                    </div>
+                </div>
+
+                <div class="view" id="view-guide" hidden>
+                    <h1 data-i18n="app.guide.heading">Before you begin</h1>
+                    <div class="flow view-body">
+                        <p data-i18n="app.guide.intro"></p>
+                        <h2 data-i18n="app.guide.glossaryHeading">Glossary</h2>
+                        <p class="text-muted" data-i18n="app.guide.glossaryIntro"></p>
+                        <div id="guide-glossary"></div>
+                        <h2 data-i18n="app.guide.rubricHeading">Quality rubric</h2>
+                        <p data-i18n="app.guide.rubricIntro"></p>
+                        <div id="guide-rubric"></div>
+                    </div>
+                    <div class="view-actions view-actions--split">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            id="guide-back"
+                            data-i18n="app.guide.back"
+                        >
+                            Back
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="guide-start"
+                            data-i18n="app.guide.start"
+                        >
+                            Start rating studies
+                        </button>
+                    </div>
+                </div>
+
+                <div class="view view-study" id="view-study" hidden></div>
+
+                <div class="view view-weights" id="view-weights" hidden></div>
+
+                <div class="view view-results" id="view-results" hidden>
+                    <h1 id="results-heading" data-i18n="app.results.heading">Your results</h1>
+                    <p
+                        class="info-box info-box--info"
+                        id="results-readonly-note"
+                        hidden
+                        data-i18n="app.results.readOnlyNote"
+                    ></p>
+                    <div id="results-dynamic" class="results-stack"></div>
+
+                    <section class="results-section">
+                        <h2 data-i18n="app.results.takeawaysHeading">Points to take away</h2>
+                        <ul class="takeaways">
+                            <li data-i18n-html="app.results.takeawayAccess"></li>
+                            <li data-i18n-html="app.results.takeawayHype"></li>
+                            <li data-i18n-html="app.results.takeawayMethods"></li>
+                            <li data-i18n-html="app.results.takeawaySource"></li>
+                            <li data-i18n-html="app.results.takeawayConclusion"></li>
+                            <li data-i18n-html="app.results.takeawayCompare"></li>
                         </ul>
-                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.5rem;">You will be able to access the live dashboard once you have rated at least 10 papers.</p>
-                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0;">The more papers you rate, the more robust and useful your contribution — so we encourage you to complete as many as possible!</p>
-                    </div>
-                    
-                    <div style="margin-top: 2rem; padding: 1.25rem; background: #f0f9ff; border: 2px solid #3b82f6; border-radius: 8px;">
-                        <h3 style="margin-top: 0; color: #1e40af; font-size: 1rem;">📊 Data Use Notice</h3>
-                        <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem;">By participating in this task, you agree that your <strong>anonymous data will be used for research purposes</strong> and may be shared and analysed.</p>
-                        <ul style="font-size: 0.9rem; line-height: 1.6; margin: 0.75rem 0; padding-left: 1.5rem;">
-                            <li>Your data is identified only by an <strong>automatically assigned anonymous username</strong>.</li>
-                            <li>Your username will be displayed on the <strong>results page at the end</strong>.</li>
-                            <li>You need not share this username with anyone if you do not wish to.</li>
-                            <li><strong>No demographic details</strong> or personally identifiable information is collected.</li>
+                    </section>
+
+                    <section class="results-section info-box">
+                        <h2 class="info-box__title" data-i18n="app.results.exploreHeading">
+                            Keep exploring
+                        </h2>
+                        <p data-i18n="app.results.exploreIntro"></p>
+                        <ul>
+                            <li data-i18n="app.results.exploreOriginal"></li>
+                            <li data-i18n="app.results.exploreData"></li>
+                            <li data-i18n="app.results.exploreClaims"></li>
+                            <li data-i18n="app.results.exploreSource"></li>
                         </ul>
-                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0;">All data is fully anonymised and used solely for understanding how people evaluate research quality.</p>
-                    </div>
-                    
-                    <div style="margin-top: 2rem; padding: 1rem; background: #f8fafc; border-radius: 8px; font-size: 0.9rem; color: #64748b;">
-                        <p style="margin-bottom: 0.5rem;"><strong>Author:</strong> Dr Pablo Bernabeu, Department of Education, University of Oxford</p>
-                        <p style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #64748b;"><strong>Legal disclaimer:</strong> This app and workshop were created by Dr Pablo Bernabeu in a personal capacity during spare time. The employer is not affiliated with, does not endorse, and bears no liability for this app or workshop.</p>
-                        <p style="margin-bottom: 0.5rem;"><strong>Materials:</strong> <a href="https://github.com/pablobernabeu/Unlock_the_Lab" target="_blank" rel="noopener noreferrer" style="color: #2563eb;">github.com/pablobernabeu/Unlock_the_Lab</a></p>
-                        <p style="margin-bottom: 0.5rem;"><strong>Licence:</strong> <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" style="color: #2563eb;">CC BY 4.0</a> — Free to use with attribution</p>
-                        <p style="margin-bottom: 0; font-size: 0.85rem; font-style: italic;">💡 Contributions welcome! Suggest improvements or report issues on <a href="https://github.com/pablobernabeu/Unlock_the_Lab/issues" target="_blank" rel="noopener noreferrer" style="color: #2563eb;">GitHub</a>.</p>
-                    </div>
-                </div>
-                
-                <button class="btn-primary" onclick="nextPage()" style="margin-top: 1.5rem;">Get started</button>
-                
-                <!-- Admin Link -->
-                <p style="text-align: right; margin-top: 3rem; font-size: 0.8rem;"><a href="admin.html" style="color: #94a3b8; text-decoration: none;">Admin</a></p>
-            </div>
-        </div>
+                    </section>
 
-        <!-- Page 2: Glossary and Rubric -->
-        <div class="page" id="page-guide">
-            <div class="container">
-                <div class="page-logo-header">
-                    <img id="guide-logo" src="unlock-lab-icon.svg" alt="Logo" class="page-logo">
-                </div>
-                <h1>📚 Before We Begin</h1>
-                
-                <div class="content">
-                    <div class="info-box" style="background: #e3f2fd; border-left: 4px solid #2196f3;">
-                        <p style="margin: 0;"><strong>📖 Take your time with these resources!</strong> They're the foundation for evaluating research quality. You can return to them anytime using the 📖 button.</p>
-                    </div>
-                    
-                    <h2 style="margin-top: 1.5rem;">📚 Scientific Glossary</h2>
-                    <p style="color: #666; margin-bottom: 1rem;">Key terms you'll encounter when evaluating research:</p>
-                    <div id="glossary-content"></div>
-                    
-                    <h2 style="margin-top: 2.5rem;">⚖️ Quality Rating Rubric (1-7 Scale)</h2>
-                    <p style="color: #666; margin-bottom: 1rem;">Use these six criteria to rate each study. Consider all aspects together for your final score:</p>
-                    <div id="rubric-content"></div>
-                </div>
-                
-                <div style="display: flex; gap: 1rem; justify-content: space-between; align-items: stretch;">
-                    <button class="btn-secondary" style="align-self: stretch; display: flex; align-items: center;" onclick="previousPage()">← Back</button>
-                    <button class="btn-primary" onclick="nextPage()">Start rating papers →</button>
+                    <section class="results-section">
+                        <h2 data-i18n="app.results.dashboardHeading">See everyone's results</h2>
+                        <p data-i18n="app.results.dashboardText"></p>
+                        <p>
+                            <a
+                                class="btn btn-secondary"
+                                id="results-dashboard-link"
+                                href="/dashboard.html"
+                                data-i18n="app.results.dashboardLink"
+                                >Open the live dashboard</a
+                            >
+                        </p>
+                    </section>
+
+                    <div id="results-own-actions"></div>
+                    <p class="results-thanks" data-i18n="app.results.thanks"></p>
                 </div>
             </div>
-        </div>
+        </main>
 
-        <!-- Paper Pages (Generated Dynamically) -->
-        <div id="paper-pages"></div>
-
-        <!-- Final Page: Recap -->
-        <!-- Token Allocation Page -->
-        <div class="page" id="page-ranking">
-            <div class="container">
-                <h1>⚖️ What Matters Most to You?</h1>
-                <div class="content">
-                    <div class="info-box" style="margin-bottom: 1.5rem;">
-                        <h3 style="margin-top: 0; color: #667eea;">Instructions</h3>
-                        <p style="margin-bottom: 0.75rem;">You have <strong>20 tokens</strong> to distribute across the six criteria you used to evaluate the studies. The more tokens you assign to a criterion, the more important it is to you.</p>
-                        <p style="margin-bottom: 0.75rem;"><strong>How to use:</strong> Tap any box in a row to fill all boxes from the left up to that position. Tap the last filled box again to clear that criterion's tokens.</p>
-                        <p style="margin: 0;"><strong>Please allocate all 20 tokens</strong> before proceeding to your results.</p>
-                    </div>
-
-                    <div style="margin-bottom: 1.5rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <span style="font-weight: 600; color: #374151;">Tokens used:</span>
-                            <span style="font-weight: 700; font-size: 1.1rem; color: #667eea;"><span id="tokens-used-display">0</span> / 20</span>
-                        </div>
-                        <div style="background: #e5e7eb; border-radius: 8px; height: 10px; overflow: hidden;">
-                            <div id="token-progress-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 8px; transition: width 0.2s ease;"></div>
-                        </div>
-                    </div>
-
-                    <div id="criteria-token-grid"></div>
-
-                    <button id="submit-ranking-btn" class="btn-primary" onclick="submitRanking()" disabled
-                        style="margin-top: 1.5rem; width: 100%; padding: 1rem; opacity: 0.5; font-size: 1rem;">
-                        Allocate all 20 tokens to continue
+        <footer class="site-footer">
+            <div class="container app-footer">
+                <div class="app-footer__controls">
+                    <div data-motion-toggle></div>
+                    <div data-locale-switcher></div>
+                    <button type="button" class="btn-link" id="footer-new-participant" hidden>
+                        <span data-i18n="app.footer.newParticipant">Start as a new participant</span>
                     </button>
                 </div>
+                <nav
+                    class="app-footer__links"
+                    data-i18n-attr="aria-label:app.footer.linksLabel"
+                    aria-label="Other pages"
+                >
+                    <a href="/dashboard.html" data-i18n="app.footer.dashboard">Live dashboard</a>
+                    <a href="/admin.html" data-i18n="app.footer.admin">Facilitator panel</a>
+                </nav>
+                <p data-i18n-html="common.footer.author"></p>
+                <p data-i18n-html="common.footer.disclaimer"></p>
+                <p data-i18n-html="common.footer.materials"></p>
+                <p data-i18n-html="common.footer.licence"></p>
+                <p data-i18n-html="common.footer.issues"></p>
+                <p id="app-version"></p>
             </div>
-        </div>
-
-        <div class="page" id="page-final">
-            <div class="container">
-                <h1>🎉 Workshop Complete!</h1>
-                
-                <div class="content">
-                    
-                    <!-- PART 1: PREDICTION PERFORMANCE -->
-                    <div style="margin-bottom: 3rem; padding: 2rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; color: white;">
-                        <h2 id="final-part1-heading" style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem;">
-                            🎯 Part 1: Your Prediction Performance
-                        </h2>
-                        <p id="final-part1-desc" style="font-size: 1.05rem; margin-bottom: 1.5rem;">
-                            How well did you predict what others would rate each study?
-                        </p>
-                        
-                        <div class="final-score-card" style="background: white; color: #1f2937;">
-                            <h3 id="final-score-heading" style="color: #059669;">Your Prediction Accuracy Score</h3>
-                            <div class="final-score" id="final-score">0</div>
-                            <p id="final-papers-count" style="font-size: 0.9rem; color: #666; margin: 0.5rem 0 0 0;">Based on <span id="total-papers">0</span> paper</p>
-                            <div class="score-rank" id="score-rank">Calculating rank...</div>
-                            <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
-                                This score measures how accurately you predicted the crowd's average ratings. Higher scores mean better predictions!
-                            </p>
-                        </div>
-                        
-                        <div class="leaderboard" style="background: rgba(255,255,255,0.95); border-radius: 8px; padding: 1.25rem; margin-top: 1.25rem;">
-                            <h3 style="color: #059669; margin-top: 0; text-shadow: none;">🏆 Top Predictors</h3>
-                            <p id="final-leaderboard-desc" style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
-                                See how your prediction accuracy compares to other participants
-                            </p>
-                            <div id="leaderboard-list">Loading...</div>
-                        </div>
-                    </div>
-                    
-                    <!-- PART 2: YOUR RATING PROFILE -->
-                    <div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
-                        <h2 id="final-part2-heading" style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
-                            📊 Part 2: Your Rating Profile
-                        </h2>
-                        <p id="final-part2-desc" style="font-size: 1.05rem; margin-bottom: 1.5rem; font-weight: 300; color: white;">
-                            How did your own quality ratings compare to the crowd's ratings?
-                        </p>
-                        
-                        <!-- Personalized Rating Analysis -->
-                        <div id="rating-analysis" style="display: none;">
-                            <div style="background: rgba(255,255,255,0.95); color: #1f2937; padding: 1rem; border-radius: 10px; margin: 1rem 0;">
-                                <p id="analysis-summary" style="font-size: 1.05rem; line-height: 1.7; margin: 0;"></p>
-                            </div>
-                            <div style="background: white; border-radius: 10px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 1rem 0;">
-                                <h3 id="final-chart-heading" style="color: #20B2AA; margin-top: 0; text-shadow: none;">Your Ratings vs. Crowd Average</h3>
-                                <p id="final-chart-desc" style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
-                                    This chart shows how your quality ratings (purple line) compared to what other participants rated on average (green dashed line).
-                                </p>
-                                <div style="position: relative; height: 220px;">
-                                    <canvas id="comparison-chart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- PART 3: CRITERION IMPORTANCE -->
-                    <div id="criterion-importance-section" style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 12px; color: white;">
-                        <h2 id="final-part3-heading" style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
-                            ⚖️ Part 3: Your Criterion Weightings
-                        </h2>
-                        <p id="final-part3-desc" style="font-size: 1.05rem; margin-bottom: 1rem; font-weight: 300;">
-                            Here is how you weighted the six evaluation criteria.
-                        </p>
-                        <div id="criterion-importance-bars" style="background: rgba(255,255,255,0.95); color: #1f2937; padding: 1rem; border-radius: 10px;">
-                            <p style="text-align: center; color: #9ca3af; margin: 0;">Loading...</p>
-                        </div>
-                    </div>
-
-                    <h2 id="final-evaluated-heading">You've evaluated <span id="total-papers-below">0</span> research papers!</h2>
-                    <h3 style="margin-top: 2rem; margin-bottom: 0.5rem;">Key Takeaways</h3>
-                    <ul style="line-height: 1.8; padding-left: 2rem; margin: 0.5rem 0 1.5rem 0;">
-                        <li style="margin-bottom: 0.75rem;"><strong>🔓 Open Access</strong> — Paywalls hide science from public scrutiny. Demand transparency!</li>
-                        <li style="margin-bottom: 0.75rem;"><strong>🚨 Spotting Clickbait</strong> — Sensational titles usually mean weak science underneath</li>
-                        <li style="margin-bottom: 0.75rem;"><strong>🔬 Methodology Matters</strong> — Sample sizes, controls, and open data separate real from fake</li>
-                        <li style="margin-bottom: 0.75rem;"><strong>📚 Source Credibility</strong> — Predatory journals publish anything for money. Trust matters</li>
-                        <li style="margin-bottom: 0.75rem;"><strong>⚖️ Nuanced Conclusions</strong> — Good scientists admit what they don't know. Beware certainty!</li>
-                        <li style="margin-bottom: 0.75rem;"><strong>🌐 Crowd vs. Experts</strong> — You learned how public perception differs from scientific quality</li>
-                    </ul>
-                    
-                    <div class="info-box">
-                        <h3>Keep Exploring Science!</h3>
-                        <p>When reading science news:</p>
-                        <ul style="line-height: 1.7; padding-left: 2rem; margin: 0.75rem 0;">
-                            <li style="margin-bottom: 0.5rem;">Look for the original research paper</li>
-                            <li style="margin-bottom: 0.5rem;">Check if data is openly available</li>
-                            <li style="margin-bottom: 0.5rem;">Question sensational claims</li>
-                            <li style="margin-bottom: 0.5rem;">Consider the source and methodology</li>
-                        </ul>
-                    </div>
-                    
-                    <div style="text-align: center; margin-top: 2rem;">
-                        <h3>Curious About the Results?</h3>
-                        <p>See how all participants rated the studies, including average scores, rating distributions, and agreement levels across the group.</p>
-                        <a href="dashboard.html" class="btn-primary" style="display: inline-block; text-decoration: none; margin-top: 1rem;">
-                            📊 View Live Dashboard
-                        </a>
-                        <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
-                            Real-time ratings and statistics from all participants
-                        </p>
-                        
-                        <!-- Save Your Results Section -->
-                        <div id="save-results-section" style="margin-top: 2rem; padding: 1.25rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: rgba(255,255,255,0.95);">
-                            <h3 style="margin-top: 0; color: white; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">💾 Save Your Results</h3>
-                            <div style="background: rgba(255,255,255,0.15); padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">
-                                <p style="margin: 0; font-size: 0.9rem; font-weight: 400; opacity: 0.9;">Your username:</p>
-                                <p style="margin: 0.25rem 0 0 0; font-size: 1.1rem; font-weight: 700; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.2);" id="username-display-save"></p>
-                            </div>
-                            <p style="margin-bottom: 1rem; font-size: 0.95rem; font-weight: 400;">
-                                Want to review your personalized analysis later? Save your results link now! You can return to this page anytime to see:
-                            </p>
-                            <ul style="margin-bottom: 1rem; padding-left: 2.25rem; font-size: 0.95rem; line-height: 1.8; list-style: disc; list-style-position: outside; font-weight: 400; color: rgba(255,255,255,0.98);">
-                                <li style="margin-bottom: 0.65rem;">Your rating profile and statistical comparison</li>
-                                <li style="margin-bottom: 0.65rem;">How your ratings compare to the crowd average</li>
-                                <li style="margin-bottom: 0.65rem;">Your complete prediction accuracy scores</li>
-                            </ul>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-                                <button id="save-results-link" class="btn-secondary" style="display: none; padding: 0.75rem 1.5rem; background: white; color: #667eea; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600;" onclick="copyResultsLink()">
-                                    🔗 Copy link to your results
-                                </button>
-                                <button id="email-results-link" class="btn-secondary" style="display: none; padding: 0.75rem 1.5rem; background: white; color: #667eea; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600;" onclick="emailResultsLink()">
-                                    📧 Email my results
-                                </button>
-                            </div>
-                            <p id="link-copied-msg" style="display: none; font-size: 0.9rem; color: #fef3c7; margin-top: 0.75rem; text-align: center;">
-                                ✓ Link copied! Save it to return to your results anytime.
-                            </p>
-                            <p style="margin-top: 1.5rem; font-size: 0.9rem; font-weight: 400; text-align: center;">
-                                Or visit the <a href="dashboard.html" style="color: white; text-decoration: underline; font-weight: bold;">live dashboard</a> and enter your name (<strong id="username-display-inline" style="font-weight: 600;"></strong>) to find your results.
-                            </p>
-                        </div>
-                        
-                    </div>
-                    
-                    <p style="text-align: center; margin-top: 2rem; font-size: 1.2rem;">
-                        Thank you for participating! 🔬✨
-                    </p>
-                    
-                    <div style="margin-top: 2.5rem; padding: 1.5rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #2563eb;">
-                        <h3 style="margin-top: 0; color: #2563eb;">📋 Workshop Information</h3>
-                        <p style="margin-bottom: 0.75rem; color: #64748b;"><strong>Author:</strong> Dr Pablo Bernabeu<br>Department of Education, University of Oxford</p>
-                        <p style="margin-bottom: 0.75rem; color: #64748b;"><strong>App Materials:</strong> <a href="https://github.com/pablobernabeu/Unlock_the_Lab" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; border-bottom: 1px solid #2563eb;">github.com/pablobernabeu/Unlock_the_Lab</a></p>
-                        <p style="margin-bottom: 0; color: #64748b;"><strong>Licence:</strong> <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; border-bottom: 1px solid #2563eb;">CC BY 4.0 Attribution</a> — You're free to use and adapt these materials provided you acknowledge the authorship.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Floating Help Button (appears on paper pages) -->
-    <button id="help-button" class="floating-btn" onclick="showHelp()">
-        📖
-    </button>
-
-    <!-- Modal for Glossary/Rubric -->
-    <div id="help-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeHelp()">&times;</span>
-            <div class="modal-tabs">
-                <button class="tab-btn active" onclick="showTab('glossary')">Glossary</button>
-                <button class="tab-btn" onclick="showTab('rubric')">Rating rubric</button>
-            </div>
-            <div id="modal-glossary" class="tab-content active"></div>
-            <div id="modal-rubric" class="tab-content"></div>
-        </div>
-    </div>
-
-    <!-- App Scripts (ES Modules) -->
-    <script type="module" src="/app.js"></script>
-</body>
+        </footer>
+    </body>
 </html>
