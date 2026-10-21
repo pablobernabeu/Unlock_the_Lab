@@ -2,11 +2,40 @@
   {
     "id": "STUDY-1",
     "title": "The impact of chocolate-based breakfasts on mathematical performance in school-aged children",
-    "access": "Freely accessible online (Open Access). The journal charges authors a publication fee rather than readers — a common model in predatory publishing that creates the appearance of openness while bypassing rigorous peer review.",
-    "overview": "The study relies on the simplified premise that glucose provides immediate fuel for the brain. However, it fails to engage with the substantial body of existing literature describing the ‘sugar crash’ effect and the impact of sustained energy release on cognitive concentration.",
-    "methods": "The researchers observed <i>N</i>=12 children in a single classroom for three days. There was no control group (e.g., children eating a standard breakfast) to compare against. Data availability: The authors state that raw data and individual test scores are ‘not shared due to commercial sensitivity regarding the chocolate brand involved.’",
+    "access": "Freely accessible online (Open Access). The journal charges authors a publication fee rather than readers, a model also used by many reputable open-access journals.",
+    "overview": "The study relies on the simplified premise that glucose provides immediate fuel for the brain. However, it fails to engage with the substantial body of existing literature describing the 'sugar crash' effect and the impact of sustained energy release on cognitive concentration.",
+    "methods": "The researchers observed <i>N</i>=12 children in a single classroom for three days. There was no control group (e.g. children eating a standard breakfast) to compare against. Data availability: The authors state that raw data and individual test scores are 'not shared due to commercial sensitivity regarding the chocolate brand involved'.",
     "conclusion": "The authors conclude that chocolate should be mandatory in school breakfasts to improve national grades. This is a massive generalisation based on a tiny, uncontrolled sample.",
-    "source": "Predatory Journal. Published in a ‘pay-to-publish’ outlet with no rigorous peer review process, often used for marketing stunts disguised as science."
+    "source": "Predatory Journal. Published in a 'pay-to-publish' outlet with no rigorous peer review process, often used for marketing stunts disguised as science.",
+    "feedback": {
+      "summary": "Weak on four of six criteria: a predatory journal with no real peer review, a theory that ignores the 'sugar crash', 12 children over three days with no control group, hidden data and a call to make chocolate compulsory at school breakfast. Free access and a calm title cannot make up for that, so it gets the lowest rating.",
+      "criteria": {
+        "title": {
+          "band": "medium",
+          "note": "The wording is calm and free of hype, but 'impact' hints at cause and effect while 'school-aged children' sounds far broader than 12 pupils in one classroom."
+        },
+        "access": {
+          "band": "high",
+          "note": "Anyone can read it free online. Charging authors rather than readers is a model many reputable open-access journals use, so neither the fee nor free access says anything about quality."
+        },
+        "source": {
+          "band": "low",
+          "note": "A predatory journal: it publishes for a fee without rigorous peer review (checks by independent experts). Outlets like this are often used for marketing stunts dressed up as science."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It treats glucose (a sugar) as instant fuel for the brain and ignores the body of research on the 'sugar crash' and on how steady energy release affects concentration."
+        },
+        "methods": {
+          "band": "low",
+          "note": "Only 12 children were watched for three days, with no control group (children on an ordinary breakfast); raw data are withheld for commercial reasons linked to the chocolate brand."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "Calling for chocolate to be compulsory at school breakfasts to raise national grades goes far beyond what a three-day study of 12 children could ever show."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-2",
@@ -15,52 +44,226 @@
     "overview": "The study builds on standard metallurgical theories regarding titanium-aluminium blends, specifically addressing a known gap in the literature regarding heat resistance at high altitudes. It uses previous stress-testing models responsibly to predict performance.",
     "methods": "The team conducted rigorous stress-testing in controlled lab conditions, repeating the fracture test 500 times. Data availability: Stress-test logs and statistical code are uploaded to a public repository (OSF/GitHub). However, the precise alloy composition ratios have been withheld pending a patent application, which prevents full independent replication of the material itself.",
     "conclusion": "The conclusion is cautious. It states the alloy is significantly lighter but notes it is currently too expensive for commercial use, suggesting further research into manufacturing costs is required.",
-    "source": "Respected Field-Specific Journal. A well-regarded peer-reviewed publication specialising in materials science and engineering."
+    "source": "Respected Field-Specific Journal. A well-regarded peer-reviewed publication specialising in materials science and engineering.",
+    "feedback": {
+      "summary": "Strong across the board: a respected peer-reviewed journal, free access, work on a known gap in earlier research, 500 repeated tests with openly shared logs and a cautious conclusion that admits the alloy is too costly for now. It misses the top score because the exact recipe is withheld for a patent, so others cannot fully repeat the work.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "'Shows promise' signals an early result rather than a breakthrough, which fits a conclusion admitting the alloy is still too expensive for commercial use."
+        },
+        "access": {
+          "band": "high",
+          "note": "A direct, free PDF link means anyone can read the full study and check the claims for themselves."
+        },
+        "source": {
+          "band": "high",
+          "note": "A well-regarded specialist journal in materials science, where experts in the field check studies before they are published (peer review)."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It tackles a known gap (how titanium-aluminium blends resist heat at high altitude) and builds responsibly on established stress-testing models."
+        },
+        "methods": {
+          "band": "high",
+          "note": "Repeating the fracture test 500 times under controlled conditions and sharing the logs and code is rigorous, though the withheld alloy recipe stops others fully repeating the work."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "Careful and honest: it reports the weight saving but admits the alloy currently costs too much for commercial use and calls for research into manufacturing costs."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-3",
     "title": "The effect of pre-sleep screen time on sleep onset latency",
-    "access": "Accessible with difficulty (requires searching the DOI in a university library or using Sci-Hub).",
+    "access": "Accessible with difficulty (requires a university library login or an email to the author asking for a copy).",
     "overview": "The hypothesis is grounded in well-established theories regarding blue light emission and the suppression of melatonin (the sleep hormone). It cites robust prior research on circadian rhythms.",
-    "methods": "The study surveyed 2,000 adults. However, it relied entirely on self-reported data (participants estimated how much they slept), which is often inaccurate compared to objective tracking. Data availability: Summary tables are provided in the appendix, but raw participant data is not available to protect privacy.",
-    "conclusion": "The authors suggest a link between phone use and insomnia but responsibly acknowledge ‘reverse causality’—noting that anxious people might be using their phones because they cannot sleep, rather than the phone causing the sleeplessness.",
-    "source": "High-Impact Generalist Journal. A prestigious journal that covers broad scientific topics; known for rigorous peer review but occasionally favours studies with mass appeal."
+    "methods": "The study surveyed 2,000 adults. However, it relied entirely on self-reported data (participants estimated how long it took them to fall asleep), which is often inaccurate compared to objective tracking. Data availability: Summary tables are provided in the appendix, but raw participant data is not available to protect privacy.",
+    "conclusion": "The authors suggest a link between phone use and taking longer to fall asleep but responsibly acknowledge 'reverse causality', noting that anxious people might be using their phones because they cannot sleep, rather than the phone causing the sleeplessness.",
+    "source": "High-Impact Generalist Journal. A prestigious journal that covers broad scientific topics; known for rigorous peer review but occasionally favours studies with mass appeal.",
+    "feedback": {
+      "summary": "A prestigious peer-reviewed journal, sound theory and an honest conclusion that admits the link could run the other way make this a solid study. It is held back by relying entirely on people's own estimates of how long they took to fall asleep, withheld raw data, restricted access and a title that implies cause and effect.",
+      "criteria": {
+        "title": {
+          "band": "medium",
+          "note": "Neutral in tone, but 'the effect of' implies that screens cause a longer 'sleep onset latency' (time taken to fall asleep), which a survey can suggest but not prove."
+        },
+        "access": {
+          "band": "medium",
+          "note": "Not free to everyone: you need a university library login or must email the author for a copy, a real hurdle for most members of the public."
+        },
+        "source": {
+          "band": "high",
+          "note": "A prestigious journal known for rigorous peer review (checks by independent experts), although it occasionally favours studies with mass appeal."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It builds responsibly on well-established research into how blue light from screens reduces melatonin (the hormone that makes us sleepy) and into the body clock."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "A large sample of 2,000 adults, but sleep times were personal estimates rather than tracked objectively; only summary tables are shared, to protect privacy."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It speaks only of a link and openly considers reverse causality: people who cannot sleep may reach for their phones, rather than phones keeping them awake."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-4",
     "title": "The neuroprotective effects of a daily herbal tea infusion on Alzheimer's disease prevention",
-    "access": "Free to read online (Open Access). Like many predatory journals, this outlet charges authors a fee to publish rather than charging readers — a misleading signal of quality.",
+    "access": "Free to read online (Open Access). As with many open-access journals, authors pay a publication fee so that readers do not have to.",
     "overview": "The premise is loosely based on traditional folk medicine practices. It ignores current neurological understanding of amyloid plaques and tau tangles, which are the primary biological markers of Alzheimer's disease.",
-    "methods": "A 6-week observational study of 40 people who already chose to drink the tea daily. There was no randomised control group. Cognition was measured via brief phone interviews rather than clinical scanning. Data availability: ‘Raw data unavailable due to participant confidentiality.’",
-    "conclusion": "Overblown. The study confuses a short-term feeling of alertness (likely from caffeine) with the long-term prevention of a complex neurodegenerative disease.",
-    "source": "Predatory Journal. The journal website contains broken English and promises ‘publication within 48 hours for a fee,’ indicating zero peer review."
+    "methods": "A 6-week observational study of 40 people who already chose to drink the tea daily. There was no randomised control group. Cognition was measured via brief phone interviews rather than validated in-person cognitive assessments. Data availability: 'Raw data unavailable due to participant confidentiality.'",
+    "conclusion": "Overblown. The study confuses a short-term feeling of alertness (likely an expectation or placebo effect) with the long-term prevention of a complex neurodegenerative disease.",
+    "source": "Predatory Journal. The journal website contains broken English and promises 'publication within 48 hours for a fee', indicating zero peer review.",
+    "feedback": {
+      "summary": "Weak on every criterion except access. It appeared in a predatory journal with no real peer review and ignores what is known about Alzheimer's disease. For six weeks it followed 40 people who already drank the tea, with no proper control group, yet it claims long-term prevention. Free access cannot make up for that: it gets the lowest rating.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "Words like 'neuroprotective' (protecting brain cells) and 'prevention' promise far more than a six-week study of 40 tea drinkers could ever show."
+        },
+        "access": {
+          "band": "high",
+          "note": "Anyone can read it free online. Many open-access journals charge authors rather than readers, so the fee is not itself a warning sign."
+        },
+        "source": {
+          "band": "low",
+          "note": "A predatory journal: its website is in broken English and promises 'publication within 48 hours for a fee', showing it has no peer review (checks by independent experts)."
+        },
+        "theory": {
+          "band": "low",
+          "note": "Loosely based on folk medicine, it ignores amyloid plaques and tau tangles, the protein build-ups in the brain that are the main biological signs of Alzheimer's."
+        },
+        "methods": {
+          "band": "low",
+          "note": "Forty people already drinking the tea were followed for six weeks with no randomly chosen comparison group. Brief phone calls replaced standard in-person thinking tests; raw data are withheld."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "It treats a short-term feeling of alertness, likely a placebo effect (feeling better because you expect to), as proof of long-term protection against a complex disease."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-5",
     "title": "Specific pesticide shows minimal impact on honey bee navigation in field conditions",
     "access": "Open Access (Direct PDF link).",
     "overview": "The study investigates the ecological validity of previous lab-based findings. It questions whether the harm seen in petri dishes translates to real-world farming environments, a valid scientific question.",
-    "methods": "A large-scale field trial across 20 farms over two years, using RFID tags to track thousands of individual bees. The methodology was pre-registered (declared before the experiment started) to prevent cherry-picking results. Data availability: Full datasets and tracking code are uploaded to a public repository (Zenodo).",
-    "conclusion": "Cautious and specific. It states that at current agricultural usage levels, this specific chemical does not significantly impair homing flight, but explicitly warns against applying this finding to other insect species.",
-    "source": "Respected Field-Specific Journal. Published in a top-tier peer-reviewed journal dedicated to ecology and entomology. Note: the field trial was co-funded by the manufacturer of the pesticide under study — a declared conflict of interest. The preregistration limits bias, but commercial influence on which results get published cannot be ruled out."
+    "methods": "A large-scale field trial across 20 farms over two years, using RFID tags to track thousands of individual bees. The methodology was preregistered (declared before the experiment started) to prevent cherry-picking results. Data availability: Full datasets and tracking code are uploaded to a public repository (Zenodo).",
+    "conclusion": "Cautious and specific. It reports that at current agricultural usage levels this specific chemical caused no significant impairment of homing flight, notes that this does not rule out a small effect and explicitly warns against applying this finding to other insect species.",
+    "source": "Respected Field-Specific Journal. Published in a top-tier peer-reviewed journal dedicated to ecology and entomology. Note: the field trial was co-funded by the manufacturer of the pesticide under study — a declared conflict of interest. The preregistration limits bias, but commercial influence on which results get published cannot be ruled out.",
+    "feedback": {
+      "summary": "Rigorous methods (a two-year trial on 20 farms, planned in advance, with all data shared), free access and a careful conclusion point to a high rating. The expert gives 5 rather than 6 mainly because the pesticide's maker helped fund the trial, a conflict of interest weighed heavily here. The title also leaves out a key limit.",
+      "criteria": {
+        "title": {
+          "band": "medium",
+          "note": "Careful to say it concerns one pesticide in real fields, but 'minimal impact' leaves out a key limit: the finding applies only at current agricultural usage levels."
+        },
+        "access": {
+          "band": "high",
+          "note": "A direct, free PDF link lets anyone read the full paper and check the methods for themselves."
+        },
+        "source": {
+          "band": "medium",
+          "note": "A top peer-reviewed ecology journal, but the pesticide's maker co-funded the trial: a declared conflict of interest (a stake in the result) that leaves room for commercial influence."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It asks a fair, open question that builds on earlier lab work: do the harms seen in petri dishes actually happen on real farms?"
+        },
+        "methods": {
+          "band": "high",
+          "note": "Two years, 20 farms and thousands of individually tagged bees, with the plan preregistered (declared before the trial began) and all data and code openly shared."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It claims only what it tested (no clear harm to bees' homing flight at current usage), admits a small effect is possible and warns against applying it to other insects."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-6",
     "title": "A causal link between Instagram use and adolescent anxiety",
     "access": "Accessible with difficulty (via university library subscription).",
-    "overview": "Uses standard social psychology theories regarding ‘social comparison’ and self-esteem. However, it assumes a direct causal vector without accounting for the complexity of adolescent mental health.",
-    "methods": "A cross-sectional survey of 5,000 teenagers taken at a single point in time. While the sample size is large, the method relies entirely on self-reporting for both ‘hours used’ and ‘anxiety levels.’ Data availability: Summary statistics provided; raw data available only upon request to the lead author.",
+    "overview": "Uses standard social psychology theories regarding 'social comparison' and self-esteem. However, it assumes a direct causal vector without accounting for the complexity of adolescent mental health.",
+    "methods": "A cross-sectional survey of 5,000 teenagers taken at a single point in time. While the sample size is large, the method relies entirely on self-reporting for both 'hours used' and 'anxiety levels'. Data availability: Summary statistics provided; raw data available only upon request to the lead author.",
     "conclusion": "Logical but limited. The study establishes a strong correlation but the authors (and the title) imply causation. They fail to address whether anxious teens simply retreat to social media more often.",
-    "source": "Mid-Tier Psychology Journal. A legitimate peer-reviewed journal, though one that occasionally publishes correlational studies with catchy titles to boost its impact factor."
+    "source": "Mid-Tier Psychology Journal. A legitimate peer-reviewed journal, though one that occasionally publishes correlational studies with catchy titles to boost its impact factor.",
+    "feedback": {
+      "summary": "Standard theory, a large sample and a legitimate peer-reviewed journal give this study a fair base. Its title claims cause and effect, yet a one-off survey of what teenagers said about themselves can only show a link. It also ignores whether anxious teenagers simply turn to social media more. That leaves it in the middle of the scale.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "It announces a 'causal link', yet a survey taken at a single moment can only show that the two go together: correlation is not causation."
+        },
+        "access": {
+          "band": "medium",
+          "note": "Readers need a university library subscription, so most members of the public cannot read the full paper."
+        },
+        "source": {
+          "band": "medium",
+          "note": "A legitimate mid-tier peer-reviewed journal, but one that sometimes publishes studies with catchy titles to boost its impact factor (a measure of how often its papers are cited)."
+        },
+        "theory": {
+          "band": "medium",
+          "note": "It uses standard ideas about social comparison (measuring yourself against others) and self-esteem but assumes Instagram directly causes anxiety, overlooking how complex teenage mental health is."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "Surveying 5,000 teenagers gives a large sample, but both hours of use and anxiety were self-reported at a single point in time and raw data are only available on request."
+        },
+        "conclusion": {
+          "band": "medium",
+          "note": "The strong link it reports fits the data, but the authors hint at cause and effect and never ask whether anxious teenagers simply turn to social media more."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-7",
     "title": "Eliminating gender bias in recruitment with a novel AI hiring tool",
-    "access": "A white paper published directly on the tech company’s website (free, but requires an email sign-up).",
-    "overview": "The approach assumes that simply removing names from CVs is sufficient to de-bias an algorithmic process. It fails to engage with literature on ‘proxy variables’ (how AI finds other patterns that correlate with gender).",
-    "methods": "The developers tested the AI using CVs from their own previous hiring rounds. They did not account for the fact that their historical hiring data was already biased against women, meaning the AI learned to replicate that bias. Data availability: ‘Data and algorithms are proprietary intellectual property and cannot be shared.’",
+    "access": "A white paper published directly on the tech company's website (free, but requires an email sign-up).",
+    "overview": "The approach assumes that simply removing names from CVs is sufficient to de-bias an algorithmic process. It fails to engage with literature on 'proxy variables' (how AI finds other patterns that correlate with gender).",
+    "methods": "The developers tested the AI using CVs from their own previous hiring rounds. They did not account for the fact that their historical hiring data was already biased against women, meaning the AI learned to replicate that bias. Data availability: 'Data and algorithms are proprietary intellectual property and cannot be shared.'",
     "conclusion": "Incorrect. The study claims success because names were hidden, but independent analysis later showed the AI penalised applicants who attended women's colleges or played women's sports.",
-    "source": "Corporate White Paper. This is marketing material, not a peer-reviewed scientific study. It has not been vetted by independent experts."
+    "source": "Corporate White Paper. This is marketing material, not a peer-reviewed scientific study. It has not been vetted by independent experts.",
+    "feedback": {
+      "summary": "This is company marketing that no independent expert has checked. The AI was tested on the firm's own biased hiring records, with its data and algorithm kept secret. Independent analysis later contradicted its claim of success. Every criterion except access is weak, which puts it near the bottom of the scale.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "'Eliminating' bias promises complete success, a far bigger claim than the evidence supports. Independent analysis later showed the bias was still there."
+        },
+        "access": {
+          "band": "medium",
+          "note": "Free, but only after handing your email address to the company, so it is not the one-click open access that lets anyone check a study."
+        },
+        "source": {
+          "band": "low",
+          "note": "A corporate white paper (a report the company publishes itself) is marketing for its own product, not research checked by independent experts."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It assumes hiding names is enough to remove bias and ignores research on proxy variables: other details in a CV that hint at gender."
+        },
+        "methods": {
+          "band": "low",
+          "note": "Using the firm's own past hiring records, already biased against women, taught the AI to copy that bias; the data and algorithm are also kept secret."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "It declares success just because names were hidden, but independent analysis later showed the tool penalised applicants who attended women's colleges or played women's sports."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-8",
@@ -69,7 +272,36 @@
     "overview": "The study directly addresses a known engineering bottleneck in electron transport layers. It references the specific physics of perovskite crystal degradation responsibly.",
     "methods": "Rigorous laboratory testing under standard solar simulation conditions. The experiment was replicated by a second, independent lab before publication. Data availability: Spectral data and test results are fully published; however, the precise fabrication parameters for the proprietary layer composition have been withheld pending patent approval, limiting full independent replication.",
     "conclusion": "Accurate and boring. Reports a 1.5% efficiency increase. Critically, it notes that the new material degrades faster in humidity, admitting it is not yet ready for commercial use.",
-    "source": "Top-Tier Generalist Journal. Published in a journal equivalent to Nature or Science, known for publishing significant breakthroughs with rigorous review."
+    "source": "Top-Tier Generalist Journal. Published in a journal equivalent to Nature or Science, known for publishing significant breakthroughs with rigorous review.",
+    "feedback": {
+      "summary": "Strong on nearly every criterion: a leading peer-reviewed journal, a clearly defined engineering problem, results confirmed by a second, independent lab and an honest conclusion that admits the material breaks down faster in humidity. It falls short of the top score because key manufacturing details are withheld for a patent and the paper sits behind a paywall.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "'Marginal efficiency gains' honestly signals a small improvement, which matches the modest 1.5% increase the study reports."
+        },
+        "access": {
+          "band": "medium",
+          "note": "Behind a paywall unless you have access through a university or similar institution, though the authors' accepted version may be free on a preprint server (a public site for papers)."
+        },
+        "source": {
+          "band": "high",
+          "note": "A top journal covering many areas of science, on a par with Nature or Science, known for rigorous peer review (checks by independent experts before publication)."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It tackles a known engineering bottleneck in the electron transport layer (the part of the cell that carries electric charge) and draws responsibly on how perovskite crystals break down."
+        },
+        "methods": {
+          "band": "high",
+          "note": "Rigorous lab tests under standard conditions were repeated by a second, independent lab and results are fully published, though withheld manufacturing details stop others reproducing the material exactly."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It reports a modest 1.5% gain and openly admits the material breaks down faster in humidity, so it is not yet ready for commercial use."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-9",
@@ -78,7 +310,36 @@
     "overview": "Relies on theories of cognitive desensitisation but attempts to map complex behavioural psychology onto simple blood-flow changes in the brain without sufficient justification.",
     "methods": "A laboratory study of 60 university students. Half played a violent game for 20 minutes, half played a puzzle game, then viewed images of injuries whilst in an fMRI scanner. The analysis of specific brain regions was NOT preregistered. Data availability: Data not shared.",
     "conclusion": "The authors claim a definitive link to real-world violence based only on short-term brain activity changes. They did not measure actual aggressive behaviour or long-term effects.",
-    "source": "Mid-Tier Journal. A legitimate journal, but one that has been criticised in the past for accepting small-sample neuroscience studies with overreaching titles."
+    "source": "Mid-Tier Journal. A legitimate journal, but one that has been criticised in the past for accepting small-sample neuroscience studies with overreaching titles.",
+    "feedback": {
+      "summary": "A fair design with a comparison group, in a legitimate journal, is let down by unshared data, a brain analysis that was not registered in advance and a paywall. The biggest weakness is the conclusion: it leaps from short-term brain scans to a definite link with real-world violence, which the study never measured.",
+      "criteria": {
+        "title": {
+          "band": "medium",
+          "note": "Calm and technical, but it presents brief changes in brain blood flow as 'desensitisation' (reacting less to upsetting images) without saying the effect was short-term."
+        },
+        "access": {
+          "band": "low",
+          "note": "It sits behind a paywall with no free copy mentioned, so most people cannot read the full study or check its claims for themselves."
+        },
+        "source": {
+          "band": "medium",
+          "note": "A legitimate journal, but one criticised for accepting small brain-science studies with titles that claim too much, so publication there is a weaker sign of quality."
+        },
+        "theory": {
+          "band": "medium",
+          "note": "It draws on existing ideas about desensitisation but, without good justification, treats simple changes in brain blood flow as a measure of complex behaviour."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "With 60 students and a puzzle-game comparison group, the design is fair, but the brain analysis was not preregistered (planned publicly in advance) and the data are not shared."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "Claiming a definite link to real-world violence goes far beyond a short lab session that never measured aggressive behaviour or any lasting effect."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-10",
@@ -87,78 +348,340 @@
     "overview": "Investigates the bioaccumulation of polymers in the human body. This is a novel field, so the theoretical framework is exploratory rather than established.",
     "methods": "The team developed a novel, highly sensitive chemical analysis method (mass spectrometry) to detect tiny plastic particles. Stringent contamination controls were used to ensure plastics from the lab equipment didn't affect results. Data availability: Full methodology and anonymised data concentrations are freely available.",
     "conclusion": "Nuanced and alarming. It confirms the presence of plastics in blood but explicitly states that the health implications of these specific concentrations are currently unknown and require urgent further study.",
-    "source": "High-Impact Generalist Journal. Published in a world-leading journal with extremely high rejection rates and rigorous statistical review."
+    "source": "High-Impact Generalist Journal. Published in a world-leading journal with extremely high rejection rates and rigorous statistical review.",
+    "feedback": {
+      "summary": "Strong on every criterion: open access, a world-leading journal with tough review, strict contamination checks, freely shared data and a careful conclusion that admits the health effects are unknown. It stops short of 7 because the field is so new that the theory is exploratory and the study does not say how many people were tested.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Plain and descriptive: it states what was looked for and where, with no claim about harm, which matches a conclusion that admits the health effects are unknown."
+        },
+        "access": {
+          "band": "high",
+          "note": "Open access means anyone can read the full paper free of charge and check the method and data for themselves."
+        },
+        "source": {
+          "band": "high",
+          "note": "A world-leading journal that rejects most papers and checks statistics rigorously, so the study has passed tough independent peer review (scrutiny by other experts)."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It tackles a clear gap, how plastics build up in the human body (bioaccumulation), though in such a new field the theory is exploratory rather than established."
+        },
+        "methods": {
+          "band": "high",
+          "note": "A new, highly sensitive test, strict checks against plastic from lab equipment and freely shared data are excellent, though it does not say how many people were tested."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It reports only what was found (plastic in the blood) and says plainly that the health effects of these amounts are not yet known."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-11",
     "title": "An evolutionary explanation for the correlation between height and CEO status in males",
     "access": "Freely available for download (preprint server). Because the paper has not been accepted by a journal, there is no paywall — anyone can read it immediately.",
-    "overview": "Uses evolutionary psychology to suggest height signals dominance. It fails to account for the ‘halo effect’ (social bias) and treats modern corporate structures as if they are prehistoric hunter-gatherer societies.",
-    "methods": "The authors looked at the height of CEOs in Fortune 500 companies and compared them to the national average. No measure of actual company performance, profit or leadership skill was included. Data availability: A spreadsheet of CEO heights is available on request.",
+    "overview": "Uses evolutionary psychology to suggest height signals dominance. It fails to account for the 'halo effect' (social bias) and treats modern corporate structures as if they are prehistoric hunter-gatherer societies.",
+    "methods": "The authors looked at the height of CEOs of Fortune 500 companies (the 500 largest US firms) and compared them to the national average. No measure of actual company performance, profit or leadership skill was included. Data availability: A spreadsheet of CEO heights is available on request.",
     "conclusion": "Overblown. It confuses a societal bias (we promote tall men) with an inherent evolutionary ability (tall men are better leaders).",
-    "source": "Preprint Server. The paper has been uploaded to a server but has not yet been peer-reviewed or accepted by a journal."
+    "source": "Preprint Server. The paper has been uploaded to a server but has not yet been peer-reviewed or accepted by a journal.",
+    "feedback": {
+      "summary": "This free preprint, not yet checked by independent experts, links height with becoming a CEO (company boss), then explains the link with an evolutionary story it never tests. It ignores the simpler explanation that people tend to promote tall men. These flaws in theory and conclusion weigh far more than its easy access and reasonable comparison.",
+      "criteria": {
+        "title": {
+          "band": "medium",
+          "note": "It honestly calls the height link a correlation, but offering 'an evolutionary explanation' presents an untested story as if the data supported it."
+        },
+        "access": {
+          "band": "high",
+          "note": "Anyone can download it free from a preprint server (a public site for sharing papers before review), though being free to read says nothing about quality."
+        },
+        "source": {
+          "band": "medium",
+          "note": "As a preprint it has not yet been checked by independent experts (peer review) or accepted by any journal, so its claims remain unverified."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It treats modern firms like prehistoric hunter-gatherer groups and ignores the 'halo effect', a social bias in which one admired trait such as height colours our whole judgement."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "Comparing CEOs' heights at the 500 largest US firms with the national average can show a link, but nothing measured leadership or performance and data are only on request."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "It mistakes a social bias (we tend to promote tall men) for an inborn ability (tall men are better leaders), treating a correlation as if it proved a cause."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-12",
-    "title": "Comparative Efficacy of Lavender Essential Oil vs. Hypnotic Drugs in the Treatment of Insomnia",
+    "title": "Comparative efficacy of lavender essential oil vs hypnotic drugs in the treatment of insomnia",
     "access": "Behind paywall.",
     "overview": "Based on aromatherapy principles suggesting lavender affects GABA neurotransmitters. However, the mechanism is poorly understood and the study ignores the pharmacological complexity of benzodiazepines.",
-    "methods": "A pilot randomised trial of 60 people with mild insomnia. Participants were assigned to lavender oil inhalation, placebo scent, or no treatment. Sleep was measured via self-reported diaries only (no objective actigraphy). The study was not blinded—participants knew if they received lavender. Data availability: Summary statistics only.",
-    "conclusion": "Overblown. The study found a small subjective improvement in sleep onset (15 minutes) but the title claims it 'cures insomnia faster than pills' based on no direct comparison to medication.",
-    "source": "Low-Tier Complementary Medicine Journal. A peer-reviewed journal, but one that publishes small, underpowered aromatherapy studies with weak methodology."  },
+    "methods": "A pilot randomised trial of 60 people with mild insomnia. Participants were assigned to lavender oil inhalation, placebo scent or no treatment. Sleep was measured via self-reported diaries only (no objective actigraphy). The study was not blinded; participants knew if they received lavender. Data availability: Summary statistics only.",
+    "conclusion": "Overblown. The study found a small subjective improvement in sleep onset (15 minutes), but the title presents it as a comparison with hypnotic drugs (sleeping pills) although no participant received medication.",
+    "source": "Low-Tier Complementary Medicine Journal. A peer-reviewed journal, but one that publishes small, underpowered aromatherapy studies with weak methodology.",
+    "feedback": {
+      "summary": "A small randomised trial with a dummy (placebo) scent is a fair start that keeps it off the bottom. But the title promises a comparison with sleeping pills that never happened, the small gain rests on diaries kept by people who knew which scent they had and the paywalled paper appears in a journal known for weak aromatherapy studies.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "Its technical wording sounds careful, yet it promises a comparison with sleeping pills ('hypnotic drugs') although no participant took any medication."
+        },
+        "access": {
+          "band": "low",
+          "note": "The paper is paywalled, so most readers would have to pay before they could check how the trial was actually run."
+        },
+        "source": {
+          "band": "medium",
+          "note": "Peer-reviewed, but the journal publishes underpowered aromatherapy studies (too small to give reliable answers) with weak methods, so its approval offers limited reassurance."
+        },
+        "theory": {
+          "band": "medium",
+          "note": "It builds on the aromatherapy idea that lavender acts on GABA (a calming brain chemical), but the mechanism is unclear and the study ignores how complex sleeping pills are."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "Random allocation and a dummy 'placebo' scent help, but sleep was judged only from people's own diaries, they knew if they had lavender and only summary figures are shared."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "Framing a small, self-reported gain (falling asleep 15 minutes sooner) as a comparison with sleeping pills claims far more than a trial with no medication group can show."
+        }
+      }
+    }
+  },
   {
     "id": "STUDY-13",
-    "title": "Dietary Adaptation of Urban Foxes to Include High Levels of Anthropogenic Food Waste",
+    "title": "Dietary adaptation of urban foxes to include high levels of anthropogenic food waste",
     "access": "Behind a paywall.",
-    "overview": "Relies on standard ecological theory regarding ‘dietary plasticity’ in opportunistic omnivores (animals that eat anything). It fits well with existing urban ecology literature.",
+    "overview": "Relies on standard ecological theory regarding 'dietary plasticity' in opportunistic omnivores (animals that eat anything). It fits well with existing urban ecology literature.",
     "methods": "Rigorous analysis of stomach contents of 300 deceased foxes collected over five years across three cities. Results were compared against rural fox diets. Data availability: Summary tables in the appendix; full dietary datasets nominally available on request, though the corresponding author's response to data-sharing enquiries has reportedly been slow — an effective barrier to independent reanalysis.",
     "conclusion": "Solid. It concludes that urban foxes are highly dependent on anthropogenic (human) food sources, which may have implications for their health and population density.",
-    "source": "Respected Field-Specific Journal. A specialised journal for Zoology and Ecology, known for solid, data-driven science."
+    "source": "Respected Field-Specific Journal. A specialised journal for zoology and ecology, known for solid, data-driven science.",
+    "feedback": {
+      "summary": "Careful work on 300 foxes over five years, with rural fox diets for comparison, a respected specialist journal and a measured conclusion make this a sound study. It sits at 5 because the paper is paywalled, the full data are hard to obtain in practice and the theory breaks little new ground.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Plain and accurate: it says what was found, city foxes eating a lot of human food waste ('anthropogenic' means produced by people), without exaggerating."
+        },
+        "access": {
+          "band": "low",
+          "note": "Behind a paywall, so most people cannot read the full study; good research can be paywalled too, but it is harder for the public to check."
+        },
+        "source": {
+          "band": "high",
+          "note": "A respected specialist journal in zoology and ecology with a reputation for solid, data-driven science, so publication there is a good sign of quality."
+        },
+        "theory": {
+          "band": "medium",
+          "note": "Well grounded in existing research on city wildlife and 'dietary plasticity' (animals switching easily between foods), but it applies a familiar idea rather than testing a new one."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "Analysing the stomach contents of 300 dead foxes from three cities over five years is strong, but reportedly slow replies to data requests hinder independent checking."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It stays close to the evidence: city foxes rely heavily on human food, which 'may' affect their health and numbers; it claims nothing stronger."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-14",
-        "title": "The viability of edible crop cultivation in simulated Martian regolith",
+    "title": "The viability of edible crop cultivation in simulated Martian regolith",
     "access": "Open Access.",
-    "overview": "Addresses a crucial gap in knowledge regarding ‘In-Situ Resource Utilisation’ for future space missions. It applies standard botanical knowledge to a novel soil environment.",
-    "methods": "A greenhouse experiment using NASA-developed Mars soil simulant (Regolith). Tested various crop types with different fertiliser additives. Control groups used standard Earth soil. Data availability: All plant growth metrics, soil composition analysis and watering schedules are freely downloadable.",
+    "overview": "Addresses a crucial gap in knowledge regarding 'In-Situ Resource Utilisation' for future space missions. It applies standard botanical knowledge to a novel soil environment.",
+    "methods": "A greenhouse experiment using NASA-developed Mars soil simulant (regolith). Tested various crop types with different fertiliser additives. Control groups used standard Earth soil. Data availability: All plant growth metrics, soil composition analysis and watering schedules are freely downloadable.",
     "conclusion": "Optimistic but careful. Crops grew, but the authors note they accumulated heavy metals present in the Mars simulant, making them unsafe to eat without further processing. The title misses this vital caveat.",
-    "source": "Respected Field-Specific Journal. Published in a leading journal for Space and Planetary Science."
+    "source": "Respected Field-Specific Journal. Published in a leading journal for space and planetary science.",
+    "feedback": {
+      "summary": "Open access, a leading journal, a clear gap in knowledge, Earth-soil comparisons, fully shared data and an honest warning about heavy metals make this a strong study. It is rated 5, not higher, mainly because the title leaves out that the crops were unsafe to eat without processing, a missing warning the expert weighs heavily.",
+      "criteria": {
+        "title": {
+          "band": "medium",
+          "note": "The wording is calm, but it leaves out the vital warning that the crops took up heavy metals and were unsafe to eat without further processing."
+        },
+        "access": {
+          "band": "high",
+          "note": "Free for anyone to read in full (open access), so pupils, teachers and scientists alike can check the work for themselves."
+        },
+        "source": {
+          "band": "high",
+          "note": "A leading specialist journal for space and planetary science, respected in its field, so publication there is a good sign of quality."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It fills a clear gap, how future missions might use materials found on Mars itself ('In-Situ Resource Utilisation'), by applying established plant science to a new soil."
+        },
+        "methods": {
+          "band": "high",
+          "note": "Control groups in ordinary Earth soil and freely downloadable growth, soil and watering data are excellent, though it does not say how many plants were grown."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "Careful and honest: crops grew, but the authors warn they absorbed heavy metals from the imitation soil and would be unsafe to eat without further processing."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-15",
-    "title": "The Effect of Passive Listening to Classical Music on Abstract Reasoning Performance",
+    "title": "The effect of passive listening to classical music on abstract reasoning performance",
     "access": "Behind a paywall.",
-    "overview": "A rehash of the ‘Mozart Effect,’ a theory largely debunked by modern psychology. It suggests passive listening boosts general intelligence, rather than just temporary arousal or mood.",
+    "overview": "A rehash of the 'Mozart effect', an idea largely debunked by modern psychology. It suggests passive listening boosts general intelligence, rather than just temporary arousal or mood.",
     "methods": "30 students took a short logic test after 10 minutes of Mozart, and another test after 10 minutes of silence, in counterbalanced order (half took Mozart first) to control for learning effects. It did not measure IQ (which is a stable trait), but rather performance on one specific puzzle. The hypothesis was not preregistered. Data availability: Individual test scores are deposited in the journal's supplementary data repository.",
-    "conclusion": "Overblown. It found a tiny, temporary improvement in one task and generalised it to ‘raising IQ,’ implying a permanent cognitive upgrade.",
-    "source": "Low-Tier Journal. A peer-reviewed journal, but one with a low impact factor that often publishes ‘novelty’ psychology studies."
+    "conclusion": "Overblown. It found a tiny, temporary improvement in one task and generalised it to 'raising IQ', implying a permanent cognitive upgrade.",
+    "source": "Low-Tier Journal. A peer-reviewed journal, but one with a low impact factor that often publishes 'novelty' psychology studies.",
+    "feedback": {
+      "summary": "A sensible design with openly shared scores keeps this study above the bottom. But it revives the 'Mozart effect' (the largely discredited idea that listening to Mozart makes you cleverer), uses only 30 students and stretches a tiny, temporary gain on one puzzle into 'raising IQ', in a paywalled journal known for eye-catching novelty studies.",
+      "criteria": {
+        "title": {
+          "band": "medium",
+          "note": "Sober and free of IQ claims, but 'classical music' and 'abstract reasoning' sound broader than ten minutes of Mozart and one short logic puzzle."
+        },
+        "access": {
+          "band": "low",
+          "note": "A paywall means most readers must pay to see the full paper, which makes it hard for the public to check the claims about IQ."
+        },
+        "source": {
+          "band": "medium",
+          "note": "Peer-reviewed, but a little-cited journal (low impact factor) that often publishes eye-catching 'novelty' psychology studies, so its approval is a weaker sign of quality."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It revives the 'Mozart effect', an idea modern psychology has largely rejected. It also overlooks the simpler explanation that music briefly lifts mood or alertness."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "Testing 30 students after Mozart and silence, half in each order, is sensible and scores are shared, but the sample is small and the prediction was not registered in advance."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "A tiny, temporary gain on one puzzle is stretched into 'raising IQ', implying a lasting boost to intelligence that the study never measured."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-16",
-    "title": "The Impact of Freezing Temperatures on Electric Vehicle Battery Range",
+    "title": "The impact of freezing temperatures on electric vehicle battery range",
     "access": "Open Access.",
     "overview": "Based on known electrochemical properties of lithium-ion batteries. Electrolyte fluid becomes more viscous and internal resistance increases in cold climates; the theory is solid physics.",
-    "methods": "Tested five popular EV models in climate-controlled chambers running standard driving cycles at +20°C and -10°C to ensure fair comparison. Data availability: Full test protocols and detailed discharge curves for all vehicles are available on the institute's website.",
-    "conclusion": "Accurate. The study provides real-world data confirming a known limitation of current battery technology. It does not attack EVs but informs consumers in cold climates.",
-    "source": "National Research Institute Report. Published by a government-funded transport research body. Highly credible and independent of car manufacturers."
+    "methods": "Tested five popular EV models in climate-controlled chambers running standard driving cycles at +20°C and −10°C to ensure fair comparison. Data availability: Full test protocols and detailed discharge curves for all vehicles are available on the institute's website.",
+    "conclusion": "Accurate. The study provides controlled test data confirming a known limitation of current battery technology. It does not attack EVs but informs consumers in cold climates.",
+    "source": "National Research Institute Report. Published by a government-funded transport research body. Highly credible and independent of car manufacturers.",
+    "feedback": {
+      "summary": "A trusted independent source, open access, controlled tests and fully published data make this a dependable report with a fair, measured conclusion. It sits at 5 rather than higher because it confirms a well-known effect instead of answering a new question and because only five car models were tested.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Plain and accurate: 'impact' is fair here because the temperature was deliberately controlled in test chambers, so cause and effect can reasonably be claimed."
+        },
+        "access": {
+          "band": "high",
+          "note": "Free for anyone to read (open access), with the test details also posted on the institute's website, so the work is easy to check."
+        },
+        "source": {
+          "band": "high",
+          "note": "A government-funded national transport research body that is independent of car makers, so it has no commercial reason to make electric cars look good or bad."
+        },
+        "theory": {
+          "band": "medium",
+          "note": "Solid physics (cold thickens the battery fluid and makes it harder for current to flow inside the battery), but it confirms a well-known effect rather than tackling a new question."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "The chamber tests are tightly controlled and fully published, but only five car models were tested, too few to be sure the results hold for every electric car."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It claims only what the controlled tests show (a known limit of current batteries) and informs drivers in cold climates rather than attacking electric cars."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-17",
-    "title": "A Self-Reported Analysis of Productivity in Remote vs. Office-Based Work Environments",
+    "title": "A self-reported analysis of productivity in remote vs office-based work environments",
     "access": "A PDF report downloadable from a website.",
-    "overview": "N/A. This is a purely explorative survey with no grounding in management theory or organisational psychology.",
-    "methods": "An online survey of 2,000 workers. Productivity was measured solely by asking participants: ‘Do you feel more productive at home?’ Data availability: Proprietary data, not shared.",
-    "conclusion": "Flawed. It uses a subjective feeling (‘I feel productive’) as an objective measure of output.",
-    "source": "Corporate Marketing Report. The study was conducted and published by a management consultancy firm that sells remote-work software. A clear conflict of interest."
+    "overview": "N/A. This is a purely exploratory survey with no grounding in management theory or organisational psychology.",
+    "methods": "An online survey of 2,000 workers. Productivity was measured solely by asking participants: 'Do you feel more productive at home?' Data availability: Proprietary data, not shared.",
+    "conclusion": "Flawed. It uses a subjective feeling ('I feel productive') as an objective measure of output.",
+    "source": "Corporate Marketing Report. The study was conducted and published by a management consultancy firm that sells remote-work software. A clear conflict of interest.",
+    "feedback": {
+      "summary": "A marketing report from a firm that sells remote-work software, with no grounding in research on work, a single question about how productive people feel and unshared data. An honest title and an easy download lift it just off the bottom of the scale, but neither makes the findings trustworthy.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Plain and honest: 'self-reported' warns readers up front that the results rest on what workers said about themselves, not on any measure of their output."
+        },
+        "access": {
+          "band": "high",
+          "note": "Anyone can download the PDF report from a website, though easy access alone does not make the findings trustworthy."
+        },
+        "source": {
+          "band": "low",
+          "note": "A marketing report by a firm selling remote-work software, which ran and published the survey itself, so it has a financial stake in the answer (a conflict of interest)."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It offers no theory at all: the survey simply asks questions without drawing on management theory or organisational psychology (the study of how people behave at work)."
+        },
+        "methods": {
+          "band": "low",
+          "note": "A large sample of 2,000 workers cannot make up for measuring productivity with one question about feelings; the data are also kept private so nobody can check them."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "It treats how productive people feel as proof of how much they actually produce, turning an impression into a measured fact."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-18",
-    "title": "The Role of Gut Microbiota Imbalance as a Primary Causal Factor in Depression",
+    "title": "The role of gut microbiota imbalance as a primary causal factor in depression",
     "access": "Accessible with difficulty (specialist microbiology journal).",
-    "overview": "Investigates the ‘gut-brain axis,’ a legitimate and exciting new field. However, the theory reduces a complex biopsychosocial disorder (depression) to a single biological cause.",
-    "methods": "Transferred fecal microbiota from depressed humans into sterile mice. The specific behavioural scoring criteria were preregistered. The mice showed behavioural changes associated with rodent stress. Data availability: Data available upon request.",
-    "conclusion": "Overblown title. The study shows an interesting mechanism in mice, but the title makes a massive leap to claiming it is the sole cause of depression in humans, ignoring trauma and social factors.",
-    "source": "Respected Field-Specific Journal. A solid microbiology journal. The study itself is sound; the overreaching title is the problem."
+    "overview": "Investigates the 'gut-brain axis', a legitimate and exciting new field. However, the theory reduces a complex biopsychosocial disorder (depression) to a single biological cause.",
+    "methods": "Transferred faecal microbiota from depressed humans into germ-free mice. The specific behavioural scoring criteria were preregistered. The mice showed behavioural changes associated with rodent stress. Data availability: Data available upon request.",
+    "conclusion": "Overblown title. The study shows an interesting mechanism in mice, but the title makes a massive leap to presenting it as a primary cause of depression in humans, ignoring trauma and social factors.",
+    "source": "Respected Field-Specific Journal. A solid microbiology journal. The study itself is sound; the overreaching title is the problem.",
+    "feedback": {
+      "summary": "A sound experiment in a respected journal, with behaviour scoring set in advance, but its title turns a finding in mice into a primary cause of human depression. That leap, a theory that reduces depression to one biological cause and data only on request keep it in the middle of the scale.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "Calling an imbalance in gut bacteria a 'primary causal factor' in depression claims far more than an experiment in mice can show; the title never even mentions mice."
+        },
+        "access": {
+          "band": "medium",
+          "note": "It is accessible only with difficulty, through a specialist microbiology journal, so many readers would struggle to get hold of the full paper."
+        },
+        "source": {
+          "band": "high",
+          "note": "A solid, respected specialist journal in microbiology (the study of bacteria and other tiny organisms), the kind of outlet where experts check studies before publication."
+        },
+        "theory": {
+          "band": "medium",
+          "note": "The gut-brain axis (links between gut and brain) is a real field, but the theory reduces depression, which has biological, psychological and social sides, to one biological cause."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "Gut bacteria from depressed people were put into germ-free mice (raised without microbes) and behaviour was scored by rules preregistered (published in advance); data are available only on request."
+        },
+        "conclusion": {
+          "band": "medium",
+          "note": "The finding of an interesting mechanism in mice fits the results, but presenting it as a primary cause of human depression ignores other explanations such as trauma and social factors."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-19",
@@ -167,51 +690,226 @@
     "overview": "Dendroclimatology (using tree rings as proxies for past climate). The study uses established protocols for calibrating tree ring width against known temperature records.",
     "methods": "Combined thousands of tree-ring datasets from across Europe and Asia. Used rigorous statistical modelling to account for uncertainties and outliers. Data availability: The entire dataset of proxy records and the reconstruction code are hosted on the NOAA Paleoclimatology database.",
     "conclusion": "Robust. It shows current warming is unprecedented in the context of the last two millennia. The conclusion is highly specific about geographical limitations and statistical margins of error.",
-    "source": "Top-Tier Generalist Journal. Published in a prestigious journal (e.g., Nature) known for strictly reviewing climate models."
+    "source": "Top-Tier Generalist Journal. Published in a prestigious journal (e.g. Nature) known for strictly reviewing climate models.",
+    "feedback": {
+      "summary": "This study is strong on everything that affects trust: an established method, thousands of tree-ring records, careful statistics, fully open data and code, a journal with strict review and a conclusion that states its limits. The paywall costs it little because an author's version is available and access does not change the quality of the research.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Plain and specific: it says exactly what was done, a reconstruction of Northern Hemisphere summer temperatures over 2,000 years, without hinting at a dramatic result."
+        },
+        "access": {
+          "band": "medium",
+          "note": "The final version needs an institutional subscription (for example through a university), though an author-accepted manuscript (the reviewed text before the journal's formatting) is available through some university repositories."
+        },
+        "source": {
+          "band": "high",
+          "note": "A prestigious journal covering all of science, such as Nature, known for strict review of climate models by independent experts before publication."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It builds on dendroclimatology (reading past climate from tree rings), using established ways of matching ring widths to known temperature records to look back 2,000 years."
+        },
+        "methods": {
+          "band": "high",
+          "note": "Thousands of tree-ring records from Europe and Asia are analysed with rigorous statistics that allow for uncertainty and outliers (unusual values); all data and code are in a public database."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It finds current warming has no match in 2,000 years while spelling out the regions the result covers and its statistical margins of error."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-20",
-        "title": "The stabilising effect of Bitcoin adoption on the economy of a developing nation",
+    "title": "The stabilising effect of Bitcoin adoption on the economy of a developing nation",
     "access": "A PDF uploaded to a crypto-enthusiast server.",
-    "overview": "Relies on unorthodox economic theories promoted by cryptocurrency advocates, often ignoring standard monetary policy principles regarding inflation and liquidity.",
+    "overview": "Relies on unorthodox economic ideas promoted by cryptocurrency advocates, often ignoring standard monetary policy principles regarding inflation and liquidity.",
     "methods": "Looks at economic indicators in the country over a very short period (3 months) after adoption. It ignores massive external factors, such as global oil prices, which affected that economy simultaneously. Data availability: Links to some public charts provided, but no raw economic dataset included.",
     "conclusion": "Flawed correlation. It attributes short-term stabilisation entirely to Bitcoin without evidence, ignoring confounding variables.",
-    "source": "Preprint / Blog Post. This is a non-peer-reviewed paper hosted on a community server. It has not been vetted by economists."
+    "source": "Preprint / Blog Post. This is a non-peer-reviewed paper hosted on a community server. It has not been vetted by economists.",
+    "feedback": {
+      "summary": "This unreviewed paper on a crypto-enthusiast server rests on unconventional economic ideas, covers only three months, shares no raw data and credits Bitcoin alone while global oil prices were also affecting the economy. Easy access and the fact that it is at least a research preprint keep it just off the bottom of the scale.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "It states as fact that Bitcoin had a 'stabilising effect', a cause-and-effect claim that three months of figures cannot support."
+        },
+        "access": {
+          "band": "high",
+          "note": "The full PDF is posted online where anyone can open it, though easy access alone does not make a paper reliable."
+        },
+        "source": {
+          "band": "medium",
+          "note": "Half preprint (a paper shared before expert review), half blog post, it sits on a crypto-enthusiast community server and no economist has checked it, so it is unverified at best."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It relies on unconventional ideas promoted by cryptocurrency advocates and often ignores standard economics on inflation (rising prices) and liquidity (how easily assets can be turned into cash)."
+        },
+        "methods": {
+          "band": "low",
+          "note": "Three months of figures is far too short, outside forces such as global oil prices are ignored and only links to some public charts are given, with no raw data."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "It credits Bitcoin alone for the short-term stability and ignores confounding factors (other things changing at the same time); happening together does not prove one caused the other."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-21",
-    "title": "A Comparative Life-Cycle Assessment of Vertical Farming and Traditional Agriculture",
+    "title": "A comparative life-cycle assessment of vertical farming and traditional agriculture",
     "access": "Open Access.",
-    "overview": "Uses ‘Life-Cycle Assessment’ (LCA), a standardised framework for assessing environmental impacts associated with all stages of a product's life.",
+    "overview": "Uses 'life-cycle assessment' (LCA), a standardised framework for assessing environmental impacts associated with all stages of a product's life.",
     "methods": "Compared data from three operational vertical farms against average data for conventional field farming of lettuce. Accounted for energy use for lighting/heating vs diesel for tractors/transport. Data availability: Full LCA assumptions and input data tables provided in the appendix.",
     "conclusion": "Nuanced. It reveals a trade-off: vertical farming saves land and water, but currently requires massive amounts of electricity, making it higher carbon depending on the local energy grid.",
-    "source": "Respected Field-Specific Journal. Published in a reputable journal focusing on Sustainability and Agricultural Science."
+    "source": "Respected Field-Specific Journal. Published in a reputable journal focusing on sustainability and agricultural science.",
+    "feedback": {
+      "summary": "Open access, a respected journal, fully published input data and a balanced conclusion about land, water and electricity make this a trustworthy study. It is rated 5 rather than higher because it compares only three vertical farms with average field figures and applies a standard framework rather than building a new argument.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Plain and exact: it names the method and the two kinds of farming being compared, with no hint of which one comes out ahead."
+        },
+        "access": {
+          "band": "high",
+          "note": "It is open access, so anyone can read the full paper free of charge and check its figures."
+        },
+        "source": {
+          "band": "high",
+          "note": "A respected journal specialising in sustainability and agricultural science, the kind of outlet where independent experts check studies before publication."
+        },
+        "theory": {
+          "band": "medium",
+          "note": "It applies life-cycle assessment (adding up environmental costs at every stage of a product's life), a sound, standard framework, rather than building a new argument."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "Full assumptions and input data are published, a real strength, but comparing three vertical farms with average figures for field-grown lettuce is a narrow basis."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It reports a real trade-off: vertical farms save land and water but currently use far more electricity, so their carbon footprint depends on how local electricity is made."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-22",
-    "title": "Objective Tracking of Late-Night Smartphone Use and its Association with Lower Sleep Quality in Adolescents",
+    "title": "Objective tracking of late-night smartphone use and its association with lower sleep quality in adolescents",
     "access": "Behind a paywall.",
-    "overview": "Builds on previous survey data but aims to correct the ‘recall bias’ (memory errors) of those studies by using digital tracking.",
+    "overview": "Builds on previous survey data but aims to correct the 'recall bias' (memory errors) of those studies by using digital tracking.",
     "methods": "500 teenagers installed an app that tracked exact phone usage times and wore an actigraphy wristband to measure actual sleep patterns for two weeks. The statistical analysis plan was preregistered on OSF to prevent <i>p</i>-hacking. Data availability: Anonymised, aggregated data is available on the Open Science Framework (OSF), but individual raw traces are hidden for privacy.",
-    "conclusion": "Strong. The use of objective measurement tools removes memory bias. The conclusion accurately reports a significant negative correlation between screen usage after 10 PM and sleep duration.",
-    "source": "High-Impact Generalist Journal. A top-tier journal known for rigorous medical and health sciences research."
+    "conclusion": "Strong. The use of objective measurement tools removes memory bias. The conclusion accurately reports a significant negative correlation between screen usage after 10 pm and both sleep duration and sleep quality.",
+    "source": "High-Impact Generalist Journal. A top-tier journal known for rigorous medical and health sciences research.",
+    "feedback": {
+      "summary": "A well-designed study in a top journal: 500 teenagers tracked objectively for two weeks, an analysis plan fixed in advance and a careful conclusion that reports a link, not a cause. It sits one step below the top score because individual raw records are withheld for privacy and the paper is behind a paywall with no free copy.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Careful wording: 'objective tracking' says how the data were gathered and 'association' signals a link rather than proof that phones cause poor sleep."
+        },
+        "access": {
+          "band": "low",
+          "note": "Behind a paywall with no free copy mentioned, so many readers cannot see the full paper without paying, though that does not change the quality of the research."
+        },
+        "source": {
+          "band": "high",
+          "note": "A top general journal, widely read and cited, known for rigorous medical and health research, where independent experts check studies before publication."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It builds on earlier surveys and tackles their weakness, recall bias (errors in what people remember), by tracking phone use and sleep directly."
+        },
+        "methods": {
+          "band": "high",
+          "note": "An app and a sleep-tracking wristband followed 500 teenagers for two weeks, the analysis plan was preregistered (published in advance) and anonymised summary data are public, but not individual records."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It accurately reports a statistically significant link (one unlikely to be down to chance) between screen use after 10 pm and shorter, poorer sleep, without claiming one causes the other."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-23",
-    "title": "The efficacy of a novel peptide cream in reversing signs of dermal aging",
+    "title": "The efficacy of a novel peptide cream in reversing signs of dermal ageing",
     "access": "Behind paywall.",
     "overview": "Investigates topical peptides for collagen synthesis. The biological mechanism (peptide penetration through the stratum corneum) is questionable, and the study does not address bioavailability concerns raised in dermatology literature.",
-    "methods": "Company-sponsored trial of 120 women aged 40-60. Participants applied the cream twice daily for 12 weeks. Outcomes measured via participant self-assessment questionnaires ('How old does your skin look?') and non-blinded researcher ratings of photographs. No placebo cream control. Data availability: Published summary only; raw data proprietary.",
-    "conclusion": "Overblown. While participants reported feeling their skin looked younger, objective measures like wrinkle depth were not assessed. The title's '20 years younger' claim is based on subjective perception in an unblinded study.",
-    "source": "Low-Tier Dermatology Journal. Peer-reviewed but known for accepting industry-sponsored cosmetic studies with weak controls."  },
+    "methods": "Company-sponsored trial of 120 women aged 40–60. Participants applied the cream twice daily for 12 weeks. Outcomes measured via participant self-assessment questionnaires ('How old does your skin look?') and unblinded researcher ratings of photographs. No placebo cream control. Data availability: Published summary only; raw data proprietary.",
+    "conclusion": "Overblown. While participants reported feeling their skin looked younger, objective measures like wrinkle depth were not assessed. The title's claim of 'reversing' signs of ageing rests on subjective perception in an unblinded study.",
+    "source": "Low-Tier Dermatology Journal. Peer-reviewed but known for accepting industry-sponsored cosmetic studies with weak controls.",
+    "feedback": {
+      "summary": "A company-sponsored trial with no placebo cream, photos rated by researchers who knew about the treatment and no objective skin measurements cannot back the title's claim of 'reversing' ageing. Peer review, a decent sample of 120 women and a real research question lift it to 3 rather than lower; the paywall matters little either way.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "'Reversing' signs of skin ageing promises a real physical change, yet the study only recorded how people thought the skin looked and never measured wrinkle depth."
+        },
+        "access": {
+          "band": "low",
+          "note": "Behind a paywall with no free version mentioned, so most readers cannot check the trial's details without paying."
+        },
+        "source": {
+          "band": "medium",
+          "note": "It was peer reviewed (checked by other experts), but in a low-ranking skin journal known for accepting industry-funded cosmetics studies with weak comparison groups, so that check counts for less."
+        },
+        "theory": {
+          "band": "medium",
+          "note": "It asks whether peptides (small protein fragments) in a cream boost collagen (the protein that keeps skin firm) but ignores published doubts that they can pass the skin's outer layer."
+        },
+        "methods": {
+          "band": "low",
+          "note": "No placebo (dummy) cream, photos rated by researchers who knew about the treatment, self-rating questionnaires and unshared raw data outweigh a decent sample of 120 women."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "Participants felt their skin looked younger, but with no objective measure such as wrinkle depth, claiming the cream 'reverses' ageing turns an impression into a fact."
+        }
+      }
+    }
+  },
   {
     "id": "STUDY-24",
     "title": "The efficacy of mindfulness meditation as an intervention for chronic pain: A systematic review",
     "access": "Open Access via Cochrane Library.",
     "overview": "Meta-analysis of 38 randomised controlled trials investigating mindfulness-based interventions for chronic pain conditions. Uses established frameworks from pain neuroscience and psychological interventions.",
-    "methods": "Systematic review following Cochrane protocols. Included 3,500+ participants across multiple pain conditions. Pre-registered methodology. Independent reviewers assessed bias. Full PRISMA checklist provided. Data availability: All extracted data and analysis code publicly available.",
-    "conclusion": "Cautious and specific. Reports moderate effect size for pain reduction (<i>d</i>=0.33) but notes high heterogeneity between studies. Acknowledges mindfulness works better for some pain types than others and cannot replace medical treatment.",
-    "source": "Cochrane Database of Systematic Reviews. Gold-standard source for evidence synthesis. Rigorous peer review and editorial oversight."
+    "methods": "Systematic review following Cochrane protocols. Included 3,500+ participants across multiple pain conditions. Preregistered methodology. Independent reviewers assessed bias. Full PRISMA checklist provided. Data availability: All extracted data and analysis code publicly available.",
+    "conclusion": "Cautious and specific. Reports a small-to-moderate effect size for pain reduction (<i>d</i>=0.33) but notes high heterogeneity between studies. Acknowledges mindfulness works better for some pain types than others and cannot replace medical treatment.",
+    "source": "Cochrane Database of Systematic Reviews. Gold-standard source for evidence synthesis. Rigorous peer review and editorial oversight.",
+    "feedback": {
+      "summary": "This review is strong on every criterion. It is free to read, published by Cochrane and pools 38 randomised trials with more than 3,500 participants. Its plan was set in advance, its data and code are open and it honestly reports a modest benefit that varies between trials and pain types. That earns it the top score.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Plain and accurate: it names the question and says this is a systematic review (a study that gathers and combines all suitable earlier trials), with no promise of a cure."
+        },
+        "access": {
+          "band": "high",
+          "note": "Free to read through the Cochrane Library, so anyone can check the full review and how it was done."
+        },
+        "source": {
+          "band": "high",
+          "note": "The Cochrane database is a gold-standard source for summing up research evidence, with rigorous peer review (checks by other experts) and careful editorial oversight."
+        },
+        "theory": {
+          "band": "high",
+          "note": "Pooling 38 randomised controlled trials (where people are put into groups by chance) and drawing on established pain science, it uses earlier research carefully to answer one clear question."
+        },
+        "methods": {
+          "band": "high",
+          "note": "Covering more than 3,500 participants, it followed Cochrane rules and a plan published in advance, had independent reviewers check the trials for bias and shares all data and code."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It reports a small-to-moderate reduction in pain, notes that results varied widely between trials and says mindfulness suits some pain types better and cannot replace medical treatment."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-25",
@@ -219,25 +917,113 @@
     "access": "Open access in complementary medicine journal.",
     "overview": "Tests the hypothesis that magnetically-treated water alters H2O molecular clusters, potentially affecting cellular hydration. The proposed mechanism conflicts with established chemistry, but the study attempts to investigate outcomes empirically.",
     "methods": "A non-randomised trial of 80 adults with various chronic conditions (diabetes, arthritis, depression). Half received 'structured water' treatment (water exposed to magnetic fields), half received regular water, but assignment was not blinded. Outcomes measured via self-reported symptom questionnaires over 8 weeks. No objective biomarkers (blood glucose, inflammation markers) were measured. Data availability: Full dataset provided in supplementary materials.",
-    "conclusion": "Overblown. The study found subjective improvements in self-reported symptoms but cannot distinguish placebo effects from treatment. The title's claim about 'curing' diseases is not supported by the actual findings.",
-    "source": "Low-Tier Complementary Medicine Journal. Peer-reviewed but specialises in alternative therapies and has lower methodological standards than mainstream medical journals."  },
+    "conclusion": "Overblown. The study found subjective improvements in self-reported symptoms but cannot distinguish placebo effects from treatment. The title's framing of structured water as a therapy for chronic disease is not supported by the actual findings.",
+    "source": "Low-Tier Complementary Medicine Journal. Peer-reviewed but specialises in alternative therapies and has lower methodological standards than mainstream medical journals.",
+    "feedback": {
+      "summary": "Free access, a comparison group and a fully shared dataset lift it above the lowest ratings. But its idea conflicts with established chemistry, groups were not chosen at random and who got which water was not hidden. With only self-reported symptoms, it cannot rule out the placebo effect, so calling the water a 'therapy' goes too far.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "There are no hype words, but calling structured water a 'therapy' for chronic disease presents it as a treatment that works, which is more than the findings show."
+        },
+        "access": {
+          "band": "high",
+          "note": "It is open access, so anyone can read it free online, though being easy to reach says nothing about whether its claims are sound."
+        },
+        "source": {
+          "band": "medium",
+          "note": "It was peer reviewed (checked by independent experts), but in a low-ranking journal that specialises in alternative therapies and has lower standards for methods than mainstream medical journals."
+        },
+        "theory": {
+          "band": "low",
+          "note": "Its starting idea, that magnets change how water molecules cluster and so might affect the water inside cells, conflicts with established chemistry, though the study does try to test it."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "A regular-water group and fully shared data help, but the 80 adults were not assigned at random, who got which water was not hidden and only self-reported symptoms were measured."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "Self-reported improvements cannot be told apart from the placebo effect (feeling better because you expect to), so presenting structured water as a therapy goes beyond the evidence."
+        }
+      }
+    }
+  },
   {
     "id": "STUDY-26",
     "title": "A phase III trial of a novel Alzheimer's drug and its effect on cognitive decline",
     "access": "Behind paywall (£45 per article).",
     "overview": "Investigates monoclonal antibody targeting amyloid-beta plaques. Grounded in established Alzheimer's pathology but outcome measure (CDR-SB scale) is somewhat controversial in the field.",
-    "methods": "Randomised, double-blind, placebo-controlled trial. <i>N</i>=1,800 participants across 200 sites. 18-month follow-up. However, dropout rate was high (32%), and post-hoc subgroup analyses not pre-registered. Data availability: Summary statistics only; full data available to qualified researchers upon request.",
-    "conclusion": "The title overstates findings. The 27% figure refers to relative slowing on one cognitive scale, not functional improvement. Paper acknowledges the drug doesn't restore lost function and has significant side effects (brain swelling in 13% of participants).",
-    "source": "High-Impact Medical Journal. Well-respected but the study was funded entirely by the pharmaceutical company developing the drug."
+    "methods": "Randomised, double-blind, placebo-controlled trial. <i>N</i>=1,800 participants across 200 sites. 18-month follow-up. However, dropout rate was high (32%), and post-hoc subgroup analyses not preregistered. Data availability: Summary statistics only; full data available to qualified researchers upon request.",
+    "conclusion": "The authors headline a 27% slowing of cognitive decline, but this is a relative figure on one cognitive scale, not functional improvement. Paper acknowledges the drug doesn't restore lost function and has significant side effects (brain swelling in 13% of participants).",
+    "source": "High-Impact Medical Journal. Well-respected but the study was funded entirely by the pharmaceutical company developing the drug.",
+    "feedback": {
+      "summary": "A large trial in a respected journal, with groups set by chance and a placebo (dummy treatment), gives this real weight. It stays mid-scale because the drug's developer paid for it all, almost a third of participants dropped out, the paper costs £45 and the 27% headline is a relative figure on one debated scale, not improved daily functioning.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Plain and accurate: it says what was measured and names the design, a phase III trial (a large, late-stage test of a new drug), without promising any result."
+        },
+        "access": {
+          "band": "low",
+          "note": "At £45 per article the paywall stops most readers from checking the trial for themselves, although the price tells you nothing about whether the research is sound."
+        },
+        "source": {
+          "band": "medium",
+          "note": "A well-respected, widely cited medical journal, but the company developing the drug paid for the whole trial, a conflict of interest (a stake in the result) worth weighing."
+        },
+        "theory": {
+          "band": "medium",
+          "note": "The drug targets amyloid-beta plaques (protein clumps in the brain), building on established knowledge of Alzheimer's, but the trial's main measure, the CDR-SB scale, is somewhat controversial among experts."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "Randomised and double-blind (patients and researchers did not know who had the drug), with 1,800 people, but 32% dropped out, some analyses were unplanned and full data are on request."
+        },
+        "conclusion": {
+          "band": "medium",
+          "note": "The 27% headline is relative (compared with placebo) on one scale only, but the paper admits the drug restores no lost function and caused brain swelling in 13% of participants."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-27",
     "title": "The predictive relationship between income inequality and population health outcomes: A longitudinal study",
     "access": "Open Access.",
     "overview": "Uses 40 years of data across 50 countries to examine Gini coefficient and health metrics. Builds on established social epidemiology theories and addresses confounders like absolute poverty and healthcare spending.",
-    "methods": "Sophisticated multi-level modelling using WHO and World Bank datasets. Pre-registered analysis plan. Extensive sensitivity analyses. Controls for GDP, healthcare access, education. Data availability: All code and datasets publicly archived. Note: approximately 15% of country-year observations had missing health data requiring multiple imputation; sensitivity analyses confirm findings are robust, but the imputation assumptions are consequential.",
-    "conclusion": "Robust but carefully worded. Shows strong association between inequality and life expectancy, infant mortality, and mental health even after controlling for absolute wealth. Acknowledges causation cannot be proven from observational data.",
-    "source": "Top-Tier Public Health Journal. Known for rigorous statistical review and replication-friendly practices."
+    "methods": "Sophisticated multi-level modelling using WHO and World Bank datasets. Preregistered analysis plan. Extensive sensitivity analyses. Controls for GDP, healthcare access, education. Data availability: All code and datasets publicly archived. Note: approximately 15% of country-year observations had missing health data requiring multiple imputation; sensitivity analyses confirm findings are robust, but the imputation assumptions are consequential.",
+    "conclusion": "Robust but carefully worded. Shows strong association between inequality and life expectancy, infant mortality and mental health even after controlling for absolute wealth. Acknowledges causation cannot be proven from observational data.",
+    "source": "Top-Tier Public Health Journal. Known for rigorous statistical review and replication-friendly practices.",
+    "feedback": {
+      "summary": "Strong on every criterion: open access, a top public health journal, a plan fixed in advance, shared code and data and a careful conclusion. It still gets only 5 because the expert weighs two limits heavily: data from observation, not experiment, cannot prove that inequality harms health and about 15% of the health figures had to be estimated.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "'Predictive relationship' claims a link rather than proof of cause and 'longitudinal' (following the same countries over many years) describes the design exactly."
+        },
+        "access": {
+          "band": "high",
+          "note": "It is open access, so anyone can read the full paper free of charge and check the work for themselves."
+        },
+        "source": {
+          "band": "high",
+          "note": "A top public health journal known for careful statistical review and for practices that help other researchers repeat (replicate) published studies."
+        },
+        "theory": {
+          "band": "high",
+          "note": "Using 40 years of data from 50 countries, it builds on established social epidemiology (how society shapes health) and accounts for rival explanations such as absolute poverty."
+        },
+        "methods": {
+          "band": "high",
+          "note": "The analysis plan was recorded in advance (preregistered) and all code and data are public, but about 15% of yearly country records had missing health data filled in by estimation."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It finds a strong link between inequality and life expectancy, infant mortality and mental health, yet states plainly that observational data (gathered without an experiment) cannot prove cause."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-28",
@@ -245,17 +1031,75 @@
     "access": "Company-funded study summary on corporate website.",
     "overview": "Tests proprietary caffeine-taurine blend. Ignores decades of sports science showing caffeine effects plateau and vary hugely by individual tolerance.",
     "methods": "Compared 20 athletes drinking the energy drink vs water. No blinding (athletes knew which drink they got). Performance measured on company-owned equipment. No independent verification. Data availability: Proprietary.",
-    "conclusion": "Cherry-picked results. The 35% figure comes from one specific sprint test; overall performance improvement was minimal and within normal day-to-day variation.",
-    "source": "Corporate White Paper. Research conducted by company's own lab. Lead author is the company's Chief Marketing Officer."
+    "conclusion": "Cherry-picked results. The company's headline claim of a 35% improvement comes from one specific sprint test; overall performance improvement was minimal and within normal day-to-day variation.",
+    "source": "Corporate White Paper. Research conducted by company's own lab. Lead author is the company's Chief Marketing Officer.",
+    "feedback": {
+      "summary": "A report the company published itself, with its marketing chief as lead author: 20 athletes who knew which drink they had, tested on company equipment, with private data and a 35% headline taken from one sprint test. A plain title and a real, if weak, comparison with water keep it just above the bottom of the scale.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Plain and neutral: it says what was tested and makes no claim about the result, unlike the company's 35% headline."
+        },
+        "access": {
+          "band": "low",
+          "note": "Only a summary is posted, on the company's own website, which is too little for anyone to check how the tests were run or what the full results were."
+        },
+        "source": {
+          "band": "low",
+          "note": "A corporate white paper (a report a company publishes itself) from the company's own lab, with its Chief Marketing Officer as lead author and no independent checks."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It tests a caffeine-taurine blend but ignores decades of sports science showing that caffeine's effects level off and vary hugely with how used to caffeine each person is."
+        },
+        "methods": {
+          "band": "low",
+          "note": "Twenty athletes is a small sample, they knew which drink they had, testing used company-owned equipment and the data are kept private, with no independent verification."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "The 35% headline comes from one sprint test; overall improvement was minimal and within normal day-to-day ups and downs. That is cherry-picking (reporting only the flattering results)."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-29",
     "title": "An analysis of leaked documents purporting to show underreported vaccine injury rates",
     "access": "Free PDF on conspiracy theory website.",
-    "overview": "Misinterprets VAERS data (a passive reporting system for any health event after vaccination, not proven causation). Ignores statistical principles and how VAERS actually works.",
-    "methods": "No original research. Selectively quotes decontextualised sentences from regulatory documents. Conflates correlation with causation. No statistical analysis of baseline rates.",
+    "overview": "Misinterprets VAERS data (the US passive reporting system for any health event after vaccination, not proven causation). Ignores statistical principles and how VAERS actually works.",
+    "methods": "No original research. Selectively quotes decontextualised sentences from regulatory documents. Conflates correlation with causation. No statistical analysis of baseline rates. Data availability: None.",
     "conclusion": "Dangerously misleading. Presents normal background illness rates as vaccine injuries. Does not mention that VAERS reports are unverified and anyone can submit them.",
-    "source": "Conspiracy Website. Anonymous author. Website also promotes COVID denialism and sells unregulated supplements."
+    "source": "Conspiracy Website. Anonymous author. Website also promotes COVID denialism and sells unregulated supplements.",
+    "feedback": {
+      "summary": "There is no original research here: an anonymous author on a conspiracy website that sells unregulated supplements quotes documents out of context and counts illnesses that happen anyway as vaccine injuries. A free download and a cautious-sounding title cannot make up for that, so it gets the lowest rating.",
+      "criteria": {
+        "title": {
+          "band": "medium",
+          "note": "'Purporting to show' (claiming to show) sounds suitably cautious, but 'leaked documents' adds intrigue and 'an analysis' suggests real research where there is only selective quoting."
+        },
+        "access": {
+          "band": "high",
+          "note": "Anyone can download the PDF free of charge, but easy access tells you nothing about whether a document is reliable."
+        },
+        "source": {
+          "band": "low",
+          "note": "An anonymous author, so nobody is accountable for the claims, writing on a conspiracy website that also promotes COVID denial and sells unregulated supplements."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It treats VAERS, a US system where anyone can report any health event after vaccination, as if each report proved harm, ignoring how the system and statistics work."
+        },
+        "methods": {
+          "band": "low",
+          "note": "No original research: it selectively quotes sentences from regulatory documents out of context, never examines baseline rates (how often illnesses occur anyway) and shares no data."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "It presents illnesses that happen anyway as vaccine injuries and never says VAERS reports are unchecked, mistaking things that follow vaccination for things caused by it."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-30",
@@ -264,167 +1108,719 @@
     "overview": "Prospective cohort study using validated food frequency questionnaires. Builds on established nutrition epidemiology and neurodegeneration research.",
     "methods": "Followed 8,000 participants for 25 years. Used standardised dementia assessments. Controlled for education, exercise, smoking, genetics (APOE4). However, diet was self-reported (not objectively measured) and adherence could change over time. Data availability: Aggregate data in appendix; individual data on request.",
     "conclusion": "Well-balanced. Reports 23% lower dementia incidence in high Mediterranean diet adherence group but acknowledges this is observational and cannot prove the diet caused the reduction (healthier people might choose healthier diets).",
-    "source": "Respected Medical Journal. Good reputation but not top-tier. Appropriately rigorous peer review."
+    "source": "Respected Medical Journal. Good reputation but not top-tier. Appropriately rigorous peer review.",
+    "feedback": {
+      "summary": "A clear title, 8,000 people followed for 25 years and a conclusion that admits diet may not be the cause are real strengths. The rating of 4 gives heavy weight to the limits: diet was self-reported and may have changed, individual data come only on request, the journal is respected but not top-tier and the paper is paywalled.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "'Association' signals a link rather than proof that diet prevents dementia and '25-year follow-up' describes the design exactly."
+        },
+        "access": {
+          "band": "low",
+          "note": "The paper sits behind a paywall, a barrier to checking it that has nothing to do with how good the research is."
+        },
+        "source": {
+          "band": "medium",
+          "note": "A respected medical journal with proper peer review (checks by independent experts) and a good reputation, though not among the very top journals."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It builds on established research on diet and neurodegeneration (the gradual loss of brain cells), following people forward in time with food questionnaires already tested for accuracy."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "Tracking 8,000 people for 25 years with standard dementia tests, allowing for smoking and genes, is strong, but diet was self-reported and may have changed; individual data are on request."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It reports a 23% lower rate of dementia among people who stuck closely to the diet but admits this cannot prove cause, as healthier people may choose healthier diets."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-31",
     "title": "The impact of daily reading to infants on language skill acquisition at age 3: A randomised trial",
     "access": "Behind a paywall (institutional subscription). Despite being a strong study, the journal does not offer free access by default.",
     "overview": "Tests early literacy intervention grounded in developmental psychology and neurolinguistics. Addresses known socioeconomic disparities in language exposure.",
-    "methods": "Cluster-randomised trial (randomisation at community health centre level). <i>N</i>=600 families. Intervention group received books and training. Control group received standard care. Assessments blinded. Pre-registered outcomes. Data availability: De-identified data and analysis scripts on OSF.",
+    "methods": "Cluster-randomised trial (randomisation at community health centre level). <i>N</i>=600 families. Intervention group received books and training. Control group received standard care. Assessments blinded. Preregistered outcomes. Data availability: De-identified data and analysis scripts on OSF.",
     "conclusion": "Measured and specific. Reports significant improvements in vocabulary and grammar but notes effects were strongest in lower-income families and attenuated by age 5. Does not claim reading alone solves educational inequality.",
-    "source": "Top-Tier Developmental Psychology Journal. Known for emphasis on replication and open science."
+    "source": "Top-Tier Developmental Psychology Journal. Known for emphasis on replication and open science.",
+    "feedback": {
+      "summary": "A strong study in a top journal: health centres were assigned by chance, testers did not know which families got books, outcomes were fixed in advance, data are open and the conclusion admits gains weakened by age 5. It misses the top score because the paper is paywalled, which limits who can read it, not how sound it is.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "'Impact' implies cause and effect, which a randomised trial (groups assigned by chance) can support; the title also names exactly what was tested and when."
+        },
+        "access": {
+          "band": "medium",
+          "note": "It needs an institutional subscription, such as a university login, though the data and code are free on OSF (a public research archive), so the evidence can still be checked."
+        },
+        "source": {
+          "band": "high",
+          "note": "A top developmental psychology journal that champions replication (repeating studies to check results) and open science (sharing data and methods publicly)."
+        },
+        "theory": {
+          "band": "high",
+          "note": "Grounded in child development and neurolinguistics (how the brain handles language), it tackles a known problem: children in poorer families often hear less language."
+        },
+        "methods": {
+          "band": "high",
+          "note": "Across 600 families, health centres were assigned by chance, testers did not know which families got the books, outcomes were fixed in advance and anonymised data and code are public."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It reports gains in vocabulary and grammar that were strongest in lower-income families and had weakened by age 5. It never claims reading alone solves educational inequality."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-32",
-        "title": "A review of claims linking 5G mobile networks to cancer, autism, and infertility",
+    "title": "A review of claims linking 5G mobile networks to cancer, autism and infertility",
     "access": "Shared on social media, links to pseudoscience portal.",
     "overview": "Conflates 5G radio waves with ionising radiation (completely different types of electromagnetic radiation). Ignores physics and biology of how radiation interacts with tissue.",
-    "methods": "No study. Article cites unnamed 'scientists' and misrepresents quotes from unrelated research on high-dose ionising radiation (like X-rays).",
+    "methods": "No study. Article cites unnamed 'scientists' and misrepresents quotes from unrelated research on high-dose ionising radiation (like X-rays). Data availability: None.",
     "conclusion": "Pure misinformation. Radio frequency radiation from 5G is non-ionising (cannot break DNA bonds). Claims are biologically impossible at real-world exposure levels.",
-    "source": "Social Media Post / Pseudoscience Website. No peer review. Site also promotes flat Earth theory."
+    "source": "Social Media Post / Pseudoscience Website. No peer review. Site also promotes flat Earth theory.",
+    "feedback": {
+      "summary": "There is no study here, just an article on a pseudoscience website, spread on social media, citing unnamed 'scientists' and twisting research on X-ray-type radiation. 5G radio waves cannot break DNA bonds, so the claimed harms are impossible at real-world levels. Easy access and a calm title cannot make up for that, so it gets the lowest rating.",
+      "criteria": {
+        "title": {
+          "band": "medium",
+          "note": "The wording is calm and claims nothing itself, but 'a review' suggests a careful look at the evidence, which this article never provides."
+        },
+        "access": {
+          "band": "high",
+          "note": "Shared on social media with a link to the website, it is free to read in one click, but how easily something spreads says nothing about its truth."
+        },
+        "source": {
+          "band": "low",
+          "note": "A social media post linking to a website that promotes pseudoscience (claims dressed up as science) and flat Earth theory, with no checks by experts (peer review)."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It confuses 5G radio waves with ionising radiation such as X-rays, a completely different kind that can damage DNA, ignoring how radiation actually affects the body."
+        },
+        "methods": {
+          "band": "low",
+          "note": "There is no study at all: the article cites unnamed 'scientists', twists quotes from unrelated research on high doses of ionising radiation such as X-rays and offers no data."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "Blaming 5G for cancer, autism and infertility is misinformation: its non-ionising radio waves cannot break DNA bonds, so the claimed harms are impossible at real-world exposure levels."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-33",
     "title": "A machine learning algorithm for early detection of pancreatic cancer from routine blood tests",
     "access": "Open Access.",
-    "overview": "Uses metabolomics and machine learning on electronic health records. Pancreatic cancer is notoriously hard to detect early, so this addresses a critical clinical gap.",
-    "methods": "Analysed blood samples from 500 eventual pancreatic cancer patients and 1,500 matched controls. External validation cohort of 400 patients. Algorithm development properly separated from testing set. Cross-validated. Data availability: Model code is open-sourced; patient data is technically available to approved researchers, but access requires a formal ethics committee review — a process that typically takes 6–12 months and is accessible mainly to well-resourced academic institutions.",
+    "overview": "Uses machine learning on routine blood-test results from electronic health records. Pancreatic cancer is notoriously hard to detect early, so this addresses a critical clinical gap.",
+    "methods": "Analysed routine blood-test results from 500 eventual pancreatic cancer patients and 1,500 matched controls. External validation cohort of 400 patients. Algorithm development properly separated from testing set. Cross-validated. Data availability: Model code is open-sourced; patient data is technically available to approved researchers, but access requires a formal ethics committee review — a process that typically takes 6–12 months and is accessible mainly to well-resourced academic institutions.",
     "conclusion": "Promising but appropriately cautious. Notes the 92% accuracy needs prospective validation before clinical use. Acknowledges false positives would cause anxiety and unnecessary procedures. Calls for multi-site replication.",
-    "source": "High-Impact Medical AI Journal. Requires detailed reporting of AI methods and external validation."
+    "source": "High-Impact Medical AI Journal. Requires detailed reporting of AI methods and external validation.",
+    "feedback": {
+      "summary": "A strong study: free to read, in a demanding journal, tackling a real medical gap, with the algorithm checked on a separate group of 400 patients and a cautious conclusion. It misses the top score because patient data take months of ethics review to reach and the tool has not yet been tested on new patients as they arrive.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Plain and descriptive: it names the method, the disease and the data used, without promising a breakthrough or suggesting the tool is ready for clinics."
+        },
+        "access": {
+          "band": "high",
+          "note": "It is open access, so anyone can read the full paper free of charge and check how the algorithm was built and tested."
+        },
+        "source": {
+          "band": "high",
+          "note": "A high-impact (widely cited) journal that insists on detailed reporting of AI methods and on testing with outside data, which makes it harder for overhyped claims to slip through."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It tackles a recognised gap, since pancreatic cancer is notoriously hard to catch early, using blood-test results that health records already hold."
+        },
+        "methods": {
+          "band": "high",
+          "note": "Comparing 500 patients with 1,500 matched people without the disease, then testing on a separate 400, is strong; the code is open but patient data need slow ethics approval."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It treats 92% accuracy as promising rather than proven, warns that false alarms would cause anxiety and needless procedures and calls for testing at several sites."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-34",
     "title": "The role of an alkaline diet in cancer prevention through blood pH regulation",
     "access": "Free e-book on wellness influencer's website.",
-    "overview": "Fundamentally misunderstands human physiology. Blood pH is tightly regulated (7.35-7.45) regardless of diet; if it changed significantly, you would die.",
-    "methods": "No research. Cites debunked theories and misunderstands how metabolism works. No mention of actual cancer biology.",
-    "conclusion": "Nonsense. The body maintains pH through breathing and kidney function, not food. Cancer is caused by genetic mutations, not 'acidic blood.'",
-    "source": "Wellness Influencer Blog. Author has no medical or scientific credentials. Sells alkaline water machines and supplements."
+    "overview": "Fundamentally misunderstands human physiology. Blood pH is tightly regulated (7.35–7.45) regardless of diet; if it changed significantly, you would die.",
+    "methods": "No research. Cites debunked claims and misunderstands how metabolism works. No mention of actual cancer biology. Data availability: None.",
+    "conclusion": "Nonsense. The body maintains pH through breathing and kidney function, not food. Cancer is caused by genetic mutations, not 'acidic blood'.",
+    "source": "Wellness Influencer Blog. Author has no medical or scientific credentials. Sells alkaline water machines and supplements.",
+    "feedback": {
+      "summary": "This e-book contains no research, rests on a basic misunderstanding of how the body works and comes from an author with no medical or scientific qualifications who sells alkaline water machines. Its only strength is being free to read, which says nothing about whether its claims are true, so it gets the lowest rating.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "Its calm, academic wording presents as fact that diet can change blood pH and so prevent cancer, though the body keeps blood pH steady whatever we eat."
+        },
+        "access": {
+          "band": "high",
+          "note": "The e-book is free on the author's website, but being easy to read says nothing about whether its claims are true."
+        },
+        "source": {
+          "band": "low",
+          "note": "A wellness blog by an author with no medical or scientific qualifications who sells alkaline water machines and supplements, a clear financial stake in the message (a conflict of interest)."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It ignores basic physiology (how the body works): blood pH stays between 7.35 and 7.45 whatever you eat; a large change would be fatal."
+        },
+        "methods": {
+          "band": "low",
+          "note": "There is no research at all, only debunked claims repeated without data, so there is nothing anyone could check or repeat."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "Blaming cancer on 'acidic blood' ignores that cancer comes from genetic mutations and that breathing and the kidneys, not food, keep blood pH steady."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-35",
     "title": "Association between urban green space access and rates of anxiety and depression",
     "access": "Behind paywall.",
     "overview": "Uses satellite imagery to quantify green space and links to mental health survey data. Grounded in environmental psychology and stress-reduction theories.",
-    "methods": "Cross-sectional study of 15,000 adults across 50 cities. Clever use of objective green space metrics (NDVI from satellites). However, correlation study - can't prove causation (maybe wealthier, less stressed people move near parks). Data availability: Summary stats only.",
+    "methods": "Cross-sectional study of 15,000 adults across 50 cities. Clever use of objective green space metrics (NDVI from satellites). However, as a correlational study it can't prove causation (maybe wealthier, less stressed people move near parks). Data availability: Summary stats only.",
     "conclusion": "Plausible but limited. Shows association but authors acknowledge reverse causation possibility and confounders like income. Calls for experimental interventions.",
-    "source": "Mid-Tier Environmental Health Journal. Legitimate peer review but not the most rigorous in the field."
+    "source": "Mid-Tier Environmental Health Journal. Legitimate peer review but not the most rigorous in the field.",
+    "feedback": {
+      "summary": "A large, honest study that uses satellite images to measure green space and reports a link rather than a cause, admitting that income or other factors could explain it. It sits mid-scale because a one-off snapshot cannot show what causes what, only summary figures are shared, the journal is not top-tier and the paper is paywalled.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "'Association' tells readers this is a link, not proof that green space improves mental health; a link is exactly what this kind of study can show."
+        },
+        "access": {
+          "band": "low",
+          "note": "The paper sits behind a paywall with no free copy mentioned, so most people cannot read it in full, though price says nothing about quality."
+        },
+        "source": {
+          "band": "medium",
+          "note": "A legitimate journal where independent experts check studies before publication (peer review), but not one of the most demanding in its field."
+        },
+        "theory": {
+          "band": "medium",
+          "note": "It builds soundly on established ideas from environmental psychology about nature easing stress, but mainly tests a link those ideas already predict rather than adding a new argument."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "Survey data from 15,000 adults in 50 cities and greenery measured objectively from satellites are strengths, but a one-off snapshot cannot show cause and only summary figures are shared."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "The authors claim only a link, admit that wealthier, less stressed people may simply move near parks and call for experiments to test cause and effect."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-36",
     "title": "The effect of a probiotic yogurt on immune function markers",
     "access": "Press release; full study not published.",
-    "overview": "Tests proprietary bacterial strains. Uses 'immune function' vaguely (the immune system has hundreds of components - which one improved?).",
+    "overview": "Tests proprietary bacterial strains. Uses 'immune function' vaguely (the immune system has hundreds of components: which one improved?).",
     "methods": "Company internal study. Measured one non-specific immune marker (IgA in saliva) in 30 people for 2 weeks. No control group, no published protocol. Data availability: None.",
-    "conclusion": "Marketing claims. The 80% refers to a temporary spike in one immune marker, not actual infection resistance or health outcomes.",
-    "source": "Food Company Press Release. Not peer-reviewed. Study conducted by company employees."
+    "conclusion": "Marketing claims. The press release's claim of an 80% boost refers to a temporary spike in one immune marker, not actual infection resistance or health outcomes.",
+    "source": "Food Company Press Release. Not peer-reviewed. Study conducted by company employees.",
+    "feedback": {
+      "summary": "This is a company press release, not a published study: 30 people, two weeks, one immune marker, no comparison group and no data to check. The '80% boost' is a brief rise in one marker, not a measure of better health. It sits just above the bottom because the question it asks is at least a fair one.",
+      "criteria": {
+        "title": {
+          "band": "medium",
+          "note": "Sober wording, but 'effect' implies the yogurt caused a change, which a study with no comparison group cannot show; 'markers' also suggests more than the one measured."
+        },
+        "access": {
+          "band": "low",
+          "note": "Only a press release is available and the full study has not been published, so nobody can read or check what was actually done."
+        },
+        "source": {
+          "band": "low",
+          "note": "A food company's own press release about a study run by its employees, with no independent experts checking it before release."
+        },
+        "theory": {
+          "band": "medium",
+          "note": "Asking whether a probiotic (food with live bacteria) affects immunity is fair, but 'immune function' is used vaguely for a system with hundreds of parts."
+        },
+        "methods": {
+          "band": "low",
+          "note": "Thirty people for two weeks, one general marker (IgA, an antibody in saliva), no comparison group, no published plan and no data: far too little to rely on."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "Calling a short-lived rise in one marker an '80% boost' is a marketing claim: it says nothing about resistance to infection or overall health, neither of which was measured."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-37",
     "title": "Psilocybin-assisted therapy for treatment-resistant depression: A double-blind RCT",
     "access": "Open Access.",
     "overview": "Investigates psychedelic therapy for depression. Builds on neuroscience of serotonin receptors and psychological theories of set/setting in psychedelic therapy.",
-    "methods": "Randomised, double-blind, placebo-controlled trial. <i>N</i>=100 patients who failed at least 2 antidepressants. Rigorous screening, therapy protocol standardised, independent assessors. 6-month follow-up. Pre-registered. Data availability: Full anonymised data has been deposited in a controlled-access repository; access requires a formal application reviewed by an independent ethics committee, which in practice takes several months and is not straightforward for independent researchers.",
-    "conclusion": "Careful interpretation. Shows significant symptom reduction but notes therapy protocol was intensive (not just the drug alone), some patients relapsed, and long-term safety still unknown. Calls for larger trials.",
-    "source": "Top-Tier Psychiatry Journal. Known for conservative editorial standards and emphasis on clinical significance."
+    "methods": "Randomised, double-blind, placebo-controlled trial. <i>N</i>=100 patients who failed at least 2 antidepressants. Rigorous screening, therapy protocol standardised, independent assessors. 6-month follow-up. Preregistered. Data availability: Full anonymised data has been deposited in a controlled-access repository; access requires a formal application reviewed by an independent ethics committee, which in practice takes several months and is not straightforward for independent researchers.",
+    "conclusion": "Careful interpretation. Shows significant symptom reduction but notes therapy protocol was intensive (not just the drug alone), some patients relapsed and long-term safety still unknown. Calls for larger trials.",
+    "source": "Top-Tier Psychiatry Journal. Known for conservative editorial standards and emphasis on clinical significance.",
+    "feedback": {
+      "summary": "A carefully run trial, free to read in a top journal: chance decided who got psilocybin or a dummy treatment, neither patients nor researchers knew which and the plan was published in advance. Its conclusion admits relapses and unknown long-term safety. It misses the top score because 100 patients is modest and the data take months to obtain.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "'Assisted therapy' rightly signals the drug came with therapy; 'double-blind RCT' names a randomised controlled trial (groups set by chance) where neither patients nor researchers knew who got psilocybin."
+        },
+        "access": {
+          "band": "high",
+          "note": "It is open access, so anyone can read the full trial report free of charge and check the results for themselves."
+        },
+        "source": {
+          "band": "high",
+          "note": "A top psychiatry journal known for cautious editorial standards and a focus on whether results make a real difference to patients (clinical significance)."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It builds on brain science about serotonin (a chemical messenger) and on how mindset and surroundings shape the drug experience, to tackle depression that other drugs have not helped."
+        },
+        "methods": {
+          "band": "high",
+          "note": "A placebo (dummy treatment) group, independent assessors, a plan published in advance and six-month follow-up make this rigorous, though 100 patients is modest and data access takes months."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It reports a clear drop in symptoms but notes the benefit came with intensive therapy, not the drug alone, that some patients relapsed and that long-term safety is unknown."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-38",
     "title": "A review of the health risks of genetically modified crops by an industry panel",
     "access": "Free report on biotech industry association website.",
-    "overview": "Reviews existing literature on GMO safety. However, panel members are all employed by biotech companies - clear conflict of interest.",
-    "methods": "Narrative review (not systematic). Cherry-picks studies showing safety; ignores research raising concerns about pesticide use and biodiversity. No independent critical appraisal.",
-    "conclusion": "Biased summary. While many GMOs are likely safe to eat, the panel ignores environmental concerns and dismisses any contrary evidence as 'anti-science.'",
-    "source": "Industry Association Report. All authors work for GMO-producing companies. Not independent or peer-reviewed."
+    "overview": "Reviews existing literature on GMO safety. However, panel members are all employed by biotech companies, a clear conflict of interest.",
+    "methods": "Narrative review (not systematic). Cherry-picks studies showing safety; ignores research raising concerns about pesticide use and biodiversity. No independent critical appraisal. Data availability: None.",
+    "conclusion": "Biased summary. While many GMOs are likely safe to eat, the panel ignores environmental concerns and dismisses any contrary evidence as 'anti-science'.",
+    "source": "Industry Association Report. All authors work for GMO-producing companies. Not independent or peer-reviewed.",
+    "feedback": {
+      "summary": "This report was written entirely by staff of companies that make genetically modified (GM) crops, with no independent review. It picks studies that show safety, ignores concerns about pesticide use and biodiversity and dismisses opposing evidence as 'anti-science'. Many GM crops may well be safe to eat, but this bias outweighs the report's free access and honest title.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Plain and accurate: it says this is an industry panel's review of health risks, which helps readers spot a possible conflict of interest."
+        },
+        "access": {
+          "band": "high",
+          "note": "The report is free on the industry association's website, but easy access says nothing about whether a review is balanced."
+        },
+        "source": {
+          "band": "low",
+          "note": "An industry association report written entirely by staff of companies that make GM crops, so the authors have a stake in the answer; no independent experts checked it."
+        },
+        "theory": {
+          "band": "medium",
+          "note": "Summarising existing research on GM crop safety adds little that is new; a panel made up only of biotech employees is also unlikely to weigh that research fairly."
+        },
+        "methods": {
+          "band": "low",
+          "note": "A narrative review lets authors choose which studies to include, unlike a systematic one that sets search rules in advance; here they left out research raising concerns (cherry-picking)."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "Even if many GM crops are likely safe to eat, ignoring environmental concerns and calling all contrary evidence 'anti-science' is one-sided rather than careful."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-39",
     "title": "Accelerating sea level rise through 2100: An analysis of global climate models",
     "access": "Open Access.",
     "overview": "Uses ensemble of climate models (CMIP6) with updated ice sheet dynamics. Builds on established physics of thermal expansion and glaciology.",
-    "methods": "Multi-model comparison with rigorous uncertainty quantification. Incorporates satellite data, tide gauges, and paleoclimate proxies for validation. Pre-registered methodology. Data availability: All model outputs and code archived in public repositories.",
-    "conclusion": "Sobering but precise. Projects 0.6-1.1m rise by 2100 under current emissions trajectory, with clear uncertainty ranges and regional variations. Acknowledges ice sheet behaviour is the largest source of uncertainty.",
-    "source": "Top-Tier Earth Science Journal. Highest standards for climate model reporting and reproducibility."
+    "methods": "Multi-model comparison with rigorous uncertainty quantification. Incorporates satellite data, tide gauges and palaeoclimate proxies for validation. Preregistered methodology. Data availability: All model outputs and code archived in public repositories.",
+    "conclusion": "Sobering but precise. Projects 0.6–1.1 m rise by 2100 under current emissions trajectory, with clear uncertainty ranges and regional variations. Acknowledges ice sheet behaviour is the largest source of uncertainty.",
+    "source": "Top-Tier Earth Science Journal. Highest standards for climate model reporting and reproducibility.",
+    "feedback": {
+      "summary": "This study does well on every criterion: free to read in a leading journal, built on well-established physics, with a method fixed in advance, checks against real-world records and all model results and code made public. Its conclusion gives a range rather than a single figure and names ice sheets as the biggest unknown. It earns the top score.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "It states the main finding and makes clear it comes from an analysis of climate models, so readers know the results are estimates, not measurements."
+        },
+        "access": {
+          "band": "high",
+          "note": "It is open access, so anyone can read the full paper; the model results and code behind it are public too."
+        },
+        "source": {
+          "band": "high",
+          "note": "A top earth science journal with the highest standards for reporting climate models and making work reproducible (possible for others to repeat and get the same results)."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It combines a set of established climate models with updated knowledge of how ice sheets behave, building on well-understood physics such as water expanding as it warms."
+        },
+        "methods": {
+          "band": "high",
+          "note": "Comparing many models, measuring uncertainty, checking against satellites, tide gauges and past-climate records, publishing the plan in advance and sharing all results and code make this close to ideal."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It projects a rise of 0.6 to 1.1 metres by 2100 if emissions stay on their current path, shows regional differences and admits ice sheets are the biggest uncertainty."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-40",
     "title": "A laboratory analysis of alleged mind-control chemicals in aircraft contrails ('chemtrails')",
     "access": "Anonymous blog post with blurry photos.",
-    "overview": "Conspiracy theory. Contrails (condensation trails from aircraft) are water vapour, not chemicals. Basic atmospheric science debunks this.",
-    "methods": "No credible methodology. Shows photos of normal contrails. Claims to have 'lab analysis' but provides no chain of custody, no lab credentials, no peer review.",
+    "overview": "Conspiracy theory. Contrails (condensation trails from aircraft) are ice crystals formed from the water vapour in engine exhaust, not chemicals. Basic atmospheric science debunks this.",
+    "methods": "No credible methodology. Shows photos of normal contrails. Claims to have 'lab analysis' but provides no chain of custody, no lab credentials, no peer review. Data availability: None.",
     "conclusion": "Fabricated. No evidence provided. Contradicts fundamental chemistry and meteorology.",
-    "source": "Anonymous Blog. No credentials, no review, no accountability. Site also promotes New World Order conspiracy theories."
+    "source": "Anonymous Blog. No credentials, no review, no accountability. Site also promotes New World Order conspiracy theories.",
+    "feedback": {
+      "summary": "An anonymous blog post that claims a lab analysis but shows only photos of ordinary contrails, with no lab credentials, no record of how samples were handled and no data. Its mind-control claim contradicts basic science about how contrails form. Free access is its only strength and cannot make up for that, so it gets the lowest rating.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "'A laboratory analysis' sounds scientific, but the post shows no lab credentials and no data, so the title promises far more than the work behind it delivers."
+        },
+        "access": {
+          "band": "high",
+          "note": "Anyone can read the blog post for free, but being easy to reach says nothing about whether its claims are true."
+        },
+        "source": {
+          "band": "low",
+          "note": "An anonymous blog with no credentials or review, so nobody is accountable for what it says; the site also promotes New World Order conspiracy theories."
+        },
+        "theory": {
+          "band": "low",
+          "note": "Contrails are ice crystals that form from the water vapour in engine exhaust; the post ignores this basic atmospheric science and offers a conspiracy theory instead."
+        },
+        "methods": {
+          "band": "low",
+          "note": "Photos of normal contrails and an unverified 'lab analysis', with no chain of custody (a record of who handled the samples) and no data, give nothing anyone could check."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "Its claim of mind-control chemicals rests on no evidence at all and contradicts basic chemistry and meteorology (the science of weather and the atmosphere)."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-41",
-    "title": "Efficacy of pre-exposure prophylaxis (PrEP) in reducing HIV transmission risk in a real-world cohort",
+    "title": "Effectiveness of pre-exposure prophylaxis (PrEP) in reducing HIV transmission risk in a real-world cohort",
     "access": "Open Access.",
     "overview": "Follows high-risk individuals taking daily PrEP medication. Grounded in virology and pharmacokinetics of antiretroviral drugs.",
     "methods": "Prospective cohort of 5,000 participants. Adherence monitored via pharmacy refills and drug level testing. Compared to matched historical controls. Independent outcome ascertainment. Data availability: De-identified data on request.",
     "conclusion": "Strong evidence but emphasises adherence. Near-perfect protection when taken consistently, but effectiveness drops sharply with missed doses. Notes PrEP doesn't protect against other STIs. Notably, the effectiveness estimates rest on comparison to historical controls rather than a concurrent randomised group — a meaningful methodological limitation the authors acknowledge only briefly in the supplementary material.",
-    "source": "Top-Tier Infectious Disease Journal. Rigorous review and high clinical relevance standards."
+    "source": "Top-Tier Infectious Disease Journal. Rigorous review and high clinical relevance standards.",
+    "feedback": {
+      "summary": "A study of 5,000 people taking PrEP (a daily medicine to prevent HIV), free to read in a top journal. It honestly says missed doses sharply cut protection. It misses the top score because it compares users with people from past records rather than a group set by chance, shares data only on request and mentions that weakness only briefly.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "It names the medicine, the outcome and the setting; 'real-world cohort' (a group followed in everyday life) describes the design without promising any particular result."
+        },
+        "access": {
+          "band": "high",
+          "note": "It is open access, so anyone can read the full paper free of charge and check the claims for themselves."
+        },
+        "source": {
+          "band": "high",
+          "note": "A top infectious disease journal with strict peer review (checks by independent experts before publication) and high standards for relevance to patient care."
+        },
+        "theory": {
+          "band": "high",
+          "note": "PrEP is a daily medicine taken to prevent HIV. The study builds on virology (the science of viruses) and how the body handles the drug, testing it in everyday life."
+        },
+        "methods": {
+          "band": "medium",
+          "note": "Following 5,000 people and testing drug levels are strengths, but they are compared with past records (historical controls), not a group set by chance; data are shared only on request."
+        },
+        "conclusion": {
+          "band": "medium",
+          "note": "It is honest that protection drops with missed doses and does not cover other STIs (sexually transmitted infections), but mentions its key weakness only briefly, in the supplementary material."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-42",
     "title": "The effect of testosterone therapy on youth and vitality in men over 40",
     "access": "Published in supplement industry magazine.",
-    "overview": "Promotes off-label testosterone use for 'anti-aging.' Downplays cardiovascular risks and ignores endocrinology showing normal age-related decline isn't a disease.",
+    "overview": "Promotes off-label testosterone use for 'anti-ageing'. Downplays cardiovascular risks and ignores endocrinology showing normal age-related decline isn't a disease.",
     "methods": "Retrospective review of clinic patients (no control group). Patients self-selected for treatment and reported 'feeling better' (subjective). No long-term safety monitoring. Data availability: None.",
-    "conclusion": "Irresponsible. Conflates correlation with causation and ignores serious side effects (heart attack, stroke, prostate issues). Written by clinic owner who profits from selling testosterone.",
-    "source": "Men's Health Magazine / Clinic Advertising. Not peer-reviewed. Author owns testosterone clinic mentioned in article."
+    "conclusion": "Irresponsible. Conflates correlation with causation and ignores possible side effects (blood clots, heart rhythm problems, prostate issues) whose long-term risks are still being studied. Written by clinic owner who profits from selling testosterone.",
+    "source": "Men's Health Magazine / Clinic Advertising. Not peer-reviewed. Author owns testosterone clinic mentioned in article.",
+    "feedback": {
+      "summary": "Written by a clinic owner who sells testosterone and not peer-reviewed, this looks back at clinic patients who chose the treatment and said they felt better. With no comparison group, long-term safety checks or data, it cannot show the hormone caused the improvement. Its use of real patient records, however flawed, lifts it above the lowest rating.",
+      "criteria": {
+        "title": {
+          "band": "medium",
+          "note": "It avoids words like 'miracle', but 'effect' implies the hormone caused a change and 'youth and vitality' is vague, appealing wording for patients simply saying they felt better."
+        },
+        "access": {
+          "band": "medium",
+          "note": "It appeared as an article in a supplement industry magazine rather than a research journal, with no data, so even readers who find it have little to check."
+        },
+        "source": {
+          "band": "low",
+          "note": "Magazine content and clinic advertising with no peer review (checks by independent experts), written by the owner of the testosterone clinic it mentions, who profits from selling the hormone."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It treats the normal drop in testosterone with age as a disease, ignoring endocrinology (the science of hormones) and playing down risks to the heart and blood vessels."
+        },
+        "methods": {
+          "band": "low",
+          "note": "Records of clinic patients who chose the treatment and said they felt better, with no comparison group, long-term safety checks or data, cannot separate a real effect from expectation."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "It treats men feeling better as proof the hormone worked (correlation is not causation) and skips over possible side effects such as blood clots, whose long-term risks are still unclear."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-43",
     "title": "Correction of the sickle cell mutation in a human patient trial using CRISPR gene editing",
     "access": "Behind paywall.",
-    "overview": "Uses CRISPR-Cas9 to edit patient's own hematopoietic stem cells, correcting the genetic mutation causing sickle cell disease. Grounded in molecular biology and gene therapy.",
-    "methods": "Single-arm trial (no control group - unethical to withhold treatment from sick patients). <i>N</i>=15 patients with severe sickle cell disease. 2-year follow-up. Rigorous safety monitoring. Data availability: Patient-level data restricted; summary data in paper.",
-    "conclusion": "The title overclaims for a 15-patient single-arm trial. 'Correction of the mutation' implies completeness that two years of follow-up cannot yet establish. The paper itself is more careful: all patients showed meaningful improvement, but long-term durability is unknown, the procedure is extremely expensive, and off-target editing was detected in 2 patients (ongoing monitoring required).",
-    "source": "Top-Tier Medical Journal. Requires independent data monitoring boards for clinical trials."
+    "overview": "Uses CRISPR-Cas9 to edit patient's own haematopoietic stem cells, correcting the genetic mutation causing sickle cell disease. Grounded in molecular biology and gene therapy.",
+    "methods": "Single-arm trial (no control group; common in early gene-therapy trials, but it makes the benefit harder to judge). <i>N</i>=15 patients with severe sickle cell disease. 2-year follow-up. Rigorous safety monitoring. Data availability: Patient-level data restricted; summary data in paper.",
+    "conclusion": "The title overclaims for a 15-patient single-arm trial. 'Correction of the mutation' implies completeness that two years of follow-up cannot yet establish. The paper itself is more careful: all patients showed meaningful improvement, but long-term durability is unknown, the procedure is extremely expensive and off-target editing was detected in 2 patients (ongoing monitoring required).",
+    "source": "Top-Tier Medical Journal. Requires independent data monitoring boards for clinical trials.",
+    "feedback": {
+      "summary": "A gene-editing trial for sickle cell disease in a top medical journal, with close safety monitoring and an honest paper that reports unintended edits in two patients. The expert's 6 gives most weight to these strengths; on the rubric alone, the paywall, just 15 patients with no comparison group and an overclaiming title would put it nearer the middle.",
+      "criteria": {
+        "title": {
+          "band": "medium",
+          "note": "It names the method and makes clear this was a patient trial, but 'correction' suggests a complete, lasting fix that a two-year trial of 15 patients cannot yet show."
+        },
+        "access": {
+          "band": "low",
+          "note": "A paywall stops most readers from checking the trial for themselves, although the price of a paper says nothing about whether the research is sound."
+        },
+        "source": {
+          "band": "high",
+          "note": "A top medical journal that insists trials are overseen by an independent data monitoring board (outside experts who check safety and results while the trial runs)."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It builds on molecular biology and gene therapy, using CRISPR (a tool for cutting and editing DNA) on patients' own blood-forming stem cells, aiming to correct the faulty gene."
+        },
+        "methods": {
+          "band": "low",
+          "note": "Just 15 patients and no comparison group make the benefit harder to judge and patients' individual data stay private, although close safety monitoring over two years is a strength."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "Unlike the title, the paper is careful: all patients improved, but it admits nobody knows how long this lasts, notes the high cost and reports unintended edits in two patients."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-44",
     "title": "The efficacy of an organic diet in preventing all diseases: A 10-year study",
     "access": "Published on organic food industry website.",
-    "overview": "Massively overstates findings. 'All diseases' claim ignores genetics, smoking, exercise, and countless other factors.",
-    "methods": "Observational study comparing organic food shoppers to general population. No control for income, education, or overall healthy lifestyle (people who buy organic often exercise more, smoke less, etc.). Data availability: Not provided.",
+    "overview": "Massively overstates findings. 'All diseases' claim ignores genetics, smoking, exercise and countless other factors.",
+    "methods": "Observational study comparing organic food shoppers to general population. No control for income, education or overall healthy lifestyle (people who buy organic often exercise more, smoke less, etc.). Data availability: Not provided.",
     "conclusion": "Misleading. Any observed health differences likely due to confounding factors (wealthier, health-conscious people) not the organic label itself.",
-    "source": "Organic Trade Association Report. Study funded by organic industry. Authors work for organic certification bodies."
+    "source": "Organic Trade Association Report. Study funded by organic industry. Authors work for organic certification bodies.",
+    "feedback": {
+      "summary": "A report funded by the organic industry and written by people who work in it, claiming that organic food prevents 'all diseases'. It shares no data and compares organic shoppers with everyone else while ignoring obvious differences such as income and lifestyle. Still, studying real groups of people lifts it just above the lowest rating.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "Claiming that one diet prevents 'all diseases' goes far beyond what any study could show; sweeping headlines like this should put readers on guard."
+        },
+        "access": {
+          "band": "high",
+          "note": "It is published on an organic food industry website, so it is easy to reach, but easy access says nothing about whether a report is fair."
+        },
+        "source": {
+          "band": "low",
+          "note": "A report from an organic trade association, funded by the industry and written by staff of bodies that certify food as organic, so they have a stake in the result."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It credits organic food with preventing every disease, ignoring what is already known about other factors such as genes, smoking and exercise."
+        },
+        "methods": {
+          "band": "low",
+          "note": "Organic shoppers are compared with the general population without taking account of income, education or healthy habits, any of which could explain a difference; no data are shared either."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "It treats a link as proof, but organic buyers tend to be wealthier and more health-conscious (confounding factors), so any health difference likely comes from these, not the organic label."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-45",
     "title": "The effect of hourly breaks from sitting on metabolic risk markers in office workers",
     "access": "Open Access.",
     "overview": "Tests interrupting prolonged sitting with short activity breaks. Based on metabolic physiology and epidemiology of sedentary behaviour.",
-    "methods": "Randomised crossover trial. <i>N</i>=40 participants. Measured blood glucose, insulin, and lipids after 8-hour sitting vs sitting interrupted by 3-minute walks every hour. Lab-controlled conditions. Pre-registered. Data availability: Full data on OSF.",
+    "methods": "Randomised crossover trial. <i>N</i>=40 participants. Measured blood glucose, insulin and lipids after 8-hour sitting vs sitting interrupted by 3-minute walks every hour. Lab-controlled conditions. Preregistered. Data availability: Full data on OSF.",
     "conclusion": "Measured findings. Shows improvements in glucose metabolism but notes this was short-term, in controlled conditions. Doesn't claim breaks alone prevent diabetes or heart disease.",
-    "source": "Respected Exercise Physiology Journal. Good methodological standards."
+    "source": "Respected Exercise Physiology Journal. Good methodological standards.",
+    "feedback": {
+      "summary": "Strong on every criterion: open access, a respected journal, a randomised design with a plan fixed in advance and all data shared, plus a conclusion that claims no more than it found. The expert's 5 seems to weigh its limits heavily: short-term lab tests on 40 people cannot show lasting benefits in real offices.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "It names what was tested and what was measured, 'metabolic risk markers' (blood readings linked to later illness), rather than claiming breaks prevent diabetes or heart disease."
+        },
+        "access": {
+          "band": "high",
+          "note": "It is open access and the full data are public too, so anyone can read the paper and check the results for themselves."
+        },
+        "source": {
+          "band": "high",
+          "note": "A respected journal of exercise physiology (how the body responds to activity), with good standards for how research is designed and carried out."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It builds on population studies of sitting and health (epidemiology) and on how the body handles sugar and fat, then tests the idea directly with an experiment."
+        },
+        "methods": {
+          "band": "high",
+          "note": "A randomised crossover trial (each person tries both conditions in random order), preregistered and with full data public; its main weakness is a small sample of 40."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It reports better blood sugar handling but notes the test was short and lab-based; it does not claim breaks alone prevent diabetes or heart disease."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-46",
     "title": "The efficacy of a 'detox' tea for toxin removal and adipose tissue reduction",
     "access": "Influencer Instagram post with affiliate link.",
-    "overview": "Scientifically nonsensical. The liver and kidneys detoxify the body; no tea can 'flush toxins.' 'Belly fat' cannot be spot-reduced.",
-    "methods": "No study. Influencer's personal testimonial plus paid actors in before/after photos. No measurements, no controls, no biology.",
+    "overview": "Scientifically nonsensical. The liver and kidneys detoxify the body; no tea can 'flush toxins', as the post claims, and fat cannot be spot-reduced from the belly.",
+    "methods": "No study. Influencer's personal testimonial plus paid actors in before/after photos. No measurements, no controls, no biology. Data availability: None.",
     "conclusion": "Fraudulent marketing. The tea is a laxative causing temporary water weight loss (and dehydration), not fat loss.",
-    "source": "Social Media Influencer. Paid promotion. No scientific credentials. FTC violations for undisclosed advertising."
+    "source": "Social Media Influencer. Paid promotion. No scientific credentials. Breaks advertising rules by not labelling the post as an advert.",
+    "feedback": {
+      "summary": "There is no study, only an influencer paid to promote the tea, paid actors in before-and-after photos and no label saying it is an advert. Its claims contradict basic biology and the tea is a laxative, so any weight lost is water that soon returns. Easy access is its only strength and says nothing about whether the claims are true.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "Research words like 'efficacy' (how well something works) and 'adipose tissue' (body fat) dress an advert up as science; the title also assumes a tea can remove toxins."
+        },
+        "access": {
+          "band": "high",
+          "note": "Anyone can see an Instagram post, but easy access is not the same as trustworthiness: the affiliate link pays the influencer for every sale it brings in."
+        },
+        "source": {
+          "band": "low",
+          "note": "A paid promotion by an influencer with no scientific qualifications, which breaks advertising rules by not saying it is an advert; the person making the claims profits from them."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It ignores basic biology: the liver and kidneys already clear toxins from the body and fat cannot be lost from one chosen spot such as the belly."
+        },
+        "methods": {
+          "band": "low",
+          "note": "There is no study at all, just the influencer's own story and before-and-after photos of paid actors, with nothing measured, nothing compared and no data."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "Its promise of toxin removal and fat loss is false: as a laxative (it speeds up the bowels), the tea only causes a brief loss of water weight, risking dehydration."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-47",
     "title": "The impact of participatory budgeting on civic engagement in marginalised communities",
     "access": "Open Access.",
     "overview": "Studies democratic innovation where residents directly decide local spending. Grounded in political science theories of deliberative democracy and empowerment.",
-    "methods": "Mixed methods: quantitative analysis of voting records across 30 cities plus qualitative interviews with participants. Pre-registered analysis. Control cities matched on demographics. Data availability: Quantitative data public; interview transcripts available on request (privacy).",
+    "methods": "Mixed methods: quantitative analysis of voting records across 30 cities plus qualitative interviews with participants. Preregistered analysis. Control cities matched on demographics. Data availability: Quantitative data public; interview transcripts available on request (privacy).",
     "conclusion": "Nuanced. Shows increased participation in marginalised groups but notes effects vary by implementation quality and existing political culture. Doesn't claim participatory budgeting solves all governance problems.",
-    "source": "Top-Tier Political Science Journal. Known for rigorous mixed-methods standards."
+    "source": "Top-Tier Political Science Journal. Known for rigorous mixed-methods standards.",
+    "feedback": {
+      "summary": "This study does well on every criterion: free to read in a top journal, with an analysis plan fixed in advance, matched comparison cities, interviews and public voting data. Its conclusion admits results depend on how well the scheme is run. That earns the top score, although cities were not assigned to the scheme at random, so some doubt remains.",
+      "criteria": {
+        "title": {
+          "band": "high",
+          "note": "Plain and specific: it names the policy, the outcome (civic engagement: taking part in public life) and the communities studied, without promising any particular result."
+        },
+        "access": {
+          "band": "high",
+          "note": "It is open access and the voting data are public, so anyone can read the paper and check the numbers for themselves."
+        },
+        "source": {
+          "band": "high",
+          "note": "A top political science journal known for strict standards in mixed-methods research, which combines numbers with interviews."
+        },
+        "theory": {
+          "band": "high",
+          "note": "It builds on political science theories of deliberative democracy (citizens discussing and deciding together) to test participatory budgeting, where residents decide directly how local money is spent."
+        },
+        "methods": {
+          "band": "high",
+          "note": "Voting records from 30 cities (made public), interviews and an analysis plan fixed in advance (preregistration) are strengths; comparison cities matched on population make-up may still differ in other ways."
+        },
+        "conclusion": {
+          "band": "high",
+          "note": "It reports more participation by marginalised groups but admits results depend on how well the scheme is run and on local political culture, without claiming it fixes everything."
+        }
+      }
+    }
   },
   {
     "id": "STUDY-48",
     "title": "The efficacy of magnets in curing arthritis pain by realigning 'body energy fields'",
     "access": "Free PDF on magnet therapy sales website.",
-    "overview": "Pseudoscience. The human body has no 'energy fields' that magnets could affect. Static magnets used in therapy are far too weak to penetrate tissue.",
+    "overview": "Pseudoscience. The human body has no 'energy fields' that magnets could affect. Magnetic fields do pass through the body (MRI scanners rely on this), but a small therapy magnet's field weakens rapidly with distance and there is no known way it could relieve pain.",
     "methods": "No controlled study. Testimonials from customers who bought magnetic bracelets. No comparison to placebo (which is powerful for subjective pain). Data availability: None.",
     "conclusion": "Placebo effect being sold as medicine. Systematic reviews of actual controlled trials show magnetic therapy performs no better than fake magnets.",
-    "source": "Magnet Therapy Company Website. Selling magnets for £150 each. Site also claims magnets cure diabetes and cancer."  }
+    "source": "Magnet Therapy Company Website. Selling magnets for £150 each. Site also claims magnets cure diabetes and cancer.",
+    "feedback": {
+      "summary": "A sales document from a company that charges £150 per magnet and claims magnets cure diabetes and cancer. It rests on 'body energy fields' that do not exist and on customer stories with no comparison against fake magnets, while reviews of fair tests find magnets work no better than fakes. Being a free download is its only strength.",
+      "criteria": {
+        "title": {
+          "band": "low",
+          "note": "The promise of 'curing' pain is a red flag and the title takes for granted 'body energy fields', which do not exist."
+        },
+        "access": {
+          "band": "high",
+          "note": "The PDF is free to download, but it sits on a website selling magnets; easy access says nothing about whether a claim is true."
+        },
+        "source": {
+          "band": "low",
+          "note": "The company behind it sells the magnets at £150 each and also claims they cure diabetes and cancer, so it has every reason to exaggerate."
+        },
+        "theory": {
+          "band": "low",
+          "note": "It relies on 'energy fields' the body does not have; magnetic fields do pass through us, as hospital MRI scanners show, but a small magnet's field fades quickly with distance."
+        },
+        "methods": {
+          "band": "low",
+          "note": "Only stories from customers who bought bracelets, with no comparison against fake magnets, which matters because pain is especially open to the placebo effect (feeling better because you expect to)."
+        },
+        "conclusion": {
+          "band": "low",
+          "note": "It sells a placebo effect as medicine; systematic reviews (studies that pool the results of many fair tests) find magnets work no better than fake ones."
+        }
+      }
+    }
+  }
 ]
