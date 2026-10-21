@@ -1,0 +1,102 @@
+name: Backup data
+
+on:
+  schedule:
+    # Daily at 03:17 UTC, away from the top of the hour when scheduled runs queue up.
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      allow_empty:
+        description: 'Record nodes that are now empty (after data was deleted on purpose)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  # Only for re-enabling this workflow below.
+  actions: write
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Back up Firebase data to the data branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Check out the data branch in a worktree
+        run: |
+          data_dir="$RUNNER_TEMP/data"
+          if git ls-remote --exit-code --heads origin data > /dev/null; then
+            git fetch --depth=1 origin data
+            git worktree add -B data "$data_dir" FETCH_HEAD
+          else
+            # First run: start the branch with no history shared with main.
+            git worktree add --orphan -b data "$data_dir"
+          fi
+          echo "DATA_DIR=$data_dir" >> "$GITHUB_ENV"
+
+      - name: Describe the branch
+        run: |
+          cat > "$DATA_DIR/README.md" <<'EOF'
+          # Unlock the Lab: data backups
+
+          This branch holds daily backups of the workshop's Firebase Realtime Database,
+          written by the 'Backup data' workflow (`.github/workflows/backup.yml` on `main`).
+          A commit is made only when the data has changed, so the history shows when
+          participants took part.
+
+          | File | Contents |
+          | --- | --- |
+          | `ratings.json` | Study ratings and predictions, by study and session |
+          | `leaderboard.json` | Leaderboard entries, by session |
+          | `rankings.json` | Criterion token allocations, by session |
+          | `sessions.json` | Session records, by session |
+          | `backup-info.json` | Time of the last backup that changed data, and record counts |
+
+          Keys are sorted so that diffs show only real changes. Presence data (`/active`) is
+          not backed up. Fields, legacy record shapes and how to restore a backup are
+          described in [docs/data.md](https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/docs/data.md)
+          on `main`.
+          EOF
+
+      - name: Back up the database
+        env:
+          ALLOW_EMPTY: ${{ inputs.allow_empty }}
+        run: |
+          if [ "$ALLOW_EMPTY" = 'true' ]; then
+            node scripts/backup.mjs --out "$DATA_DIR" --allow-empty
+          else
+            node scripts/backup.mjs --out "$DATA_DIR"
+          fi
+
+      - name: Commit and push if anything changed
+        working-directory: ${{ env.DATA_DIR }}
+        run: |
+          git add --all
+          if git diff --cached --quiet; then
+            echo 'No changes since the last backup.'
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit --quiet --message "Backup Firebase data ($(date -u +%Y-%m-%d))"
+          git push origin data
+
+      # GitHub disables scheduled workflows in public repositories after 60 days without
+      # activity, and quiet periods produce no backup commits. Re-enabling resets that clock.
+      - name: Keep the schedule active
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method PUT "repos/$GITHUB_REPOSITORY/actions/workflows/backup.yml/enable"
