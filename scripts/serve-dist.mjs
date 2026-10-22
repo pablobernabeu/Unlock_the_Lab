@@ -70,7 +70,13 @@ export function withEmulatorOrigins(csp) {
 }
 
 async function resolveFile(urlPath) {
-    const decoded = decodeURIComponent(urlPath);
+    let decoded;
+    try {
+        decoded = decodeURIComponent(urlPath);
+    } catch {
+        // A malformed escape (say '/%E0') is a missing page, not a reason to stop the server.
+        return null;
+    }
     const candidate = path.join(DIST, decoded.endsWith('/') ? `${decoded}index.html` : decoded);
     if (!candidate.startsWith(DIST)) return null;
     try {

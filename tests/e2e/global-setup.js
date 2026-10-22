@@ -1,8 +1,12 @@
-// Resets the emulators to the synthetic fixture before the end-to-end run.
+// Checks the emulators before any test runs: both answer, the database rules
+// from firebase.json are in force in the namespace the app uses, and the data
+// can be reset to the fixture. Each test resets the data again (see test.js).
+import { assertRulesEnforced, loadRules, resetEmulators, waitForEmulators } from './emulator.js';
 import { fixture } from './fixture.js';
-import { resetAccounts, resetDatabase } from './emulator.js';
 
 export default async function globalSetup() {
-    const adminUid = await resetAccounts();
-    await resetDatabase(fixture, adminUid);
+    await waitForEmulators();
+    await loadRules();
+    await assertRulesEnforced();
+    await resetEmulators(fixture);
 }
