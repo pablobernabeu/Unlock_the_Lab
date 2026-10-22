@@ -30,8 +30,8 @@
  *   --color-info-text       #1e40af on --color-info-tint      #dbeafe   7.15:1
  *   white                   #ffffff on --color-brand-strong   #0f766e   5.47:1
  *   white                   #ffffff on --color-brand-hover    #115e59   7.58:1
- *   white                   #ffffff on --color-accent-strong  #5563d6   5.07:1  (gradient start)
- *   white                   #ffffff on --color-purple         #764ba2   6.37:1  (gradient end)
+ *   white                   #ffffff on --color-accent-strong  #5563d6   5.07:1
+ *   white                   #ffffff on --color-purple         #764ba2   6.37:1
  *   white                   #ffffff on --color-amber-strong   #b45309   5.02:1
  *   white                   #ffffff on --color-green-strong   #047857   5.48:1
  *   white                   #ffffff on --color-danger         #b91c1c   6.47:1
@@ -41,7 +41,7 @@
  *   white                   #ffffff on --color-quality-medium #b45309   5.02:1
  *   white                   #ffffff on --color-quality-high   #0369a1   5.93:1
  * Large text (24px, or 18.66px bold) and UI components need 3:1:
- *   white                   #ffffff on --color-accent         #667eea   3.66:1  (--gradient-brand: large text only)
+ *   white                   #ffffff on --color-accent         #667eea   3.66:1  (large text only)
  *   --color-border-strong   #64748b on --color-surface        #ffffff   4.76:1  (form control borders)
  *   --color-border-strong   #64748b on --color-bg             #f8fafc   4.55:1
  *   --color-focus           #1d4ed8 on --color-surface        #ffffff   6.70:1
@@ -50,7 +50,7 @@
  *   --color-focus           #1d4ed8 on --color-brand-tint     #e6f6f5   6.02:1
  *   --color-focus           #1d4ed8 on --color-amber-tint     #fef3c7   6.02:1
  *   --color-focus           #1d4ed8 on --color-danger-tint    #fee2e2   5.49:1
- *   focus on dark surfaces  #ffffff on #5563d6 / #667eea / #764ba2      5.07 / 3.66 / 6.37:1
+ *   focus ring in toasts    #ffffff on --color-text           #1e293b  14.63:1
  *   --color-quality-*       on --color-surface                         8.02 / 5.02 / 5.93:1  (chart marks)
  * Decorative only, never for text or essential UI:
  *   --color-brand #20b2aa 2.62:1, --color-amber #f59e0b 2.15:1, --color-green #10b981 2.54:1 on white.
@@ -61,8 +61,8 @@
 :root {
     color-scheme: light;
 
-    /* v1 identity: teal brand, purple gradient, amber and green. The -strong
-       variants are the accessible versions for text and for white text on top. */
+    /* v1 identity: teal brand, blue-violet and purple accents, amber and green. The
+       -strong variants are the accessible versions for text and for white text on top. */
     --color-brand: #20b2aa;
     --color-brand-strong: #0f766e;
     --color-brand-hover: #115e59;
@@ -100,14 +100,6 @@
     --color-quality-low: #9f1239;
     --color-quality-medium: #b45309;
     --color-quality-high: #0369a1;
-
-    /* Decorative gradient (white text on it must be large) and the text-safe version. */
-    --gradient-brand: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-brand-text: linear-gradient(
-        135deg,
-        var(--color-accent-strong) 0%,
-        var(--color-purple) 100%
-    );
 
     --font-body:
         -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -270,10 +262,6 @@ small,
     color: var(--color-text-muted);
 }
 
-.text-center {
-    text-align: center;
-}
-
 .lead {
     font-size: var(--text-lg);
 }
@@ -331,10 +319,15 @@ main {
     box-shadow: var(--shadow-sm);
 }
 
-.site-header--sticky {
-    position: sticky;
-    top: 0;
-    z-index: 100;
+/* Preview builds only (src/lib/preview-banner.js): previews use the live database. */
+.preview-banner {
+    margin: 0;
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 3px solid var(--color-amber-strong);
+    background: var(--color-amber-tint);
+    color: var(--color-amber-text);
+    font-weight: 700;
+    text-align: center;
 }
 
 .site-header__inner {
@@ -417,11 +410,6 @@ main {
     outline-offset: 2px;
 }
 
-/* On the purple gradient or other dark backgrounds the focus ring turns white. */
-.surface-dark {
-    --color-focus: #ffffff;
-}
-
 /* ---------- Buttons ---------- */
 
 .btn {
@@ -502,10 +490,6 @@ main {
     font-size: var(--text-sm);
 }
 
-.btn-block {
-    width: 100%;
-}
-
 /* Disabled buttons stay legible but look inactive; the reason is given in nearby text. */
 .btn:disabled,
 .btn[aria-disabled='true'] {
@@ -560,31 +544,9 @@ main {
     --info-bg: var(--color-amber-tint);
 }
 
-.info-box--success {
-    --info-accent: var(--color-green-strong);
-    --info-bg: var(--color-green-tint);
-}
-
 .info-box--danger {
     --info-accent: var(--color-danger);
     --info-bg: var(--color-danger-tint);
-}
-
-/* White text on the brand gradient, with the text-safe gradient. */
-.panel-gradient {
-    padding: var(--space-5);
-    border-radius: var(--radius-lg);
-    background: var(--gradient-brand-text);
-    color: var(--color-text-inverse);
-    --color-focus: #ffffff;
-}
-
-.panel-gradient a,
-.panel-gradient h1,
-.panel-gradient h2,
-.panel-gradient h3,
-.panel-gradient h4 {
-    color: inherit;
 }
 
 .badge {
@@ -941,11 +903,6 @@ legend {
     max-width: 36rem;
     margin: var(--space-10) auto;
     text-align: center;
-}
-
-.page-message__logo {
-    width: 4rem;
-    margin: 0 auto var(--space-4);
 }
 
 .page-message .cluster {

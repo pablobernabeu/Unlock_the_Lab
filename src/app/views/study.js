@@ -18,6 +18,8 @@ import { renderFeedbackPanel } from './feedback.js';
 
 /** After this long without an answer from the server, say that saving is slow. */
 const SLOW_SAVE_MS = 8000;
+/** Marks (data-leaves-study) the buttons that leave the study: they wait while it is saving. */
+const LEAVES_STUDY = { leavesStudy: '' };
 const SCALE = Array.from({ length: RATING_MAX - RATING_MIN + 1 }, (_, i) => RATING_MIN + i);
 
 /** Study text is trusted content HTML; 'Data availability:' in Methods is set in bold, as in v1. */
@@ -37,7 +39,9 @@ function backControl(app, studyIndex) {
             type: 'button',
             class: 'btn btn-secondary btn-small',
             'aria-describedby': hintId,
+            dataset: LEAVES_STUDY,
             onClick: () => {
+                if (isUnavailable(button)) return;
                 app.patch({ hasUsedBackButton: true });
                 app.navigate(studyPage(studyIndex - 1));
             },
@@ -152,11 +156,19 @@ function errorMessage(error) {
 }
 
 function finishButton(app, page) {
-    return el(
+    const button = el(
         'button',
-        { type: 'button', class: 'btn btn-secondary', onClick: () => app.finishEarly(page) },
+        {
+            type: 'button',
+            class: 'btn btn-secondary',
+            dataset: LEAVES_STUDY,
+            onClick: () => {
+                if (!isUnavailable(button)) app.finishEarly(page);
+            },
+        },
         t('app.study.finish')
     );
+    return button;
 }
 
 function finishControl(app, studyIndex) {
@@ -249,6 +261,11 @@ function answersSection(app, study, studyIndex) {
         // A disabled fieldset also stops the answers changing while they are being saved.
         prediction.disabled = value;
         rating.disabled = value;
+        // Leaving now would put this study's feedback on whichever study is shown next.
+        const view = section.closest('.view');
+        for (const button of view?.querySelectorAll('[data-leaves-study]') ?? []) {
+            setUnavailable(button, value);
+        }
         form.setAttribute('aria-busy', String(value));
         clearTimeout(slowTimer);
         status.textContent = '';

@@ -53,7 +53,8 @@
                         <h1 data-i18n="dashboard.heading">Live dashboard</h1>
                         <p class="lead" data-i18n="dashboard.intro">
                             How workshop participants rate the fictional studies and how well they
-                            predict the target ratings.
+                            predict the crowd's ratings. The figures update by themselves as people
+                            take part.
                         </p>
                         <p class="connection-status" data-connection role="status">
                             <span class="connection-status__dot" aria-hidden="true"></span>
@@ -250,12 +251,16 @@
                             class="table-wrap"
                             role="region"
                             tabindex="0"
-                            aria-labelledby="leaderboard-heading"
+                            aria-labelledby="leaderboard-caption"
                             data-leaderboard-wrap
                             hidden
                         >
                             <table class="table leaderboard-table">
-                                <caption class="visually-hidden" data-leaderboard-caption></caption>
+                                <caption
+                                    class="visually-hidden"
+                                    id="leaderboard-caption"
+                                    data-leaderboard-caption
+                                ></caption>
                                 <thead>
                                     <tr>
                                         <th

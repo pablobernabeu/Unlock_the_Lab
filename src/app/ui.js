@@ -19,6 +19,15 @@ export function trustedHtml(tag, attrs, html) {
 }
 
 /**
+ * The label of an expert quality band ('Low quality' and so on).
+ * @param {'low'|'medium'|'high'} band
+ * @returns {string}
+ */
+export function qualityLabel(band) {
+    return t(`common.quality.${band}`);
+}
+
+/**
  * A coloured badge for a quality band, always with its text label.
  * @param {'low'|'medium'|'high'|null} band
  * @param {string} text

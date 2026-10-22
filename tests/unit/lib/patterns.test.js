@@ -14,13 +14,10 @@ function ruleStrings(node, found = []) {
     return found;
 }
 
-const hasV2Rules = Boolean(rules?.rules?.sessions);
-
 describe('patterns match database.rules.json', () => {
-    if (!hasV2Rules) {
-        it.skip('database.rules.json has no /sessions node yet (v1 rules): parity is checked once the v2 rules land', () => {});
-        return;
-    }
+    it('reads the v2 rules', () => {
+        expect(rules.rules.sessions).toBeDefined();
+    });
 
     const expressions = ruleStrings(rules).join('\n');
     for (const [name, pattern] of Object.entries(patterns)) {
@@ -43,12 +40,14 @@ describe('patterns match database.rules.json', () => {
 });
 
 describe('pattern behaviour', () => {
-    it('USERNAME_PATTERN accepts generated names and the v1 suffix fallback', () => {
+    it('USERNAME_PATTERN accepts generated names and the v1 suffix fallback only', () => {
         for (const name of [
             'Red Bear 76',
             'Curious Penguin 83',
             'Tall Rabbit 07',
             'Red Fox 07-12',
+            'Teal Raccoon 00',
+            'Peaceful Leopard 99-123',
         ]) {
             expect(name).toMatch(patterns.USERNAME_PATTERN);
         }
@@ -60,6 +59,12 @@ describe('pattern behaviour', () => {
             'Red Fox 007',
             '<img src=x>',
             'Red Fox 07-1234',
+            'Red Fox 07-1000',
+            'Smelly Teacher 12',
+            'Red Teacher 12',
+            'Smelly Fox 12',
+            'Redd Fox 12',
+            'Red Foxes 12',
         ]) {
             expect(name).not.toMatch(patterns.USERNAME_PATTERN);
         }

@@ -2,30 +2,27 @@
 // privileges (the owner token bypasses the database rules). Every URL is a
 // 127.0.0.1 emulator address, so nothing here can reach production.
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { loadEnv } from 'vite';
 
 const ROOT = new URL('../../', import.meta.url);
 const DATABASE = 'http://127.0.0.1:9000';
 const AUTH = 'http://127.0.0.1:9099';
 const OWNER = { Authorization: 'Bearer owner' };
 
-/** `KEY=value` lines of a dotenv file in the repository root. */
-function readEnvFile(name) {
-    const values = {};
-    for (const line of readFileSync(new URL(name, ROOT), 'utf8').split(/\r?\n/)) {
-        const match = /^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/.exec(line);
-        if (match) values[match[1]] = match[2].replace(/^(['"])(.*)\1$/, '$2');
-    }
-    return values;
-}
-
-const testEnv = readEnvFile('.env.test');
+/**
+ * The VITE_ variables of the test build, read the way `vite build --mode test`
+ * reads them (.env, .env.local, .env.test, .env.test.local, then the
+ * environment), so a fork's .env.local reaches these helpers as it reaches the build.
+ */
+const testEnv = loadEnv('test', fileURLToPath(ROOT), 'VITE_');
 
 /** The test build's project id, which the emulators must be started with. */
-export const PROJECT_ID = testEnv.VITE_FIREBASE_PROJECT_ID ?? 'demo-unlock-the-lab';
+export const PROJECT_ID = testEnv.VITE_FIREBASE_PROJECT_ID || 'demo-unlock-the-lab';
 
 /**
  * The database namespace the test build talks to: the first label of its
- * databaseURL (.env.test, or the default in src/lib/firebase-config.js).
+ * databaseURL (from the env files, or the default in src/lib/firebase-config.js).
  */
 export const NAMESPACE = (() => {
     let url = testEnv.VITE_FIREBASE_DATABASE_URL;

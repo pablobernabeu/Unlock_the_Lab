@@ -3,15 +3,17 @@
  * Every generated name matches USERNAME_PATTERN, which the database rules enforce.
  */
 
+/** The v1 adjectives. USERNAME_PATTERN lists the same words; change both together. */
 // prettier-ignore
-const ADJECTIVES = Object.freeze([
+export const ADJECTIVES = Object.freeze([
     'Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange', 'Pink', 'Teal',
     'Brave', 'Wise', 'Swift', 'Tall', 'Happy', 'Clever', 'Bright', 'Quick',
     'Mighty', 'Gentle', 'Bold', 'Cheerful', 'Curious', 'Friendly', 'Kind', 'Peaceful',
 ]);
 
+/** The v1 animals. USERNAME_PATTERN lists the same words; change both together. */
 // prettier-ignore
-const ANIMALS = Object.freeze([
+export const ANIMALS = Object.freeze([
     'Fox', 'Raccoon', 'Owl', 'Sparrow', 'Robin', 'Falcon', 'Eagle', 'Hawk',
     'Rabbit', 'Squirrel', 'Deer', 'Bear', 'Wolf', 'Otter', 'Badger', 'Hedgehog',
     'Dolphin', 'Seal', 'Penguin', 'Panda', 'Koala', 'Tiger', 'Lion', 'Leopard',

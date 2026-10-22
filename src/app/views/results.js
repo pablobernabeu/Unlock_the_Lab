@@ -14,7 +14,7 @@ import { t } from '../../lib/i18n.js';
 import { meanAccuracy } from '../../lib/scoring.js';
 import { chartPoints, leaderboardView, ratingProfile, tokenShares } from '../results-model.js';
 import { targetDigits } from '../target-precision.js';
-import { bandBadge, setChildren } from '../ui.js';
+import { bandBadge, qualityLabel, setChildren } from '../ui.js';
 import { formatTarget, renderExpertFeedback } from './feedback.js';
 import { drawRatingChart } from './results-chart.js';
 
@@ -32,12 +32,6 @@ import { drawRatingChart } from './results-chart.js';
  */
 
 let activeChart = null;
-
-const QUALITY_LABELS = {
-    low: () => t('common.quality.low'),
-    medium: () => t('common.quality.medium'),
-    high: () => t('common.quality.high'),
-};
 
 function section(id, heading, ...content) {
     return el(
@@ -374,10 +368,12 @@ function reviewItem(row) {
     const { study } = row;
     const band = qualityBand(study.expertRating);
     const notRecorded = t('app.results.notRecorded');
+    const titleId = `review-title-${study.id}`;
+    const labelId = `review-feedback-${study.id}`;
     return el(
         'li',
         { class: 'review-item' },
-        el('h3', { class: 'review-item__title' }, study.title),
+        el('h3', { class: 'review-item__title', id: titleId }, study.title),
         el(
             'dl',
             { class: 'review-item__facts' },
@@ -396,13 +392,18 @@ function reviewItem(row) {
             fact(t('app.results.reviewExpert'), [
                 String(study.expertRating),
                 ' ',
-                band ? bandBadge(band, QUALITY_LABELS[band]()) : null,
+                band ? bandBadge(band, qualityLabel(band)) : null,
             ])
         ),
         el(
             'details',
             { class: 'results-details' },
-            el('summary', null, t('app.results.reviewFeedback')),
+            // Named after the study too: up to 48 of these follow one another in tab order.
+            el(
+                'summary',
+                { 'aria-labelledby': `${labelId} ${titleId}` },
+                el('span', { id: labelId }, t('app.results.reviewFeedback'))
+            ),
             renderExpertFeedback(study, { withHeading: false })
         )
     );

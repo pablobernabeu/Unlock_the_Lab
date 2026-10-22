@@ -4,7 +4,7 @@ The interface and the content can be translated without touching the code. Engli
 
 ## Files
 
-For a language with code `xx` (an ISO 639 code such as `es`, `nb` or `pt-BR`):
+Each language has a code `xx`: a language tag such as `es`, `nb` or `pt-BR`, made of two or three lower-case letters and optionally one region or script part. The code is stored with every rating, and `npm test` checks its form. Copy these files:
 
 | Copy                           | To                             | What it contains                |
 | ------------------------------ | ------------------------------ | ------------------------------- |
@@ -16,7 +16,7 @@ For a language with code `xx` (an ISO 639 code such as `es`, `nb` or `pt-BR`):
 | `src/content/en/glossary.json` | `src/content/xx/glossary.json` | Glossary                        |
 | `src/content/en/rubric.json`   | `src/content/xx/rubric.json`   | Rubric                          |
 
-Once any file exists under `src/i18n/xx/`, the language appears in the language menu at the foot of each page, and `?lang=xx` selects it directly. Its name in the menu comes from the browser's own list of language names.
+Once any file exists under `src/i18n/xx/`, the language appears in the language menu (in the page header or footer), and `?lang=xx` selects it directly. Its name in the menu comes from the browser's own list of language names.
 
 ## Rules for translators
 
@@ -31,8 +31,11 @@ Once any file exists under `src/i18n/xx/`, the language appears in the language 
 ## Checking a translation
 
 ```bash
+npm run emulators      # in a second terminal; needs Java 21 or later
 npm run dev            # then open http://localhost:3000/?lang=xx
 npm test               # checks that every key the code uses exists in English
 ```
+
+Without the emulators the welcome page, the guide and the study cards still show, but answers cannot be saved, so the feedback, weights and results pages cannot be checked. See 'Local development' in `README.md` for more.
 
 Each rating records the interface language (`locale`), so analyses can separate or compare languages.

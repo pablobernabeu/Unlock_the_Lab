@@ -55,7 +55,7 @@
     "participantsNote": "Sessions with at least one rating.",
     "ratings": "Ratings",
     "ratingsNote": "Ratings on the 1 to 7 scale, across all studies.",
-    "completed": "Completed",
+    "completed": "Rated {count} or more",
     "completedNote": {
       "one": "Sessions with at least {count} rated study.",
       "other": "Sessions with at least {count} rated studies."
@@ -70,7 +70,7 @@
       "other": "The presence list holds {count} entries in all."
     },
     "capacityTitle": "How many people can join at once?",
-    "capacityLimit": "On Firebase's free Spark plan, the database accepts at most 100 simultaneous connections. Every open page uses one: each participant's workshop page, each dashboard screen (a projected one included) and this admin page. When the limit is reached, new visitors cannot connect until others leave.",
+    "capacityLimit": "On Firebase's free Spark plan, the database accepts at most 100 simultaneous connections. Every open page uses one: each participant's workshop page, each dashboard screen (a projected one included) and this facilitator panel. When the limit is reached, new visitors cannot connect until others leave.",
     "capacityEstimate": "'Active now' counts participants' presence entries only, so it approximates but does not equal the number of connections. The Usage tab of the Realtime Database in the Firebase console shows the real number."
   },
   "rooms": {
@@ -133,7 +133,7 @@
     },
     "snapshot": "Download full snapshot (JSON)",
     "snapshotNote": "One file with everything in the table plus the presence list and the time sessions were last ended, stamped with the time of export.",
-    "analysis": "For the analysis report in <code>analysis/</code>, save <code>ratings.json</code>, <code>leaderboard.json</code>, <code>rankings.json</code> and <code>sessions.json</code> in one folder (their names are what the script expects) and run <code>analysis/fetch-data.sh</code> with the option <code>--from</code> followed by that folder. The same files can be restored with the Firebase CLI, as <a href=\"https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/docs/deployment.md#backups-and-restoring\">the deployment guide</a> explains.",
+    "analysis": "For the analysis report in <code>analysis/</code>, run <code>analysis/fetch-data.sh</code> with the option <code>--from</code> followed by either the full snapshot file or a folder holding <code>ratings.json</code>, <code>leaderboard.json</code>, <code>rankings.json</code> and <code>sessions.json</code> (their names are what the script expects). The per-node JSON files can also be restored with the Firebase CLI, as <a href=\"https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/docs/deployment.md#backups-and-restoring\">the deployment guide</a> explains.",
     "preparing": "Preparing the download…",
     "done": "Downloaded {file}.",
     "failed": "The download could not be prepared. {reason}",
@@ -173,8 +173,8 @@
       "active": "the presence list (<code>/active</code>)"
     },
     "kept": "The list of administrators and the time sessions were last ended are kept.",
-    "github": "Copies already saved by the daily backup on the repository's <code>data</code> branch on GitHub are not affected. After a deletion, the backup keeps those copies and refuses to replace them with empty files until someone runs it by hand with the option for empty nodes (see <a href=\"https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/docs/deployment.md#backups-and-restoring\">the deployment guide</a>).",
-    "exportFirst": "Download a full snapshot first, so that you keep a copy of everything that is deleted.",
+    "github": "Copies already saved by the daily backup on the repository's <code>data</code> branch on GitHub are not affected. After a deletion, the backup keeps those copies and refuses to replace them with empty files until someone runs it by hand with 'Allow empty nodes' ticked (see <a href=\"https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/docs/deployment.md#backups-and-restoring\">the deployment guide</a>).",
+    "exportFirst": "Download a full snapshot first, so that you keep a copy of everything that is deleted. The analysis report can read the snapshot as it is.",
     "button": "Delete participant data…",
     "nothing": "There is no participant data to delete.",
     "readFailed": "The data could not be counted, so nothing was deleted. {reason}",

@@ -256,6 +256,22 @@ describe('readOnlyTotals', () => {
         expect(readOnlyTotals(null, [{ score: 80 }, { score: null }])).toBeNull();
         expect(readOnlyTotals({ score: 0, papersRated: 0 }, [])).toBeNull();
     });
+
+    it('uses the saved scores when they cover more studies than an entry left behind', () => {
+        const rows = [{ score: 80 }, { score: 90 }, { score: 70 }];
+        expect(readOnlyTotals({ score: 170, papersRated: 2 }, rows)).toEqual({
+            score: 240,
+            papersRated: 3,
+        });
+        expect(readOnlyTotals({ score: 250, papersRated: 3 }, rows)).toEqual({
+            score: 250,
+            papersRated: 3,
+        });
+        expect(readOnlyTotals({ score: 170, papersRated: 2 }, [...rows, { score: null }])).toEqual({
+            score: 170,
+            papersRated: 2,
+        });
+    });
 });
 
 describe('resolveSessionParam', () => {

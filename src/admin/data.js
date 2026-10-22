@@ -1,11 +1,15 @@
 /**
- * Database access for the admin panel, always through the named 'admin'
- * Firebase app (src/lib/firebase.js createAdminApp), so it runs with the
- * administrator's sign-in and never touches a participant's anonymous user.
+ * Database access for the admin panel. Live data and writes go through the
+ * named 'admin' Firebase app (src/lib/firebase.js createAdminApp), so they run
+ * with the administrator's sign-in and never touch a participant's anonymous
+ * user. Exports and the delete counts read over REST instead (see rest.js).
  */
 import { get, onValue, ref, serverTimestamp, update } from 'firebase/database';
+import { firebaseConfig } from '../lib/firebase-config.js';
+import { DATABASE_EMULATOR_PORT, EMULATOR_HOST, usingEmulators } from '../lib/firebase.js';
 import { DELETED_NODES } from './counts.js';
 import { withTimeout } from './errors.js';
+import { fetchNode, restBaseUrl } from './rest.js';
 
 /** Nodes the panel watches live. */
 export const LIVE_NODES = Object.freeze([...DELETED_NODES]);
@@ -49,18 +53,25 @@ export function watchData(db, store, onError) {
     return () => stops.forEach((stop) => stop());
 }
 
+const REST_BASE = restBaseUrl({
+    databaseURL: firebaseConfig.databaseURL,
+    emulatorOrigin: usingEmulators
+        ? `http://${EMULATOR_HOST}:${DATABASE_EMULATOR_PORT}`
+        : undefined,
+});
+
 /**
- * Reads nodes afresh from the database.
- * @param {import('firebase/database').Database} db
+ * Reads nodes afresh from the server, over REST as the daily backup does, so
+ * that a file or a count never comes from the SDK's copy (see rest.js).
  * @param {readonly string[]} names e.g. ['ratings', 'leaderboard']
  * @returns {Promise<Record<string, unknown>>} values keyed by node name (null when empty)
  */
-export async function readNodes(db, names) {
-    const snapshots = await withTimeout(
-        Promise.all(names.map((name) => get(ref(db, name)))),
+export async function readNodes(names) {
+    const values = await withTimeout(
+        Promise.all(names.map((name) => fetchNode(REST_BASE, name))),
         REQUEST_TIMEOUT_MS
     );
-    return Object.fromEntries(names.map((name, index) => [name, snapshots[index].val()]));
+    return Object.fromEntries(names.map((name, index) => [name, values[index]]));
 }
 
 /**

@@ -194,19 +194,24 @@ export function withOwnEntry(entries, { sessionId, userName, score, papersRated,
 }
 
 /**
- * Score totals for a read-only page: the leaderboard entry when there is one,
- * otherwise the per-rating scores stored by v2 (only when every row has one).
+ * Score totals for a read-only page: the leaderboard entry, or the per-rating
+ * scores stored by v2 (only when every row has one) when there is no entry or
+ * they cover more studies than the entry (an entry left behind, for example
+ * by a second tab of the session).
  * @param {{score: number, papersRated: number}|null} entry
  * @param {Array<{score: number|null}>} rows
  * @returns {{score: number, papersRated: number}|null}
  */
 export function readOnlyTotals(entry, rows) {
-    if (entry && entry.papersRated > 0)
+    const scored = rows.length > 0 && rows.every((row) => Number.isInteger(row.score));
+    const fromRows = scored
+        ? { score: rows.reduce((sum, row) => sum + row.score, 0), papersRated: rows.length }
+        : null;
+    const hasEntry = entry && entry.papersRated > 0;
+    if (hasEntry && !(fromRows && fromRows.papersRated > entry.papersRated)) {
         return { score: entry.score, papersRated: entry.papersRated };
-    if (rows.length > 0 && rows.every((row) => Number.isInteger(row.score))) {
-        return { score: rows.reduce((sum, row) => sum + row.score, 0), papersRated: rows.length };
     }
-    return null;
+    return fromRows;
 }
 
 /**

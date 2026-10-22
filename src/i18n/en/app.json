@@ -53,9 +53,9 @@
     "length": "There are {total} studies. You can stop and see your results at any point after rating {minFinish}.",
     "leaderboardRoom": "This session is part of the workshop room {room}. At the end you can see the leaderboard for this workshop as well as the one for everyone.",
     "dataHeading": "Your data",
-    "dataCollected": "We store your ratings and predictions, your scores, how much weight you give each of the six criteria at the end, how long you took over each study and when you answered, together with your random nickname, the language, any workshop room code and random codes that identify this session and this browser. We do not ask for your name, email address or any other personal details.",
+    "dataCollected": "We store your ratings and predictions, your scores, how much weight you give each of the six criteria at the end, how long you took over each study and when you answered, together with your random nickname, the language, any workshop room code and random codes that identify this session and this browser. While the page is open, we also record that you are online and when you were last active. We do not ask for your name, email address or any other personal details.",
     "dataNoTracking": "The answers are kept in a Google Firebase database. There are no analytics or tracking cookies. Your progress is also kept in this browser's storage, so you can reload the page without losing it.",
-    "dataUse": "The data are pseudonymous: the random codes link your answers to each other, not to you. By taking part you agree that your answers may be used for research on how people judge the quality of studies, and shared and analysed in anonymous form. Your nickname and scores appear on the public leaderboard and the live dashboard.",
+    "dataUse": "The data are pseudonymous: the random codes link your answers to each other, not to you. Everything you submit is public. Anyone can see the answers and scores saved under each nickname on the leaderboard, the live dashboard and the results pages. A copy of all the data is also published every day in the project's public GitHub repository, where it stays. By taking part you agree that your answers may be used, shared and published for research on how people judge the quality of studies.",
     "start": "Get started"
   },
   "guide": {
@@ -164,6 +164,7 @@
     },
     "saving": "Saving…",
     "saveFailed": "Your weights were not saved. Check your connection and try again.",
+    "earlierKept": "Your earlier weights had been saved after all, so those are the ones kept.",
     "keepRating": "Go back to rating studies"
   },
   "results": {
@@ -201,7 +202,7 @@
     "notOnBoard": "This session is not on the leaderboard.",
     "leaderboardEmpty": "No one has rated {count} or more studies yet.",
     "leaderboardFailed": "The leaderboard could not be loaded.",
-    "colRank": "Rank",
+    "colRank": "Place",
     "colName": "Nickname",
     "colScore": "Average score",
     "colStudies": "Studies rated",
@@ -284,7 +285,7 @@
     "notFoundText": "There are no results for this link. Check that you copied the whole link.",
     "chooseHeading": "Choose the results",
     "chooseText": "Several participants have this nickname. Choose the right results:",
-    "chooseItem": "{name}, {count} rated, last active {date}",
+    "chooseItem": "{name}, {count} rated, latest rating {date}",
     "takePart": "Take part in the workshop"
   },
   "session": {
@@ -302,7 +303,7 @@
     "warningTitle": "Are you still there?",
     "warningText": "Your session will pause in {minutes} minutes unless you continue.",
     "pausedTitle": "Session paused",
-    "pausedText": "Your session paused after {minutes} minutes without activity. Your progress is saved. Select Continue to carry on where you left off.",
+    "pausedText": "Your session paused after {minutes} minutes without activity. Your progress is saved. Select 'Continue' to carry on where you left off.",
     "continue": "Continue",
     "newTitle": "Start as a new participant?",
     "newText": "This clears the session saved in this browser ({name}, {count} rated) and starts a new one. Answers already sent stay in the research data, and the results link for that session keeps working.",

@@ -211,7 +211,7 @@ export async function expectNoAxeViolations(page, label) {
     );
     expect(overflow, `horizontal page scroll on ${label}`).toBeLessThanOrEqual(0);
     const results = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
         .analyze();
     const summary = results.violations.map(
         (violation) =>

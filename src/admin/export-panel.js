@@ -18,7 +18,7 @@ import { createStatus, errorReason, whileBusy } from './ui.js';
  */
 export function runDownload(button, status, download, isConnected) {
     return whileBusy(button, async () => {
-        // Offline, Firebase answers from the last copy it received, which may be out of date.
+        // A read would most likely fail offline, and this says why straight away.
         if (!isConnected()) {
             status.show(t('admin.export.offline'), 'error');
             return false;
@@ -39,10 +39,9 @@ export function runDownload(button, status, download, isConnected) {
 /**
  * @param {HTMLElement} root the export section
  * @param {object} options
- * @param {import('firebase/database').Database} options.db
  * @param {ReturnType<import('./store.js').createStore>} options.store
  */
-export function createExportPanel(root, { db, store }) {
+export function createExportPanel(root, { store }) {
     const status = createStatus(qs('[data-export-status]', root));
     const rows = qsa('[data-export-node]', root);
     const isConnected = () => store.get('connected') === true;
@@ -53,9 +52,9 @@ export function createExportPanel(root, { db, store }) {
         const node = button.closest('[data-export-node]')?.dataset.exportNode;
         const format = button.dataset.export;
         const downloads = {
-            snapshot: () => downloadSnapshot(db),
-            csv: () => downloadNodeCsv(db, node),
-            json: () => downloadNodeJson(db, node),
+            snapshot: () => downloadSnapshot(),
+            csv: () => downloadNodeCsv(node),
+            json: () => downloadNodeJson(node),
         };
         if (downloads[format]) runDownload(button, status, downloads[format], isConnected);
     });

@@ -1,12 +1,13 @@
-// End-to-end tests: a test-mode build served with the production headers
-// (scripts/serve-dist.mjs) against the Firebase emulators, which run under a
-// demo- project id so they need no credentials or network. Locally, emulators
-// that are already running are reused; the build is always made afresh unless
-// something already serves port 4173.
+// End-to-end tests: a test-mode build (in dist-e2e/, never the dist/ that
+// Hosting publishes) served with the production headers (scripts/serve-dist.mjs)
+// against the Firebase emulators, which run under a demo- project id so they
+// need no credentials or network. Locally, emulators that are already running
+// are reused, and so is a server already on APP_PORT, which global setup checks
+// is serving the test build; otherwise the build is made afresh.
 import { defineConfig, devices } from '@playwright/test';
+import { APP_PORT } from './tests/e2e/app-server.js';
 import { PROJECT_ID } from './tests/e2e/emulator.js';
 
-const PORT = 4173;
 const executablePath = process.env.PW_CHROMIUM_PATH || undefined;
 
 export default defineConfig({
@@ -21,7 +22,7 @@ export default defineConfig({
     timeout: 90_000,
     expect: { timeout: 10_000 },
     use: {
-        baseURL: `http://127.0.0.1:${PORT}`,
+        baseURL: `http://127.0.0.1:${APP_PORT}`,
         trace: 'retain-on-failure',
         screenshot: 'only-on-failure',
     },
@@ -44,8 +45,8 @@ export default defineConfig({
             stderr: 'pipe',
         },
         {
-            command: `npm run build:test && node scripts/serve-dist.mjs --emulators --port ${PORT}`,
-            url: `http://127.0.0.1:${PORT}/404.html`,
+            command: `npm run build:test && node scripts/serve-dist.mjs --emulators --dir dist-e2e --port ${APP_PORT}`,
+            url: `http://127.0.0.1:${APP_PORT}/404.html`,
             reuseExistingServer: !process.env.CI,
             timeout: 180_000,
         },

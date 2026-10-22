@@ -1,8 +1,8 @@
 dist
+dist-e2e
 node_modules
 package-lock.json
 materials
-data
 analysis/*_files
 coverage
 playwright-report

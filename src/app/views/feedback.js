@@ -11,7 +11,7 @@ import { formatRating } from '../../lib/format.js';
 import { formatNumber, t } from '../../lib/i18n.js';
 import { scoreBand } from '../../lib/scoring.js';
 import { roundTarget, targetDigits } from '../target-precision.js';
-import { bandBadge } from '../ui.js';
+import { bandBadge, qualityLabel } from '../ui.js';
 
 const SCORE_MESSAGES = {
     perfect: () => t('app.feedback.band.perfect'),
@@ -26,12 +26,6 @@ const CRITERION_BAND_LABELS = {
     low: () => t('app.feedback.bandLow'),
     medium: () => t('app.feedback.bandMedium'),
     high: () => t('app.feedback.bandHigh'),
-};
-
-const QUALITY_LABELS = {
-    low: () => t('common.quality.low'),
-    medium: () => t('common.quality.medium'),
-    high: () => t('common.quality.high'),
 };
 
 /**
@@ -53,7 +47,7 @@ export function renderExpertFeedback(study, { withHeading = true } = {}) {
         el(
             'p',
             { class: 'expert-feedback__rating' },
-            band ? bandBadge(band, QUALITY_LABELS[band]()) : null,
+            band ? bandBadge(band, qualityLabel(band)) : null,
             ' ',
             t('app.feedback.expertRating', { rating: study.expertRating })
         ),

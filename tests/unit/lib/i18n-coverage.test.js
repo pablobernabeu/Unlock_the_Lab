@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { CRITERION_KEYS, descriptionKey, labelKey } from '../../../src/lib/criteria.js';
 import { lookupMessage, splitKey } from '../../../src/lib/i18n-core.js';
@@ -10,6 +11,7 @@ import {
     loadLocale,
     localeCodes,
     missingKeys,
+    sourceFiles,
     withoutComments,
 } from './i18n-keys.js';
 
@@ -49,6 +51,26 @@ describe('i18n key coverage', () => {
                 descriptionKey(key)
             ).toBe(true);
         }
+    });
+
+    it('has no English strings that nothing uses', () => {
+        // Translators copy whole files, so a dead string costs every language a translation.
+        // Keys built at run time, which no literal in the source spells out in full:
+        const built = new Set([
+            ...CRITERION_KEYS.map(labelKey),
+            ...CRITERION_KEYS.map(descriptionKey),
+            'dashboard.table.ascending',
+            'dashboard.table.descending',
+        ]);
+        // A quoted key counts as used: maps such as src/admin/errors.js pass keys to t() later.
+        const sources = sourceFiles()
+            .map((file) => withoutComments(readFileSync(file, 'utf8'), file))
+            .join('\n');
+        const quoted = (key) => ["'", '"', '`'].some((q) => sources.includes(`${q}${key}${q}`));
+        const unused = leafKeys(english).filter(
+            (key) => !used.has(key) && !built.has(key) && !quoted(key)
+        );
+        expect(unused).toEqual([]);
     });
 
     it('has a label for every quality band', () => {

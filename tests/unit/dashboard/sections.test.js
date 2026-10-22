@@ -216,6 +216,21 @@ describe('leaderboard', () => {
         expect(qs('[data-leaderboard-panel]').getAttribute('aria-labelledby')).toBe(dayTab.id);
     });
 
+    it('names the scrolling table after its caption, not the section heading', () => {
+        const board = createLeaderboard(section('leaderboard-heading'));
+        board.update({ entries: normaliseEntries(raw), now, room: null });
+        const wrap = qs('[data-leaderboard-wrap]');
+        const label = () => document.getElementById(wrap.getAttribute('aria-labelledby'));
+        // Two region landmarks both called 'Leaderboard' would be indistinguishable.
+        expect(wrap.getAttribute('aria-labelledby')).not.toBe(
+            section('leaderboard-heading').getAttribute('aria-labelledby')
+        );
+        expect(label()).toBe(qs('[data-leaderboard-caption]'));
+        expect(label().textContent).toBe('Leaderboard, all time');
+        qsa('[role="tab"]')[1].click();
+        expect(label().textContent).toBe('Leaderboard, past 24 hours');
+    });
+
     it('says when no one is ranked, and names the room', () => {
         const board = createLeaderboard(section('leaderboard-heading'));
         board.update({ entries: normaliseEntries(raw), now, room: 'DEMO-1' });

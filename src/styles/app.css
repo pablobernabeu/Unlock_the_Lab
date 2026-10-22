@@ -377,6 +377,8 @@
 
 .scale__input:checked + .scale__label::before {
     content: '✓';
+    /* Decorative: the radio is already announced as checked, so its name stays the number. */
+    content: '✓' / '';
     margin-right: 0.15em;
     font-size: 0.8em;
 }
@@ -606,6 +608,17 @@
     cursor: not-allowed;
 }
 
+/* Forced colours drop backgrounds, which is all that shows a filled token or bar. */
+@media (forced-colors: active) {
+    .token-box--filled,
+    .token-box--filled:hover,
+    .weights-total__fill {
+        forced-color-adjust: none;
+        border-color: Highlight;
+        background: Highlight;
+    }
+}
+
 @media (min-width: 30rem) {
     .weights-row {
         grid-template-columns: 1fr auto;
@@ -823,6 +836,17 @@
     display: block;
     height: 100%;
     background: var(--color-amber-strong);
+}
+
+@media (forced-colors: active) {
+    .weight-bars__track {
+        border: 1px solid CanvasText;
+    }
+
+    .weight-bars__fill {
+        forced-color-adjust: none;
+        background: Highlight;
+    }
 }
 
 .takeaways li + li {

@@ -33,7 +33,7 @@ function total(counts) {
 }
 
 /** The snapshot offer inside the confirmation dialog, with its own status line. */
-function snapshotOffer(db, isConnected) {
+function snapshotOffer(isConnected) {
     const status = el('p', { class: 'admin-status', role: 'status' });
     const button = el(
         'button',
@@ -42,12 +42,12 @@ function snapshotOffer(db, isConnected) {
     );
     const report = createStatus(status);
     button.addEventListener('click', () =>
-        runDownload(button, report, () => downloadSnapshot(db), isConnected)
+        runDownload(button, report, downloadSnapshot, isConnected)
     );
     return el('div', { class: 'admin-dialog-offer' }, button, status);
 }
 
-function confirmationMessage({ db, isConnected, counts, participants }) {
+function confirmationMessage({ isConnected, counts, participants }) {
     return [
         t('admin.delete.confirmIntro'),
         el(
@@ -58,7 +58,7 @@ function confirmationMessage({ db, isConnected, counts, participants }) {
         participants > 0 ? t('admin.delete.participants', { count: participants }) : null,
         t('admin.delete.race'),
         t('admin.delete.githubShort'),
-        snapshotOffer(db, isConnected),
+        snapshotOffer(isConnected),
     ].filter(Boolean);
 }
 
@@ -75,7 +75,7 @@ export function createDeleteData(root, { db, store }) {
     const isConnected = () => store.get('connected') === true;
 
     async function confirmDeletion() {
-        const nodes = await readNodes(db, DELETED_NODES);
+        const nodes = await readNodes(DELETED_NODES);
         if (!hasDeletableData(nodes)) {
             status.show(t('admin.delete.nothing'));
             return false;
@@ -84,7 +84,7 @@ export function createDeleteData(root, { db, store }) {
         const participants = sessionsWithData(nodes);
         return promptDialog({
             title: t('admin.delete.confirmTitle'),
-            message: confirmationMessage({ db, isConnected, counts, participants }),
+            message: confirmationMessage({ isConnected, counts, participants }),
             expected: deleteConfirmationText(participants),
             label:
                 participants > 0 ? t('admin.delete.typeCount', { count: participants }) : undefined,
@@ -94,7 +94,7 @@ export function createDeleteData(root, { db, store }) {
 
     async function reportOutcome() {
         // Anything written after the deletion (an open workshop page, say) is reported, not hidden.
-        const after = await readNodes(db, DELETED_NODES).catch(() => null);
+        const after = await readNodes(DELETED_NODES).catch(() => null);
         const added = after ? total(deletionCounts(after)) : 0;
         if (added > 0) status.show(t('admin.delete.doneButNew', { count: added }), 'warning');
         else status.show(t('admin.delete.done'), 'success');
@@ -102,7 +102,7 @@ export function createDeleteData(root, { db, store }) {
 
     async function remove() {
         status.clear();
-        // Offline, the counts would come from an out-of-date copy and the deletion could not run.
+        // Offline, the deletion could not run, so there is no point in counting first.
         if (!isConnected()) {
             status.show(t('admin.errors.notConnected'), 'error');
             return;
@@ -135,7 +135,7 @@ export function createDeleteData(root, { db, store }) {
 
     button.addEventListener('click', () => whileBusy(button, remove));
     snapshotButton.addEventListener('click', () =>
-        runDownload(snapshotButton, status, () => downloadSnapshot(db), isConnected)
+        runDownload(snapshotButton, status, downloadSnapshot, isConnected)
     );
 
     return {

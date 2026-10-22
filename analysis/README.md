@@ -28,7 +28,7 @@ cd analysis
 ./fetch-data.sh --from DIR     # copy the node files from a local directory
 ```
 
-The default uses the backups that the 'Backup data' workflow commits to the `data` branch every day. It clones that branch into a temporary directory, so your checkout is not changed. `--live` reads the public database through its REST API with GET requests only; it never writes. Set `FIREBASE_DATABASE_URL` to read an emulator instead. `--from` copies `ratings.json`, `leaderboard.json`, `rankings.json`, `sessions.json`, `active.json` and `backup-info.json` from a directory, such as a checkout of the `data` branch at an earlier commit:
+The default uses the backups that the 'Backup data' workflow commits to the `data` branch every day. It clones that branch into a temporary directory, so your checkout is not changed. `--live` reads the public database through its REST API with GET requests only; it never writes. Set `FIREBASE_DATABASE_URL` to read an emulator instead, such as `http://127.0.0.1:9000/?ns=unlock-the-lab-workshop-default-rtdb` for the one `npm run dev` uses. `--from` copies `ratings.json`, `leaderboard.json`, `rankings.json`, `sessions.json`, `active.json` and `backup-info.json` from a directory, such as a checkout of the `data` branch at an earlier commit:
 
 ```sh
 git fetch origin data

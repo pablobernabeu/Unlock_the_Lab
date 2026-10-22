@@ -9,13 +9,11 @@ import { isValidAllocation } from '../lib/criteria.js';
 import { db } from '../lib/firebase.js';
 import { normaliseEntries } from '../lib/leaderboard.js';
 import { USERNAME_PATTERN } from '../lib/patterns.js';
-import { withTimeout } from './db-utils.js';
+import { DB_TIMEOUT_MS, withTimeout } from './db-utils.js';
 import { othersMean, readOnlyReviewRows, resolveSessionParam } from './results-model.js';
 
-const READ_TIMEOUT_MS = 15000;
-
 async function read(path) {
-    const snapshot = await withTimeout(get(ref(db, path)), READ_TIMEOUT_MS, `Reading ${path}`);
+    const snapshot = await withTimeout(get(ref(db, path)), DB_TIMEOUT_MS, `Reading ${path}`);
     return snapshot.val();
 }
 

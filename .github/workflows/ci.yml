@@ -115,10 +115,16 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      # An environment secret of 'production', so jobs without that environment (such as
+      # previews, which run pull-request code) never receive this key (docs/deployment.md).
       - name: Write the service account key
         env:
-          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_UNLOCK_THE_LAB_WORKSHOP }}
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_DEPLOY_SERVICE_ACCOUNT }}
         run: |
+          if [ -z "$SERVICE_ACCOUNT" ]; then
+            echo "::error::The production environment has no FIREBASE_DEPLOY_SERVICE_ACCOUNT secret (see docs/deployment.md)."
+            exit 1
+          fi
           umask 077
           printf '%s' "$SERVICE_ACCOUNT" > "$RUNNER_TEMP/service-account.json"
       - name: Deploy
@@ -152,8 +158,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Previews use the production database; this flag makes every page say so.
       - run: npm run build
-      # Pinned to a commit because this step receives the service account key.
+        env:
+          VITE_DEPLOY_TARGET: preview
+      # Pinned to a commit because this step receives the service account key. That key can
+      # deploy previews only; the database admin key is an environment secret of the deploy job.
       - uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0.11.0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

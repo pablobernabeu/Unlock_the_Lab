@@ -6,7 +6,7 @@ import {
     rankEntries,
 } from '../../../src/lib/leaderboard.js';
 
-/** The public v1 backup of /leaderboard (data/leaderboard.json, October 2026). */
+/** The public v1 backup of /leaderboard (data/leaderboard.json on main before v2, October 2026). */
 // prettier-ignore
 const V1_BACKUP = {
     session_1771630835301_gj69lmk1o: { papersRated: 12, score: 1044, timestamp: 1771632076449, userName: 'Red Bear 76' },

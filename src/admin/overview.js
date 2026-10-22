@@ -27,6 +27,10 @@ export function createOverview(root, store, serverNow) {
     const problem = createStatus(qs('[data-overview-error]', root));
 
     setText(
+        qs('[data-stat-label="completed"]', root),
+        t('admin.overview.completed', { count: MIN_STUDIES_TO_FINISH })
+    );
+    setText(
         qs('[data-stat-note="completed"]', root),
         t('admin.overview.completedNote', { count: MIN_STUDIES_TO_FINISH })
     );

@@ -5,6 +5,7 @@
  * an /admins/{uid} entry: the same check the database rules make for every
  * admin write. Anyone else is told why and signed out.
  */
+import '../lib/preview-banner.js';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { APP_VERSION } from '../lib/config.js';
 import { el, ensureLiveRegions, focusHeading, qs, setText } from '../lib/dom.js';

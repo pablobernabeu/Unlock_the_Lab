@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
     LEADERBOARD_COLUMNS,
@@ -172,5 +173,28 @@ describe('flattening the other nodes', () => {
         });
         expect(Object.keys(sessions[0])).toEqual([...SESSION_COLUMNS]);
         expect(sessions[0]).toMatchObject({ sessionId: 's1', feedbackMode: null, room: null });
+    });
+});
+
+describe('export columns and database.rules.json', () => {
+    // The rules refuse unknown children, so a new field must be added to them; this keeps a
+    // field added there (and to the writer) from silently missing from every CSV export.
+    const { rules } = JSON.parse(
+        readFileSync(new URL('../../../database.rules.json', import.meta.url), 'utf8')
+    );
+    const fields = (node) =>
+        Object.keys(node)
+            .filter((key) => !key.startsWith('.') && !key.startsWith('$'))
+            .sort();
+    const without = (columns, keys) => columns.filter((column) => !keys.includes(column)).sort();
+
+    it.each([
+        ['ratings', rules.ratings.$studyId.$sessionId, RATING_COLUMNS, ['sessionId', 'studyId']],
+        ['leaderboard', rules.leaderboard.$sessionId, LEADERBOARD_COLUMNS, ['sessionId']],
+        ['rankings', rules.rankings.$sessionId, RANKING_COLUMNS, ['sessionId']],
+        ['sessions', rules.sessions.$sessionId, SESSION_COLUMNS, ['sessionId']],
+    ])('exports every field the rules allow on /%s', (_name, node, columns, keys) => {
+        expect(fields(node).length).toBeGreaterThan(0);
+        expect(without(columns, keys)).toEqual(fields(node));
     });
 });

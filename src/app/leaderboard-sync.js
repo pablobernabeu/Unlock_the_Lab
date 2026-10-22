@@ -1,17 +1,19 @@
 /**
  * Keeps /leaderboard/{sessionId} in step with the participant's totals.
  * Writes go one study at a time (see leaderboard-plan.js) and are serialised,
- * so overlapping calls never race. A refused write is not an error for the
- * participant: v1 entries without a uid, or owned by another uid, are frozen
- * by the rules, so the app logs it quietly and stops trying for this page.
+ * so overlapping calls never race. Nothing here is an error for the
+ * participant, so problems are logged quietly:
+ *   - v1 entries without a uid, or owned by another uid, are frozen by the
+ *     rules, so the app stops trying for this page;
+ *   - an entry ahead of this browser, or a refused write, usually means
+ *     another tab of the same session has moved the entry on. The next sync
+ *     reads the entry again and carries on once the local totals catch up.
  */
 import { get, ref, serverTimestamp, set } from 'firebase/database';
 import { db } from '../lib/firebase.js';
 import { USERNAME_PATTERN } from '../lib/patterns.js';
-import { isPermissionDenied, withTimeout } from './db-utils.js';
+import { DB_TIMEOUT_MS, withTimeout } from './db-utils.js';
 import { planLeaderboardSteps } from './leaderboard-plan.js';
-
-const READ_TIMEOUT_MS = 15000;
 
 /**
  * @param {object} options
@@ -27,11 +29,7 @@ export function createLeaderboardSync({ sessionId, getLocal }) {
     let chain = Promise.resolve();
 
     async function readStored() {
-        const snapshot = await withTimeout(
-            get(entryRef),
-            READ_TIMEOUT_MS,
-            'Reading the leaderboard'
-        );
+        const snapshot = await withTimeout(get(entryRef), DB_TIMEOUT_MS, 'Reading the leaderboard');
         return snapshot.exists() ? snapshot.val() : null;
     }
 
@@ -50,9 +48,9 @@ export function createLeaderboardSync({ sessionId, getLocal }) {
         }
         const steps = planLeaderboardSteps(stored, local);
         if (steps === null) {
-            frozen = true;
+            stored = undefined;
             console.info(
-                '[leaderboard] The stored entry is ahead of this browser; not updating it.'
+                '[leaderboard] The stored entry is ahead of this browser; not updating it yet.'
             );
             return;
         }
@@ -79,7 +77,6 @@ export function createLeaderboardSync({ sessionId, getLocal }) {
             writeSteps().catch((error) => {
                 // The next sync reads the entry again rather than trusting a value that may not have landed.
                 stored = undefined;
-                if (isPermissionDenied(error)) frozen = true;
                 console.info('[leaderboard] Update not saved:', error?.message ?? error);
             })
         );

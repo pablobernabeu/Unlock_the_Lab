@@ -24,7 +24,6 @@
     "conclusion": "Do the claims stay within what the data show?"
   },
   "quality": {
-    "legend": "Expert quality band",
     "low": "Low quality",
     "medium": "Medium quality",
     "high": "High quality",
@@ -36,14 +35,6 @@
     "studies": {
       "one": "{count} study",
       "other": "{count} studies"
-    },
-    "participants": {
-      "one": "{count} participant",
-      "other": "{count} participants"
-    },
-    "ratings": {
-      "one": "{count} rating",
-      "other": "{count} ratings"
     }
   },
   "participant": {
@@ -72,16 +63,15 @@
     "label": "Language",
     "apply": "Change language"
   },
+  "preview": {
+    "banner": "Preview build: anything you do here is saved to the live database."
+  },
   "status": {
-    "loading": "Loading…",
-    "notAvailable": "Not available"
+    "loading": "Loading…"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "offline": "You seem to be offline. Check your connection and try again.",
-    "loadFailed": "The data could not be loaded. Check your connection and reload the page.",
-    "saveFailed": "This was not saved. Check your connection and try again.",
-    "permissionDenied": "The database refused this request. Reload the page and try again.",
     "storageUnavailable": "Your browser is blocking site storage, so your progress will be lost if you close or reload this page.",
     "retry": "Try again",
     "reload": "Reload the page"

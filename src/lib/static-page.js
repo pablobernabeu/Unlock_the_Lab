@@ -3,6 +3,7 @@
  * in the HTML (prerendered at build time); this applies another language when
  * one is chosen, the animation preference and the language switcher.
  */
+import './preview-banner.js';
 import { applyTranslations, initI18n } from './i18n.js';
 import { renderLocaleSwitcher } from './locale-switcher.js';
 import { initMotion } from './motion.js';

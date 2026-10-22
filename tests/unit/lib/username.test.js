@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { USERNAME_PATTERN } from '../../../src/lib/patterns.js';
 import {
+    ADJECTIVES,
+    ANIMALS,
     generateUniqueUsername,
     generateUsername,
     normaliseUsername,
@@ -20,6 +22,26 @@ describe('generateUsername', () => {
     it('always matches USERNAME_PATTERN', () => {
         for (let i = 0; i < 2000; i++) {
             expect(generateUsername()).toMatch(USERNAME_PATTERN);
+        }
+    });
+});
+
+describe('USERNAME_PATTERN and the word lists', () => {
+    it('lists exactly the adjectives and animals the generator uses', () => {
+        expect(USERNAME_PATTERN.source).toBe(
+            `^(${ADJECTIVES.join('|')}) (${ANIMALS.join('|')}) [0-9]{2}(-[0-9]{1,3})?$`
+        );
+    });
+
+    it('accepts every name the generator can produce', () => {
+        const numbers = Array.from({ length: 100 }, (_, n) => String(n).padStart(2, '0'));
+        for (const adjective of ADJECTIVES) {
+            for (const animal of ANIMALS) {
+                for (const number of numbers) {
+                    const name = `${adjective} ${animal} ${number}`;
+                    if (!USERNAME_PATTERN.test(name)) expect(name).toMatch(USERNAME_PATTERN);
+                }
+            }
         }
     });
 });

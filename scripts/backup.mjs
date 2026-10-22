@@ -4,8 +4,9 @@
 //
 //   node scripts/backup.mjs --out <dir> [--dry-run] [--allow-empty]
 //
-// FIREBASE_DATABASE_URL overrides the database, for example an emulator:
-//   FIREBASE_DATABASE_URL='http://127.0.0.1:9000/?ns=demo-unlock-the-lab' node scripts/backup.mjs --out tmp
+// FIREBASE_DATABASE_URL overrides the database, for example the local emulator
+// (the app keeps its data in the namespace named after the production instance):
+//   FIREBASE_DATABASE_URL='http://127.0.0.1:9000/?ns=unlock-the-lab-workshop-default-rtdb' node scripts/backup.mjs --out tmp
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -54,6 +55,11 @@ function compareCodeUnits(a, b) {
     return a < b ? -1 : 1;
 }
 
+/**
+ * A copy of a JSON value with every object's keys in compareKeys order.
+ * @param {unknown} value
+ * @returns {unknown}
+ */
 export function sortKeysDeep(value) {
     if (Array.isArray(value)) return value.map(sortKeysDeep);
     if (value === null || typeof value !== 'object') return value;
@@ -69,6 +75,11 @@ export function serialise(value) {
     return `${JSON.stringify(sortKeysDeep(value ?? null), null, 2)}\n`;
 }
 
+/**
+ * True for what the database returns for a missing or empty node.
+ * @param {unknown} value
+ * @returns {boolean} true for null, undefined, {} and []
+ */
 export function isEmptyValue(value) {
     if (value === null || value === undefined) return true;
     return typeof value === 'object' && Object.keys(value).length === 0;
@@ -122,6 +133,12 @@ export function planBackup({ fetched, existing = {}, allowEmpty = false, now = n
     return { counts, changed, refused, writes };
 }
 
+/**
+ * The REST URL of a top-level node, keeping any query such as an emulator's `?ns=`.
+ * @param {string} baseUrl the database URL
+ * @param {string} node e.g. 'ratings'
+ * @returns {URL}
+ */
 export function nodeUrl(baseUrl, node) {
     const url = new URL(baseUrl);
     url.pathname = `${url.pathname.replace(/\/+$/, '')}/${node}.json`;
@@ -143,6 +160,18 @@ function isRetryable(error) {
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/**
+ * Reads one node, retrying network failures, timeouts, 408, 429 and 5xx
+ * responses after each of `delays`; other HTTP errors fail at once.
+ * @param {string} baseUrl the database URL
+ * @param {string} node e.g. 'ratings'
+ * @param {object} [options]
+ * @param {typeof fetch} [options.fetchImpl]
+ * @param {number[]} [options.delays] ms to wait before each retry
+ * @param {(ms: number) => Promise<void>} [options.sleep]
+ * @param {Pick<Console, 'warn'>} [options.logger]
+ * @returns {Promise<unknown>} the node's value (null when it is empty)
+ */
 export async function fetchNode(baseUrl, node, options = {}) {
     const { fetchImpl = fetch, delays = RETRY_DELAYS_MS, sleep = wait, logger = console } = options;
     const url = nodeUrl(baseUrl, node);
@@ -189,6 +218,11 @@ async function writeAtomically(file, text) {
     await rename(temporary, file);
 }
 
+/**
+ * Parses the command line; unknown options throw.
+ * @param {string[]} argv the arguments after the script name
+ * @returns {{outDir: string|undefined, dryRun: boolean, allowEmpty: boolean, help: boolean}}
+ */
 export function parseOptions(argv) {
     const { values } = parseArgs({
         args: argv,

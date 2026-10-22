@@ -91,7 +91,7 @@ build_ratings <- function(sessions) {
         }
         entry <- list(score = total, papersRated = length(s$rows),
                       timestamp = max(vapply(s$rows, function(r) r$timestamp, numeric(1))),
-                      userName = paste('Calm', sample(c('Otter', 'Heron', 'Lynx'), 1),
+                      userName = paste('Gentle', sample(c('Otter', 'Owl', 'Badger'), 1),
                                        sprintf('%02d', sample(0:99, 1))))
         if (s$version == 2) entry$uid <- s$uid
         if (!is.null(s$room)) entry$room <- s$room
@@ -164,7 +164,7 @@ if (variant == 'empty') {
         if (!is.null(s$room)) record$room <- s$room
         session_records[[s$id]] <- record
         if (length(s$rows) >= 10) {
-            rankings[[s$id]] <- c(allocation(), list(userName = 'Calm Otter 01', uid = s$uid,
+            rankings[[s$id]] <- c(allocation(), list(userName = 'Gentle Otter 01', uid = s$uid,
                                                      timestamp = max(sapply(s$rows, `[[`, 'timestamp'))))
         }
     }

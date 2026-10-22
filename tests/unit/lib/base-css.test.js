@@ -81,7 +81,8 @@ describe('base.css colour contrast record', () => {
 describe('base.css essentials', () => {
     it('keeps the v1 brand colours as tokens', () => {
         expect(tokens['--color-brand']).toBe('#20b2aa');
-        expect(css).toContain('linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
+        expect(tokens['--color-accent']).toBe('#667eea');
+        expect(tokens['--color-purple']).toBe('#764ba2');
     });
 
     it('has a visible focus ring, skip link and visually hidden helper', () => {

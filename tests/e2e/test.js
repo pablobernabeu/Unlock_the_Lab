@@ -1,6 +1,7 @@
 // The Playwright `test` every spec uses. Each test starts from the fixture
 // data (see resetEmulators) and fails if any page in it logs a console error,
-// throws an uncaught exception or violates the Content Security Policy.
+// throws an uncaught exception, violates the Content Security Policy or tries
+// to reach the production Firebase services (those requests are blocked).
 import { test as base, expect } from '@playwright/test';
 import { resetEmulators } from './emulator.js';
 import { fixture } from './fixture.js';
@@ -8,6 +9,13 @@ import { fixture } from './fixture.js';
 export { expect };
 
 const CSP_PREFIX = '[e2e] securitypolicyviolation:';
+
+/**
+ * Production Firebase hosts. The host is anchored after the scheme because
+ * Auth emulator URLs carry 'identitytoolkit.googleapis.com' in their path.
+ */
+const PRODUCTION_FIREBASE =
+    /^(https|wss):\/\/([^/]+\.firebasedatabase\.app|[^/]+\.firebaseio\.com|identitytoolkit\.googleapis\.com|securetoken\.googleapis\.com)\//;
 
 /** Runs in every page before its own scripts: reports CSP violations to the console. */
 function watchViolations(prefix) {
@@ -50,6 +58,15 @@ export const test = base.extend({
             });
             context.on('weberror', (error) => {
                 problems.push(`page error: ${error.error().message}`);
+            });
+            // A test build that reached production would write test data into the live database.
+            await context.route(PRODUCTION_FIREBASE, (route) => {
+                problems.push(`blocked request to production: ${route.request().url()}`);
+                return route.abort();
+            });
+            await context.routeWebSocket(PRODUCTION_FIREBASE, (socket) => {
+                problems.push(`blocked WebSocket to production: ${socket.url()}`);
+                socket.close();
             });
             await use(problems);
             expect(problems, 'console errors and CSP violations').toEqual([]);

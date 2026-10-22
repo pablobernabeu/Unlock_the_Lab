@@ -10,7 +10,8 @@
 #                          'origin' remote, otherwise the project's GitHub repository)
 #   DATA_BRANCH            branch holding the backups (default: data)
 #   FIREBASE_DATABASE_URL  database read by --live (default: the production database,
-#                          read only; set it to an emulator URL to test)
+#                          read only; set it to an emulator URL to test, such as
+#                          http://127.0.0.1:9000/?ns=unlock-the-lab-workshop-default-rtdb)
 #
 # Each run replaces the previous snapshot, so files from different sources are
 # never mixed, and records where the data came from in data/fetch-info.json

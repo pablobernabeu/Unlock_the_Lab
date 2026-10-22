@@ -10,13 +10,15 @@ const { version } = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8
 // Modes: `vite` (development) and `vite build --mode test` use the Firebase
 // emulators (.env.development, .env.test); `vite build` targets production;
 // `vite --mode live` is a development server against production (.env.live).
-export default defineConfig({
+// Test builds go to dist-e2e/, so they never replace the production build in
+// dist/ that Firebase Hosting publishes.
+export default defineConfig(({ mode }) => ({
     define: {
         __APP_VERSION__: JSON.stringify(version),
     },
     plugins: [i18nPrerender()],
     build: {
-        outDir: 'dist',
+        outDir: mode === 'test' ? 'dist-e2e' : 'dist',
         assetsDir: 'assets',
         // Browsers that have supported a feature set for 30 months (Vite's default, stated for clarity).
         target: 'baseline-widely-available',
@@ -38,4 +40,4 @@ export default defineConfig({
         port: 4173,
         strictPort: true,
     },
-});
+}));

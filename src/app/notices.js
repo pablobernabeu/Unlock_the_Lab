@@ -3,7 +3,7 @@
  * resumed session on a shared device, a room mismatch). Unlike toasts they
  * stay until resolved or dismissed, and they never sit behind a dialog.
  */
-import { el } from '../lib/dom.js';
+import { el, focusHeading } from '../lib/dom.js';
 import { t } from '../lib/i18n.js';
 
 /**
@@ -19,6 +19,15 @@ import { t } from '../lib/i18n.js';
  */
 export function createNotices(container) {
     const shown = new Map();
+
+    const holdsFocus = (node) => Boolean(node?.contains(document.activeElement));
+
+    /** Focus that was inside a removed notice goes to the current view's heading. */
+    function focusPage() {
+        focusHeading(
+            document.querySelector('.view:not([hidden]) h1') ?? document.getElementById('main')
+        );
+    }
 
     function actionElement({ label, onClick, href, primary }) {
         const className = ['btn', 'btn-small', primary ? 'btn-primary' : 'btn-secondary'];
@@ -74,10 +83,17 @@ export function createNotices(container) {
                 : null
         );
         const existing = shown.get(id);
+        const hadFocus = holdsFocus(existing);
         if (existing?.isConnected) existing.replaceWith(notice);
         else container.append(notice);
         shown.set(id, notice);
         refresh();
+        if (hadFocus) {
+            // For example 'Try again' that failed again: stay on the new notice's first action.
+            const action = notice.querySelector('button, a[href]');
+            if (action) action.focus();
+            else focusPage();
+        }
     }
 
     /**
@@ -86,9 +102,12 @@ export function createNotices(container) {
      * @returns {void}
      */
     function clear(id) {
-        shown.get(id)?.remove();
+        const node = shown.get(id);
+        const hadFocus = holdsFocus(node);
+        node?.remove();
         shown.delete(id);
         refresh();
+        if (hadFocus) focusPage();
     }
 
     /**

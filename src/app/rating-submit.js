@@ -7,10 +7,8 @@ import { get, ref, serverTimestamp, set } from 'firebase/database';
 import { db } from '../lib/firebase.js';
 import { predictionScore, scoringTarget, validRatings } from '../lib/scoring.js';
 import { mean } from '../lib/stats.js';
-import { isPermissionDenied, withTimeout } from './db-utils.js';
+import { DB_TIMEOUT_MS, isPermissionDenied, withTimeout } from './db-utils.js';
 import { buildRatingRecord } from './rating-record.js';
-
-const READ_TIMEOUT_MS = 15000;
 
 /**
  * Reads the study's ratings and works out the target without the participant's own rating.
@@ -21,7 +19,7 @@ const READ_TIMEOUT_MS = 15000;
 export async function readTarget(study, sessionId) {
     const snapshot = await withTimeout(
         get(ref(db, `ratings/${study.id}`)),
-        READ_TIMEOUT_MS,
+        DB_TIMEOUT_MS,
         'Reading the ratings'
     );
     const others = validRatings(snapshot.val(), sessionId);

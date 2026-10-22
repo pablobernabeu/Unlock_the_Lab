@@ -11,13 +11,15 @@ import { INACTIVITY_TIMEOUT_MS, INACTIVITY_WARNING_MS } from '../lib/config.js';
 import { db } from '../lib/firebase.js';
 import { USERNAME_PATTERN } from '../lib/patterns.js';
 import { generateUniqueUsername, generateUsername } from '../lib/username.js';
-import { ConnectionError, createConnection } from './connection.js';
+import { ConnectionError, createConnection, endedAfterJoin } from './connection.js';
 import { withTimeout } from './db-utils.js';
 import { createInactivityMonitor } from './inactivity.js';
 import { createLeaderboardSync } from './leaderboard-sync.js';
 import { ratedCount } from './state.js';
 
 const READ_TIMEOUT_MS = 10000;
+
+const isClosedError = (error) => error instanceof ConnectionError && error.kind === 'closed';
 
 /**
  * A nickname for this session: the one already stored for it on the
@@ -116,9 +118,7 @@ export function createSession({
                 READ_TIMEOUT_MS,
                 'Reading the session control'
             );
-            const endedAt = snapshot.val();
-            const { joinedAt } = getState();
-            return Number.isFinite(endedAt) && Number.isFinite(joinedAt) && endedAt > joinedAt;
+            return endedAfterJoin(snapshot.val(), getState().joinedAt);
         } catch {
             // The listener started below catches an ending that this read missed.
             return false;
@@ -161,6 +161,8 @@ export function createSession({
             onConnected();
             await ensureUsername();
             if (await endedByFacilitator()) {
+                // Answers saved before the ending (perhaps in flight when it came) still count.
+                leaderboard.sync();
                 close();
                 return;
             }
@@ -168,8 +170,13 @@ export function createSession({
             if (wantPresence) activate();
             else phase = 'finished';
         } catch (error) {
+            // The session's data were deleted: the closed view, not a connection problem.
+            if (isClosedError(error)) {
+                close();
+                return;
+            }
             phase = 'idle';
-            if (error instanceof ConnectionError && error.kind !== 'closed') onProblem(error.kind);
+            if (error instanceof ConnectionError) onProblem(error.kind);
             else console.warn('[session] Could not start:', error);
         }
     }
@@ -223,7 +230,13 @@ export function createSession({
      */
     async function whenReady() {
         if (phase === 'closed') throw new ConnectionError('closed');
-        const ready = await connection.whenReady();
+        let ready;
+        try {
+            ready = await connection.whenReady();
+        } catch (error) {
+            if (isClosedError(error)) close();
+            throw error;
+        }
         if (phase === 'idle') start({ presence: wantPresence });
         return ready;
     }
@@ -236,8 +249,11 @@ export function createSession({
         ensureUsername,
         /** Restarts the inactivity countdown (the warning's Continue button). */
         keepAlive: () => monitor.reset(),
-        /** Brings the leaderboard entry up to date with the saved answers. Never rejects. */
-        syncLeaderboard: () => (phase === 'closed' ? Promise.resolve() : leaderboard.sync()),
+        /**
+         * Brings the leaderboard entry up to date with the saved answers, also once the
+         * session is closed (a rating may land just after the facilitator ends it). Never rejects.
+         */
+        syncLeaderboard: () => leaderboard.sync(),
         whenReady,
         get closed() {
             return phase === 'closed';

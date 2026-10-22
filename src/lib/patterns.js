@@ -3,8 +3,14 @@
  * same regular expressions; tests/unit/lib/patterns.test.js checks that they do.
  */
 
-/** Generated usernames such as 'Red Fox 07', or 'Red Fox 07-2' from the v1 fallback. */
-export const USERNAME_PATTERN = /^[A-Z][a-z]+ [A-Z][a-z]+ [0-9]{2}(-[0-9]{1,3})?$/;
+/**
+ * Generated usernames such as 'Red Fox 07', or 'Red Fox 07-2' from the v1 fallback. Only the
+ * adjectives and animals of username.js are accepted, so nobody can put free text on the
+ * public leaderboard; tests/unit/lib/username.test.js checks that the lists agree.
+ */
+// One line, because analysis/R/repo.R reads each pattern from its own line.
+// prettier-ignore
+export const USERNAME_PATTERN = /^(Red|Blue|Green|Yellow|Purple|Orange|Pink|Teal|Brave|Wise|Swift|Tall|Happy|Clever|Bright|Quick|Mighty|Gentle|Bold|Cheerful|Curious|Friendly|Kind|Peaceful) (Fox|Raccoon|Owl|Sparrow|Robin|Falcon|Eagle|Hawk|Rabbit|Squirrel|Deer|Bear|Wolf|Otter|Badger|Hedgehog|Dolphin|Seal|Penguin|Panda|Koala|Tiger|Lion|Leopard) [0-9]{2}(-[0-9]{1,3})?$/;
 
 /** Facilitator room codes such as 'OXFORD-1'. */
 export const ROOM_PATTERN = /^[A-Z0-9][A-Z0-9-]{1,19}$/;

@@ -26,7 +26,7 @@ export function createPanel(root, { db }) {
     const sections = [
         overview,
         createRoomLinks(qs('#rooms', root), store),
-        createExportPanel(qs('#export', root), { db, store }),
+        createExportPanel(qs('#export', root), { store }),
         createEndSessions(qs('#end-sessions', root), { db, store, serverNow }),
         createDeleteData(qs('#delete-data', root), { db, store }),
     ];

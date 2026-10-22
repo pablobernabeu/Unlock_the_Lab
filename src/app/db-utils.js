@@ -3,6 +3,9 @@
  * imports, so they can be unit-tested in Node.
  */
 
+/** How long the app waits for a database read or write before telling the participant. */
+export const DB_TIMEOUT_MS = 15000;
+
 /** Error raised by withTimeout. */
 export class TimeoutError extends Error {
     constructor(label, ms) {

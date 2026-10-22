@@ -6,42 +6,28 @@
  * stepper). The allocation is saved in the participant state on every change
  * and written once, create-only, to /rankings/{sessionId}.
  */
-import { get, ref, serverTimestamp, set } from 'firebase/database';
 import { TOKEN_BUDGET } from '../../lib/config.js';
 import { CRITERIA, descriptionKey, labelKey } from '../../lib/criteria.js';
 import { announce, el } from '../../lib/dom.js';
-import { db } from '../../lib/firebase.js';
 import { t } from '../../lib/i18n.js';
+import { showToast } from '../../lib/toast.js';
 import { ConnectionError } from '../connection.js';
-import { isPermissionDenied, withTimeout } from '../db-utils.js';
+import { submitRanking } from '../ranking-submit.js';
 import { isRated, resultsPage } from '../state.js';
 import { allocationComplete, maxTokensFor, setTokens, tokensUsed } from '../tokens.js';
 import { isUnavailable, setChildren, setUnavailable } from '../ui.js';
 
-/** A queued write still reaches the database later, so the participant moves on after this. */
-const WRITE_TIMEOUT_MS = 10000;
-
 /**
- * Writes the allocation. A refusal because this session's record already
- * exists (a retry after a lost acknowledgement) counts as saved.
+ * Writes the allocation once the session is connected and has a nickname.
  * @param {object} app
  * @param {Record<string, number>} tokens
- * @returns {Promise<void>}
+ * @returns {Promise<Record<string, number>>} the allocation stored in the database
  */
 async function saveRanking(app, tokens) {
     const { uid } = await app.session.whenReady();
     await app.session.ensureUsername();
     const { sessionId, userName, room } = app.state;
-    const recordRef = ref(db, `rankings/${sessionId}`);
-    const record = { ...tokens, userName, timestamp: serverTimestamp(), uid };
-    if (room) record.room = room;
-    try {
-        await withTimeout(set(recordRef, record), WRITE_TIMEOUT_MS, 'Saving the weights');
-    } catch (error) {
-        if (!isPermissionDenied(error)) throw error;
-        const existing = (await get(recordRef)).val();
-        if (existing?.uid !== uid) throw error;
-    }
+    return submitRanking({ sessionId, uid, userName, room, tokens });
 }
 
 function criterionRow(key, icon, onSet) {
@@ -190,9 +176,12 @@ export function renderWeightsView(app) {
         error.textContent = '';
         refresh();
         try {
-            await saveRanking(app, tokens);
-            app.patch({ rankingSubmitted: true });
+            const saved = await saveRanking(app, tokens);
+            // An earlier attempt that timed out may have landed after all; its allocation stays.
+            const keptEarlier = CRITERIA.some(({ key }) => saved[key] !== tokens[key]);
+            app.patch({ rankingSubmitted: true, criterionTokens: saved });
             app.navigate(resultsPage(app.studyCount));
+            if (keptEarlier) showToast(t('app.weights.earlierKept'));
             return;
         } catch (failure) {
             console.warn('[weights] Not saved:', failure);

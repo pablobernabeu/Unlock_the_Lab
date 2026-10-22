@@ -36,6 +36,7 @@ import {
     resultsPage,
     saveState,
     startingState,
+    studyPage,
     weightsPage,
 } from './state.js';
 import { bindOnce, closeOpenDialogs, dialogOpen, focusView, setPageTitle, showView } from './ui.js';
@@ -82,20 +83,24 @@ export function startParticipantApp({ content, logo }) {
     // A first-time visitor's session is only stored once they choose to start.
     let persisted = prepared.saved;
     let storageWarned = false;
+    /** Set once 'Start as a new participant' is under way. */
+    let leaving = false;
     const order = seededShuffle(content.studies, state.sessionId);
     const notices = createNotices(document.getElementById('app-notice'));
 
+    function warnStorage() {
+        if (storageWarned) return;
+        storageWarned = true;
+        notices.show('storage', {
+            tone: 'warning',
+            text: t('common.errors.storageUnavailable'),
+            dismissible: true,
+        });
+    }
+
     function persist() {
         if (!persisted) return;
-        const stored = saveState(state);
-        if (!stored && !storageWarned) {
-            storageWarned = true;
-            notices.show('storage', {
-                tone: 'warning',
-                text: t('common.errors.storageUnavailable'),
-                dismissible: true,
-            });
-        }
+        if (!saveState(state)) warnStorage();
     }
 
     function patch(changes) {
@@ -253,14 +258,7 @@ export function startParticipantApp({ content, logo }) {
 
     function begin() {
         persisted = true;
-        if (!storageAvailable() && !storageWarned) {
-            storageWarned = true;
-            notices.show('storage', {
-                tone: 'warning',
-                text: t('common.errors.storageUnavailable'),
-                dismissible: true,
-            });
-        }
+        if (!storageAvailable()) warnStorage();
         navigate(1);
         session.start({ presence: true });
     }
@@ -305,11 +303,23 @@ export function startParticipantApp({ content, logo }) {
         if (celebrate)
             state = { ...state, celebratedPapers: [...state.celebratedPapers, study.id] };
         persist();
+        session.syncLeaderboard();
+        if (leaving) return;
+        if (session.closed) {
+            // The facilitator ended the session while this answer was saving: the closed view
+            // stays, and is drawn again so that it counts this answer.
+            showClosed();
+            return;
+        }
         refreshChrome();
 
-        const panel = showFeedbackInPlace(app, studyIndex, section);
-        focusHeading(panel.querySelector('#feedback-heading'));
-        session.syncLeaderboard();
+        if (section.isConnected) {
+            const panel = showFeedbackInPlace(app, studyIndex, section);
+            focusHeading(panel.querySelector('#feedback-heading'));
+        } else if (state.currentPage === studyPage(studyIndex)) {
+            // The study was drawn again while saving; draw it once more, now with its feedback.
+            render(state.currentPage);
+        }
 
         const count = ratedCount(state);
         if (celebrate) celebrateLater(500);
@@ -373,6 +383,10 @@ export function startParticipantApp({ content, logo }) {
     /* ---------- New participant ---------- */
 
     async function startNewParticipant() {
+        // Nothing may write the old session back once it is being cleared (a save or a
+        // connection still in progress patches the state).
+        persisted = false;
+        leaving = true;
         // A link's room wins: that is how someone holding an older session joins a new room.
         const room = roomFromUrl() ?? state.room;
         await session.end();

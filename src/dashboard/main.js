@@ -3,6 +3,7 @@
  * never writes. Each database node has its own listener; changes are batched
  * and only the sections that depend on a changed node are re-rendered.
  */
+import '../lib/preview-banner.js';
 import { APP_VERSION, SEED_WEIGHT, STORAGE_KEYS } from '../lib/config.js';
 import { loadContent } from '../lib/content.js';
 import { ensureLiveRegions, qs, setText } from '../lib/dom.js';

@@ -3,6 +3,7 @@
  * the content, then either shows a read-only results page for a
  * `?session=` link (no sign-in, no writes, no timers) or starts the workshop.
  */
+import '../lib/preview-banner.js';
 import { APP_VERSION } from '../lib/config.js';
 import { loadContent } from '../lib/content.js';
 import { ensureLiveRegions, qs, setText } from '../lib/dom.js';
@@ -13,7 +14,7 @@ import { initToasts } from '../lib/toast.js';
 import { enableLogoAnimation } from './logo-animation.js';
 import { startParticipantApp } from './participant.js';
 import { loadOthersMeans, loadReadOnlyResults } from './results-data.js';
-import { readOnlyTotals } from './results-model.js';
+import { readOnlyTotals, withOwnEntry } from './results-model.js';
 import { setPageTitle, showView } from './ui.js';
 import { renderChooseView, renderFailedView, renderNotFoundView } from './views/message.js';
 import { renderReadOnlyResultActions } from './views/results-actions.js';
@@ -40,14 +41,27 @@ function showReadOnlyView(result) {
         return { view: renderChooseView(result.matches), title: t('app.pageTitle.choose') };
     }
     const name = result.userName ?? t('common.participant.unnamed');
+    const totals = readOnlyTotals(result.entry, result.rows);
+    const { entry } = result;
+    // Saved scores that have overtaken the leaderboard entry also give the position.
+    const entries =
+        entry && totals
+            ? withOwnEntry(result.entries, {
+                  sessionId: result.sessionId,
+                  userName: entry.userName,
+                  ...totals,
+                  room: entry.room,
+                  now: Date.now(),
+              })
+            : result.entries;
     const view = renderResultsView({
         mode: 'readOnly',
         sessionId: result.sessionId,
         name,
-        totals: readOnlyTotals(result.entry, result.rows),
+        totals,
         rows: result.rows,
-        room: result.entry?.room ?? null,
-        entries: Promise.resolve(result.entries),
+        room: entry?.room ?? null,
+        entries: Promise.resolve(entries),
         others: loadOthersMeans(
             result.rows.map((row) => row.study.id),
             result.sessionId
