@@ -422,6 +422,39 @@ describe('runBackup', () => {
         expect(saved['STUDY-5']).toEqual({ hasOwnProperty: { rating: 7 } });
     });
 
+    it('backs up the other nodes and warns when one node is refused', async () => {
+        const log = vi.fn();
+        const fetchImpl = vi.fn(async (url) => {
+            const node = new URL(url).pathname.replace(/^\/|\.json$/g, '');
+            if (node === 'sessions') return jsonResponse({ error: 'Permission denied' }, 401);
+            return jsonResponse(fetchedData()[node] ?? null);
+        });
+        expect(await run(fetchedData(), { fetchImpl, logger: { ...silentLogger, log } })).toBe(0);
+        expect((await readdir(outDir)).sort()).toEqual([
+            INFO_FILE,
+            'leaderboard.json',
+            'rankings.json',
+            'ratings.json',
+        ]);
+        const info = JSON.parse(await readFile(path.join(outDir, INFO_FILE), 'utf8'));
+        expect(info.counts.sessions).toBeNull();
+        expect(log.mock.calls.flat().join('\n')).toMatch(
+            /::warning::Reading \/sessions was refused/
+        );
+    });
+
+    it('keeps an earlier backup of a node that is refused later', async () => {
+        await run(fetchedData());
+        const before = await readFile(path.join(outDir, 'sessions.json'), 'utf8');
+        const fetchImpl = vi.fn(async (url) => {
+            const node = new URL(url).pathname.replace(/^\/|\.json$/g, '');
+            if (node === 'sessions') return jsonResponse({ error: 'Permission denied' }, 401);
+            return jsonResponse(fetchedData()[node] ?? null);
+        });
+        expect(await run(fetchedData(), { fetchImpl })).toBe(0);
+        expect(await readFile(path.join(outDir, 'sessions.json'), 'utf8')).toBe(before);
+    });
+
     it('rejects when the database cannot be read', async () => {
         const fetchImpl = vi.fn(async () => jsonResponse({ error: 'Permission denied' }, 401));
         await expect(run(fetchedData(), { fetchImpl })).rejects.toThrow(/Permission denied/);

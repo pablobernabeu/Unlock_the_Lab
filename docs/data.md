@@ -6,12 +6,12 @@ The rules in `database.rules.json` enforce the shapes below for new writes. Reco
 
 ## Identifiers
 
-| Identifier  | Format                                | Notes                                                                                                                                                                                        |
-| ----------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sessionId` | `session_<ms>_<random>`               | Created in the browser when a participant starts; `<ms>` is the client time at creation. Kept in local storage, so a reload resumes the same session.                                        |
-| `uid`       | Firebase Auth uid                     | Anonymous account of the browser that owns the session. One browser keeps the same uid across sessions, so several sessions can share a uid (for example, a shared classroom computer).      |
-| `studyId`   | `STUDY-1` to `STUDY-48`               | Stable across content versions. Texts are in `src/content/en/studies.json`, expert ratings in `src/content/expert-ratings.json`. Pilot backups also use ids such as `STUDY-001` (see below). |
-| `room`      | 2-20 characters, `A-Z`, `0-9` and `-` | Optional workshop code from the `?room=` link.                                                                                                                                               |
+| Identifier  | Format                                | Notes                                                                                                                                                                                                                                                                                                 |
+| ----------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sessionId` | `session_<ms>_<random>`               | Created in the browser when the welcome page loads and saved in local storage once the participant selects 'Get started'; `<ms>` is the client time of that page load. A reload after starting resumes the same session.                                                                              |
+| `uid`       | Firebase Auth uid                     | Anonymous account of the browser that owns the session. Version 1 kept one uid per browser, so several version 1 sessions can share a uid (for example, on a shared classroom computer). Since version 2, 'Start as a new participant' signs out first, so each new session normally has its own uid. |
+| `studyId`   | `STUDY-1` to `STUDY-48`               | Stable across content versions. Texts are in `src/content/en/studies.json`, expert ratings in `src/content/expert-ratings.json`. Pilot backups also use ids such as `STUDY-001` (see below).                                                                                                          |
+| `room`      | 2-20 characters, `A-Z`, `0-9` and `-` | Optional workshop code from the `?room=` link.                                                                                                                                                                                                                                                        |
 
 ## `/sessions/{sessionId}`
 
@@ -90,16 +90,16 @@ The criterion weights a participant gave after rating: 20 tokens across six crit
 
 Presence for the 'active now' figures. Removed automatically when the browser disconnects or the session pauses, and not backed up.
 
-| Field        | Type             | Meaning                                                                             |
-| ------------ | ---------------- | ----------------------------------------------------------------------------------- |
-| `joinedAt`   | number           | Server time the current page load joined.                                           |
-| `lastActive` | number           | Server time of the latest heartbeat (every minute while the participant is active). |
-| `uid`        | string           | Owner of the session.                                                               |
-| `room`       | string, optional | Workshop code.                                                                      |
+| Field        | Type             | Meaning                                                                                                    |
+| ------------ | ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| `joinedAt`   | number           | Server time of the page's latest connection (written again after a reconnection or a resume from a pause). |
+| `lastActive` | number           | Server time of the latest heartbeat (every minute while the participant is active).                        |
+| `uid`        | string           | Owner of the session.                                                                                      |
+| `room`       | string, optional | Workshop code.                                                                                             |
 
 ## `/control/sessionsEndedAt`
 
-Server time at which an administrator last ended all active sessions. Open pages whose `joinedAt` is earlier close their session.
+Server time at which an administrator last ended all active sessions. Every session that first connected before then is closed: open pages close at once, and other pages close when they are next opened. The comparison uses the join time saved in the participant's browser, not `/active/{sessionId}/joinedAt`.
 
 ## `/admins/{uid}`
 
@@ -119,4 +119,4 @@ These records are not comparable with later data and are no longer in the databa
 
 A GitHub Actions workflow (`.github/workflows/backup.yml`) copies `/ratings`, `/leaderboard`, `/rankings` and `/sessions` once a day into the `data` branch of the repository, one JSON file per node with keys sorted, plus `backup-info.json` with the time and record counts. It commits only when the data have changed. Backups taken before version 2 are in the history of `data/` on `main`, up to the merge of version 2.
 
-The facilitator panel exports the same nodes as CSV (one row per record, columns as in the tables above plus `sessionId` and, for ratings, `studyId`) and as JSON. The analysis in `analysis/` reads either source; see `analysis/README.md`.
+The facilitator panel exports the same nodes as CSV (one row per record, columns as in the tables above plus `sessionId` and, for ratings, `studyId`) and as JSON. The analysis in `analysis/` reads the daily backups or the panel's JSON files (not the CSV files); see `analysis/README.md`.

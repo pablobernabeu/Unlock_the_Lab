@@ -2,7 +2,7 @@
 
 This folder holds a reproducible report on the data that Unlock the Lab collects. It compares participants' quality ratings with the expert ratings, estimates how reliable the study means are, examines predictions and how they are scored, looks for learning across trials and summarises criterion weights, response times, rooms and content versions. The report is written in [Quarto](https://quarto.org) with R. Every number in its text is computed from the data when it is rendered, and the wording of its conclusions follows the estimates, so the same source can be rendered again as data accumulate.
 
-The report reads the scoring constants, validation patterns, study titles and expert ratings from the app's own source (`src/lib/config.js`, `src/lib/patterns.js`, `src/lib/criteria.js` and `src/content/`), so it always matches the app it sits next to.
+The report reads the scoring constants, validation patterns, criteria and their labels, study titles and expert ratings from the app's own source (`src/lib/config.js`, `src/lib/patterns.js`, `src/lib/criteria.js`, `src/i18n/en/common.json` and `src/content/`), so it always matches the app it sits next to.
 
 ## Requirements
 
@@ -15,7 +15,7 @@ The report reads the scoring constants, validation patterns, study titles and ex
     ```
 
 - Quarto (the report was developed with Quarto 1.10 and R 4.3).
-- git, to fetch the backups, or Node.js 22.22 or later, to read the database directly.
+- git, to fetch the backups, or Node.js 24.12 or later, to read the database directly.
 
 ## Getting the data
 
@@ -41,7 +41,7 @@ The JSON files from the export section of the facilitator panel (`ratings.json`,
 
 Each run replaces the previous snapshot, so files from different sources are never mixed, and writes `data/fetch-info.json` to record where the data came from. The report cites it.
 
-Snapshots from v1 backups (the `data/` folder on `main` before v2) hold `/ratings`, `/leaderboard` and `/active` only, because v1 never backed up `/rankings` or `/sessions`. The report then skips the criterion weights and says why.
+Snapshots from v1 backups (the `data/` folder on `main` before v2) hold `/ratings`, `/leaderboard` and `/active` only, because v1 never backed up `/rankings` and had no `/sessions` node. The report then skips the criterion weights and says why.
 
 ## Rendering
 
@@ -111,4 +111,4 @@ Use `tiny` or `empty` instead of `full` for the other fixtures. The fixture valu
 
 ## Privacy
 
-Snapshots hold pseudonymous identifiers: random session ids, anonymous authentication ids and generated nicknames. The same records are publicly readable in the database and in the backups on the repository's `data` branch. The report uses the identifiers only to group records and prints none of them.
+Snapshots hold pseudonymous identifiers: random session ids, anonymous authentication ids and generated nicknames. Most of the same records are publicly readable in the database and in the backups on the repository's `data` branch, but a facilitator panel snapshot can hold records that have since been deleted. Keep snapshot files out of git and do not share them beyond the people analysing them. The report uses the identifiers only to group records and prints none of them.

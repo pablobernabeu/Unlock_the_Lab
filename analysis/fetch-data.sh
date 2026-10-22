@@ -96,7 +96,9 @@ try {
     process.exit(1);
 }
 const nodes = snapshot?.nodes;
-if (typeof snapshot?.exportedAt !== "string" || !nodes || typeof nodes !== "object" || Array.isArray(nodes)) {
+const exported = new Date(snapshot?.exportedAt);
+if (typeof snapshot?.exportedAt !== "string" || Number.isNaN(exported.getTime()) ||
+    !nodes || typeof nodes !== "object" || Array.isArray(nodes)) {
     console.error(`${file} is not a full snapshot from the facilitator panel.`);
     process.exit(1);
 }
@@ -105,8 +107,8 @@ const write = (name, value) =>
 for (const node of ["ratings", "leaderboard", "rankings", "sessions", "active"]) {
     write(`${node}.json`, nodes[node] ?? null);
 }
-write("backup-info.json", { lastBackup: snapshot.exportedAt, counts: snapshot.counts ?? {} });
-console.log(snapshot.exportedAt);
+write("backup-info.json", { lastBackup: exported.toISOString(), counts: snapshot.counts ?? {} });
+console.log(exported.toISOString());
 '
 
 commit=''
@@ -148,7 +150,7 @@ case "$mode" in
                 echo 'Node.js is needed to read a snapshot file with --from.' >&2
                 exit 1
             fi
-            exported_at="$(node -e "$split_snapshot" "$source_dir" "$staging")"
+            exported_at="$(node -e "$split_snapshot" -- "$source_dir" "$staging")"
             method='snapshot'
             source="$(basename "$source_dir")"
         elif [ -d "$source_dir" ]; then

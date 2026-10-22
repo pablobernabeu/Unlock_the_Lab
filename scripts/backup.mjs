@@ -130,12 +130,23 @@ export function reservedKeyPaths(node, value) {
  * Decides what a backup run writes. Pure: `fetched` maps node names to database values and
  * `existing` maps file names to their current text (missing files are absent or null).
  */
-export function planBackup({ fetched, existing = {}, allowEmpty = false, now = new Date() }) {
+export function planBackup({
+    fetched,
+    existing = {},
+    allowEmpty = false,
+    now = new Date(),
+    skipped = [],
+}) {
     const counts = {};
     const refused = [];
     const writes = [];
 
     for (const node of NODES) {
+        // A node the database refused to serve keeps its previous backup file untouched.
+        if (skipped.includes(node)) {
+            counts[node] = null;
+            continue;
+        }
         const file = `${node}.json`;
         const text = serialise(fetched[node]);
         const previous = existing[file] ?? null;
@@ -172,6 +183,12 @@ class HttpError extends Error {
         super(`HTTP ${status}${body ? `: ${body.slice(0, 200)}` : ''}`);
         this.status = status;
     }
+}
+
+/** fetchNode wraps the HTTP error, so look at the cause as well. */
+function isPermissionDenied(error) {
+    const http = error instanceof HttpError ? error : error?.cause;
+    return http instanceof HttpError && (http.status === 401 || http.status === 403);
 }
 
 // Client errors such as 401 'Permission denied' will not go away by retrying.
@@ -280,12 +297,37 @@ export async function runBackup({
     logger.log(`Reading ${NODES.join(', ')} from ${host}${dryRun ? ' (dry run)' : ''}.`);
 
     const fetched = {};
+    const skipped = [];
+    let refusal = null;
     for (const node of NODES) {
-        fetched[node] = await fetchNode(baseUrl, node, { fetchImpl, delays, logger });
+        try {
+            fetched[node] = await fetchNode(baseUrl, node, { fetchImpl, delays, logger });
+        } catch (error) {
+            // The version 1 rules do not let anyone read /sessions, so until the version 2
+            // rules are deployed that node is refused while the others can still be saved.
+            if (!isPermissionDenied(error)) throw error;
+            skipped.push(node);
+            refusal = error;
+            logger.log(
+                `::warning::Reading /${node} was refused (${error.message}), so its backup ` +
+                    'is left as it was. Check that the current database rules are deployed.'
+            );
+        }
     }
+    if (skipped.length === NODES.length) throw refusal;
 
-    const plan = planBackup({ fetched, existing: await readExisting(outDir), allowEmpty, now });
-    for (const node of NODES) logger.log(`  ${node}: ${plan.counts[node]} records`);
+    const plan = planBackup({
+        fetched,
+        existing: await readExisting(outDir),
+        allowEmpty,
+        now,
+        skipped,
+    });
+    for (const node of NODES) {
+        logger.log(
+            `  ${node}: ${skipped.includes(node) ? 'not read' : `${plan.counts[node]} records`}`
+        );
+    }
     // '::warning::' makes GitHub Actions show the line as an annotation on the run.
     for (const keyPath of NODES.flatMap((node) => reservedKeyPaths(node, fetched[node]))) {
         logger.log(

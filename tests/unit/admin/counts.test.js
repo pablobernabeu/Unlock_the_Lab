@@ -58,6 +58,11 @@ describe('presenceCounts', () => {
         expect(presenceCounts(active, { now }).recent).toBe(countActive(active, { now }));
     });
 
+    it('ignores an array-shaped node in both figures, as the dashboard does', () => {
+        const active = [{ lastActive: now - 1000 }, { lastActive: now - 2000 }];
+        expect(presenceCounts(active, { now })).toEqual({ total: 0, recent: 0 });
+    });
+
     it('accepts a custom window and an empty node', () => {
         expect(presenceCounts({ a: { lastActive: now - 5000 } }, { now, windowMs: 1000 })).toEqual({
             total: 1,

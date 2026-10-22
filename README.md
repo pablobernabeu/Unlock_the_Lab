@@ -19,7 +19,7 @@ Unlock the Lab is a web app for science-literacy workshops. Participants read sh
     They then see their score, the target it was scored against and the expert's rating with a note on each criterion.
 
 4. **Weights.** After at least 10 studies (all 48 if they like), participants share 20 tokens across the six criteria to show which matter most to them.
-5. **Results.** Average score, place on the leaderboard, a chart comparing their ratings with everyone else's, a review of every study and a personal link to come back to the results.
+5. **Results.** Average score, place on the leaderboard, a chart comparing their ratings with everyone else's, a review of every study they rated and a personal link to come back to the results.
 
 ### Scoring
 
@@ -30,25 +30,25 @@ target = (S + 100 × e) / (n + 100)
 score  = max(0, 100 − round(12 × |p − target|))
 ```
 
-The expert rating counts as 100 participants, so the target stays close to it until many people have rated the study. A participant's own rating never counts towards their own target. Leaderboards rank people by their average score per study, once they have rated at least 10 studies; for equal averages, the person who rated more studies ranks higher. The weight and the other constants are in `src/lib/config.js`.
+The expert rating counts as 100 participants, so the target stays close to it until many people have rated the study. A participant's own rating never counts towards their own target. Leaderboards rank people by their average score per study, once they have rated at least 10 studies. When two averages are the same as whole percentages, the person who rated more studies ranks higher; if that is equal too, they share the place. The weight and the other constants are in `src/lib/config.js`.
 
 ## For workshop leaders
 
 [`docs/facilitating.md`](docs/facilitating.md) explains how to run a workshop: room codes with their own leaderboard view and QR code, the dashboard, ending a workshop and how many people can join at once (100 simultaneous connections on Firebase's free plan). Facilitators sign in to the facilitator panel at `/admin.html` to make room links, export the data and end sessions.
 
-Handouts are in `materials/workshop`: the sample studies and the evaluation guide with glossary (PDF and Word) and slides with a banner and a QR code. They were made before content version 2, so a few study texts and expert ratings differ from the app; the app is the reference.
+Handouts are in `materials/workshop`: the sample studies and the evaluation guide with glossary (PDF and Word) and slides with a banner and a QR code. They were made before content version 2, so some study texts differ from the app; the app is the reference.
 
 ## Data and privacy
 
 - Participants are pseudonymous: they are identified by a random nickname and random codes, and are never asked for a name, email address or other personal details.
 - There are no analytics and no tracking cookies.
-- Everything participants submit is publicly readable, so that the dashboard works without sign-in, and a copy is committed every day to the public `data` branch of this repository. The welcome page says so before anyone starts.
+- Everything participants submit is publicly readable, so that the dashboard works without sign-in, and a daily backup copies it to the public `data` branch of this repository (with a commit whenever the data have changed). The welcome page says so before anyone starts.
 - [`docs/data.md`](docs/data.md) describes every node and field, including the records version 1 of the app wrote.
 - [`analysis/`](analysis/README.md) holds a reproducible Quarto report on the data.
 
 ## Local development
 
-You need Node.js 22.22 or later, and Java 21 or later for the Firebase emulators.
+You need Node.js 24.12 or later, and Java 21 or later for the Firebase emulators.
 
 ```bash
 git clone https://github.com/pablobernabeu/Unlock_the_Lab.git

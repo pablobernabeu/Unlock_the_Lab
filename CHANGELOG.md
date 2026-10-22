@@ -26,7 +26,7 @@ A rewrite of the app, its data handling and the repository. Ratings stored by ve
 - Each rating also stores `contentVersion`, `target`, `score`, `trial`, `locale` and, where used, `room`; sessions get a `/sessions` record. Timestamps come from the server.
 - Content version 2 corrects errors in the study cards and glossary (outdated critiques of title claims, a Sci-Hub recommendation, factual slips) without changing the expert ratings.
 - `analysis/` adds a reproducible Quarto report on the backups.
-- Daily backups go to the `data` branch, include the criterion weights (`/rankings`) and sessions, and are committed only when the data change. The v1 backups in `data/` are frozen.
+- Daily backups go to the `data` branch and include the criterion weights (`/rankings`) and sessions. They are committed only when the data change. The v1 backups in `data/` are frozen.
 
 ### Security and privacy
 
@@ -38,7 +38,7 @@ A rewrite of the app, its data handling and the repository. Ratings stored by ve
 
 - Code licensed under MIT; content stays CC BY 4.0. `CITATION.cff` added.
 - Vite 8, Firebase 13 and Chart.js bundled from npm; build output is no longer committed.
-- Unit, database-rules, end-to-end and accessibility tests run in CI, which deploys the site and the database rules from `main` and publishes a preview for each pull request.
+- Unit, database-rules, end-to-end and accessibility tests run in CI, which deploys the site and the database rules from `main` and publishes a preview for each pull request from a branch of this repository. Development requires Node.js 24.12 or later.
 
 ## 1.0.0 (2026-03)
 

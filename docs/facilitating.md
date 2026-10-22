@@ -13,7 +13,7 @@ This guide is for workshop leaders. It covers room links, what participants see,
     You can also type these links by hand. The panel tells you if the code has been used before.
 
 3. **Check the capacity** (see below) if you expect a large group.
-4. **Handouts.** The files in `materials/workshop` (evaluation guide, glossary and sample studies) were made before content version 2. A few study texts and expert ratings have changed since, so treat the app as the reference.
+4. **Handouts.** The files in `materials/workshop` (evaluation guide, glossary and sample studies) were made before content version 2. A few study texts have changed since, so treat the app as the reference.
 
 ## During the workshop
 

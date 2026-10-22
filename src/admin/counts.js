@@ -63,7 +63,11 @@ export function recordCount(name, node) {
  * @returns {{total: number, recent: number}}
  */
 export function presenceCounts(node, { now, windowMs = ACTIVE_WINDOW_MS }) {
-    return { total: recordCount('active', node), recent: countActive(node, { now, windowMs }) };
+    // Both figures ignore an array-shaped node, as the dashboard does.
+    return {
+        total: isObject(node) ? recordCount('active', node) : 0,
+        recent: countActive(node, { now, windowMs }),
+    };
 }
 
 /**
