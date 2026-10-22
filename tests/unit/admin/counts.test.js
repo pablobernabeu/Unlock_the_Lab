@@ -6,31 +6,13 @@ import {
     deleteConfirmationText,
     deletionCounts,
     hasDeletableData,
-    isWorkshopStudy,
     presenceCounts,
-    ratingCounts,
     recordCount,
     roomParticipants,
     sessionsWithData,
 } from '../../../src/admin/counts.js';
-import { ACTIVE_WINDOW_MS, MIN_STUDIES_TO_FINISH, STUDY_COUNT } from '../../../src/lib/config.js';
-
-/** A /ratings node in which `sessionId` rated studies 1..count. */
-function ratedStudies(sessionId, count, record = { rating: 4, prediction: 4 }) {
-    return Object.fromEntries(
-        Array.from({ length: count }, (_, index) => [`STUDY-${index + 1}`, { [sessionId]: record }])
-    );
-}
-
-function mergeRatings(...nodes) {
-    const merged = {};
-    for (const node of nodes) {
-        for (const [studyId, sessions] of Object.entries(node)) {
-            merged[studyId] = { ...merged[studyId], ...sessions };
-        }
-    }
-    return merged;
-}
+import { ACTIVE_WINDOW_MS } from '../../../src/lib/config.js';
+import { countActive } from '../../../src/lib/counts.js';
 
 describe('recordCount', () => {
     it('counts ratings per study and session, and other nodes per key', () => {
@@ -59,55 +41,6 @@ describe('recordCount', () => {
     });
 });
 
-describe('isWorkshopStudy', () => {
-    it('accepts the workshop studies only', () => {
-        expect(isWorkshopStudy('STUDY-1')).toBe(true);
-        expect(isWorkshopStudy(`STUDY-${STUDY_COUNT}`)).toBe(true);
-        expect(isWorkshopStudy(`STUDY-${STUDY_COUNT + 1}`)).toBe(false);
-        expect(isWorkshopStudy('STUDY-99')).toBe(false);
-        expect(isWorkshopStudy('STUDY-0')).toBe(false);
-        expect(isWorkshopStudy('STUDY-01')).toBe(false);
-        expect(isWorkshopStudy('paper-1')).toBe(false);
-    });
-});
-
-describe('ratingCounts', () => {
-    it('counts participants, valid ratings and completed sessions', () => {
-        const ratings = mergeRatings(
-            ratedStudies('session_done', MIN_STUDIES_TO_FINISH),
-            ratedStudies('session_partial', MIN_STUDIES_TO_FINISH - 1)
-        );
-        expect(ratingCounts(ratings)).toEqual({
-            participants: 2,
-            ratings: 2 * MIN_STUDIES_TO_FINISH - 1,
-            completed: 1,
-        });
-    });
-
-    it('accepts legacy bare-number ratings and skips invalid ones and bad study ids', () => {
-        const ratings = {
-            'STUDY-1': { legacy: 5, broken: { rating: 0 }, text: { rating: '4' } },
-            'STUDY-2': { legacy: { rating: 7, prediction: 6 } },
-            'paper-3': { legacy: { rating: 3 } },
-        };
-        expect(ratingCounts(ratings)).toEqual({ participants: 1, ratings: 2, completed: 0 });
-    });
-
-    it('leaves out studies the workshop does not have, as the dashboard does', () => {
-        // The rules accept ids up to STUDY-99, so such records can exist.
-        const ratings = { 'STUDY-1': { a: 4 }, 'STUDY-77': { a: 4, b: 5 } };
-        expect(ratingCounts(ratings)).toEqual({ participants: 1, ratings: 1, completed: 0 });
-    });
-
-    it('uses the given threshold for completed sessions', () => {
-        expect(ratingCounts(ratedStudies('s', 3), { minStudies: 3 }).completed).toBe(1);
-    });
-
-    it('returns zeros for an empty database', () => {
-        expect(ratingCounts(null)).toEqual({ participants: 0, ratings: 0, completed: 0 });
-    });
-});
-
 describe('presenceCounts', () => {
     const now = 1_800_000_000_000;
 
@@ -121,6 +54,8 @@ describe('presenceCounts', () => {
             junk: 'x',
         };
         expect(presenceCounts(active, { now })).toEqual({ total: 6, recent: 2 });
+        // 'Active now' is the dashboard's figure, from the shared count.
+        expect(presenceCounts(active, { now }).recent).toBe(countActive(active, { now }));
     });
 
     it('accepts a custom window and an empty node', () => {

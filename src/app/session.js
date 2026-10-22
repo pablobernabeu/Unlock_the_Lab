@@ -8,11 +8,11 @@
  */
 import { get, ref } from 'firebase/database';
 import { INACTIVITY_TIMEOUT_MS, INACTIVITY_WARNING_MS } from '../lib/config.js';
+import { withTimeout } from '../lib/db-utils.js';
 import { db } from '../lib/firebase.js';
 import { USERNAME_PATTERN } from '../lib/patterns.js';
 import { generateUniqueUsername, generateUsername } from '../lib/username.js';
 import { ConnectionError, createConnection, endedAfterJoin } from './connection.js';
-import { withTimeout } from './db-utils.js';
 import { createInactivityMonitor } from './inactivity.js';
 import { createLeaderboardSync } from './leaderboard-sync.js';
 import { ratedCount } from './state.js';

@@ -29,7 +29,8 @@
     },
     "notAdminTitle": "This account is not an administrator",
     "notAdminText": "You have been signed out. To make it an administrator, the project owner adds its user ID under /admins in the Firebase console, as the deployment guide explains.",
-    "notAdminUid": "User ID: {uid}"
+    "notAdminUid": "User ID: {uid}",
+    "previewDisabled": "The facilitator panel is disabled on preview builds because they use the live database. Use the facilitator panel on the live site instead."
   },
   "account": {
     "signedInAs": "Signed in as {email}",

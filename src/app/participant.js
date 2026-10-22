@@ -10,6 +10,7 @@ import {
     MILESTONE_STUDIES,
     MIN_STUDIES_TO_FINISH,
 } from '../lib/config.js';
+import { withTimeout } from '../lib/db-utils.js';
 import { alertDialog, confirmDialog } from '../lib/dialog.js';
 import { announce, focusHeading } from '../lib/dom.js';
 import { getParticipantAuth } from '../lib/firebase.js';
@@ -18,7 +19,6 @@ import { roomFromUrl } from '../lib/room.js';
 import { seededShuffle } from '../lib/shuffle.js';
 import { storageAvailable } from '../lib/storage.js';
 import { showToast } from '../lib/toast.js';
-import { withTimeout } from './db-utils.js';
 import { updateScoreBanner } from './header.js';
 import { createNotices } from './notices.js';
 import { markFirstDisplay } from './response-time.js';

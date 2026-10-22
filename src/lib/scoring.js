@@ -23,6 +23,17 @@ export function isValidRating(value) {
 }
 
 /**
+ * The quality rating held by one stored `/ratings/{studyId}/{sessionId}`
+ * record: a `{rating, ...}` object or, in very old data, a bare number.
+ * @param {unknown} record
+ * @returns {number | null} the rating, or null when it is missing or off the 1-7 scale
+ */
+export function ratingOf(record) {
+    const rating = typeof record === 'number' ? record : record?.rating;
+    return isValidRating(rating) ? rating : null;
+}
+
+/**
  * Extracts usable ratings from a `/ratings/{studyId}` node. Entries may be
  * `{rating, ...}` objects or, in very old data, bare numbers.
  * @param {Record<string, unknown> | null | undefined} node
@@ -33,8 +44,8 @@ export function validRatings(node, excludeKey) {
     if (!node || typeof node !== 'object') return [];
     return Object.entries(node)
         .filter(([key]) => key !== excludeKey)
-        .map(([, entry]) => (typeof entry === 'number' ? entry : entry?.rating))
-        .filter(isValidRating);
+        .map(([, entry]) => ratingOf(entry))
+        .filter((rating) => rating !== null);
 }
 
 /**

@@ -4,19 +4,16 @@
  *
  * Rooms: v2 records carry a `room` code; v1 records have none, so they only
  * count when no room is selected. Readers accept every legacy shape the
- * database holds (bare-number ratings, missing fields, empty usernames).
+ * database holds (bare-number ratings, missing fields, empty usernames). The
+ * headline counts, which the facilitator panel shows too, are in src/lib/counts.js.
  */
-import {
-    ACTIVE_WINDOW_MS,
-    LEADERBOARD_SIZE,
-    MIN_STUDIES_TO_FINISH,
-    MIN_STUDIES_TO_RANK,
-} from '../lib/config.js';
+import { LEADERBOARD_SIZE, MIN_STUDIES_TO_RANK } from '../lib/config.js';
 import { compareStudyIds, qualityBand, studyNumber } from '../lib/content.js';
 import { isValidAllocation } from '../lib/criteria.js';
 import { rankEntries } from '../lib/leaderboard.js';
-import { ROOM_PATTERN, SESSION_ID_PATTERN, STUDY_ID_PATTERN } from '../lib/patterns.js';
-import { isValidRating } from '../lib/scoring.js';
+import { SESSION_ID_PATTERN, STUDY_ID_PATTERN } from '../lib/patterns.js';
+import { inRoom, isObject, recordRoom } from '../lib/records.js';
+import { isValidRating, ratingOf } from '../lib/scoring.js';
 import { mean, meanCI, shareCI } from '../lib/stats.js';
 
 export const DAY_MS = 24 * 60 * 60 * 1000;
@@ -31,36 +28,10 @@ export const CLOCK_TOLERANCE_MS = 5 * 60 * 1000;
 /** Shortest scale for the criterion bars, so typical shares (about 1 in 6) are not squashed. */
 const MIN_SHARE_SCALE = 0.4;
 
-function isObject(value) {
-    return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-}
-
-/**
- * The room a stored record belongs to.
- * @param {unknown} record a rating, leaderboard, rankings, session or presence value
- * @returns {string|null} null for v1 records, bare numbers and invalid codes
- */
-export function recordRoom(record) {
-    return isObject(record) && typeof record.room === 'string' && ROOM_PATTERN.test(record.room)
-        ? record.room
-        : null;
-}
-
-/**
- * True when a record belongs to `room`, or always when no room is selected.
- * @param {unknown} record
- * @param {string|null} room
- * @returns {boolean}
- */
-export function inRoom(record, room) {
-    return !room || recordRoom(record) === room;
-}
-
 /**
  * @typedef {object} RatingGroup
  * @property {number[]} ratings valid quality ratings (1-7)
  * @property {number[]} predictions valid predictions from the same records
- * @property {string[]} sessionIds one per rating, in the same order
  */
 
 /**
@@ -79,36 +50,16 @@ export function groupRatings(node, { room = null, studyIds = null } = {}) {
     for (const [studyId, studyNode] of Object.entries(node)) {
         if (!STUDY_ID_PATTERN.test(studyId) || !isObject(studyNode)) continue;
         if (allowed && !allowed.has(studyId)) continue;
-        const group = { ratings: [], predictions: [], sessionIds: [] };
-        for (const [sessionId, record] of Object.entries(studyNode)) {
-            const rating = typeof record === 'number' ? record : record?.rating;
-            if (!isValidRating(rating) || !inRoom(record, room)) continue;
+        const group = { ratings: [], predictions: [] };
+        for (const record of Object.values(studyNode)) {
+            const rating = ratingOf(record);
+            if (rating === null || !inRoom(record, room)) continue;
             group.ratings.push(rating);
-            group.sessionIds.push(sessionId);
             if (isValidRating(record?.prediction)) group.predictions.push(record.prediction);
         }
         groups.set(studyId, group);
     }
     return groups;
-}
-
-/**
- * Headline counts from grouped ratings.
- * @param {Map<string, RatingGroup>} groups
- * @param {object} [options]
- * @param {number} [options.minStudies] studies needed to count as completed
- * @returns {{participants: number, ratings: number, completed: number}}
- *   participants: sessions with at least one rating; completed: with at least `minStudies`
- */
-export function overviewCounts(groups, { minStudies = MIN_STUDIES_TO_FINISH } = {}) {
-    const perSession = new Map();
-    let ratings = 0;
-    for (const { sessionIds } of groups.values()) {
-        ratings += sessionIds.length;
-        for (const id of sessionIds) perSession.set(id, (perSession.get(id) ?? 0) + 1);
-    }
-    const completed = [...perSession.values()].filter((count) => count >= minStudies).length;
-    return { participants: perSession.size, ratings, completed };
 }
 
 /**
@@ -155,7 +106,7 @@ export function shortTitle(title, maxLength = 48) {
  * @property {number} predictions number of predictions behind meanPrediction
  */
 
-const NO_RATINGS = Object.freeze({ ratings: [], predictions: [], sessionIds: [] });
+const NO_RATINGS = Object.freeze({ ratings: [], predictions: [] });
 
 /**
  * One row of statistics per study, in content order, from participant ratings only.
@@ -240,28 +191,6 @@ export function sortStudyRows(
             typeof first === 'string' ? first.localeCompare(second, locale) : first - second;
         return sign * order || compareStudyIds(a.id, b.id);
     });
-}
-
-/**
- * Presence entries active within the window.
- * @param {Record<string, unknown> | null | undefined} node `/active`
- * @param {object} options
- * @param {number} options.now current server time in ms
- * @param {string|null} [options.room]
- * @param {number} [options.windowMs]
- * @returns {number}
- */
-export function countActive(node, { now, room = null, windowMs = ACTIVE_WINDOW_MS }) {
-    if (!isObject(node)) return 0;
-    // Entries far in the future cannot be genuine heartbeats (the rules stamp server time).
-    return Object.values(node).filter(
-        (entry) =>
-            isObject(entry) &&
-            Number.isFinite(entry.lastActive) &&
-            entry.lastActive >= now - windowMs &&
-            entry.lastActive <= now + windowMs &&
-            inRoom(entry, room)
-    ).length;
 }
 
 /**
@@ -375,7 +304,7 @@ export function sessionHasRatings(node, sessionId) {
     return Object.values(node).some((studyNode) => {
         if (!isObject(studyNode) || !Object.hasOwn(studyNode, sessionId)) return false;
         const record = studyNode[sessionId];
-        return isValidRating(typeof record === 'number' ? record : record?.rating);
+        return ratingOf(record) !== null;
     });
 }
 

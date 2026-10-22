@@ -6,6 +6,7 @@
  */
 import expertRatings from '../content/expert-ratings.json';
 import { STUDY_ID_PATTERN } from './patterns.js';
+import { isObject } from './records.js';
 import { isValidRating } from './scoring.js';
 import { DEFAULT_LOCALE, getLocale } from './i18n.js';
 
@@ -59,10 +60,6 @@ export function compareStudyIds(a, b) {
     return numberA - numberB || String(a).localeCompare(String(b));
 }
 
-function isPlainObject(value) {
-    return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-}
-
 /**
  * Fields that hold codes rather than text: a translation must never change them
  * (`band` is the expert feedback's 'low' | 'medium' | 'high', used for styling and lookups).
@@ -87,8 +84,8 @@ export function mergeTranslation(english, translated) {
             mergeTranslation(item, Array.isArray(translated) ? translated[index] : undefined)
         );
     }
-    if (isPlainObject(english)) {
-        if (!isPlainObject(translated)) return english;
+    if (isObject(english)) {
+        if (!isObject(translated)) return english;
         return Object.fromEntries(
             Object.entries(english).map(([key, value]) =>
                 UNTRANSLATABLE_KEYS.has(key)

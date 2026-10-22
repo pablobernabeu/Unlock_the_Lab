@@ -4,6 +4,7 @@
  * exactly what goes and offers a full snapshot first. Copies already made by
  * the daily GitHub backup (data branch) are not touched.
  */
+import { DB_TIMEOUT_MS, withTimeout } from '../lib/db-utils.js';
 import { promptDialog } from '../lib/dialog.js';
 import { el, qs } from '../lib/dom.js';
 import { t } from '../lib/i18n.js';
@@ -14,9 +15,8 @@ import {
     hasDeletableData,
     sessionsWithData,
 } from './counts.js';
-import { REQUEST_TIMEOUT_MS, deleteParticipantData, readNodes } from './data.js';
+import { deleteParticipantData, readNodes } from './data.js';
 import { downloadSnapshot } from './downloads.js';
-import { withTimeout } from './errors.js';
 import { runDownload } from './export-panel.js';
 import { createStatus, errorReason, reportWriteFailure, whileBusy } from './ui.js';
 
@@ -122,7 +122,7 @@ export function createDeleteData(root, { db, store }) {
         }
         status.show(t('admin.delete.working'));
         try {
-            await withTimeout(deleteParticipantData(db), REQUEST_TIMEOUT_MS);
+            await withTimeout(deleteParticipantData(db), DB_TIMEOUT_MS, 'Deleting data');
         } catch (error) {
             reportWriteFailure(status, error, {
                 pending: () => t('admin.delete.pending'),

@@ -4,17 +4,21 @@
  * user in the same browser, and lasts only for the browser tab. Access needs
  * an /admins/{uid} entry: the same check the database rules make for every
  * admin write. Anyone else is told why and signed out.
+ *
+ * Preview builds (pull-request previews) run unreviewed code against the live
+ * database, so there the panel never signs anyone in: it does not even start
+ * the sign-in service, and says why.
  */
-import '../lib/preview-banner.js';
+import { IS_PREVIEW_BUILD } from '../lib/preview-banner.js';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { APP_VERSION } from '../lib/config.js';
+import { isPermissionDenied } from '../lib/db-utils.js';
 import { el, ensureLiveRegions, focusHeading, qs, setText } from '../lib/dom.js';
 import { createAdminApp } from '../lib/firebase.js';
 import { applyTranslations, initI18n, t } from '../lib/i18n.js';
 import { renderLocaleSwitcher } from '../lib/locale-switcher.js';
 import { initMotion } from '../lib/motion.js';
 import { isAdmin } from './data.js';
-import { isPermissionDenied } from './errors.js';
 import { createLoginForm } from './login.js';
 import { createPanel } from './panel.js';
 import { createStatus, whileBusy } from './ui.js';
@@ -179,6 +183,13 @@ async function connect() {
     startAccess(firebase);
 }
 
+/** Explains that this build does not sign anyone in, and offers no sign-in form. */
+function refuseSignIn() {
+    showActions([]);
+    showView(null);
+    page.status.show(t('admin.login.previewDisabled'), 'error');
+}
+
 async function start() {
     initMotion();
     ensureLiveRegions();
@@ -190,7 +201,8 @@ async function start() {
         console.warn('[i18n] Could not load translations', error);
     }
     renderStaticCopy();
-    await connect();
+    if (IS_PREVIEW_BUILD) refuseSignIn();
+    else await connect();
 }
 
 start();

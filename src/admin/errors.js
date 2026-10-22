@@ -1,41 +1,9 @@
 /**
- * Error handling helpers for the admin panel: timeouts and the translation
- * key for each kind of failure. Pure, so they can be unit-tested in Node.
+ * Error handling helpers for the admin panel: the translation key for each
+ * kind of failure. Pure, so they can be unit-tested in Node. The timeout and
+ * refusal checks are shared with the participant app (src/lib/db-utils.js).
  */
-
-/** Raised by withTimeout when the database does not answer in time. */
-export class TimeoutError extends Error {
-    constructor(ms) {
-        super(`No answer from the database within ${ms} ms`);
-        this.name = 'TimeoutError';
-    }
-}
-
-/**
- * Rejects with a TimeoutError when `promise` has not settled within `ms`.
- * Firebase cannot cancel a request, so a write that times out may still be
- * applied later; callers must say so rather than report a failure.
- * @template T
- * @param {Promise<T>} promise
- * @param {number} ms
- * @returns {Promise<T>}
- */
-export function withTimeout(promise, ms) {
-    let timer;
-    const timeout = new Promise((_, reject) => {
-        timer = setTimeout(() => reject(new TimeoutError(ms)), ms);
-    });
-    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
-}
-
-/**
- * True when the security rules refused a database request.
- * @param {unknown} error
- * @returns {boolean}
- */
-export function isPermissionDenied(error) {
-    return /permission[_ ]denied/i.test(`${error?.code ?? ''} ${error?.message ?? ''}`);
-}
+import { TimeoutError, isPermissionDenied } from '../lib/db-utils.js';
 
 const SIGN_IN_ERRORS = Object.freeze({
     'auth/invalid-credential': 'admin.login.errors.invalidCredential',

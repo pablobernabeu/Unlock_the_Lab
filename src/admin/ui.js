@@ -1,9 +1,10 @@
 /**
  * Small UI helpers shared by the admin panels.
  */
+import { TimeoutError } from '../lib/db-utils.js';
 import { MISSING } from '../lib/format.js';
 import { formatNumber, t } from '../lib/i18n.js';
-import { TimeoutError, databaseErrorKey } from './errors.js';
+import { databaseErrorKey } from './errors.js';
 
 /**
  * Writes messages into a status element that is always in the page (a live

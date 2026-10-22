@@ -6,10 +6,10 @@
  */
 import { get, ref } from 'firebase/database';
 import { isValidAllocation } from '../lib/criteria.js';
+import { DB_TIMEOUT_MS, withTimeout } from '../lib/db-utils.js';
 import { db } from '../lib/firebase.js';
 import { normaliseEntries } from '../lib/leaderboard.js';
 import { USERNAME_PATTERN } from '../lib/patterns.js';
-import { DB_TIMEOUT_MS, withTimeout } from './db-utils.js';
 import { othersMean, readOnlyReviewRows, resolveSessionParam } from './results-model.js';
 
 async function read(path) {

@@ -3,9 +3,10 @@
  * sessions and presence entries, for the whole database, updated live.
  */
 import { ACTIVE_WINDOW_MS, MIN_STUDIES_TO_FINISH } from '../lib/config.js';
+import { ratingCounts } from '../lib/counts.js';
 import { qs, setText } from '../lib/dom.js';
 import { t } from '../lib/i18n.js';
-import { presenceCounts, ratingCounts, recordCount } from './counts.js';
+import { presenceCounts, recordCount } from './counts.js';
 import { createStatus, displayCount, errorReason } from './ui.js';
 
 const ACTIVE_WINDOW_MINUTES = ACTIVE_WINDOW_MS / 60000;

@@ -6,6 +6,7 @@
 import '../lib/preview-banner.js';
 import { APP_VERSION, SEED_WEIGHT, STORAGE_KEYS } from '../lib/config.js';
 import { loadContent } from '../lib/content.js';
+import { countActive, ratingCounts } from '../lib/counts.js';
 import { ensureLiveRegions, qs, setText } from '../lib/dom.js';
 import { db } from '../lib/firebase.js';
 import { applyTranslations, initI18n, t } from '../lib/i18n.js';
@@ -21,11 +22,9 @@ import { createCriterionImportance } from './criterion-importance.js';
 import {
     chartSummary,
     collectRooms,
-    countActive,
     criterionShares,
     groupRatings,
     localSessionId,
-    overviewCounts,
     sessionHasRatings,
     studyRows,
 } from './data.js';
@@ -125,7 +124,6 @@ function createDashboard() {
             studyIds: state.studies.map((study) => study.id),
         });
         state.rows = studyRows(state.studies, groups);
-        overview.setCounts(overviewCounts(groups));
         statsTable.update(state.rows);
         chart?.update(state.rows);
         renderChartSummary(state.rows);
@@ -139,6 +137,9 @@ function createDashboard() {
     function render(parts) {
         const changed = (...names) => names.some((name) => parts.has(name));
         const ready = (name) => state.loaded.has(name);
+        if (changed('ratings', 'room') && ready('ratings')) {
+            overview.setCounts(ratingCounts(state.nodes.ratings, { room: state.room }));
+        }
         if (changed('ratings', 'content', 'room', 'chart') && ready('ratings') && state.studies) {
             renderRatings();
         }

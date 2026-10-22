@@ -5,17 +5,14 @@
  * user. Exports and the delete counts read over REST instead (see rest.js).
  */
 import { get, onValue, ref, serverTimestamp, update } from 'firebase/database';
+import { DB_TIMEOUT_MS, withTimeout } from '../lib/db-utils.js';
 import { firebaseConfig } from '../lib/firebase-config.js';
 import { DATABASE_EMULATOR_PORT, EMULATOR_HOST, usingEmulators } from '../lib/firebase.js';
 import { DELETED_NODES } from './counts.js';
-import { withTimeout } from './errors.js';
 import { fetchNode, restBaseUrl } from './rest.js';
 
 /** Nodes the panel watches live. */
 export const LIVE_NODES = Object.freeze([...DELETED_NODES]);
-
-/** How long a read or write may take before the panel reports it. */
-export const REQUEST_TIMEOUT_MS = 15000;
 
 /** Store key for the time of the last 'end all sessions'. */
 export const ENDED_AT = 'sessionsEndedAt';
@@ -28,7 +25,11 @@ export const ENDED_AT = 'sessionsEndedAt';
  * @returns {Promise<boolean>}
  */
 export async function isAdmin(db, uid) {
-    const snapshot = await withTimeout(get(ref(db, `admins/${uid}`)), REQUEST_TIMEOUT_MS);
+    const snapshot = await withTimeout(
+        get(ref(db, `admins/${uid}`)),
+        DB_TIMEOUT_MS,
+        'Checking administrator access'
+    );
     return snapshot.val() === true;
 }
 
@@ -69,7 +70,8 @@ const REST_BASE = restBaseUrl({
 export async function readNodes(names) {
     const values = await withTimeout(
         Promise.all(names.map((name) => fetchNode(REST_BASE, name))),
-        REQUEST_TIMEOUT_MS
+        DB_TIMEOUT_MS,
+        'Reading the data'
     );
     return Object.fromEntries(names.map((name, index) => [name, values[index]]));
 }

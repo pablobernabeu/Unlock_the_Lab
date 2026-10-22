@@ -5,10 +5,10 @@
  */
 import { MIN_STUDIES_TO_FINISH, RATING_MAX, RATING_MIN } from '../../lib/config.js';
 import { CRITERIA, labelKey } from '../../lib/criteria.js';
+import { isPermissionDenied } from '../../lib/db-utils.js';
 import { el, escapeHtml } from '../../lib/dom.js';
 import { getLocale, t } from '../../lib/i18n.js';
 import { ConnectionError } from '../connection.js';
-import { isPermissionDenied } from '../db-utils.js';
 import { submitRating } from '../rating-submit.js';
 import { responseTimeFor } from '../response-time.js';
 import { isRated, ratedCount, studyPage, weightsPage } from '../state.js';

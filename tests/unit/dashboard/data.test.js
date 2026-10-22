@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { ACTIVE_WINDOW_MS, MIN_STUDIES_TO_FINISH } from '../../../src/lib/config.js';
 import { normaliseEntries } from '../../../src/lib/leaderboard.js';
 import { tCritical95 } from '../../../src/lib/stats.js';
 import {
@@ -7,17 +6,13 @@ import {
     DAY_MS,
     chartSummary,
     collectRooms,
-    countActive,
     criterionShares,
     errorBarSegment,
     groupRatings,
-    inRoom,
     leaderboardView,
     localSessionId,
-    overviewCounts,
     parseLookup,
     plainText,
-    recordRoom,
     resultsHref,
     sessionHasRatings,
     shareScaleMax,
@@ -60,40 +55,12 @@ const STUDIES = [
 ];
 const STUDY_IDS = STUDIES.map((study) => study.id);
 
-describe('recordRoom and inRoom', () => {
-    it('reads valid room codes only', () => {
-        expect(recordRoom({ room: 'DEMO-1' })).toBe('DEMO-1');
-        expect(recordRoom({ room: 'demo-1' })).toBeNull();
-        expect(recordRoom({ room: '<b>' })).toBeNull();
-        expect(recordRoom({ rating: 4 })).toBeNull();
-        expect(recordRoom(4)).toBeNull();
-        expect(recordRoom(null)).toBeNull();
-        expect(recordRoom([{ room: 'DEMO-1' }])).toBeNull();
-    });
-
-    it('keeps everything when no room is selected and v1 records only then', () => {
-        expect(inRoom({ rating: 4 }, null)).toBe(true);
-        expect(inRoom(4, null)).toBe(true);
-        expect(inRoom({ rating: 4 }, 'DEMO-1')).toBe(false);
-        expect(inRoom({ room: 'DEMO-1' }, 'DEMO-1')).toBe(true);
-        expect(inRoom({ room: 'OTHER' }, 'DEMO-1')).toBe(false);
-    });
-});
-
 describe('groupRatings', () => {
     it('keeps valid ratings from every shape, with predictions from the same records', () => {
         const groups = groupRatings(RATINGS);
-        expect(groups.get('STUDY-1')).toEqual({
-            ratings: [2, 4, 6],
-            predictions: [3, 5],
-            sessionIds: [S1, S2, S3],
-        });
+        expect(groups.get('STUDY-1')).toEqual({ ratings: [2, 4, 6], predictions: [3, 5] });
         // An out-of-range prediction is dropped but its rating still counts.
-        expect(groups.get('STUDY-2')).toEqual({
-            ratings: [5, 3],
-            predictions: [4],
-            sessionIds: [S1, S4],
-        });
+        expect(groups.get('STUDY-2')).toEqual({ ratings: [5, 3], predictions: [4] });
     });
 
     it('ignores malformed study ids and non-object study nodes', () => {
@@ -111,7 +78,7 @@ describe('groupRatings', () => {
     it('filters by each rating’s own room, treating v1 records and invalid codes as no room', () => {
         const groups = groupRatings(RATINGS, { room: 'DEMO-1' });
         expect(groups.get('STUDY-1').ratings).toEqual([6]);
-        expect(groups.get('STUDY-2').sessionIds).toEqual([S4]);
+        expect(groups.get('STUDY-2').ratings).toEqual([3]);
         expect(groups.get('STUDY-10').ratings).toEqual([]);
     });
 
@@ -119,33 +86,6 @@ describe('groupRatings', () => {
         expect(groupRatings(null).size).toBe(0);
         expect(groupRatings(undefined).size).toBe(0);
         expect(groupRatings(5).size).toBe(0);
-    });
-});
-
-describe('overviewCounts', () => {
-    it('counts sessions with a rating, ratings and sessions with enough ratings', () => {
-        const groups = groupRatings(RATINGS, { studyIds: STUDY_IDS });
-        expect(overviewCounts(groups, { minStudies: 2 })).toEqual({
-            participants: 4,
-            ratings: 6,
-            completed: 1,
-        });
-    });
-
-    it('uses the finishing threshold by default', () => {
-        const node = {};
-        for (let index = 1; index <= MIN_STUDIES_TO_FINISH; index++) {
-            node[`STUDY-${index}`] = { [S1]: { rating: 4 }, ...(index < 3 ? { [S2]: 5 } : {}) };
-        }
-        expect(overviewCounts(groupRatings(node))).toEqual({
-            participants: 2,
-            ratings: MIN_STUDIES_TO_FINISH + 2,
-            completed: 1,
-        });
-    });
-
-    it('is all zeros without data', () => {
-        expect(overviewCounts(new Map())).toEqual({ participants: 0, ratings: 0, completed: 0 });
     });
 });
 
@@ -309,34 +249,6 @@ describe('sortStudyRows', () => {
             'STUDY-9',
             'STUDY-10',
         ]);
-    });
-});
-
-describe('countActive', () => {
-    const now = 1_800_000_000_000;
-    const node = {
-        a: { lastActive: now - 1000, joinedAt: now - 5000 },
-        b: { lastActive: now - ACTIVE_WINDOW_MS },
-        c: { lastActive: now - ACTIVE_WINDOW_MS - 1 },
-        d: { lastActive: now + ACTIVE_WINDOW_MS + 1 },
-        e: { joinedAt: now },
-        f: 'junk',
-        g: { lastActive: now, room: 'DEMO-1' },
-        h: { lastActive: '1800000000000' },
-    };
-
-    it('counts heartbeats inside the window and ignores impossible ones', () => {
-        expect(countActive(node, { now })).toBe(3);
-    });
-
-    it('filters by room', () => {
-        expect(countActive(node, { now, room: 'DEMO-1' })).toBe(1);
-        expect(countActive(node, { now, room: 'OTHER' })).toBe(0);
-    });
-
-    it('takes the window as an option and copes with a missing node', () => {
-        expect(countActive(node, { now, windowMs: 500 })).toBe(1);
-        expect(countActive(null, { now })).toBe(0);
     });
 });
 

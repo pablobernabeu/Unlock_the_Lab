@@ -47,11 +47,11 @@ function fillName(cell, entry, isLocal) {
 }
 
 function fillRow(row, entry, localSessionId) {
-    const [place, name, accuracy, studies] = row.cells;
+    const [place, name, averageScore, studies] = row.cells;
     row.classList.toggle('leaderboard-table__top', entry.rank <= 3);
     setText(place, formatCount(entry.rank));
     fillName(name, entry, entry.sessionId === localSessionId);
-    setText(accuracy, formatPercent(entry.displayedAccuracy));
+    setText(averageScore, formatPercent(entry.displayedAccuracy));
     setText(studies, formatCount(entry.papersRated));
 }
 

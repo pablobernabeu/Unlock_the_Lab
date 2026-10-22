@@ -1,12 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-    TimeoutError,
-    databaseErrorKey,
-    isPermissionDenied,
-    signInErrorKey,
-    withTimeout,
-} from '../../../src/admin/errors.js';
+import * as adminErrors from '../../../src/admin/errors.js';
+import { databaseErrorKey, signInErrorKey } from '../../../src/admin/errors.js';
 import { createStore } from '../../../src/admin/store.js';
+import { TimeoutError, withTimeout } from '../../../src/lib/db-utils.js';
 import { lookupMessage } from '../../../src/lib/i18n-core.js';
 import { loadLocale } from '../lib/i18n-keys.js';
 
@@ -40,34 +36,34 @@ describe('signInErrorKey', () => {
 });
 
 describe('database errors', () => {
-    it('recognises refusals by the rules', () => {
-        expect(isPermissionDenied({ code: 'PERMISSION_DENIED' })).toBe(true);
-        expect(isPermissionDenied(new Error('permission_denied at /ratings'))).toBe(true);
-        expect(isPermissionDenied(new Error('Client is offline'))).toBe(false);
-        expect(isPermissionDenied(null)).toBe(false);
-    });
-
-    it('maps failures to messages that exist', () => {
-        const errors = [{ code: 'PERMISSION_DENIED' }, new TimeoutError(10), new Error('x')];
-        for (const error of errors) expect(hasMessage(databaseErrorKey(error))).toBe(true);
-        expect(databaseErrorKey(new TimeoutError(10))).toBe('common.errors.offline');
-    });
-});
-
-describe('withTimeout', () => {
     afterEach(() => {
         vi.useRealTimers();
     });
 
-    it('passes on a result that arrives in time', async () => {
-        await expect(withTimeout(Promise.resolve(3), 100)).resolves.toBe(3);
+    it('maps failures to messages that exist', () => {
+        const errors = [
+            { code: 'PERMISSION_DENIED' },
+            new Error('permission_denied at /ratings'),
+            new TimeoutError('Reading', 10),
+            new Error('x'),
+        ];
+        for (const error of errors) expect(hasMessage(databaseErrorKey(error))).toBe(true);
+        expect(databaseErrorKey({ code: 'PERMISSION_DENIED' })).toBe(
+            'admin.errors.permissionDenied'
+        );
+        expect(databaseErrorKey(new Error('Client is offline'))).toBe('common.errors.generic');
     });
 
-    it('rejects with a TimeoutError when the answer is late', async () => {
+    it('reports a request that timed out in the shared helper as a connection problem', async () => {
         vi.useFakeTimers();
-        const late = withTimeout(new Promise(() => {}), 1000);
-        vi.advanceTimersByTime(1000);
-        await expect(late).rejects.toBeInstanceOf(TimeoutError);
+        const late = withTimeout(new Promise(() => {}), 1000).catch((error) => error);
+        await vi.advanceTimersByTimeAsync(1000);
+        expect(databaseErrorKey(await late)).toBe('common.errors.offline');
+    });
+
+    it('keeps no copies of the shared database helpers', () => {
+        // They live in src/lib/db-utils.js, tested in tests/unit/lib/db-utils.test.js.
+        expect(Object.keys(adminErrors).sort()).toEqual(['databaseErrorKey', 'signInErrorKey']);
     });
 });
 

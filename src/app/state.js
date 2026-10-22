@@ -23,6 +23,7 @@
 import { RATING_MAX, RATING_MIN, STORAGE_KEYS, TOKEN_BUDGET } from '../lib/config.js';
 import { CRITERION_KEYS, emptyAllocation } from '../lib/criteria.js';
 import { SESSION_ID_PATTERN, STUDY_ID_PATTERN, USERNAME_PATTERN } from '../lib/patterns.js';
+import { isObject } from '../lib/records.js';
 import { normaliseRoom } from '../lib/room.js';
 import { safeGet, safeGetJSON, safeRemove, safeSet, safeSetJSON } from '../lib/storage.js';
 
@@ -72,17 +73,13 @@ export function resultsPage(studyCount) {
     return FIRST_STUDY_PAGE + studyCount + 1;
 }
 
-function isPlainObject(value) {
-    return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-}
-
 function isScaleValue(value) {
     return Number.isInteger(value) && value >= RATING_MIN && value <= RATING_MAX;
 }
 
 /** Keeps entries whose key is a study id and whose value passes `isValid`. */
 function studyMap(value, isValid) {
-    if (!isPlainObject(value)) return {};
+    if (!isObject(value)) return {};
     return Object.fromEntries(
         Object.entries(value).filter(([key, entry]) => STUDY_ID_PATTERN.test(key) && isValid(entry))
     );
@@ -90,7 +87,7 @@ function studyMap(value, isValid) {
 
 function sanitiseTokens(value) {
     const tokens = emptyAllocation();
-    if (!isPlainObject(value)) return tokens;
+    if (!isObject(value)) return tokens;
     let total = 0;
     for (const key of CRITERION_KEYS) {
         const count = value[key];
@@ -105,7 +102,7 @@ function sanitiseCrowd(value) {
     return studyMap(
         value,
         (entry) =>
-            isPlainObject(entry) &&
+            isObject(entry) &&
             Number.isInteger(entry.n) &&
             entry.n >= 0 &&
             (entry.mean === null || (Number.isFinite(entry.mean) && entry.n > 0))
@@ -166,7 +163,7 @@ export function createState({ sessionId, room = null, userName = null }) {
  * @returns {object|null}
  */
 export function migrateState(raw, { studyCount, legacyUserName = null }) {
-    if (!isPlainObject(raw) || typeof raw.sessionId !== 'string') return null;
+    if (!isObject(raw) || typeof raw.sessionId !== 'string') return null;
     if (!SESSION_ID_PATTERN.test(raw.sessionId)) return null;
 
     const userRatings = studyMap(raw.userRatings, isScaleValue);

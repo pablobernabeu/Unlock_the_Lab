@@ -7,7 +7,13 @@ import { RESULTS_TOP_N, TOKEN_BUDGET } from '../lib/config.js';
 import { CRITERION_KEYS } from '../lib/criteria.js';
 import { findEntriesByUsername, findRank, rankEntries } from '../lib/leaderboard.js';
 import { SESSION_ID_PATTERN, USERNAME_PATTERN } from '../lib/patterns.js';
-import { displayedAccuracy, isValidRating, meanAccuracy, validRatings } from '../lib/scoring.js';
+import {
+    displayedAccuracy,
+    isValidRating,
+    meanAccuracy,
+    ratingOf,
+    validRatings,
+} from '../lib/scoring.js';
 import { mean } from '../lib/stats.js';
 
 /** Average differences smaller than this (in scale points) count as 'close to the expert'. */
@@ -62,8 +68,8 @@ export function readOnlyReviewRows(ratingsTree, sessionId, studies) {
     const rows = [];
     for (const study of studies) {
         const record = ratingsTree?.[study.id]?.[sessionId];
-        const rating = typeof record === 'number' ? record : record?.rating;
-        if (!isValidRating(rating)) continue;
+        const rating = ratingOf(record);
+        if (rating === null) continue;
         const isScore = (value) => Number.isInteger(value) && value >= 0 && value <= 100;
         rows.push({
             study,

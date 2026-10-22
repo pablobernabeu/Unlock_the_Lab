@@ -19,7 +19,7 @@ The live site is Firebase Hosting site `unlock-the-lab` (https://unlock-the-lab.
 Preview channels use the production database, so anything done on a preview is recorded as real data: sessions, ratings, leaderboard entries and weights. The `preview` job builds with `VITE_DEPLOY_TARGET=preview`, and every page of such a build shows a banner at the top: 'Preview build: anything you do here is saved to the live database.' (`src/lib/preview-banner.js`).
 
 - Use previews to look at a change, not to test-run a workshop.
-- Never sign in to `admin.html` on a preview. The facilitator panel there runs the pull request's unreviewed code with full administrator rights, including ending sessions and deleting data.
+- The facilitator panel refuses to sign in on preview builds. Previews run a pull request's unreviewed code against the live database, so an administrator signed in there would give that code full rights, including ending sessions and deleting data.
 - Check admin changes locally against the emulators instead (see 'Local development' in `README.md`).
 
 A separate Firebase project for previews would remove the risk. It needs the owner: create a free project (for example `unlock-the-lab-preview`) with a Realtime Database and Anonymous and Email/Password sign-in, deploy `database.rules.json` to it, commit a `.env.preview` with its public `VITE_FIREBASE_*` values and `VITE_USE_EMULATORS=false`, build previews with `npx vite build --mode preview` and update this section.

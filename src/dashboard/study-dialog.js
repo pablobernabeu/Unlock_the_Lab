@@ -14,7 +14,9 @@ import { formatCount, formatStat } from './numbers.js';
 const STATS_HEADING_ID = 'study-dialog-stats-heading';
 
 /**
- * Element with trusted markup from our own content files (they may hold <i> and similar).
+ * Element with trusted markup from our own content files: the study texts may
+ * hold <i> and similar. The expert feedback is plain text and never goes
+ * through here (tests/unit/app/feedback.test.js checks the content for markup).
  * @param {string} tag
  * @param {string} html from src/content, never from the database
  * @param {Record<string, unknown>} [attrs]
@@ -99,16 +101,14 @@ function feedbackSection(study) {
                         ? el('span', { class: `badge badge--${item.band}` }, bandLabel(item.band))
                         : null
                 ),
-                trustedContent('p', item.note)
+                el('p', null, item.note)
             )
         );
     return el(
         'section',
         { class: 'study-dialog__section', 'aria-labelledby': 'study-dialog-feedback-heading' },
         el('h3', { id: 'study-dialog-feedback-heading' }, t('dashboard.dialog.feedbackHeading')),
-        feedback?.summary
-            ? trustedContent('p', feedback.summary)
-            : el('p', null, t('dashboard.dialog.noFeedback')),
+        el('p', null, feedback?.summary || t('dashboard.dialog.noFeedback')),
         items.length ? el('ul', { class: 'study-dialog__feedback' }, items) : null
     );
 }

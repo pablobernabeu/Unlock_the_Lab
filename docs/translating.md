@@ -24,7 +24,7 @@ Once any file exists under `src/i18n/xx/`, the language appears in the language 
 - Keep placeholders in curly braces, such as `{count}` or `{name}`, exactly as they are; they are replaced with numbers and names when the page runs.
 - Some values are objects with `one` and `other` (and, for some languages, `zero`, `two`, `few` or `many`): these are plural forms. Provide the forms your language needs; the browser picks the right one.
 - A few strings contain simple HTML such as `<strong>`, `<em>`, `<i>` or a link. Keep the tags and translate the text inside them.
-- In `studies.json`, keep each study's `id`. Translate the text fields and the `summary` and `note` of the feedback, but leave the `band` values (`low`, `medium`, `high`) in English: the pages use them for styling and translate the labels themselves.
+- In `studies.json`, keep each study's `id`. Translate the text fields and the `summary` and `note` of the feedback, but leave the `band` values (`low`, `medium`, `high`) in English: the pages use them for styling and translate the labels themselves. The feedback is shown as plain text, so it must not contain HTML.
 - `glossary.json` and `rubric.json` are matched to English by position, so keep the entries in the same order as the English files, even if that is not alphabetical in your language.
 - Expert ratings live in `src/content/expert-ratings.json` and are shared by all languages; do not copy that file.
 

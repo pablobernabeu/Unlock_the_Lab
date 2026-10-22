@@ -5,6 +5,7 @@ import {
     isValidRating,
     meanAccuracy,
     predictionScore,
+    ratingOf,
     scoreBand,
     scoringTarget,
     validRatings,
@@ -191,5 +192,20 @@ describe('scoreBand', () => {
         expect(scoreBand(70)).toBe('good');
         expect(scoreBand(69)).toBe('keepLearning');
         expect(scoreBand(0)).toBe('keepLearning');
+    });
+});
+
+describe('ratingOf', () => {
+    it('reads the rating of v2 and v1 records and of very old bare numbers', () => {
+        expect(ratingOf({ rating: 5, prediction: 4 })).toBe(5);
+        expect(ratingOf(3)).toBe(3);
+        expect(ratingOf({ rating: 7, room: 'DEMO-1' })).toBe(7);
+    });
+
+    it('is null for a missing rating or one off the 1-7 scale', () => {
+        for (const record of [null, undefined, {}, { rating: 0 }, { rating: 8 }, 9, '5', NaN]) {
+            expect(ratingOf(record)).toBeNull();
+        }
+        expect(ratingOf({ rating: '5' })).toBeNull();
     });
 });

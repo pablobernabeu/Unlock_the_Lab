@@ -1,9 +1,10 @@
 /**
- * Small helpers for working with Realtime Database promises. No Firebase
- * imports, so they can be unit-tested in Node.
+ * Small helpers for working with Realtime Database promises, shared by the
+ * participant app and the facilitator panel. No Firebase imports, so they can
+ * be unit-tested in Node.
  */
 
-/** How long the app waits for a database read or write before telling the participant. */
+/** How long a page waits for a database read or write before telling the person using it. */
 export const DB_TIMEOUT_MS = 15000;
 
 /** Error raised by withTimeout. */

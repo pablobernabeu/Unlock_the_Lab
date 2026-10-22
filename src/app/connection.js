@@ -29,9 +29,9 @@ import {
     FEEDBACK_MODE,
     PRESENCE_HEARTBEAT_MS,
 } from '../lib/config.js';
+import { DB_TIMEOUT_MS, isPermissionDenied, retry, withTimeout } from '../lib/db-utils.js';
 import { db, getParticipantAuth } from '../lib/firebase.js';
 import { getLocale } from '../lib/i18n.js';
-import { DB_TIMEOUT_MS, isPermissionDenied, retry, withTimeout } from './db-utils.js';
 
 /** Waits before the second and third sign-in attempts. */
 const SIGN_IN_RETRY_DELAYS_MS = [1500, 4000];

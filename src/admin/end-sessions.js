@@ -6,12 +6,12 @@
  * returns); their answers so far are kept.
  */
 import { MIN_STUDIES_TO_FINISH } from '../lib/config.js';
+import { DB_TIMEOUT_MS, withTimeout } from '../lib/db-utils.js';
 import { confirmDialog } from '../lib/dialog.js';
 import { qs, setText } from '../lib/dom.js';
 import { formatDate, t } from '../lib/i18n.js';
 import { presenceCounts } from './counts.js';
-import { ENDED_AT, REQUEST_TIMEOUT_MS, endAllSessions } from './data.js';
-import { withTimeout } from './errors.js';
+import { ENDED_AT, endAllSessions } from './data.js';
 import { createStatus, reportWriteFailure, whileBusy } from './ui.js';
 
 /**
@@ -55,7 +55,7 @@ export function createEndSessions(root, { db, store, serverNow }) {
         }
         status.show(t('admin.end.working'));
         try {
-            await withTimeout(endAllSessions(db), REQUEST_TIMEOUT_MS);
+            await withTimeout(endAllSessions(db), DB_TIMEOUT_MS, 'Ending sessions');
             status.show(t('admin.end.done'), 'success');
         } catch (error) {
             reportWriteFailure(status, error, {

@@ -361,6 +361,34 @@
     right: -1px;
 }
 
+/*
+ * Forced colours (Windows contrast themes) replace backgrounds with the page
+ * colour and drop shadows, which would hide the fills and the intervals. As
+ * for the app's token bars, the track gets an outline, the fill the system
+ * highlight colour and the interval the text colour with a page-colour halo.
+ */
+@media (forced-colors: active) {
+    .criterion__track {
+        border: 1px solid CanvasText;
+    }
+
+    .criterion__fill {
+        forced-color-adjust: none;
+        background: Highlight;
+    }
+
+    .criterion__whisker {
+        forced-color-adjust: none;
+        background: CanvasText;
+        box-shadow: 0 0 0 1px Canvas;
+    }
+
+    .criterion__whisker::before,
+    .criterion__whisker::after {
+        background: CanvasText;
+    }
+}
+
 .criterion-scale {
     display: flex;
     justify-content: space-between;

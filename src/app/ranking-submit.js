@@ -5,8 +5,8 @@
  */
 import { get, ref, serverTimestamp, set } from 'firebase/database';
 import { CRITERION_KEYS } from '../lib/criteria.js';
+import { DB_TIMEOUT_MS, isPermissionDenied, withTimeout } from '../lib/db-utils.js';
 import { db } from '../lib/firebase.js';
-import { DB_TIMEOUT_MS, isPermissionDenied, withTimeout } from './db-utils.js';
 
 /** A queued write still lands later, so the participant is told after this. */
 const WRITE_TIMEOUT_MS = 10000;

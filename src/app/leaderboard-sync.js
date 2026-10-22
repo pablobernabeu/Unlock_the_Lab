@@ -10,9 +10,9 @@
  *     reads the entry again and carries on once the local totals catch up.
  */
 import { get, ref, serverTimestamp, set } from 'firebase/database';
+import { DB_TIMEOUT_MS, withTimeout } from '../lib/db-utils.js';
 import { db } from '../lib/firebase.js';
 import { USERNAME_PATTERN } from '../lib/patterns.js';
-import { DB_TIMEOUT_MS, withTimeout } from './db-utils.js';
 import { planLeaderboardSteps } from './leaderboard-plan.js';
 
 /**

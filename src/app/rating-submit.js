@@ -4,10 +4,10 @@
  * and the leaderboard only after `submitRating` resolves.
  */
 import { get, ref, serverTimestamp, set } from 'firebase/database';
+import { DB_TIMEOUT_MS, isPermissionDenied, withTimeout } from '../lib/db-utils.js';
 import { db } from '../lib/firebase.js';
 import { predictionScore, scoringTarget, validRatings } from '../lib/scoring.js';
 import { mean } from '../lib/stats.js';
-import { DB_TIMEOUT_MS, isPermissionDenied, withTimeout } from './db-utils.js';
 import { buildRatingRecord } from './rating-record.js';
 
 /**
