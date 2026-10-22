@@ -1,6 +1,7 @@
 # Unlock the Lab: Your guide to reading science like a scientist
 
 [![DOI](https://zenodo.org/badge/1102647925.svg)](https://doi.org/10.5281/zenodo.19153148)
+[![CI](https://github.com/pablobernabeu/Unlock_the_Lab/actions/workflows/ci.yml/badge.svg)](https://github.com/pablobernabeu/Unlock_the_Lab/actions/workflows/ci.yml)
 
 Unlock the Lab is a web app for science-literacy workshops. Participants read short descriptions of fictional but realistic studies and judge their quality with six criteria that scientists use: Title, Access, Source, Theory, Methods & Data and Conclusion. After each study they see how well they did and an expert's feedback.
 
@@ -33,7 +34,7 @@ The expert rating counts as 100 participants, so the target stays close to it un
 
 ## For workshop leaders
 
-[`docs/facilitating.md`](docs/facilitating.md) explains how to run a workshop: room codes with their own leaderboard view and QR code, the dashboard, ending a workshop and how many people can join at once (100 simultaneous connections on Firebase's free plan). Facilitators sign in to the admin panel at `/admin.html` to make room links, export the data and end sessions.
+[`docs/facilitating.md`](docs/facilitating.md) explains how to run a workshop: room codes with their own leaderboard view and QR code, the dashboard, ending a workshop and how many people can join at once (100 simultaneous connections on Firebase's free plan). Facilitators sign in to the facilitator panel at `/admin.html` to make room links, export the data and end sessions.
 
 Handouts are in `materials/workshop`: the sample studies and the evaluation guide with glossary (PDF and Word) and slides with a banner and a QR code. They were made before content version 2, so a few study texts and expert ratings differ from the app; the app is the reference.
 
@@ -57,7 +58,7 @@ npm run emulators   # first terminal: database (port 9000) and Auth (port 9099) 
 npm run dev         # second terminal: http://localhost:3000
 ```
 
-`npm run dev` talks only to the local emulators, never to the live database. The dashboard is at `/dashboard.html` and the admin panel at `/admin.html`. Without the emulators the pages still load, but nothing can be saved. To try the admin panel, create an account in the Auth emulator and list its uid under `/admins`:
+`npm run dev` talks only to the local emulators, never to the live database. The dashboard is at `/dashboard.html` and the facilitator panel at `/admin.html`. Without the emulators the pages still load, but nothing can be saved. To try the facilitator panel, create an account in the Auth emulator and list its uid under `/admins`:
 
 ```bash
 curl -s 'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=local' \
@@ -92,10 +93,10 @@ CI (`.github/workflows/ci.yml`) runs the checks on every pull request, publishes
 
 ```
 index.html, dashboard.html,     page shells for the workshop, the dashboard,
-admin.html, 404.html            the admin panel and the not-found page
+admin.html, 404.html            the facilitator panel and the not-found page
 src/app/                        participant app
 src/dashboard/                  public dashboard
-src/admin/                      admin panel
+src/admin/                      facilitator panel
 src/lib/                        shared modules: scoring, statistics, leaderboard, translations, Firebase set-up
 src/content/                    studies, glossary and rubric per language; expert ratings
 src/i18n/                       interface text per language

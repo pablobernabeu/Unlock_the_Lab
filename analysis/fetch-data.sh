@@ -4,6 +4,7 @@
 #   ./fetch-data.sh              latest backup from the repository's 'data' branch (default)
 #   ./fetch-data.sh --live       fresh read of the database with scripts/backup.mjs
 #   ./fetch-data.sh --from DIR   copy the node files from a local directory
+#   ./fetch-data.sh --from FILE  split a full snapshot downloaded from the facilitator panel
 #
 # Environment:
 #   DATA_REPO_URL          repository to fetch the backup from (default: this checkout's
@@ -15,7 +16,8 @@
 #
 # Each run replaces the previous snapshot, so files from different sources are
 # never mixed, and records where the data came from in data/fetch-info.json
-# (method 'branch', 'live' or 'directory', with the source, branch and commit).
+# (method 'branch', 'live', 'directory' or 'snapshot', with the source, branch,
+# commit and export time).
 set -euo pipefail
 
 analysis_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -25,7 +27,7 @@ default_repo_url='https://github.com/pablobernabeu/Unlock_the_Lab.git'
 node_files=(ratings.json leaderboard.json rankings.json sessions.json active.json backup-info.json)
 
 usage() {
-    sed -n '2,7p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,8p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
 }
 
 mode='branch'
@@ -38,7 +40,7 @@ while [ $# -gt 0 ]; do
             mode='dir'
             source_dir="${2:-}"
             if [ -z "$source_dir" ]; then
-                echo '--from needs a directory.' >&2
+                echo '--from needs a directory or a snapshot file.' >&2
                 exit 1
             fi
             shift
@@ -79,7 +81,36 @@ json_string() {
     printf '"%s"' "${value//\"/\\\"}"
 }
 
+# Splits a full snapshot from the facilitator panel ({exportedAt, counts, nodes}) into
+# the node files a backup holds, and prints the export time. Arguments: snapshot, out dir.
+# shellcheck disable=SC2016 # JavaScript, not shell
+split_snapshot='
+const fs = require("node:fs");
+const path = require("node:path");
+const [file, out] = process.argv.slice(1);
+let snapshot;
+try {
+    snapshot = JSON.parse(fs.readFileSync(file, "utf8"));
+} catch (error) {
+    console.error(`${file} could not be read as JSON: ${error.message}`);
+    process.exit(1);
+}
+const nodes = snapshot?.nodes;
+if (typeof snapshot?.exportedAt !== "string" || !nodes || typeof nodes !== "object" || Array.isArray(nodes)) {
+    console.error(`${file} is not a full snapshot from the facilitator panel.`);
+    process.exit(1);
+}
+const write = (name, value) =>
+    fs.writeFileSync(path.join(out, name), `${JSON.stringify(value, null, 2)}\n`);
+for (const node of ["ratings", "leaderboard", "rankings", "sessions", "active"]) {
+    write(`${node}.json`, nodes[node] ?? null);
+}
+write("backup-info.json", { lastBackup: snapshot.exportedAt, counts: snapshot.counts ?? {} });
+console.log(snapshot.exportedAt);
+'
+
 commit=''
+exported_at=''
 case "$mode" in
     branch)
         origin_url="$(git -C "$repo_root" remote get-url origin 2> /dev/null ||
@@ -112,13 +143,22 @@ case "$mode" in
         source="$(without_credentials "${FIREBASE_DATABASE_URL:-production}")"
         ;;
     dir)
-        if [ ! -d "$source_dir" ]; then
-            echo "No directory at $source_dir" >&2
+        if [ -f "$source_dir" ]; then
+            if ! command -v node > /dev/null; then
+                echo 'Node.js is needed to read a snapshot file with --from.' >&2
+                exit 1
+            fi
+            exported_at="$(node -e "$split_snapshot" "$source_dir" "$staging")"
+            method='snapshot'
+            source="$(basename "$source_dir")"
+        elif [ -d "$source_dir" ]; then
+            copy_node_files "$source_dir"
+            method='directory'
+            source="$(cd "$source_dir" && pwd)"
+        else
+            echo "No directory or file at $source_dir" >&2
             exit 1
         fi
-        copy_node_files "$source_dir"
-        method='directory'
-        source="$(cd "$source_dir" && pwd)"
         ;;
 esac
 
@@ -133,6 +173,9 @@ fi
     if [ -n "$commit" ]; then
         printf '  "branch": %s,\n' "$(json_string "$branch")"
         printf '  "commit": %s,\n' "$(json_string "$commit")"
+    fi
+    if [ -n "$exported_at" ]; then
+        printf '  "exportedAt": %s,\n' "$(json_string "$exported_at")"
     fi
     printf '  "fetchedAt": %s\n}\n' "$(json_string "$(date -u +%Y-%m-%dT%H:%M:%SZ)")"
 } > "$staging/fetch-info.json"

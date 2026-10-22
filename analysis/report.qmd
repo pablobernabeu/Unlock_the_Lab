@@ -220,7 +220,7 @@ prose(when = !is.null(snapshot$fetch), "
 `r provenance_text(snapshot$fetch)`
 ")
 prose(when = length(missing_nodes) > 0, "
-The snapshot has no `r fmt_list(paste0('/', missing_nodes), 'or')` file. Backups made by v1 never included /rankings or /sessions, so a snapshot from a v1 backup cannot contain them; the analyses that need them are skipped below. A v2 backup or the admin panel's export includes both.
+The snapshot has no `r fmt_list(paste0('/', missing_nodes), 'or')` file. Backups made by v1 never included /rankings or /sessions, so a snapshot from a v1 backup cannot contain them; the analyses that need them are skipped below. A v2 backup or the facilitator panel's export includes both.
 ")
 prose(when = snapshot$present[['active']], "
 The /active node (presence) is listed for completeness. It is short-lived by design and is not analysed: in v1 its `joinedAt` field was overwritten on every heartbeat, so it does not record when people joined.
@@ -1144,7 +1144,7 @@ if (n_weights > 0) {
 #| echo: false
 #| results: asis
 prose(when = !has_rankings_node, "
-The snapshot has no /rankings node, so criterion weights cannot be analysed. Backups made by v1 did not include it; a v2 backup or the admin panel's export does.
+The snapshot has no /rankings node, so criterion weights cannot be analysed. Backups made by v1 did not include it; a v2 backup or the facilitator panel's export does.
 ")
 prose(when = has_rankings_node && nrow(rankings_all) == 0, "
 The /rankings node is empty, so there are no criterion weights to summarise.

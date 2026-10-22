@@ -104,6 +104,28 @@ export function countRecords(node, value) {
     }, 0);
 }
 
+/** A key that the Firebase web SDK cannot read (see reservedKeyPaths). */
+export const RESERVED_KEY = 'hasOwnProperty';
+
+/**
+ * Paths of every key named 'hasOwnProperty', at any depth. The Firebase web SDK calls
+ * obj.hasOwnProperty(key) on server data, so one such key makes the dashboard, the facilitator
+ * panel and the workshop treat the whole node as empty. REST reads, and so the backup, are not
+ * affected. The v1 rules let anyone add one; the v2 rules allow none.
+ */
+export function reservedKeyPaths(node, value) {
+    const found = [];
+    const walk = (current, at) => {
+        if (current === null || typeof current !== 'object') return;
+        for (const [key, child] of Object.entries(current)) {
+            if (key === RESERVED_KEY) found.push(`${at}/${key}`);
+            walk(child, `${at}/${key}`);
+        }
+    };
+    walk(value, `/${node}`);
+    return found;
+}
+
 /**
  * Decides what a backup run writes. Pure: `fetched` maps node names to database values and
  * `existing` maps file names to their current text (missing files are absent or null).
@@ -264,12 +286,19 @@ export async function runBackup({
 
     const plan = planBackup({ fetched, existing: await readExisting(outDir), allowEmpty, now });
     for (const node of NODES) logger.log(`  ${node}: ${plan.counts[node]} records`);
+    // '::warning::' makes GitHub Actions show the line as an annotation on the run.
+    for (const keyPath of NODES.flatMap((node) => reservedKeyPaths(node, fetched[node]))) {
+        logger.log(
+            `::warning::${keyPath} stops the web app from reading its node. ` +
+                'Remove it as docs/deployment.md explains.'
+        );
+    }
 
     if (plan.refused.length > 0) {
         logger.error(
             `Refusing to replace existing backups of ${plan.refused.join(', ')} with empty data. ` +
                 'If the data really was deleted, run again with --allow-empty (in GitHub, run the ' +
-                "'Backup data' workflow by hand with 'allow_empty' ticked). Nothing was written."
+                "'Backup data' workflow by hand with 'Allow empty nodes' ticked). Nothing was written."
         );
         return 1;
     }

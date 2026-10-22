@@ -15,17 +15,18 @@ The report reads the scoring constants, validation patterns, study titles and ex
     ```
 
 - Quarto (the report was developed with Quarto 1.10 and R 4.3).
-- git, to fetch the backups, or Node.js 20.19 or later, to read the database directly.
+- git, to fetch the backups, or Node.js 22.22 or later, to read the database directly.
 
 ## Getting the data
 
-The data are not kept in this folder: `analysis/data/` is ignored by git. `fetch-data.sh` puts a snapshot there in one of three ways.
+The data are not kept in this folder: `analysis/data/` is ignored by git. `fetch-data.sh` puts a snapshot there in one of four ways.
 
 ```sh
 cd analysis
 ./fetch-data.sh                # latest backup from the repository's 'data' branch
 ./fetch-data.sh --live         # fresh read of the database with scripts/backup.mjs
 ./fetch-data.sh --from DIR     # copy the node files from a local directory
+./fetch-data.sh --from FILE    # split a full snapshot downloaded from the facilitator panel
 ```
 
 The default uses the backups that the 'Backup data' workflow commits to the `data` branch every day. It clones that branch into a temporary directory, so your checkout is not changed. `--live` reads the public database through its REST API with GET requests only; it never writes. Set `FIREBASE_DATABASE_URL` to read an emulator instead, such as `http://127.0.0.1:9000/?ns=unlock-the-lab-workshop-default-rtdb` for the one `npm run dev` uses. `--from` copies `ratings.json`, `leaderboard.json`, `rankings.json`, `sessions.json`, `active.json` and `backup-info.json` from a directory, such as a checkout of the `data` branch at an earlier commit:
@@ -35,6 +36,8 @@ git fetch origin data
 git worktree add ../../utl-data-2026-06 <commit>
 ./fetch-data.sh --from ../../utl-data-2026-06
 ```
+
+The JSON files from the export section of the facilitator panel (`ratings.json`, `leaderboard.json` and so on) work the same way: save them in one folder and pass that folder to `--from`. The panel's full snapshot can be passed to `--from` as it is. The script splits it into node files, and the report gives its export time as the time the data were taken. This is the way to analyse data that were deleted from the database before the next daily backup ran.
 
 Each run replaces the previous snapshot, so files from different sources are never mixed, and writes `data/fetch-info.json` to record where the data came from. The report cites it.
 
@@ -108,4 +111,4 @@ Use `tiny` or `empty` instead of `full` for the other fixtures. The fixture valu
 
 ## Privacy
 
-Snapshots hold pseudonymous identifiers: random session ids, anonymous authentication ids and generated usernames. The report uses them only to group records and shows none of them, but the snapshot files themselves should stay out of git and should not be shared beyond the people analysing them.
+Snapshots hold pseudonymous identifiers: random session ids, anonymous authentication ids and generated nicknames. The same records are publicly readable in the database and in the backups on the repository's `data` branch. The report uses the identifiers only to group records and prints none of them.

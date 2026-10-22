@@ -5,7 +5,7 @@ This guide is for workshop leaders. It covers room links, what participants see,
 ## Before the workshop
 
 1. **Choose a room code.** A room code gives your group its own leaderboard view and dashboard filter. Codes have 2 to 20 characters: capital letters, digits and hyphens, starting with a letter or digit, such as `OXFORD-1`. Lower-case letters in a link are turned into capitals. Use a new code for each separate workshop: everyone who joins with the same code shares a leaderboard.
-2. **Make the links.** Sign in to the admin panel at `/admin.html` (see `docs/deployment.md` for how to become an administrator) and enter the code under 'Room links'. You get:
+2. **Make the links.** Sign in to the facilitator panel at `/admin.html` (see `docs/deployment.md` for how to become an administrator) and enter the code under 'Room links'. You get:
     - the workshop link for participants, `https://unlock-the-lab.web.app/?room=CODE`;
     - a dashboard link for the room, `https://unlock-the-lab.web.app/dashboard.html?room=CODE`;
     - a QR code of the workshop link, which you can download as a PNG for slides or handouts.
@@ -37,15 +37,15 @@ For each of the 48 studies, which are fictional, participants:
 
 ## Ending the workshop
 
-In the admin panel, 'End all active sessions' closes every session that started before that moment, including those whose page is shut. Participants see 'The facilitator has closed this session' and can no longer save answers. Their answers so far are kept. Anyone who has rated at least 10 studies can still see their results, and everyone can start again as a new participant. It also clears the 'Active now' figure.
+In the facilitator panel, 'End all active sessions' closes every session that started before that moment, including those whose page is shut. Participants see 'The facilitator has closed this session' and can no longer save answers. Their answers so far are kept. Anyone who has rated at least 10 studies can still see their results, and everyone can start again as a new participant. It also clears the 'Active now' figure.
 
 Each participant's results stay available at a personal link of the form `https://unlock-the-lab.web.app/?session=<id>`. The results page offers to copy or email it. Anyone who lost it can find their results on the dashboard under 'Find your results', by nickname.
 
 ## How many people can join at once
 
-The site runs on Firebase's free Spark plan, which allows at most 100 simultaneous connections to the database. Every open page uses one: each participant's workshop page, each dashboard (a projected one included) and each admin panel. When the limit is reached, new visitors cannot connect until others leave. The admin panel's 'Active now' figure approximates the number in use; the Usage tab of the Realtime Database in the Firebase console shows the real one.
+The site runs on Firebase's free Spark plan, which allows at most 100 simultaneous connections to the database. Every open page uses one: each participant's workshop page, each dashboard (a projected one included) and each facilitator panel. When the limit is reached, new visitors cannot connect until others leave. The facilitator panel's 'Active now' figure approximates the number in use; the Usage tab of the Realtime Database in the Firebase console shows the real one.
 
-For a group close to 100, close dashboards and admin panels you do not need, or ask the project owner about moving to the pay-as-you-go Blaze plan, which allows far more connections.
+For a group close to 100, close dashboards and facilitator panels you do not need, or ask the project owner about moving to the pay-as-you-go Blaze plan, which allows far more connections.
 
 ## Data and privacy
 

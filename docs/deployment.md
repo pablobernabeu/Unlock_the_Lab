@@ -19,7 +19,7 @@ The live site is Firebase Hosting site `unlock-the-lab` (https://unlock-the-lab.
 Preview channels use the production database, so anything done on a preview is recorded as real data: sessions, ratings, leaderboard entries and weights. The `preview` job builds with `VITE_DEPLOY_TARGET=preview`, and every page of such a build shows a banner at the top: 'Preview build: anything you do here is saved to the live database.' (`src/lib/preview-banner.js`).
 
 - Use previews to look at a change, not to test-run a workshop.
-- Never sign in to `admin.html` on a preview. The admin panel there runs the pull request's unreviewed code with full administrator rights, including ending sessions and deleting data.
+- Never sign in to `admin.html` on a preview. The facilitator panel there runs the pull request's unreviewed code with full administrator rights, including ending sessions and deleting data.
 - Check admin changes locally against the emulators instead (see 'Local development' in `README.md`).
 
 A separate Firebase project for previews would remove the risk. It needs the owner: create a free project (for example `unlock-the-lab-preview`) with a Realtime Database and Anonymous and Email/Password sign-in, deploy `database.rules.json` to it, commit a `.env.preview` with its public `VITE_FIREBASE_*` values and `VITE_USE_EMULATORS=false`, build previews with `npx vite build --mode preview` and update this section.
@@ -38,6 +38,20 @@ The workflow uses two service accounts, so that pull-request code never holds a 
 
 The rules require records that version 1 of the app did not write, so a browser tab that loaded version 1 before the deploy cannot save ratings afterwards until it is reloaded. Deploy between workshops.
 
+Right after the first deploy of the version 2 rules, check the data once for keys named `hasOwnProperty`. The version 1 rules let anyone add a key with any name, and the Firebase web SDK cannot read a node that holds this one: the dashboard, the facilitator panel and the workshop would treat the whole node as empty. The version 2 rules allow no such key, so the check never needs repeating. The backup script reads over REST, which is not affected, and prints a warning for each such key:
+
+```bash
+node scripts/backup.mjs --out /tmp/utl-check --dry-run
+```
+
+Remove each path it names (the daily backup has already saved a copy):
+
+```bash
+npx firebase database:remove <path> --project unlock-the-lab-workshop --instance unlock-the-lab-workshop-default-rtdb
+```
+
+The script does not read `/active`; 'End all active sessions' in the facilitator panel clears it.
+
 ## Administrators
 
 Admin rights come from the `/admins` node, not from the sign-in method:
@@ -46,7 +60,7 @@ Admin rights come from the `/admins` node, not from the sign-in method:
 2. Under Realtime Database → Data, add the child `admins/<uid>` with the value `true`.
 3. Sign in at `/admin.html`.
 
-Under Authentication → Settings → User actions, turn off 'Enable create (sign-up)' so that nobody can create an email/password account from the browser. Anonymous sign-in must stay enabled for participants.
+Anyone can create an email/password account through the browser, but such an account gets no more than an anonymous participant: only accounts listed under `/admins` can use the facilitator panel or change other people's data. Leave 'Enable create (sign-up)' under Authentication → Settings → User actions switched on, because participants' anonymous accounts are new accounts too and turning it off can stop them from signing in. Anonymous sign-in must also stay enabled.
 
 ## Recommended hardening
 
@@ -54,7 +68,7 @@ Scores are computed in the browser, so a determined visitor could still submit i
 
 ### Firebase App Check (reCAPTCHA Enterprise)
 
-1. **Code.** Initialise App Check in `src/lib/firebase.js` for both the default app and the admin app, with `initializeAppCheck(app, { provider: new ReCaptchaEnterpriseProvider(siteKey), isTokenAutoRefreshEnabled: true })`. Every page that uses the database then sends tokens, the dashboard and admin panel included. Skip it when `VITE_USE_EMULATORS` is `'true'`, because the emulators do not check tokens, and use a debug token for `npm run dev:live`.
+1. **Code.** Initialise App Check in `src/lib/firebase.js` for both the default app and the admin app, with `initializeAppCheck(app, { provider: new ReCaptchaEnterpriseProvider(siteKey), isTokenAutoRefreshEnabled: true })`. Every page that uses the database then sends tokens, the dashboard and facilitator panel included. Skip it when `VITE_USE_EMULATORS` is `'true'`, because the emulators do not check tokens, and use a debug token for `npm run dev:live`.
 2. **Content Security Policy.** In `firebase.json` (which `scripts/serve-dist.mjs` also uses), add `https://www.google.com/recaptcha/` and `https://www.gstatic.com/recaptcha/` to `script-src`, add a `frame-src` directive with `https://www.google.com/recaptcha/` and `https://recaptcha.google.com/recaptcha/`, and add `https://content-firebaseappcheck.googleapis.com` to `connect-src`. Without them the browser blocks reCAPTCHA, and once enforcement is on every database request fails.
 3. **Backups.** The daily backup (`scripts/backup.mjs`) and `analysis/fetch-data.sh --live` read the database without credentials, so enforcement would refuse them too. Before enforcing, make them authenticate (for example with a service account access token), or keep App Check in monitoring mode.
 4. **Monitoring first.** Watch the App Check metrics in the Firebase console for a while before you enforce it for the Realtime Database.

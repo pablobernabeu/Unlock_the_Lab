@@ -18,7 +18,7 @@ abstract: >-
     fictional but realistic study summaries, rate their quality on a 1-7 scale
     against a six-criterion rubric, predict the ratings of other participants and
     receive expert feedback. A public dashboard shows aggregate results, and the
-    anonymous data support research on how people evaluate scientific evidence.
+    pseudonymous data support research on how people evaluate scientific evidence.
 keywords:
     - science literacy
     - research quality

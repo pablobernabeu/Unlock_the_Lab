@@ -208,6 +208,15 @@ check('agrees verbs with counts', agree(1, 'is', 'are') == 'is' && agree(2, 'is'
 check('drops decimals from whole counts', fmt_count(2) == '2' && fmt_count(2.5) == '2.5')
 check('locates intervals', position(0.1, 0.2, 0) == 'above' && position(-0.1, 0.2, 0) == 'includes' &&
           position(NA, 1, 0) == 'unknown' && position(0.004, 0.19, 0) == 'includes')
+check('describes data split from a facilitator panel snapshot',
+      provenance_text(list(method = 'snapshot', source = 'unlock-the-lab-snapshot-2026-10-22-0205.json',
+                           exportedAt = '2026-10-22T02:05:33.120Z',
+                           fetchedAt = '2026-10-23T09:00:00Z')) ==
+          'It comes from a full snapshot downloaded from the facilitator panel on 22 October 2026.')
+check('describes data copied from a directory without its path',
+      provenance_text(list(method = 'directory', source = '/home/someone/data',
+                           fetchedAt = '2026-10-23T09:00:00Z')) ==
+          'It was copied from a local directory, on 23 October 2026.')
 check('quality bands follow src/lib/content.js',
       identical(as.character(quality_band(c(1, 2, 3, 5, 6, 7))),
                 c('low', 'low', 'medium', 'medium', 'high', 'high')))

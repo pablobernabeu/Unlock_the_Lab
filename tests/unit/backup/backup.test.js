@@ -14,6 +14,7 @@ import {
     nodeUrl,
     parseOptions,
     planBackup,
+    reservedKeyPaths,
     runBackup,
     serialise,
     sortKeysDeep,
@@ -160,6 +161,32 @@ describe('emptiness and counts', () => {
         expect(countRecords('leaderboard', LEADERBOARD)).toBe(1);
         expect(countRecords('rankings', null)).toBe(0);
         expect(countRecords('ratings', { 'STUDY-1': null })).toBe(0);
+    });
+});
+
+describe('reservedKeyPaths', () => {
+    const record = { rating: 7, prediction: 7, timestamp: 1, uid: 'x' };
+
+    it('finds keys named hasOwnProperty at any depth', () => {
+        const ratings = {
+            'STUDY-5': {
+                hasOwnProperty: record,
+                session_1771630835301_gj69lmk1o: { ...record, hasOwnProperty: 1 },
+            },
+        };
+        expect(reservedKeyPaths('ratings', ratings)).toEqual([
+            '/ratings/STUDY-5/hasOwnProperty',
+            '/ratings/STUDY-5/session_1771630835301_gj69lmk1o/hasOwnProperty',
+        ]);
+        expect(reservedKeyPaths('leaderboard', { hasOwnProperty: { score: 1 } })).toEqual([
+            '/leaderboard/hasOwnProperty',
+        ]);
+    });
+
+    it('finds nothing in ordinary data, empty nodes or other Object method names', () => {
+        expect(reservedKeyPaths('ratings', RATINGS)).toEqual([]);
+        expect(reservedKeyPaths('rankings', null)).toEqual([]);
+        expect(reservedKeyPaths('sessions', { toString: {}, constructor: {} })).toEqual([]);
     });
 });
 
@@ -378,6 +405,21 @@ describe('runBackup', () => {
         const nested = path.join(outDir, 'data');
         expect(await run(fetchedData(), { outDir: nested })).toBe(0);
         expect(await readdir(nested)).toContain('ratings.json');
+    });
+
+    it('warns about each key the web SDK cannot read, and still backs it up', async () => {
+        const logger = { ...silentLogger, log: vi.fn() };
+        const ratings = { ...RATINGS, 'STUDY-5': { hasOwnProperty: { rating: 7 } } };
+        expect(await run(fetchedData({ ratings }), { logger })).toBe(0);
+        const warnings = logger.log.mock.calls
+            .flat()
+            .filter((line) => line.startsWith('::warning::'));
+        expect(warnings).toEqual([
+            '::warning::/ratings/STUDY-5/hasOwnProperty stops the web app from reading its node. ' +
+                'Remove it as docs/deployment.md explains.',
+        ]);
+        const saved = JSON.parse(await readFile(path.join(outDir, 'ratings.json'), 'utf8'));
+        expect(saved['STUDY-5']).toEqual({ hasOwnProperty: { rating: 7 } });
     });
 
     it('rejects when the database cannot be read', async () => {

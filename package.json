@@ -13,7 +13,7 @@
   },
   "bugs": "https://github.com/pablobernabeu/Unlock_the_Lab/issues",
   "engines": {
-    "node": ">=20.19"
+    "node": ">=22.22"
   },
   "scripts": {
     "dev": "vite",

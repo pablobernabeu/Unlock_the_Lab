@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       allow_empty:
-        description: 'Record nodes that are now empty (after data was deleted on purpose)'
+        description: 'Allow empty nodes (after data was deleted on purpose)'
         type: boolean
         default: false
 
@@ -65,8 +65,10 @@ jobs:
           | `backup-info.json` | Time of the last backup that changed data, and record counts |
 
           Keys are sorted so that diffs show only real changes. Presence data (`/active`) is
-          not backed up. Fields, legacy record shapes and how to restore a backup are
-          described in [docs/data.md](https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/docs/data.md)
+          not backed up. Fields and legacy record shapes are described in
+          [docs/data.md](https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/docs/data.md),
+          and restoring in
+          [docs/deployment.md](https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/docs/deployment.md#backups-and-restoring),
           on `main`.
           EOF
 

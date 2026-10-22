@@ -11,7 +11,7 @@ Each language has a code `xx`: a language tag such as `es`, `nb` or `pt-BR`, mad
 | `src/i18n/en/common.json`      | `src/i18n/xx/common.json`      | Strings shared by all pages     |
 | `src/i18n/en/app.json`         | `src/i18n/xx/app.json`         | Participant app                 |
 | `src/i18n/en/dashboard.json`   | `src/i18n/xx/dashboard.json`   | Public dashboard                |
-| `src/i18n/en/admin.json`       | `src/i18n/xx/admin.json`       | Admin panel (optional)          |
+| `src/i18n/en/admin.json`       | `src/i18n/xx/admin.json`       | Facilitator panel (optional)    |
 | `src/content/en/studies.json`  | `src/content/xx/studies.json`  | Study cards and expert feedback |
 | `src/content/en/glossary.json` | `src/content/xx/glossary.json` | Glossary                        |
 | `src/content/en/rubric.json`   | `src/content/xx/rubric.json`   | Rubric                          |

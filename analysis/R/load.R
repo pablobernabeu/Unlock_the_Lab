@@ -234,6 +234,12 @@ provenance_text <- function(fetch) {
         live = paste0('It was read directly from ', database, ' with scripts/backup.mjs', fetched,
                       '.'),
         directory = paste0('It was copied from a local directory', fetched, '.'),
+        snapshot = paste0('It comes from a full snapshot downloaded from the facilitator panel',
+                          if (is.character(fetch$exportedAt)) {
+                              paste0(' on ', fmt_date(parse_utc(fetch$exportedAt)))
+                          } else {
+                              fetched
+                          }, '.'),
         paste0('Its source is not recorded in a form this report recognises', fetched, '.')
     )
 }

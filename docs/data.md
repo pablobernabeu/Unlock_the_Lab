@@ -119,4 +119,4 @@ These records are not comparable with later data and are no longer in the databa
 
 A GitHub Actions workflow (`.github/workflows/backup.yml`) copies `/ratings`, `/leaderboard`, `/rankings` and `/sessions` once a day into the `data` branch of the repository, one JSON file per node with keys sorted, plus `backup-info.json` with the time and record counts. It commits only when the data have changed. Backups taken before version 2 are in the history of `data/` on `main`, up to the merge of version 2.
 
-The admin panel exports the same nodes as CSV (one row per record, columns as in the tables above plus `sessionId` and, for ratings, `studyId`) and as JSON. The analysis in `analysis/` reads either source; see `analysis/README.md`.
+The facilitator panel exports the same nodes as CSV (one row per record, columns as in the tables above plus `sessionId` and, for ratings, `studyId`) and as JSON. The analysis in `analysis/` reads either source; see `analysis/README.md`.
