@@ -258,7 +258,7 @@ export function createI18n({
      * @returns {string}
      */
     function formatNumber(value, options) {
-        return new Intl.NumberFormat(locale, options).format(value);
+        return new Intl.NumberFormat(intlLocale(locale), options).format(value);
     }
 
     /**
@@ -271,7 +271,7 @@ export function createI18n({
         // Intl would show null as 1 January 1970 and undefined as now; legacy records lack timestamps.
         const time = value instanceof Date ? value.getTime() : value;
         if (!Number.isFinite(time)) return MISSING_DATE;
-        return new Intl.DateTimeFormat(locale, options).format(time);
+        return new Intl.DateTimeFormat(intlLocale(locale), options).format(time);
     }
 
     return {
@@ -286,6 +286,11 @@ export function createI18n({
         formatNumber,
         formatDate,
     };
+}
+
+/** Intl locale for formatting: the interface's English is British, so dates read '22 Oct 2026'. */
+function intlLocale(code) {
+    return code === DEFAULT_LOCALE ? 'en-GB' : code;
 }
 
 function withinRoot(root, selector) {

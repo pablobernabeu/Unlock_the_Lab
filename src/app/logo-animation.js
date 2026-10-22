@@ -7,7 +7,13 @@
  */
 import { motionAllowed } from '../lib/motion.js';
 
-const DROP_TYPES = ['droplet', 'droplet-star', 'droplet-heart', 'droplet-sparkle', 'droplet-bubble'];
+const DROP_TYPES = [
+    'droplet',
+    'droplet-star',
+    'droplet-heart',
+    'droplet-sparkle',
+    'droplet-bubble',
+];
 const ANIMATION_MS = 4000;
 const UPSIDE_DOWN_AT_MS = 600;
 const REFILL_AT_MS = 2500;
@@ -79,6 +85,9 @@ export function enableLogoAnimation(logo, { idleShake = false } = {}) {
     if (!logo) return { celebrate() {}, destroy() {} };
     let animating = false;
     let hoverTimer = null;
+    // Read once: a celebration can start while a flip shows the inverted image, and must not
+    // restore that image at its end.
+    const originalSrc = logo.getAttribute('src');
     const timers = new Set();
     const containers = new Set();
 
@@ -94,7 +103,6 @@ export function enableLogoAnimation(logo, { idleShake = false } = {}) {
         const celebration = kind === 'celebration';
         if (!motionAllowed() || (animating && !celebration) || !logo.isConnected) return;
         animating = true;
-        const originalSrc = logo.getAttribute('src');
         const container = document.createElement('div');
         container.className = 'droplet-container';
         container.setAttribute('aria-hidden', 'true');

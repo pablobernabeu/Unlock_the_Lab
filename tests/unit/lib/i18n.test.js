@@ -209,19 +209,19 @@ describe('createI18n', () => {
         expect(i18n.t('common.appName')).toBe('Unlock the Lab');
     });
 
-    it('formats numbers and dates for the locale', async () => {
+    it('formats numbers and dates for the locale, with British conventions for English', async () => {
         const { i18n } = makeTranslator();
         await i18n.initI18n();
         expect(i18n.formatNumber(1234.5)).toBe('1,234.5');
         expect(
             i18n.formatDate(Date.UTC(2026, 9, 21, 12), { dateStyle: 'long', timeZone: 'UTC' })
-        ).toBe('October 21, 2026');
+        ).toBe('21 October 2026');
         expect(
             i18n.formatDate(new Date(Date.UTC(2026, 9, 21, 12)), {
                 dateStyle: 'long',
                 timeZone: 'UTC',
             })
-        ).toBe('October 21, 2026');
+        ).toBe('21 October 2026');
     });
 
     it('shows a dash for missing dates instead of 1970 or now', async () => {

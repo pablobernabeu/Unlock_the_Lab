@@ -98,3 +98,36 @@ export function setUnavailable(button, unavailable) {
 export function isUnavailable(button) {
     return button.getAttribute('aria-disabled') === 'true';
 }
+
+const boundOnce = new WeakMap();
+
+/**
+ * Adds a listener to a static element (part of index.html) only once, however
+ * often its view is rendered. A later call replaces the handler.
+ * @param {HTMLElement|null} element
+ * @param {string} type
+ * @param {(event: Event) => void} handler
+ * @returns {void}
+ */
+export function bindOnce(element, type, handler) {
+    if (!element) return;
+    const handlers = boundOnce.get(element) ?? new Map();
+    if (!handlers.has(type)) {
+        element.addEventListener(type, (event) => handlers.get(type)?.(event));
+    }
+    handlers.set(type, handler);
+    boundOnce.set(element, handlers);
+}
+
+/**
+ * Replaces an element's children, skipping null, undefined and false
+ * (replaceChildren itself would insert them as the text 'null').
+ * @param {Element} parent
+ * @param {...(Node|string|null|undefined|false)} children
+ * @returns {void}
+ */
+export function setChildren(parent, ...children) {
+    parent.replaceChildren(
+        ...children.filter((child) => child !== null && child !== undefined && child !== false)
+    );
+}

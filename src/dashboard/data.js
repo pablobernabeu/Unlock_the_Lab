@@ -21,6 +21,13 @@ import { mean, meanCI, shareCI } from '../lib/stats.js';
 
 export const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * How far ahead of the server clock a stored time may be and still count as
+ * recent. The rules stamp server time on every write, so anything further
+ * ahead is a crafted or corrupt legacy value.
+ */
+export const CLOCK_TOLERANCE_MS = 5 * 60 * 1000;
+
 /** Shortest scale for the criterion bars, so typical shares (about 1 in 6) are not squashed. */
 const MIN_SHARE_SCALE = 0.4;
 
@@ -319,6 +326,7 @@ export function shareScaleMax(highest) {
  * @param {import('../lib/leaderboard.js').LeaderboardEntry[]} entries from normaliseEntries
  * @param {object} options
  * @param {'all'|'day'} [options.period] 'day' keeps entries updated in the past 24 hours
+ *   (an entry dated in the future would otherwise stay there for good, so it is left out)
  * @param {number} options.now current server time in ms
  * @param {string|null} [options.room]
  * @param {number} [options.limit] places listed; tied entries at the last place are kept
@@ -330,8 +338,12 @@ export function leaderboardView(
     entries,
     { period = 'all', now, room = null, limit = LEADERBOARD_SIZE, minStudies = MIN_STUDIES_TO_RANK }
 ) {
-    const since = period === 'day' ? now - DAY_MS : undefined;
-    const listed = rankEntries(entries, { minStudies, since, room });
+    const day = period === 'day';
+    const since = day ? now - DAY_MS : undefined;
+    const candidates = day
+        ? (entries ?? []).filter((entry) => (entry.timestamp ?? 0) <= now + CLOCK_TOLERANCE_MS)
+        : entries;
+    const listed = rankEntries(candidates, { minStudies, since, room });
     const ranked = listed.filter((entry) => entry.rank !== null);
     const rows = ranked.filter((entry) => entry.rank <= limit);
     return {
@@ -350,6 +362,21 @@ export function leaderboardView(
 export function localSessionId(state) {
     const id = isObject(state) ? state.sessionId : null;
     return typeof id === 'string' && SESSION_ID_PATTERN.test(id) ? id : null;
+}
+
+/**
+ * True when a session has at least one valid rating, in any room.
+ * @param {Record<string, unknown> | null | undefined} node `/ratings`
+ * @param {string|null} sessionId
+ * @returns {boolean}
+ */
+export function sessionHasRatings(node, sessionId) {
+    if (!isObject(node) || typeof sessionId !== 'string') return false;
+    return Object.values(node).some((studyNode) => {
+        if (!isObject(studyNode) || !Object.hasOwn(studyNode, sessionId)) return false;
+        const record = studyNode[sessionId];
+        return isValidRating(typeof record === 'number' ? record : record?.rating);
+    });
 }
 
 /**

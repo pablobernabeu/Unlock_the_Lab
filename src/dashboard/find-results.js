@@ -24,7 +24,8 @@ function choiceText(entry) {
  * @param {() => import('../lib/leaderboard.js').LeaderboardEntry[] | null} options.getEntries
  *   null while the leaderboard is still loading
  * @param {(href: string) => void} [options.navigate]
- * @returns {{update: (entries: import('../lib/leaderboard.js').LeaderboardEntry[]) => void}}
+ * @returns {{update: (data: {entries: import('../lib/leaderboard.js').LeaderboardEntry[],
+ *   localHasRatings: boolean}) => void}}
  */
 export function createFindResults(
     root,
@@ -37,11 +38,8 @@ export function createFindResults(
     const detected = qs('[data-find-detected]', root);
     const detectedText = qs('[data-find-detected-text]', root);
 
-    if (localSessionId) {
-        qs('[data-find-detected-link]', root).href = resultsHref(localSessionId);
-        detected.hidden = false;
-        setText(detectedText, t('dashboard.find.detectedNoName'));
-    }
+    // The link is offered once the data show the session has results to look at.
+    if (localSessionId) qs('[data-find-detected-link]', root).href = resultsHref(localSessionId);
 
     function showError(message) {
         choices.hidden = true;
@@ -103,9 +101,16 @@ export function createFindResults(
     });
 
     return {
-        update(entries) {
+        /**
+         * Shows or hides the link to this device's results.
+         * @param {object} data
+         * @param {import('../lib/leaderboard.js').LeaderboardEntry[]} data.entries
+         * @param {boolean} data.localHasRatings this device's session has saved ratings
+         */
+        update({ entries, localHasRatings }) {
             if (!localSessionId) return;
             const own = entries.find((entry) => entry.sessionId === localSessionId);
+            detected.hidden = !own && !localHasRatings;
             setText(
                 detectedText,
                 own?.nameValid

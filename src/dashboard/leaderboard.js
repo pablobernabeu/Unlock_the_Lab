@@ -70,6 +70,7 @@ export function createLeaderboard(root, { localSessionId = null } = {}) {
         empty: qs('[data-leaderboard-empty]', root),
         caption: qs('[data-leaderboard-caption]', root),
         dayNote: qs('[data-day-note]', root),
+        roomNote: qs('[data-leaderboard-room]', root),
         truncated: qs('[data-leaderboard-truncated]', root),
         unranked: qs('[data-leaderboard-unranked]', root),
         more: qs('[data-leaderboard-more]', root),
@@ -112,17 +113,13 @@ export function createLeaderboard(root, { localSessionId = null } = {}) {
         );
     }
 
-    function render() {
-        if (!data) return;
-        const view = leaderboardView(data.entries, {
-            period,
-            now: data.now,
-            room: data.room,
-        });
-        const hasRows = view.rows.length > 0;
+    function renderNotes(view) {
         parts.dayNote.hidden = period !== 'day';
-        parts.wrap.hidden = !hasRows;
-        parts.empty.hidden = hasRows;
+        parts.roomNote.hidden = !data.room;
+        setText(
+            parts.roomNote,
+            data.room ? t('dashboard.leaderboard.roomNote', { room: data.room }) : ''
+        );
         setText(
             parts.empty,
             period === 'day'
@@ -137,10 +134,6 @@ export function createLeaderboard(root, { localSessionId = null } = {}) {
                     : 'dashboard.leaderboard.captionAll'
             )
         );
-        const visible = expanded ? view.rows : view.rows.slice(0, COLLAPSED_ROWS);
-        preserveFocus(panel, () => renderRows(visible));
-        renderMoreButton(view.rows.length);
-
         parts.truncated.hidden = !view.truncated;
         setText(parts.truncated, t('dashboard.leaderboard.truncated', { count: LEADERBOARD_SIZE }));
         parts.unranked.hidden = view.unrankedCount === 0;
@@ -151,6 +144,32 @@ export function createLeaderboard(root, { localSessionId = null } = {}) {
                 min: MIN_STUDIES_TO_RANK,
             })
         );
+    }
+
+    function renderView(view) {
+        const hasRows = view.rows.length > 0;
+        renderNotes(view);
+        parts.wrap.hidden = !hasRows;
+        parts.empty.hidden = hasRows;
+        renderRows(expanded ? view.rows : view.rows.slice(0, COLLAPSED_ROWS));
+        renderMoreButton(view.rows.length);
+    }
+
+    function render() {
+        if (!data) return;
+        const view = leaderboardView(data.entries, {
+            period,
+            now: data.now,
+            room: data.room,
+        });
+        // A focused row, the table or the 'Show all' button can disappear in a live update.
+        preserveFocus(panel, () => renderView(view), {
+            fallback: () => (parts.wrap.hidden ? selectedTab() : parts.wrap),
+        });
+    }
+
+    function selectedTab() {
+        return tabs.find((tab) => tab.getAttribute('aria-selected') === 'true') ?? tabs[0];
     }
 
     function selectTab(tab, moveFocus) {
@@ -178,6 +197,9 @@ export function createLeaderboard(root, { localSessionId = null } = {}) {
         event.preventDefault();
         selectTab(next, true);
     }
+
+    parts.empty.hidden = false;
+    setText(parts.empty, t('common.status.loading'));
 
     for (const tab of tabs) {
         tab.addEventListener('click', () => selectTab(tab, false));

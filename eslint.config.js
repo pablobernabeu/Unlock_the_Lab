@@ -12,6 +12,7 @@ export default [
             'test-results/**',
             'blob-report/**',
             '.firebase/**',
+            '.tmp-*/**',
         ],
     },
     js.configs.recommended,

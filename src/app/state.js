@@ -11,7 +11,8 @@
  *   sessionId              'session_<ms>_<base36>'
  *   hasUsedBackButton      the one-time back navigation was used
  *   celebratedPapers       studies whose score triggered the celebration
- *   pageDisplayTimestamps  studyId -> ms when the study was first shown (v1: last shown)
+ *   pageDisplayTimestamps  studyId -> ms when the study was first shown (v1: last shown,
+ *                          overwritten on every display, so v1 values are dropped on migration)
  *   criterionTokens        criterion -> tokens (0-20)
  * v2 adds stateVersion, room, paperTargets, paperFeedbackShown, joinedAt and a
  * few app fields (userName, paperCrowd, rankingSubmitted, finishedFromPage).
@@ -178,6 +179,7 @@ export function migrateState(raw, { studyCount, legacyUserName = null }) {
     const page = Number.isInteger(raw.currentPage) ? raw.currentPage : 0;
     const storedName = typeof raw.userName === 'string' ? raw.userName : legacyUserName;
     const finishedFrom = raw.finishedFromPage;
+    const fromV1 = !(Number.isInteger(raw.stateVersion) && raw.stateVersion >= STATE_VERSION);
 
     return {
         ...createState({
@@ -192,9 +194,13 @@ export function migrateState(raw, { studyCount, legacyUserName = null }) {
         totalScore: sumScores(paperScores, userRatings),
         hasUsedBackButton: raw.hasUsedBackButton === true,
         celebratedPapers: Array.isArray(raw.celebratedPapers)
-            ? raw.celebratedPapers.filter((id) => typeof id === 'string' && STUDY_ID_PATTERN.test(id))
+            ? raw.celebratedPapers.filter(
+                  (id) => typeof id === 'string' && STUDY_ID_PATTERN.test(id)
+              )
             : [],
-        pageDisplayTimestamps: studyMap(raw.pageDisplayTimestamps, Number.isFinite),
+        // v1 stored when a study was last shown and reset it on every display, so a v1 value can be
+        // days old; kept as a first-display time it would record that as the response time.
+        pageDisplayTimestamps: fromV1 ? {} : studyMap(raw.pageDisplayTimestamps, Number.isFinite),
         criterionTokens: sanitiseTokens(raw.criterionTokens),
         paperTargets: rated(
             studyMap(
@@ -247,7 +253,10 @@ export function isRated(state, studyId) {
  * @param {boolean} rating.feedbackShown
  * @returns {object}
  */
-export function commitRating(state, { studyId, rating, prediction, score, target, crowd, feedbackShown }) {
+export function commitRating(
+    state,
+    { studyId, rating, prediction, score, target, crowd, feedbackShown }
+) {
     const userRatings = { ...state.userRatings, [studyId]: rating };
     const paperScores = { ...state.paperScores, [studyId]: score };
     const next = {
@@ -264,6 +273,47 @@ export function commitRating(state, { studyId, rating, prediction, score, target
     if (crowd) next.paperCrowd[studyId] = { n: crowd.n, mean: crowd.mean };
     if (feedbackShown) next.paperFeedbackShown[studyId] = true;
     return next;
+}
+
+/**
+ * True once the session has been used: it has joined the database or holds
+ * answers. Its room can then no longer change.
+ * @param {object} state
+ * @returns {boolean}
+ */
+export function hasStarted(state) {
+    return Number.isFinite(state.joinedAt) || ratedCount(state) > 0;
+}
+
+/**
+ * The state the app starts from.
+ * @param {object|null} saved the migrated saved state (loadState), null when none
+ * @param {object} options
+ * @param {string|null} options.urlRoom the room in a `?room=` link
+ * @param {() => string} options.newSessionId makes an id for a new session
+ * @param {number} options.studyCount
+ * @returns {{state: object, saved: boolean, roomMismatch: string|null}} `roomMismatch` is the
+ *   link's room when it differs from the room of a session already in use
+ */
+export function startingState(saved, { urlRoom, newSessionId, studyCount }) {
+    if (!saved) {
+        return {
+            state: createState({ sessionId: newSessionId(), room: urlRoom }),
+            saved: false,
+            roomMismatch: null,
+        };
+    }
+    let state = saved;
+    let roomMismatch = null;
+    if (urlRoom && urlRoom !== saved.room) {
+        if (hasStarted(saved)) roomMismatch = urlRoom;
+        else state = { ...state, room: urlRoom };
+    }
+    // Weights already saved (a reload just before the results appeared): go on to the results.
+    if (state.currentPage === weightsPage(studyCount) && state.rankingSubmitted) {
+        state = { ...state, currentPage: resultsPage(studyCount) };
+    }
+    return { state, saved: true, roomMismatch };
 }
 
 /**

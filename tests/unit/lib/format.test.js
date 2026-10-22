@@ -35,11 +35,11 @@ describe('formatRating', () => {
 
 describe('formatDuration', () => {
     it('formats seconds, minutes and hours', () => {
-        expect(formatDuration(45_000)).toBe('45 sec');
-        expect(formatDuration(125_000)).toBe('2 min 5 sec');
-        expect(formatDuration(120_000)).toBe('2 min');
-        expect(formatDuration(3_720_000)).toBe('1 hr 2 min');
-        expect(formatDuration(0)).toBe('0 sec');
+        expect(formatDuration(45_000)).toBe('45 secs');
+        expect(formatDuration(125_000)).toBe('2 mins 5 secs');
+        expect(formatDuration(120_000)).toBe('2 mins');
+        expect(formatDuration(3_720_000)).toBe('1 hr 2 mins');
+        expect(formatDuration(0)).toBe('0 secs');
     });
 
     it('shows a dash for missing or negative values', () => {

@@ -3,9 +3,10 @@
  * comparison with other participants and the expert, criterion weight shares
  * and the participant's own leaderboard entry. No DOM and no Firebase.
  */
-import { TOKEN_BUDGET } from '../lib/config.js';
+import { RESULTS_TOP_N, TOKEN_BUDGET } from '../lib/config.js';
 import { CRITERION_KEYS } from '../lib/criteria.js';
-import { USERNAME_PATTERN } from '../lib/patterns.js';
+import { findEntriesByUsername, findRank, rankEntries } from '../lib/leaderboard.js';
+import { SESSION_ID_PATTERN, USERNAME_PATTERN } from '../lib/patterns.js';
 import { displayedAccuracy, isValidRating, meanAccuracy, validRatings } from '../lib/scoring.js';
 import { mean } from '../lib/stats.js';
 
@@ -200,9 +201,49 @@ export function withOwnEntry(entries, { sessionId, userName, score, papersRated,
  * @returns {{score: number, papersRated: number}|null}
  */
 export function readOnlyTotals(entry, rows) {
-    if (entry && entry.papersRated > 0) return { score: entry.score, papersRated: entry.papersRated };
+    if (entry && entry.papersRated > 0)
+        return { score: entry.score, papersRated: entry.papersRated };
     if (rows.length > 0 && rows.every((row) => Number.isInteger(row.score))) {
         return { score: rows.reduce((sum, row) => sum + row.score, 0), papersRated: rows.length };
     }
+    return null;
+}
+
+/**
+ * The top of a ranked leaderboard and the participant's position in it.
+ * @param {object[]} entries from normaliseEntries (with the participant's own entry, see withOwnEntry)
+ * @param {object} options
+ * @param {string} options.sessionId the participant whose position is wanted
+ * @param {string|null} [options.room] rank this room only; null ranks everyone
+ * @param {number} [options.topN]
+ * @returns {{top: object[], position: {entry: object, rank: number|null, rankedCount: number}|null,
+ *   rankedCount: number}}
+ */
+export function leaderboardView(entries, { sessionId, room = null, topN = RESULTS_TOP_N }) {
+    const ranked = rankEntries(entries, { room });
+    const rankedOnly = ranked.filter((entry) => entry.rank !== null);
+    return {
+        top: rankedOnly.slice(0, topN),
+        position: findRank(ranked, sessionId),
+        rankedCount: rankedOnly.length,
+    };
+}
+
+/**
+ * Works out which session a `?session=` value names. v1 links carry a session
+ * id; a nickname is accepted too (exact match after ignoring case and spaces),
+ * since some people shared their nickname instead.
+ * @param {string} param
+ * @param {object[]} entries normalised leaderboard entries
+ * @returns {{sessionId: string} | {matches: object[]} | null}
+ */
+export function resolveSessionParam(param, entries) {
+    const value = String(param ?? '').trim();
+    if (SESSION_ID_PATTERN.test(value)) return { sessionId: value };
+    const lower = value.toLowerCase();
+    if (SESSION_ID_PATTERN.test(lower)) return { sessionId: lower };
+    const matches = findEntriesByUsername(entries, value);
+    if (matches.length === 1) return { sessionId: matches[0].sessionId };
+    if (matches.length > 1) return { matches };
     return null;
 }

@@ -663,8 +663,8 @@ textarea {
     border-color: var(--color-danger);
 }
 
-input[type='checkbox'],
-input[type='radio'] {
+/* :where() keeps this at zero specificity so component classes (such as the switch) can resize. */
+:where(input[type='checkbox'], input[type='radio']) {
     width: 1.25rem;
     height: 1.25rem;
     margin: 0;

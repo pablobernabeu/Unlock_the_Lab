@@ -56,9 +56,14 @@ export function createRoomFilter({ select, hint, initialRoom, onChange }) {
         select.value = current ?? '';
     }
 
+    function syncUrl() {
+        const next = urlWithRoom(location.href, current);
+        if (next !== location.href) history.replaceState(history.state, '', next);
+    }
+
     select.addEventListener('change', () => {
         current = normaliseRoom(select.value);
-        history.replaceState(history.state, '', urlWithRoom(location.href, current));
+        syncUrl();
         renderHint();
         announce(
             current
@@ -72,5 +77,7 @@ export function createRoomFilter({ select, hint, initialRoom, onChange }) {
 
     setRooms([]);
     renderHint();
+    // A code typed in lower case is shown in its normal form; an invalid one is dropped.
+    if (new URL(location.href).searchParams.has('room')) syncUrl();
     return { setRooms };
 }

@@ -12,13 +12,15 @@ import { isPermissionDenied } from '../db-utils.js';
 import { submitRating } from '../rating-submit.js';
 import { responseTimeFor } from '../response-time.js';
 import { isRated, ratedCount, studyPage, weightsPage } from '../state.js';
-import { isUnavailable, setUnavailable, trustedHtml } from '../ui.js';
+import { isUnavailable, setChildren, setUnavailable, trustedHtml } from '../ui.js';
 import { openHelpDialog } from './help-dialog.js';
 import { renderFeedbackPanel } from './feedback.js';
 
+/** After this long without an answer from the server, say that saving is slow. */
 const SLOW_SAVE_MS = 8000;
 const SCALE = Array.from({ length: RATING_MAX - RATING_MIN + 1 }, (_, i) => RATING_MIN + i);
 
+/** Study text is trusted content HTML; 'Data availability:' in Methods is set in bold, as in v1. */
 function studySectionHtml(study, field) {
     const html = study[field] ?? '';
     if (field !== 'methods') return html;
@@ -26,36 +28,40 @@ function studySectionHtml(study, field) {
     return html.replace(label, `<strong>${escapeHtml(label)}</strong>`);
 }
 
+function backControl(app, studyIndex) {
+    if (studyIndex === 0 || app.state.hasUsedBackButton) return null;
+    const hintId = 'study-back-hint';
+    const button = el(
+        'button',
+        {
+            type: 'button',
+            class: 'btn btn-secondary btn-small',
+            'aria-describedby': hintId,
+            onClick: () => {
+                app.patch({ hasUsedBackButton: true });
+                app.navigate(studyPage(studyIndex - 1));
+            },
+        },
+        el('span', { 'aria-hidden': 'true' }, '←'),
+        t('app.study.back')
+    );
+    return el(
+        'div',
+        { class: 'study-toolbar__back' },
+        button,
+        el('span', { id: hintId, class: 'field-hint' }, t('app.study.backHint'))
+    );
+}
+
 function toolbar(app, studyIndex) {
     const help = el(
         'button',
-        { type: 'button', class: 'btn btn-secondary btn-small' },
+        { type: 'button', class: 'btn btn-secondary btn-small study-toolbar__help' },
         el('span', { 'aria-hidden': 'true' }, '📖'),
         t('app.help.open')
     );
     help.addEventListener('click', () => openHelpDialog(app.content, help));
-
-    let back = null;
-    if (studyIndex > 0 && !app.state.hasUsedBackButton) {
-        const hintId = 'study-back-hint';
-        const button = el(
-            'button',
-            { type: 'button', class: 'btn btn-secondary btn-small', 'aria-describedby': hintId },
-            el('span', { 'aria-hidden': 'true' }, '←'),
-            t('app.study.back')
-        );
-        button.addEventListener('click', () => {
-            app.patch({ hasUsedBackButton: true });
-            app.navigate(studyPage(studyIndex - 1));
-        });
-        back = el(
-            'div',
-            { class: 'study-toolbar__back' },
-            button,
-            el('span', { id: hintId, class: 'field-hint' }, t('app.study.backHint'))
-        );
-    }
-    return el('div', { class: 'study-toolbar' }, back, help);
+    return el('div', { class: 'study-toolbar' }, backControl(app, studyIndex), help);
 }
 
 function studyCard(app, study, studyIndex) {
@@ -68,7 +74,7 @@ function studyCard(app, study, studyIndex) {
             { class: 'study__meta' },
             el(
                 'span',
-                null,
+                { class: 'study__progress' },
                 t('app.study.progress', { position: studyIndex + 1, total: app.studyCount })
             ),
             el('span', { class: 'study__tag' }, t('app.study.fictional'))
@@ -78,16 +84,16 @@ function studyCard(app, study, studyIndex) {
             { class: 'study__label' },
             el('span', { 'aria-hidden': 'true' }, titleCriterion.icon),
             ' ',
-            t('app.study.titleLabel')
+            t(labelKey('title'))
         ),
         el('h1', { id: 'study-title', class: 'study__title' }, study.title),
         CRITERIA.filter(({ key }) => key !== 'title').map(({ key, field, icon }) =>
             el(
                 'section',
-                { class: 'study__section' },
+                { class: 'study__section', 'aria-labelledby': `study-section-${key}` },
                 el(
                     'h2',
-                    { class: 'study__heading' },
+                    { class: 'study__heading', id: `study-section-${key}` },
                     el('span', { 'aria-hidden': 'true' }, icon),
                     ' ',
                     t(labelKey(key))
@@ -137,19 +143,73 @@ function scaleFieldset({ name, legend, hint }) {
 
 function errorMessage(error) {
     if (error instanceof ConnectionError) {
-        return error.kind === 'failed' ? t('app.study.notConnected') : t('app.study.sessionStopped');
+        return error.kind === 'failed'
+            ? t('app.study.notConnected')
+            : t('app.study.sessionStopped');
     }
     if (isPermissionDenied(error)) return t('app.study.denied');
     return t('app.study.saveFailed');
 }
 
 function finishButton(app, page) {
-    const button = el('button', { type: 'button', class: 'btn btn-secondary' }, t('app.study.finish'));
-    button.addEventListener('click', () => app.finishEarly(page));
-    return button;
+    return el(
+        'button',
+        { type: 'button', class: 'btn btn-secondary', onClick: () => app.finishEarly(page) },
+        t('app.study.finish')
+    );
 }
 
-function answersForm(app, study, studyIndex) {
+function finishControl(app, studyIndex) {
+    const canFinish =
+        studyIndex < app.studyCount - 1 && ratedCount(app.state) >= MIN_STUDIES_TO_FINISH;
+    if (!canFinish) return null;
+    return el(
+        'div',
+        { class: 'study-finish' },
+        el('p', { class: 'field-hint' }, t('app.study.finishHint')),
+        finishButton(app, studyPage(studyIndex))
+    );
+}
+
+/** The submit button and its state: unavailable until both answers are chosen or while saving. */
+function createSubmitControl() {
+    const button = el(
+        'button',
+        { type: 'submit', class: 'btn btn-primary', 'aria-describedby': 'answers-submit-hint' },
+        t('app.study.submit')
+    );
+    const hint = el(
+        'p',
+        { id: 'answers-submit-hint', class: 'field-hint' },
+        t('app.study.submitHint')
+    );
+    return {
+        button,
+        hint,
+        update({ busy, complete }) {
+            setUnavailable(button, busy || !complete);
+            hint.hidden = complete;
+            button.textContent = busy ? t('app.study.saving') : t('app.study.submit');
+        },
+    };
+}
+
+async function saveAnswers(app, study, answers, submittedAt) {
+    const { uid } = await app.session.whenReady();
+    const state = app.state;
+    return submitRating({
+        study,
+        sessionId: state.sessionId,
+        uid,
+        ...answers,
+        responseTime: responseTimeFor(state.pageDisplayTimestamps, study.id, submittedAt),
+        trial: ratedCount(state) + 1,
+        locale: getLocale(),
+        room: state.room,
+    });
+}
+
+function answersSection(app, study, studyIndex) {
     const prediction = scaleFieldset({
         name: 'prediction',
         legend: t('app.study.predictionLegend'),
@@ -160,16 +220,7 @@ function answersForm(app, study, studyIndex) {
         legend: t('app.study.ratingLegend'),
         hint: t('app.study.ratingHint'),
     });
-    const submit = el(
-        'button',
-        { type: 'submit', class: 'btn btn-primary', 'aria-describedby': 'answers-submit-hint' },
-        t('app.study.submit')
-    );
-    const submitHint = el(
-        'p',
-        { id: 'answers-submit-hint', class: 'field-hint' },
-        t('app.study.submitHint')
-    );
+    const submit = createSubmitControl();
     const status = el('p', { class: 'answers__status', role: 'status' });
     const error = el('p', { class: 'answers__error field-error', role: 'alert' });
     const form = el(
@@ -177,9 +228,15 @@ function answersForm(app, study, studyIndex) {
         { class: 'answers__form', novalidate: true },
         prediction,
         rating,
-        el('div', { class: 'answers__actions' }, submit, submitHint),
+        el('div', { class: 'answers__actions' }, submit.button, submit.hint),
         status,
         error
+    );
+    const section = el(
+        'section',
+        { class: 'answers card', 'aria-labelledby': 'answers-heading' },
+        el('h2', { id: 'answers-heading' }, t('app.study.answersHeading')),
+        form
     );
 
     let busy = false;
@@ -187,80 +244,63 @@ function answersForm(app, study, studyIndex) {
     const chosen = (name) => Number(form.elements[name].value) || null;
     const complete = () => chosen('prediction') !== null && chosen('rating') !== null;
 
-    function refreshSubmit() {
-        setUnavailable(submit, busy || !complete());
-        submitHint.hidden = complete();
-    }
-
     function setBusy(value) {
         busy = value;
+        // A disabled fieldset also stops the answers changing while they are being saved.
         prediction.disabled = value;
         rating.disabled = value;
         form.setAttribute('aria-busy', String(value));
-        submit.textContent = value ? t('app.study.saving') : t('app.study.submit');
         clearTimeout(slowTimer);
         status.textContent = '';
-        if (value) slowTimer = setTimeout(() => (status.textContent = t('app.study.slow')), SLOW_SAVE_MS);
-        refreshSubmit();
+        if (value) {
+            slowTimer = setTimeout(() => {
+                status.textContent = t('app.study.slow');
+            }, SLOW_SAVE_MS);
+        }
+        submit.update({ busy, complete: complete() });
     }
 
     form.addEventListener('change', () => {
         error.textContent = '';
-        refreshSubmit();
+        submit.update({ busy, complete: complete() });
     });
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        if (busy || isUnavailable(submit)) return;
-        const submittedAt = Date.now();
+        if (busy) return;
+        if (!complete() || isUnavailable(submit.button)) {
+            error.textContent = t('app.study.submitHint');
+            return;
+        }
         const answers = { prediction: chosen('prediction'), rating: chosen('rating') };
         error.textContent = '';
         setBusy(true);
         try {
-            const { uid } = await app.connection.whenReady();
-            const state = app.state;
-            const result = await submitRating({
-                study,
-                sessionId: state.sessionId,
-                uid,
-                ...answers,
-                responseTime: responseTimeFor(state.pageDisplayTimestamps, study.id, submittedAt),
-                trial: ratedCount(state) + 1,
-                locale: getLocale(),
-                room: state.room,
-            });
+            const result = await saveAnswers(app, study, answers, Date.now());
             setBusy(false);
-            app.onRatingSaved(study, studyIndex, result);
+            app.onRatingSaved(study, studyIndex, result, section);
         } catch (failure) {
             console.warn('[study] Answers not saved:', failure);
             setBusy(false);
             error.textContent = errorMessage(failure);
         }
     });
-    refreshSubmit();
-
-    const page = studyPage(studyIndex);
-    const canFinish = ratedCount(app.state) >= MIN_STUDIES_TO_FINISH;
-    return el(
-        'section',
-        { class: 'answers card', 'aria-labelledby': 'answers-heading' },
-        el('h2', { id: 'answers-heading' }, t('app.study.answersHeading')),
-        form,
-        canFinish ? el('div', { class: 'answers__finish' }, finishButton(app, page)) : null
-    );
+    submit.update({ busy, complete: complete() });
+    return section;
 }
 
 function feedbackActions(app, studyIndex) {
     const last = studyIndex >= app.studyCount - 1;
     const next = el(
         'button',
-        { type: 'button', class: 'btn btn-primary' },
+        {
+            type: 'button',
+            class: 'btn btn-primary',
+            onClick: () =>
+                app.navigate(last ? weightsPage(app.studyCount) : studyPage(studyIndex + 1)),
+        },
         last ? t('app.study.toWeights') : t('app.study.next')
     );
-    next.addEventListener('click', () =>
-        app.navigate(last ? weightsPage(app.studyCount) : studyPage(studyIndex + 1))
-    );
-    const canFinish = !last && ratedCount(app.state) >= MIN_STUDIES_TO_FINISH;
-    return [next, canFinish ? finishButton(app, studyPage(studyIndex)) : null];
+    return [next];
 }
 
 /**
@@ -280,25 +320,56 @@ export function savedResult(state, studyId) {
 }
 
 /**
+ * The feedback panel (with its navigation) for a study the participant has rated.
+ * @param {object} app
+ * @param {number} studyIndex
+ * @returns {HTMLElement}
+ */
+export function renderSavedFeedback(app, studyIndex) {
+    const study = app.order[studyIndex];
+    return renderFeedbackPanel({
+        study,
+        result: savedResult(app.state, study.id),
+        showExpert: app.feedbackEachStudy,
+        actions: feedbackActions(app, studyIndex),
+    });
+}
+
+/**
  * Renders the study at `studyIndex` in the participant's order.
- * @param {object} app the app context (see main.js)
+ * @param {object} app the app context (see participant.js)
  * @param {number} studyIndex
  * @returns {HTMLElement} the view
  */
 export function renderStudyView(app, studyIndex) {
     const view = document.getElementById('view-study');
     const study = app.order[studyIndex];
-    const rated = isRated(app.state, study.id);
-    view.replaceChildren(
+    setChildren(
+        view,
         toolbar(app, studyIndex),
         studyCard(app, study, studyIndex),
-        rated
-            ? renderFeedbackPanel({
-                  study,
-                  result: savedResult(app.state, study.id),
-                  actions: feedbackActions(app, studyIndex),
-              })
-            : answersForm(app, study, studyIndex)
+        isRated(app.state, study.id)
+            ? renderSavedFeedback(app, studyIndex)
+            : answersSection(app, study, studyIndex),
+        finishControl(app, studyIndex)
     );
     return view;
+}
+
+/**
+ * After a successful save: swaps the answer form for the feedback panel and
+ * offers 'Finish' once enough studies are rated.
+ * @param {object} app
+ * @param {number} studyIndex
+ * @param {HTMLElement} section the answers section that was submitted
+ * @returns {HTMLElement} the feedback panel
+ */
+export function showFeedbackInPlace(app, studyIndex, section) {
+    const panel = renderSavedFeedback(app, studyIndex);
+    section.replaceWith(panel);
+    const view = document.getElementById('view-study');
+    view.querySelector('.study-finish')?.remove();
+    const finish = finishControl(app, studyIndex);
+    if (finish) view.append(finish);
+    return panel;
 }

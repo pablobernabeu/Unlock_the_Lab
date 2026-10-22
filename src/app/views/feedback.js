@@ -8,7 +8,7 @@ import { qualityBand } from '../../lib/content.js';
 import { CRITERIA, labelKey } from '../../lib/criteria.js';
 import { el } from '../../lib/dom.js';
 import { formatRating } from '../../lib/format.js';
-import { t } from '../../lib/i18n.js';
+import { formatNumber, t } from '../../lib/i18n.js';
 import { scoreBand } from '../../lib/scoring.js';
 import { bandBadge } from '../ui.js';
 
@@ -46,7 +46,9 @@ export function renderExpertFeedback(study, { withHeading = true } = {}) {
     return el(
         'div',
         { class: 'expert-feedback' },
-        withHeading ? el('h3', { class: 'expert-feedback__heading' }, t('app.feedback.expertHeading')) : null,
+        withHeading
+            ? el('h3', { class: 'expert-feedback__heading' }, t('app.feedback.expertHeading'))
+            : null,
         el(
             'p',
             { class: 'expert-feedback__rating' },
@@ -83,12 +85,24 @@ export function renderExpertFeedback(study, { withHeading = true } = {}) {
     );
 }
 
+/**
+ * A target with two decimals: with one decimal a careful reader could get a
+ * score 1 point away from the one shown, because the score uses the exact target.
+ * @param {number} value
+ * @returns {string}
+ */
+export function formatTarget(value) {
+    return formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function targetLines({ prediction, target, crowd, expertRating }) {
+    if (!Number.isFinite(prediction)) return [t('app.feedback.targetUnknown')];
     if (!Number.isFinite(target)) {
         return [t('app.feedback.predictionOnly', { prediction }), t('app.feedback.targetUnknown')];
     }
     const lines = [
-        t('app.feedback.predictionVsTarget', { prediction, target: formatRating(target) }),
+        t('app.feedback.predictionVsTarget', { prediction, target: formatTarget(target) }),
+        t('app.feedback.distance', { distance: formatTarget(Math.abs(prediction - target)) }),
     ];
     if (crowd?.n > 0) {
         lines.push(
@@ -105,12 +119,15 @@ function targetLines({ prediction, target, crowd, expertRating }) {
 }
 
 function ratingLines({ rating, crowd }) {
-    const lines = [t('app.feedback.yourRating', { rating })];
+    const lines = [];
     if (crowd?.n > 0) {
-        lines.push(t('app.feedback.othersMean', { count: crowd.n, mean: formatRating(crowd.mean) }));
+        lines.push(
+            t('app.feedback.othersMean', { count: crowd.n, mean: formatRating(crowd.mean) })
+        );
     } else if (crowd) {
         lines.push(t('app.feedback.othersNone'));
     }
+    lines.push(t('app.feedback.yourRating', { rating }));
     return lines;
 }
 
@@ -120,10 +137,11 @@ function ratingLines({ rating, crowd }) {
  * @param {object} options.study
  * @param {{rating: number, prediction: number|null, score: number|null, target: number|null,
  *   crowd: {n: number, mean: number|null}|null}} options.result
+ * @param {boolean} [options.showExpert] include the expert's feedback (FEEDBACK_MODE 'each')
  * @param {HTMLElement[]} options.actions buttons shown under the feedback
  * @returns {HTMLElement}
  */
-export function renderFeedbackPanel({ study, result, actions }) {
+export function renderFeedbackPanel({ study, result, showExpert = true, actions }) {
     const { score } = result;
     const hasScore = Number.isInteger(score);
     return el(
@@ -137,7 +155,9 @@ export function renderFeedbackPanel({ study, result, actions }) {
                 { id: 'feedback-heading', class: 'feedback__heading', tabindex: '-1' },
                 hasScore ? t('app.feedback.heading', { score }) : t('app.results.scoreUnknown')
             ),
-            hasScore ? el('p', { class: 'feedback__band' }, SCORE_MESSAGES[scoreBand(score)]()) : null
+            hasScore
+                ? el('p', { class: 'feedback__band' }, SCORE_MESSAGES[scoreBand(score)]())
+                : null
         ),
         el(
             'ul',
@@ -147,7 +167,7 @@ export function renderFeedbackPanel({ study, result, actions }) {
                 ...ratingLines(result),
             ].map((line) => el('li', null, line))
         ),
-        renderExpertFeedback(study),
+        showExpert ? renderExpertFeedback(study) : null,
         el('div', { class: 'feedback__actions cluster' }, actions)
     );
 }

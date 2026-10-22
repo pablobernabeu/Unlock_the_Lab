@@ -52,8 +52,8 @@
                     <div class="dashboard-intro__text">
                         <h1 data-i18n="dashboard.heading">Live dashboard</h1>
                         <p class="lead" data-i18n="dashboard.intro">
-                            How workshop participants rate the studies and how well they predict
-                            each other's ratings.
+                            How workshop participants rate the fictional studies and how well they
+                            predict the target ratings.
                         </p>
                         <p class="connection-status" data-connection role="status">
                             <span class="connection-status__dot" aria-hidden="true"></span>
@@ -104,10 +104,10 @@
                     <form class="find-results__form" data-find-form novalidate>
                         <div class="field">
                             <label for="find-input" data-i18n="dashboard.find.label"
-                                >Your username</label
+                                >Your nickname</label
                             >
                             <p class="field-hint" id="find-hint" data-i18n="dashboard.find.hint">
-                                For example 'Red Fox 07'.
+                                For example 'Curious Otter 42'.
                             </p>
                             <div class="find-results__row">
                                 <input
@@ -159,7 +159,7 @@
                                 class="stat-tile__note"
                                 data-i18n="dashboard.overview.participantsNote"
                             >
-                                People who have rated at least one study
+                                Workshop sessions with at least one rating
                             </dd>
                         </div>
                         <div class="stat-tile">
@@ -241,8 +241,10 @@
                             data-day-note
                             hidden
                         >
-                            Showing people whose latest rating was saved in the past 24 hours.
+                            Showing ranked participants whose score was last updated in the past 24
+                            hours.
                         </p>
+                        <p class="text-muted" data-leaderboard-room hidden></p>
                         <p class="dash-empty" data-leaderboard-empty hidden></p>
                         <div
                             class="table-wrap"
@@ -267,7 +269,7 @@
                                             scope="col"
                                             data-i18n="dashboard.leaderboard.columns.name"
                                         >
-                                            Username
+                                            Nickname
                                         </th>
                                         <th
                                             scope="col"
@@ -323,7 +325,8 @@
                             average.
                         </p>
                         <p data-i18n="dashboard.chart.introExpert">
-                            The white diamond is the expert's rating.
+                            The white diamond is the expert's rating. The bar colour shows the
+                            expert's quality band, as in the key below.
                         </p>
                         <p data-copy="chart.introTarget"></p>
                         <p data-i18n="dashboard.chart.introSelect">
@@ -341,10 +344,13 @@
                                 class="legend-swatch legend-swatch--low"
                                 aria-hidden="true"
                             ></span>
-                            <span data-i18n="common.quality.low">Low quality</span>
-                            <span class="text-muted"
-                                >(<span data-i18n="common.quality.lowRange">Expert rating 1–2</span
-                                >)</span
+                            <span
+                                ><span data-i18n="common.quality.low">Low quality</span>
+                                <span class="text-muted"
+                                    >(<span data-i18n="common.quality.lowRange"
+                                        >Expert rating 1–2</span
+                                    >)</span
+                                ></span
                             >
                         </li>
                         <li>
@@ -352,11 +358,13 @@
                                 class="legend-swatch legend-swatch--medium"
                                 aria-hidden="true"
                             ></span>
-                            <span data-i18n="common.quality.medium">Medium quality</span>
-                            <span class="text-muted"
-                                >(<span data-i18n="common.quality.mediumRange"
-                                    >Expert rating 3–5</span
-                                >)</span
+                            <span
+                                ><span data-i18n="common.quality.medium">Medium quality</span>
+                                <span class="text-muted"
+                                    >(<span data-i18n="common.quality.mediumRange"
+                                        >Expert rating 3–5</span
+                                    >)</span
+                                ></span
                             >
                         </li>
                         <li>
@@ -364,10 +372,13 @@
                                 class="legend-swatch legend-swatch--high"
                                 aria-hidden="true"
                             ></span>
-                            <span data-i18n="common.quality.high">High quality</span>
-                            <span class="text-muted"
-                                >(<span data-i18n="common.quality.highRange">Expert rating 6–7</span
-                                >)</span
+                            <span
+                                ><span data-i18n="common.quality.high">High quality</span>
+                                <span class="text-muted"
+                                    >(<span data-i18n="common.quality.highRange"
+                                        >Expert rating 6–7</span
+                                    >)</span
+                                ></span
                             >
                         </li>
                         <li>

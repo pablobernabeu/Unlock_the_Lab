@@ -11,7 +11,11 @@ let dialog = null;
 
 function buildTabs(content) {
     const panels = [
-        { id: 'help-glossary', label: t('app.help.glossaryTab'), body: renderGlossary(content.glossary) },
+        {
+            id: 'help-glossary',
+            label: t('app.help.glossaryTab'),
+            body: renderGlossary(content.glossary),
+        },
         { id: 'help-rubric', label: t('app.help.rubricTab'), body: renderRubric(content.rubric) },
     ];
     const tabs = panels.map(({ id, label }, index) =>

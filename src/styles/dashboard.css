@@ -30,13 +30,6 @@
     text-decoration: none;
 }
 
-/* base.css sizes every checkbox at 1.25rem with a more specific selector than the
-   switch's own class, which shrinks the switch and lets its knob cover the label. */
-.motion-toggle input.motion-toggle__input {
-    width: 2.75rem;
-    height: 1.5rem;
-}
-
 /* ---------- Page intro and room filter ---------- */
 
 .dashboard-intro {
@@ -157,6 +150,11 @@
     margin-top: var(--space-2);
 }
 
+.find-results__message,
+.find-results__detected p {
+    overflow-wrap: anywhere;
+}
+
 .find-results__choices li + li {
     margin-top: var(--space-2);
 }
@@ -165,8 +163,9 @@
 
 .stat-tiles {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
-    gap: var(--space-4);
+    /* Two tiles side by side on phones (even at 320 px), four on wider screens. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
     margin: 0;
 }
 
@@ -200,6 +199,23 @@
     order: 3;
     color: var(--color-text-muted);
     font-size: var(--text-sm);
+}
+
+@media (min-width: 40rem) {
+    .stat-tiles {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--space-4);
+    }
+}
+
+@media (max-width: 30rem) {
+    .stat-tile {
+        padding: var(--space-3);
+    }
+
+    .stat-tile__value {
+        font-size: 1.75rem;
+    }
 }
 
 /* ---------- Leaderboard ---------- */
@@ -241,12 +257,19 @@
     white-space: normal;
 }
 
+/* The place column takes only the width it needs, leaving room for the nickname. */
 .leaderboard-table__place {
-    width: 4rem;
+    width: 1%;
+    white-space: nowrap;
 }
 
 .leaderboard-table__top th {
     font-weight: 700;
+}
+
+/* Old records can hold very long nicknames: they wrap rather than widen the table. */
+.leaderboard-table th[scope='row'] {
+    overflow-wrap: anywhere;
 }
 
 .leaderboard-table .badge {
@@ -254,9 +277,13 @@
 }
 
 @media (max-width: 30rem) {
+    .leaderboard-table {
+        font-size: var(--text-sm);
+    }
+
     .leaderboard-table th,
     .leaderboard-table td {
-        padding-inline: var(--space-2);
+        padding-inline: var(--space-1);
     }
 }
 
@@ -354,11 +381,16 @@
     font-size: var(--text-sm);
 }
 
+/* The marker stays beside the first line of its label when the label wraps. */
 .chart-legend li {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-1) var(--space-2);
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+}
+
+.chart-legend li > [aria-hidden='true'] {
+    align-self: flex-start;
+    margin-top: 0.1875rem;
 }
 
 .legend-swatch {
@@ -521,7 +553,7 @@
 
 .study-dialog__stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 6.5rem), 1fr));
     gap: var(--space-3);
     margin: 0 0 var(--space-3);
 }

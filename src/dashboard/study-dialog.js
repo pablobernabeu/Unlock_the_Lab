@@ -75,6 +75,7 @@ function studySection(study) {
         'section',
         { class: 'study-dialog__section', 'aria-labelledby': 'study-dialog-text-heading' },
         el('h3', { id: 'study-dialog-text-heading' }, t('dashboard.dialog.studyHeading')),
+        el('p', { class: 'text-muted' }, t('dashboard.dialog.fictional')),
         sections
     );
 }

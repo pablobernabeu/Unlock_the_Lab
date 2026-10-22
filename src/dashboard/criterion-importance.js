@@ -54,6 +54,12 @@ export function createCriterionImportance(root) {
     );
     list.append(scale);
 
+    // Until the first snapshot arrives the section says it is loading rather than showing empty bars.
+    list.hidden = true;
+    count.hidden = true;
+    empty.hidden = false;
+    setText(empty, t('common.status.loading'));
+
     setText(
         qs('[data-copy="criteria.intro"]', root),
         t('dashboard.criteria.intro', { budget: TOKEN_BUDGET, count: CRITERIA.length })

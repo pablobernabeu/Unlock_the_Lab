@@ -19,7 +19,7 @@
         <a class="skip-link" href="#main" data-i18n="common.nav.skipToContent"
             >Skip to main content</a
         >
-        <header class="site-header app-header" id="app-header">
+        <header class="site-header app-header">
             <div class="container site-header__inner">
                 <div class="site-header__brand">
                     <img
@@ -41,19 +41,28 @@
                         <dt data-i18n="app.header.rated">Rated</dt>
                         <dd id="banner-rated"></dd>
                     </div>
+                    <div class="score-banner__item" id="banner-nickname-item">
+                        <dt data-i18n="app.header.nickname">Nickname</dt>
+                        <dd id="banner-nickname"></dd>
+                    </div>
                 </dl>
-                <p class="app-header__nickname" id="header-nickname" hidden>
-                    <span data-i18n="app.header.nickname">Nickname</span>
-                    <strong id="header-nickname-value"></strong>
-                </p>
             </div>
         </header>
 
         <main id="main" tabindex="-1">
             <div class="container">
-                <div id="app-notice" class="app-notice" hidden></div>
+                <div id="app-notice" class="app-notices stack" hidden></div>
                 <p id="app-loading" class="app-loading" role="status">
-                    <span data-i18n="app.loading">Loading the workshop…</span>
+                    <span id="app-loading-text" data-i18n="app.loading">Loading the workshop…</span>
+                </p>
+                <p
+                    id="app-load-failed"
+                    class="info-box info-box--danger"
+                    role="alert"
+                    hidden
+                    data-i18n="app.loadFailed"
+                >
+                    The workshop could not be loaded.
                 </p>
                 <noscript>
                     <p class="info-box info-box--warning" data-i18n="app.noscript">
@@ -64,7 +73,7 @@
                 <div class="view view-welcome" id="view-welcome" hidden>
                     <div class="welcome-hero">
                         <img
-                            class="welcome-hero__logo"
+                            class="welcome-hero__logo app-logo"
                             id="welcome-logo"
                             src="/unlock-lab-icon.svg"
                             alt=""
@@ -78,11 +87,13 @@
                             Your guide to reading science like a scientist
                         </p>
                     </div>
-                    <div class="stack" id="welcome-notices"></div>
                     <div class="flow view-body">
                         <p class="lead" data-i18n="app.welcome.intro"></p>
                         <p data-i18n="app.welcome.about"></p>
-                        <p class="info-box info-box--info" data-i18n-html="app.welcome.fictional"></p>
+                        <p
+                            class="info-box info-box--info"
+                            data-i18n-html="app.welcome.fictional"
+                        ></p>
 
                         <h2 data-i18n="app.welcome.tasksHeading">Your two tasks</h2>
                         <p data-i18n="app.welcome.tasksIntro"></p>
@@ -97,8 +108,11 @@
                         <p id="welcome-scoring-points"></p>
                         <p data-i18n="app.welcome.scoringFeedback"></p>
 
-                        <h2 data-i18n="app.welcome.leaderboardHeading">Leaderboard</h2>
+                        <h2 data-i18n="app.welcome.leaderboardHeading">
+                            Leaderboard and finishing
+                        </h2>
                         <p id="welcome-leaderboard"></p>
+                        <p id="welcome-length"></p>
                         <p id="welcome-room" hidden></p>
 
                         <h2 data-i18n="app.welcome.dataHeading">Your data</h2>
@@ -155,6 +169,7 @@
 
                 <div class="view view-results" id="view-results" hidden>
                     <h1 id="results-heading" data-i18n="app.results.heading">Your results</h1>
+                    <p class="results-nickname" id="results-nickname" hidden></p>
                     <p
                         class="info-box info-box--info"
                         id="results-readonly-note"
@@ -163,20 +178,32 @@
                     ></p>
                     <div id="results-dynamic" class="results-stack"></div>
 
-                    <section class="results-section">
-                        <h2 data-i18n="app.results.takeawaysHeading">Points to take away</h2>
+                    <section class="results-section" aria-labelledby="results-takeaways-heading">
+                        <h2 id="results-takeaways-heading" data-i18n="app.results.takeawaysHeading">
+                            Points to take away
+                        </h2>
                         <ul class="takeaways">
                             <li data-i18n-html="app.results.takeawayAccess"></li>
                             <li data-i18n-html="app.results.takeawayHype"></li>
                             <li data-i18n-html="app.results.takeawayMethods"></li>
                             <li data-i18n-html="app.results.takeawaySource"></li>
                             <li data-i18n-html="app.results.takeawayConclusion"></li>
-                            <li data-i18n-html="app.results.takeawayCompare"></li>
+                            <li
+                                id="results-takeaway-compare"
+                                data-i18n-html="app.results.takeawayCompare"
+                            ></li>
                         </ul>
                     </section>
 
-                    <section class="results-section info-box">
-                        <h2 class="info-box__title" data-i18n="app.results.exploreHeading">
+                    <section
+                        class="results-section info-box"
+                        aria-labelledby="results-explore-heading"
+                    >
+                        <h2
+                            class="info-box__title"
+                            id="results-explore-heading"
+                            data-i18n="app.results.exploreHeading"
+                        >
                             Keep exploring
                         </h2>
                         <p data-i18n="app.results.exploreIntro"></p>
@@ -188,13 +215,14 @@
                         </ul>
                     </section>
 
-                    <section class="results-section">
-                        <h2 data-i18n="app.results.dashboardHeading">See everyone's results</h2>
+                    <section class="results-section" aria-labelledby="results-dashboard-heading">
+                        <h2 id="results-dashboard-heading" data-i18n="app.results.dashboardHeading">
+                            See everyone's results
+                        </h2>
                         <p data-i18n="app.results.dashboardText"></p>
                         <p>
                             <a
                                 class="btn btn-secondary"
-                                id="results-dashboard-link"
                                 href="/dashboard.html"
                                 data-i18n="app.results.dashboardLink"
                                 >Open the live dashboard</a
@@ -202,9 +230,15 @@
                         </p>
                     </section>
 
-                    <div id="results-own-actions"></div>
-                    <p class="results-thanks" data-i18n="app.results.thanks"></p>
+                    <div id="results-own-actions" class="results-stack"></div>
+                    <p
+                        class="results-thanks"
+                        id="results-thanks"
+                        data-i18n="app.results.thanks"
+                    ></p>
                 </div>
+
+                <div class="view view-message" id="view-message" hidden></div>
             </div>
         </main>
 
@@ -213,14 +247,20 @@
                 <div class="app-footer__controls">
                     <div data-motion-toggle></div>
                     <div data-locale-switcher></div>
-                    <button type="button" class="btn-link" id="footer-new-participant" hidden>
-                        <span data-i18n="app.footer.newParticipant">Start as a new participant</span>
+                    <button
+                        type="button"
+                        class="btn-link"
+                        id="footer-new-participant"
+                        hidden
+                        data-i18n="app.footer.newParticipant"
+                    >
+                        Start as a new participant
                     </button>
                 </div>
                 <nav
                     class="app-footer__links"
-                    data-i18n-attr="aria-label:app.footer.linksLabel"
                     aria-label="Other pages"
+                    data-i18n-attr="aria-label:app.footer.linksLabel"
                 >
                     <a href="/dashboard.html" data-i18n="app.footer.dashboard">Live dashboard</a>
                     <a href="/admin.html" data-i18n="app.footer.admin">Facilitator panel</a>

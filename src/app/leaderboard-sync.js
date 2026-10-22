@@ -27,24 +27,33 @@ export function createLeaderboardSync({ sessionId, getLocal }) {
     let chain = Promise.resolve();
 
     async function readStored() {
-        const snapshot = await withTimeout(get(entryRef), READ_TIMEOUT_MS, 'Reading the leaderboard');
+        const snapshot = await withTimeout(
+            get(entryRef),
+            READ_TIMEOUT_MS,
+            'Reading the leaderboard'
+        );
         return snapshot.exists() ? snapshot.val() : null;
     }
 
     async function writeSteps() {
         const local = getLocal();
-        if (frozen || !local.uid || !USERNAME_PATTERN.test(local.userName ?? '')) return;
+        if (frozen || local.papersRated === 0) return;
+        if (!local.uid || !USERNAME_PATTERN.test(local.userName ?? '')) return;
 
         if (stored === undefined) stored = await readStored();
         if (stored && stored.uid !== local.uid) {
             frozen = true;
-            console.info('[leaderboard] The stored entry belongs to another uid or to v1; not updating it.');
+            console.info(
+                '[leaderboard] The stored entry belongs to another uid or to v1; not updating it.'
+            );
             return;
         }
         const steps = planLeaderboardSteps(stored, local);
         if (steps === null) {
             frozen = true;
-            console.info('[leaderboard] The stored entry is ahead of this browser; not updating it.');
+            console.info(
+                '[leaderboard] The stored entry is ahead of this browser; not updating it.'
+            );
             return;
         }
         for (const step of steps) {

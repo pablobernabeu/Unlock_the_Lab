@@ -15,6 +15,7 @@ import { roomFromUrl } from '../lib/room.js';
 import { scoringTarget, validRatings } from '../lib/scoring.js';
 import { safeGetJSON } from '../lib/storage.js';
 import { createBatcher } from './batcher.js';
+import { createConnectionStatus } from './connection-status.js';
 import { createCriterionImportance } from './criterion-importance.js';
 import {
     chartSummary,
@@ -24,6 +25,7 @@ import {
     groupRatings,
     localSessionId,
     overviewCounts,
+    sessionHasRatings,
     studyRows,
 } from './data.js';
 import { createFindResults } from './find-results.js';
@@ -47,17 +49,9 @@ function showLoadError(error) {
     qs('[data-load-error]').hidden = false;
 }
 
-function renderConnection(connected) {
-    const status = qs('[data-connection]');
-    status.dataset.state = connected ? 'live' : 'offline';
-    setText(
-        qs('[data-connection-text]'),
-        connected ? t('dashboard.connection.live') : t('dashboard.connection.offline')
-    );
-}
-
 function renderStaticCopy() {
     setText(qs('[data-footer-version]'), t('common.footer.version', { version: APP_VERSION }));
+    setText(qs('[data-chart-summary]'), t('common.status.loading'));
     setText(
         qs('[data-copy="chart.introTarget"]'),
         t('dashboard.chart.introTarget', { weight: SEED_WEIGHT })
@@ -150,7 +144,12 @@ function createDashboard() {
         if (changed('leaderboard', 'room', 'clock') && ready('leaderboard')) {
             leaderboard.update({ entries: state.entries, now: now(), room: state.room });
         }
-        if (changed('leaderboard')) findResults.update(state.entries);
+        if (changed('leaderboard', 'ratings')) {
+            findResults.update({
+                entries: state.entries,
+                localHasRatings: sessionHasRatings(state.nodes.ratings, localId),
+            });
+        }
         if (changed('rankings', 'room') && ready('rankings')) {
             criteria.update(criterionShares(state.nodes.rankings, { room: state.room }));
         }
@@ -177,6 +176,10 @@ function createDashboard() {
         },
     });
 
+    const connection = createConnectionStatus({
+        status: qs('[data-connection]'),
+        text: qs('[data-connection-text]'),
+    });
     subscribe(db, {
         onData(node, value) {
             state.nodes[node] = value;
@@ -185,7 +188,7 @@ function createDashboard() {
             batcher.mark(node);
         },
         onError: (node, error) => showLoadError(error),
-        onConnection: renderConnection,
+        onConnection: connection.setConnected,
         onServerOffset(offset) {
             state.serverOffset = offset;
             batcher.mark('clock');

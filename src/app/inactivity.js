@@ -1,7 +1,10 @@
 /**
  * Inactivity timing: a warning shortly before the session pauses, then the
  * pause itself. Any interaction restarts the countdown (at most once every
- * few seconds, so pointer movement does not reset timers constantly).
+ * few seconds, so pointer movement does not reset timers constantly) until
+ * the warning appears; from then on only `reset()` (the warning's Continue
+ * button) restarts it, so the warning's 'pauses in 5 minutes' stays true and
+ * a second warning never opens on top of the first.
  * There is no hard cap on session length.
  */
 
@@ -29,6 +32,7 @@ export function createInactivityMonitor({
     let timeoutTimer = null;
     let lastReset = 0;
     let running = false;
+    let warned = false;
 
     function clearTimers() {
         clearTimeout(warningTimer);
@@ -39,8 +43,12 @@ export function createInactivityMonitor({
 
     function schedule() {
         clearTimers();
+        warned = false;
         lastReset = now();
-        warningTimer = setTimeout(onWarning, timeoutMs - warningMs);
+        warningTimer = setTimeout(() => {
+            warned = true;
+            onWarning();
+        }, timeoutMs - warningMs);
         timeoutTimer = setTimeout(() => {
             running = false;
             stopListening();
@@ -50,7 +58,7 @@ export function createInactivityMonitor({
     }
 
     function onActivity() {
-        if (running && now() - lastReset >= RESET_DEBOUNCE_MS) schedule();
+        if (running && !warned && now() - lastReset >= RESET_DEBOUNCE_MS) schedule();
     }
 
     function stopListening() {

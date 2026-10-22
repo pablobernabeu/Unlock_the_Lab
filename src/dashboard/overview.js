@@ -23,7 +23,7 @@ export function createOverview(root) {
     );
     setText(
         qs('[data-stat-note="active"]', root),
-        t('dashboard.overview.activeNote', { minutes: ACTIVE_WINDOW_MS / 60000 })
+        t('dashboard.overview.activeNote', { count: ACTIVE_WINDOW_MS / 60000 })
     );
 
     return {

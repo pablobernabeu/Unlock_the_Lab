@@ -11,20 +11,43 @@ function escapeSelector(value) {
         : String(value).replace(/["\\]/g, '\\$&');
 }
 
+/** True when focus has nowhere useful to be: on the body, or on an element now removed or hidden. */
+function focusLost(doc, element) {
+    return (
+        !element ||
+        element === doc.body ||
+        !element.isConnected ||
+        Boolean(element.closest('[hidden]'))
+    );
+}
+
 /**
  * Runs `update` and restores focus to the equivalent element inside `container`.
+ * When that element is gone (its row left the list), focus moves to `fallback`
+ * rather than dropping to the top of the page.
  * @param {HTMLElement} container
  * @param {() => void} update synchronous DOM changes
+ * @param {object} [options]
+ * @param {() => HTMLElement|null|undefined} [options.fallback]
  * @returns {void}
  */
-export function preserveFocus(container, update) {
-    const active = container.ownerDocument.activeElement;
-    const keyed = active && container.contains(active) ? active.closest('[data-focus-key]') : null;
+export function preserveFocus(container, update, { fallback } = {}) {
+    const doc = container.ownerDocument;
+    const active = doc.activeElement;
+    const hadFocus = !focusLost(doc, active) && container.contains(active);
+    const keyed = hadFocus ? active.closest('[data-focus-key]') : null;
     const key = keyed?.dataset.focusKey;
     update();
-    if (!key || container.ownerDocument.activeElement === keyed) return;
-    const replacement = container.querySelector(`[data-focus-key="${escapeSelector(key)}"]`);
-    replacement?.focus({ preventScroll: true });
+    if (!hadFocus) return;
+    if (doc.activeElement === active && !focusLost(doc, active)) return;
+    const replacement = key
+        ? container.querySelector(`[data-focus-key="${escapeSelector(key)}"]`)
+        : null;
+    if (replacement) {
+        replacement.focus({ preventScroll: true });
+    } else if (focusLost(doc, doc.activeElement) || focusLost(doc, active)) {
+        fallback?.()?.focus({ preventScroll: true });
+    }
 }
 
 /**

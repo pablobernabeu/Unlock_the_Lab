@@ -86,7 +86,13 @@ function serverTimeOffset() {
  * @param {(ms: number) => void} options.setJoinedAt saves the join time on first connection
  * @param {(status: 'connecting'|'ready'|'failed'|'claimed'|'closed') => void} [options.onStatus]
  */
-export function createConnection({ sessionId, room, getJoinedAt, setJoinedAt, onStatus = () => {} }) {
+export function createConnection({
+    sessionId,
+    room,
+    getJoinedAt,
+    setJoinedAt,
+    onStatus = () => {},
+}) {
     const activeRef = ref(db, `active/${sessionId}`);
     let status = 'idle';
     let uid = null;
@@ -116,7 +122,7 @@ export function createConnection({ sessionId, room, getJoinedAt, setJoinedAt, on
         };
         if (room) record.room = room;
         try {
-            await set(sessionRef, record);
+            await withTimeout(set(sessionRef, record), READ_TIMEOUT_MS, 'Creating the session');
             return true;
         } catch (error) {
             // The rules refuse the record when another uid owns this session's leaderboard or rankings entry.
@@ -135,7 +141,8 @@ export function createConnection({ sessionId, room, getJoinedAt, setJoinedAt, on
                 setStatus('claimed');
                 throw new ConnectionError('claimed');
             }
-            if (!Number.isFinite(getJoinedAt())) setJoinedAt(Date.now() + (await serverTimeOffset()));
+            if (!Number.isFinite(getJoinedAt()))
+                setJoinedAt(Date.now() + (await serverTimeOffset()));
             setStatus('ready');
             return { uid };
         } catch (error) {

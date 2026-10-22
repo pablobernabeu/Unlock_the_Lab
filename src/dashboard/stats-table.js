@@ -134,6 +134,11 @@ export function createStatsTable(table, { onOpenStudy }) {
         );
     }
 
+    // A placeholder row until the first update; syncChildren removes it then.
+    tbody.replaceChildren(
+        el('tr', null, el('td', { colspan: String(headers.length) }, t('common.status.loading')))
+    );
+
     for (const button of qsa('button[data-sort]', table)) {
         button.addEventListener('click', () => sortBy(button.dataset.sort));
     }
