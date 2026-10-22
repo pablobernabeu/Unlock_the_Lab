@@ -9,35 +9,44 @@ import {
     SHARED_NAME,
     SHARED_SESSIONS,
 } from './fixture.js';
+import { watchDatabase } from './helpers.js';
 import { expect, test } from './test.js';
 
-/** RTDB wire actions that change data or authenticate: put, merge, onDisconnect, auth. */
+/** Database actions that change data or authenticate (see watchDatabase). */
 const WRITE_ACTIONS = new Set(['p', 'm', 'o', 'om', 'oc', 'auth', 'gauth', 'unauth']);
 
 /**
- * Records every request to the Auth emulator or Google's sign-in hosts and
- * every database action sent over the websocket.
+ * Intercepts every request to the Auth emulator or Google's sign-in hosts
+ * (recorded, then let through) and records the database traffic.
  */
-function watchTraffic(page) {
-    const traffic = { auth: [], actions: [], sockets: 0 };
+async function watchTraffic(page) {
+    const auth = [];
+    await page.route(/:9099\/|identitytoolkit\.googleapis|securetoken\.googleapis/, (route) => {
+        auth.push(route.request().url());
+        return route.continue();
+    });
+    const longPolls = [];
     page.on('request', (request) => {
-        const url = request.url();
-        if (/:9099\/|identitytoolkit|securetoken/.test(url)) traffic.auth.push(url);
-        if (/\/\.lp\?/.test(url)) traffic.actions.push(`long-poll ${url}`);
+        if (/\/\.lp\?/.test(request.url())) longPolls.push(request.url());
     });
-    page.on('websocket', (socket) => {
-        traffic.sockets += 1;
-        socket.on('framesent', ({ payload }) => {
-            const action = /"a":"([a-z]+)"/.exec(String(payload))?.[1];
-            if (action) traffic.actions.push(action);
-        });
-    });
-    return traffic;
+    const database = watchDatabase(page);
+    return {
+        auth,
+        get sockets() {
+            return database.sockets;
+        },
+        get writes() {
+            return [
+                ...database.requests.filter(({ action }) => WRITE_ACTIONS.has(action)),
+                ...longPolls,
+            ];
+        },
+    };
 }
 
 test('a v1 results link renders read-only without signing in or writing', async ({ page }) => {
     const before = await readPath('');
-    const traffic = watchTraffic(page);
+    const traffic = await watchTraffic(page);
     const { leaderboard, ratings } = participants[LEGACY_SESSION];
 
     await page.goto(`/?session=${LEGACY_SESSION}`);
@@ -68,7 +77,7 @@ test('a v1 results link renders read-only without signing in or writing', async 
 
     expect(traffic.sockets, 'the page reads the database over a websocket').toBeGreaterThan(0);
     expect(traffic.auth, 'sign-in requests').toEqual([]);
-    expect(traffic.actions.filter((action) => WRITE_ACTIONS.has(action))).toEqual([]);
+    expect(traffic.writes).toEqual([]);
     expect(await readPath('')).toEqual(before);
     expect(
         await page.evaluate(() => Object.keys(localStorage).filter((key) => key !== 'utl.motion'))
@@ -77,16 +86,14 @@ test('a v1 results link renders read-only without signing in or writing', async 
     // The same watcher does see a participant who starts the workshop sign in and write.
     await page.goto('/');
     await page.getByRole('button', { name: 'Get started' }).click();
-    await expect
-        .poll(() => traffic.actions.filter((action) => action === 'p').length)
-        .toBeGreaterThan(0);
+    await expect.poll(() => traffic.writes.length).toBeGreaterThan(0);
     expect(traffic.auth.length).toBeGreaterThan(0);
 });
 
 test('a results link by nickname opens the results, or a choice when the name is shared', async ({
     page,
 }) => {
-    const traffic = watchTraffic(page);
+    const traffic = await watchTraffic(page);
 
     await page.goto(`/?session=${encodeURIComponent(LEGACY_NAME.toLowerCase())}`);
     await expect(
@@ -116,7 +123,7 @@ test('a results link by nickname opens the results, or a choice when the name is
     await expect(page.getByRole('heading', { level: 1, name: 'Results not found' })).toBeVisible();
 
     expect(traffic.auth).toEqual([]);
-    expect(traffic.actions.filter((action) => WRITE_ACTIONS.has(action))).toEqual([]);
+    expect(traffic.writes).toEqual([]);
 });
 
 test('results links for the oldest record shapes still render', async ({ page }) => {

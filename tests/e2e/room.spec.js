@@ -76,6 +76,16 @@ test('a participant in a room records the room and sees both leaderboards', asyn
     await expect(rows).toHaveCount(2);
     const total = scores.reduce((sum, score) => sum + score, 0);
     await expect(page.locator('.results-score__value')).toHaveText(`${Math.round(total / 10)}%`);
+
+    // The dashboard places the participant where the results page does, in the room and overall.
+    const dashboard = await page.context().newPage();
+    await dashboard.goto(`/dashboard.html?room=${ROOM}`);
+    const ownRow = dashboard.locator(`[data-leaderboard-rows] tr[data-key="${sessionId}"]`);
+    await expect(ownRow.locator('.leaderboard-table__place')).toHaveText(String(inRoom.rank));
+    await expect(ownRow).toContainText('This device');
+    await expect(ownRow).toContainText(`${Math.round(total / 10)}%`);
+    await dashboard.getByLabel('Room', { exact: true }).selectOption('');
+    await expect(ownRow.locator('.leaderboard-table__place')).toHaveText(String(overall.rank));
 });
 
 test('the dashboard filtered to a room shows only that room', async ({ page }) => {

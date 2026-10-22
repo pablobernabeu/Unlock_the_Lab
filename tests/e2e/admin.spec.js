@@ -3,7 +3,7 @@
 // QR code, the CSV export and ending all sessions.
 import { readFile } from 'node:fs/promises';
 import { ADMIN, API_KEY, NON_ADMIN, readPath, SERVER_TIMESTAMP, writePath } from './emulator.js';
-import { fixture, LEGACY_SESSION, ROOM } from './fixture.js';
+import { fixture, LEGACY_SESSION, ROOM, ROOM_SESSION } from './fixture.js';
 import {
     finishEarly,
     rateStudies,
@@ -198,6 +198,15 @@ test('the ratings CSV export holds every rating', async ({ page }) => {
     const row = legacy.find((cells) => cells[column('studyId')] === studyId);
     expect(row[column('rating')]).toBe(String(record[LEGACY_SESSION].rating));
     expect(row[column('room')]).toBe('');
+    // A version 2 rating fills every column, the room included.
+    const v2Rows = records.filter((record) => record[column('sessionId')] === ROOM_SESSION);
+    expect(v2Rows).toHaveLength(fixture.leaderboard[ROOM_SESSION].papersRated);
+    for (const cells of v2Rows) {
+        const stored = ratings[cells[column('studyId')]][ROOM_SESSION];
+        for (const name of RATING_COLUMNS.slice(2)) {
+            expect(cells[column(name)], name).toBe(String(stored[name]));
+        }
+    }
     // The oldest records were bare numbers: only the rating is filled in.
     const bare = records.find((cells) => cells[column('sessionId')].endsWith('_barenum'));
     expect(bare[column('rating')]).toBe('2');

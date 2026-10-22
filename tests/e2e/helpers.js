@@ -40,6 +40,33 @@ export async function expectedTarget(studyId, sessionId) {
     };
 }
 
+/**
+ * Records what the page's Realtime Database client sends over its websockets:
+ * the number of sockets and every request as `{action, path, data}`. Actions
+ * that change data are 'p' (set), 'm' (update) and 'o', 'om', 'oc'
+ * (onDisconnect); 'auth', 'gauth' and 'unauth' authenticate.
+ */
+export function watchDatabase(page) {
+    const traffic = { sockets: 0, requests: [] };
+    page.on('websocket', (socket) => {
+        traffic.sockets += 1;
+        socket.on('framesent', ({ payload }) => {
+            try {
+                const { t: type, d: message } = JSON.parse(String(payload));
+                if (type !== 'd' || !message?.a) return;
+                traffic.requests.push({
+                    action: message.a,
+                    path: message.b?.p ?? null,
+                    data: message.b?.d,
+                });
+            } catch {
+                // Large messages arrive in numbered pieces; none of the ones checked here are.
+            }
+        });
+    });
+    return traffic;
+}
+
 /** Presses Tab (or Shift+Tab) until the focused element matches. Keyboard only. */
 export async function tabTo(page, selector, { text = null, max = 150, back = false } = {}) {
     for (let i = 0; i < max; i += 1) {

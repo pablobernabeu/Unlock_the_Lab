@@ -34,11 +34,13 @@ export default defineConfig({
     webServer: [
         {
             command: `npx firebase emulators:start --only database,auth --project ${PROJECT_ID}`,
-            // The Auth emulator starts after the database one; global setup waits for both.
+            // The Auth emulator starts after the database one; global setup waits for both
+            // and checks that the rules from firebase.json cover the app's namespace.
             url: 'http://127.0.0.1:9099',
             reuseExistingServer: !process.env.CI,
             timeout: 180_000,
-            stdout: 'ignore',
+            // firebase-tools reports start-up problems (no Java, a busy port) on stdout.
+            stdout: process.env.CI ? 'pipe' : 'ignore',
             stderr: 'pipe',
         },
         {

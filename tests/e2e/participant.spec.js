@@ -1,7 +1,10 @@
 // A new participant's whole journey with the keyboard only: the welcome page,
 // the guide, 10 studies, finishing early, the criterion weights and the
 // results, checked against what reaches the database.
-import { readPath } from './emulator.js';
+import studies from '../../src/content/en/studies.json' with { type: 'json' };
+import expertRatings from '../../src/content/expert-ratings.json' with { type: 'json' };
+import { readPath, SERVER_TIMESTAMP, writePath } from './emulator.js';
+import { v1StudyOrder } from './fixture.js';
 import {
     activate,
     allocateTokens,
@@ -15,9 +18,11 @@ import {
     readFeedback,
     savedState,
     scoreFor,
+    SEED_WEIGHT,
     startWorkshop,
     STUDY_COUNT,
     tabTo,
+    watchDatabase,
 } from './helpers.js';
 import { expect, test } from './test.js';
 
@@ -59,6 +64,7 @@ const RATING_FIELDS = [
 test('a new participant takes part from start to results with the keyboard only', async ({
     page,
 }) => {
+    const database = watchDatabase(page);
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1, name: 'Unlock the Lab' })).toBeVisible();
     await expect(page.locator('#welcome-scoring-target')).toContainText(
@@ -83,13 +89,17 @@ test('a new participant takes part from start to results with the keyboard only'
         feedbackMode: 'each',
     });
 
+    // Each session sees the studies in the order seeded by its id, as in v1.
+    const order = v1StudyOrder(studies, sessionId);
     const scores = [];
+    const targetsShown = [];
     for (const [index, answer] of ANSWERS.entries()) {
         const trial = index + 1;
         await expect(page.locator('.study__progress')).toHaveText(
             `Study ${trial} of ${STUDY_COUNT}`
         );
         const study = await currentStudy(page);
+        expect(study.id).toBe(order[index].id);
         const expected = await expectedTarget(study.id, sessionId);
 
         if (trial === 1) {
@@ -121,7 +131,9 @@ test('a new participant takes part from start to results with the keyboard only'
         // The score is the stated rule applied to the target shown.
         const feedback = await readFeedback(page);
         expect(feedback.prediction).toBe(answer.prediction);
-        expect(feedback.targetText).toBe(expected.target.toFixed(2));
+        // Two decimals, or more where the score needs them (see the next test).
+        expect(feedback.targetText).toMatch(/^\d\.\d{2,6}$/);
+        expect(Math.abs(feedback.target - expected.target)).toBeLessThanOrEqual(0.005);
         expect(feedback.score).toBe(scoreFor(answer.prediction, feedback.target));
         expect(feedback.facts).toContain(
             expected.n === 0
@@ -159,10 +171,16 @@ test('a new participant takes part from start to results with the keyboard only'
         });
         expect(record.target).toBeCloseTo(expected.target, 10);
         expect(record.responseTime).toBeGreaterThan(0);
-        // The rules only accept the server's clock here (timestamp === now).
+        // The timestamp comes from the server: the client sent the placeholder.
+        const writes = database.requests.filter(
+            ({ action, path }) => action === 'p' && path === `/ratings/${study.id}/${sessionId}`
+        );
+        expect(writes).toHaveLength(1);
+        expect(writes[0].data.timestamp).toEqual(SERVER_TIMESTAMP);
         expect(record.timestamp).toBeGreaterThanOrEqual(submittedFrom - 2000);
         expect(record.timestamp).toBeLessThanOrEqual(submittedBy + 2000);
         scores.push(feedback.score);
+        targetsShown.push(feedback.targetText);
 
         await expect(page.locator('#banner-rated')).toHaveText(`${trial} of ${STUDY_COUNT}`);
         if (trial < ANSWERS.length) {
@@ -226,18 +244,19 @@ test('a new participant takes part from start to results with the keyboard only'
     });
     await expect(page.locator('#results-nickname')).toHaveText(`Your nickname: ${entry.userName}`);
 
+    // The fixture has four ranked participants, so the top five always include this one.
     const { rank, count } = expectedRank(leaderboard, sessionId);
+    expect(count).toBe(5);
     await expect(page.locator('.results-rank')).toHaveText(
         `Your position: ${rank} of ${count} ranked participants.`
     );
     const rows = page.locator('.results-board tbody tr');
-    await expect(rows).toHaveCount(Math.min(5, count));
-    if (rank <= 5) {
-        const own = page.locator('.results-board tr[aria-current="true"]');
-        await expect(own).toContainText(entry.userName);
-        await expect(own).toContainText('You');
-        await expect(own).toContainText(`${Math.round(total / 10)}%`);
-    }
+    await expect(rows).toHaveCount(5);
+    const own = page.locator('.results-board tr[aria-current="true"]');
+    await expect(own).toContainText(entry.userName);
+    await expect(own).toContainText('You');
+    await expect(own).toContainText(`${Math.round(total / 10)}%`);
+    await expect(own.locator('td').first()).toHaveText(String(rank));
 
     expect(await readPath(`rankings/${sessionId}`)).toEqual({
         ...TOKENS,
@@ -245,6 +264,32 @@ test('a new participant takes part from start to results with the keyboard only'
         timestamp: expect.any(Number),
         uid,
     });
+    // The ratings, in the order they were saved, are trials 1 to 10.
+    const saved = Object.entries(await readPath('ratings'))
+        .filter(([, node]) => node[sessionId])
+        .map(([studyId, node]) => ({ studyId, ...node[sessionId] }))
+        .sort((a, b) => a.timestamp - b.timestamp);
+    expect(saved.map(({ trial }) => trial)).toEqual(ANSWERS.map((_, i) => i + 1));
+    expect(saved.map(({ studyId }) => studyId)).toEqual(order.slice(0, 10).map(({ id }) => id));
+    // Study by study, the results repeat what was saved, in the order rated.
+    const items = page.locator('.review-item');
+    await expect(items).toHaveCount(10);
+    for (const [index, record] of saved.entries()) {
+        const item = items.nth(index);
+        await expect(item.locator('.review-item__title')).toHaveText(order[index].title);
+        await expect(item.locator('.review-item__facts dd')).toHaveText([
+            String(record.rating),
+            String(record.prediction),
+            targetsShown[index],
+            String(record.score),
+            new RegExp(`^${expertRatings[record.studyId]} (Low|Medium|High) quality$`),
+        ]);
+    }
+    await expect(page.locator('.weight-bars__value')).toHaveText(
+        Object.values(TOKENS).map(
+            (count) => `${count} of 20 tokens (${Math.round((count / 20) * 100)}%)`
+        )
+    );
     // Presence ends on the results page.
     await expect.poll(() => readPath(`active/${sessionId}`)).toBeNull();
     const stored = await savedState(page);
@@ -255,6 +300,79 @@ test('a new participant takes part from start to results with the keyboard only'
         rankingSubmitted: true,
         criterionTokens: TOKENS,
     });
+});
+
+/**
+ * Other participants' ratings for a study, and a prediction, for which the
+ * score worked out from the target rounded to two decimals differs from the
+ * real score: the case where two decimals are not enough to show the target.
+ */
+function roundingEdge(expertRating) {
+    for (let count = 4; count <= 40; count += 1) {
+        for (let sum = count; sum <= 7 * count; sum += 1) {
+            const target = (sum + expertRating * SEED_WEIGHT) / (count + SEED_WEIGHT);
+            for (let prediction = 1; prediction <= 7; prediction += 1) {
+                const rounded = Number(target.toFixed(2));
+                if (scoreFor(prediction, target) === scoreFor(prediction, rounded)) continue;
+                const base = Math.floor(sum / count);
+                const ratings = Array.from({ length: count }, (_, i) =>
+                    i < sum - base * count ? base + 1 : base
+                );
+                return { target, prediction, ratings };
+            }
+        }
+    }
+    throw new Error(`No rounding edge found for an expert rating of ${expertRating}`);
+}
+
+test('the score can be worked out from the target shown, even where two decimals are not enough', async ({
+    page,
+}) => {
+    await startWorkshop(page);
+    const { sessionId } = await savedState(page);
+    const study = await currentStudy(page);
+    const edge = roundingEdge(study.expertRating);
+    // The other participants' ratings; the first is stored as a bare number, as the oldest were.
+    await writePath(
+        `ratings/${study.id}`,
+        Object.fromEntries(
+            edge.ratings.map((rating, i) => [
+                `session_17000000000${String(i).padStart(2, '0')}_edge${i}`,
+                i === 0
+                    ? rating
+                    : { rating, prediction: 4, timestamp: 1_700_000_000_000 + i, uid: `uid-${i}` },
+            ])
+        )
+    );
+
+    await rateWithMouse(page, { prediction: edge.prediction, rating: 4 });
+    const feedback = await readFeedback(page);
+    const score = scoreFor(edge.prediction, edge.target);
+    expect(feedback.score).toBe(score);
+    expect(feedback.score, `the rule applied to ${feedback.targetText}`).toBe(
+        scoreFor(edge.prediction, feedback.target)
+    );
+    const distance = feedback.facts
+        .map((line) => /Your prediction was ([\d.]+) points? from the target\./.exec(line)?.[1])
+        .find(Boolean);
+    expect(Number(distance)).toBeCloseTo(Math.abs(edge.prediction - feedback.target), 9);
+    expect(feedback.facts).toContain(
+        `How the target was worked out: the expert's rating of ${study.expertRating}, counted as if 100 people had given it, combined with ${edge.ratings.length} ratings from other participants.`
+    );
+    const record = await readPath(`ratings/${study.id}/${sessionId}`);
+    expect(record.score).toBe(score);
+    expect(record.target).toBeCloseTo(edge.target, 12);
+
+    // The study-by-study results show the target the same way.
+    await page.goto(`/?session=${sessionId}`);
+    const facts = page.locator('.review-item').first().locator('.review-item__facts dd');
+    await expect(facts).toHaveText([
+        '4',
+        String(edge.prediction),
+        feedback.targetText,
+        String(score),
+        /./,
+    ]);
 });
 
 test('the results link can be copied, and a new participant gets a new session and user', async ({
@@ -342,6 +460,58 @@ test('one step back, back to rating after finishing early, and the milestone at 
         'Your average score per study, over 12 studies'
     );
     await expect(page.locator('.review-item')).toHaveCount(12);
+});
+
+test('the criterion weights work by pointer and survive a reload', async ({ page }) => {
+    await startWorkshop(page);
+    await rateStudies(page, 10);
+    await finishEarly(page);
+    const { sessionId } = await savedState(page);
+    const row = (key) =>
+        page.getByRole('group', { name: CRITERION_LABELS[key], exact: true }).locator('.token-bar');
+    const count = (key) => page.locator(`#weight-${key}-count`);
+    const submit = page.getByRole('button', { name: 'Save and see my results' });
+
+    // A box sets the count to its position, within what the other criteria leave.
+    await row('methods').locator('.token-box').nth(7).click();
+    await expect(count('methods')).toHaveText('8 tokens');
+    await row('title').locator('.token-box').nth(14).click();
+    await expect(count('title')).toHaveText('12 tokens');
+    await expect(row('title').locator('.token-box--filled')).toHaveCount(12);
+    await expect(row('access').locator('.token-box--blocked')).toHaveCount(20);
+    await expect(page.locator('.weights-total__text')).toHaveText('20 of 20 tokens used');
+    await row('methods').locator('.token-box').nth(3).click();
+    await expect(count('methods')).toHaveText('4 tokens');
+    await expect(page.locator('.weights-total__text')).toHaveText('16 of 20 tokens used');
+
+    // Saving needs every token; trying early says why and writes nothing.
+    await expect(submit).toHaveAttribute('aria-disabled', 'true');
+    await submit.click({ force: true });
+    await expect(page.locator('.weights__actions .field-error')).toHaveText(
+        'Use all 20 tokens to continue: 4 tokens left.'
+    );
+    expect(await readPath(`rankings/${sessionId}`)).toBeNull();
+
+    // The allocation so far is kept across a reload, and focus stays out of the hidden bar.
+    await page.reload();
+    await expect(count('title')).toHaveText('12 tokens');
+    await expect(count('methods')).toHaveText('4 tokens');
+    await row('conclusion').locator('.token-box').nth(3).click();
+    expect(await page.evaluate(() => document.activeElement.closest('.token-bar'))).toBeNull();
+    await page.getByRole('button', { name: 'Remove a token from Title' }).click();
+    await expect(count('title')).toHaveText('11 tokens');
+    await page.getByRole('button', { name: 'Add a token to Source' }).click();
+    await expect(page.locator('.weights-total__text')).toHaveText('20 of 20 tokens used');
+    await submit.click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Your results' })).toBeVisible();
+    expect(await readPath(`rankings/${sessionId}`)).toMatchObject({
+        title: 11,
+        access: 0,
+        source: 1,
+        theory: 0,
+        methods: 4,
+        conclusion: 4,
+    });
 });
 
 test('a double click on submit saves the answers once', async ({ page }) => {

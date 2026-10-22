@@ -10,6 +10,7 @@ import { el } from '../../lib/dom.js';
 import { formatRating } from '../../lib/format.js';
 import { formatNumber, t } from '../../lib/i18n.js';
 import { scoreBand } from '../../lib/scoring.js';
+import { roundTarget, targetDigits } from '../target-precision.js';
 import { bandBadge } from '../ui.js';
 
 const SCORE_MESSAGES = {
@@ -86,23 +87,27 @@ export function renderExpertFeedback(study, { withHeading = true } = {}) {
 }
 
 /**
- * A target with two decimals: with one decimal a careful reader could get a
- * score 1 point away from the one shown, because the score uses the exact target.
+ * A target, or a distance from one, with two decimals or, where the score
+ * needs them to be worked out from it, up to `digits` (see target-precision.js).
  * @param {number} value
+ * @param {number} [digits]
  * @returns {string}
  */
-export function formatTarget(value) {
-    return formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export function formatTarget(value, digits = 2) {
+    return formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: digits });
 }
 
-function targetLines({ prediction, target, crowd, expertRating }) {
+function targetLines({ prediction, target, score, crowd, expertRating }) {
     if (!Number.isFinite(prediction)) return [t('app.feedback.targetUnknown')];
     if (!Number.isFinite(target)) {
         return [t('app.feedback.predictionOnly', { prediction }), t('app.feedback.targetUnknown')];
     }
+    // The distance is taken from the target as shown, so the two lines and the score agree.
+    const digits = targetDigits(target, prediction, score);
+    const distance = Math.abs(prediction - roundTarget(target, digits));
     const lines = [
-        t('app.feedback.predictionVsTarget', { prediction, target: formatTarget(target) }),
-        t('app.feedback.distance', { distance: formatTarget(Math.abs(prediction - target)) }),
+        t('app.feedback.predictionVsTarget', { prediction, target: formatTarget(target, digits) }),
+        t('app.feedback.distance', { distance: formatTarget(distance, digits) }),
     ];
     if (crowd?.n > 0) {
         lines.push(

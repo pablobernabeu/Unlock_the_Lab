@@ -5,7 +5,6 @@
 // them in a workshop room.
 import expertRatings from '../../src/content/expert-ratings.json' with { type: 'json' };
 import studies from '../../src/content/en/studies.json' with { type: 'json' };
-import { seededShuffle } from '../../src/lib/shuffle.js';
 
 export const ROOM = 'DEMO-1';
 const DAY = 24 * 60 * 60 * 1000;
@@ -18,6 +17,34 @@ export const ROOM_NAME = 'Curious Hawk 71';
 /** Two leaderboard entries carry this nickname. */
 export const SHARED_NAME = 'Tall Rabbit 07';
 export const SHARED_SESSIONS = ['session_1771677565473_legacyb2', 'session_1772900000000_dupname4'];
+
+/**
+ * The study order of version 1 (`shufflePapers` in its app.js), copied here
+ * rather than imported from src/lib so that a change to the app's shuffle
+ * fails the tests instead of moving the expectations with it.
+ * @template T
+ * @param {T[]} papers in canonical order (STUDY-1 to STUDY-48)
+ * @param {string} sessionId
+ * @returns {T[]}
+ */
+export function v1StudyOrder(papers, sessionId) {
+    const result = [...papers];
+    let seed = 0;
+    for (let i = 0; i < sessionId.length; i++) {
+        seed = (seed << 5) - seed + sessionId.charCodeAt(i);
+        seed = seed & seed;
+    }
+    seed = Math.abs(seed) % 233280;
+    function seededRandom() {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+    }
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
 
 function random(seed) {
     let state = seed;
@@ -33,12 +60,12 @@ function clampRating(value) {
 
 /**
  * The studies a session rated, in the order it rated them. A seeded session
- * follows the app's study order, as a real participant does, so a v1 state
+ * follows the version 1 study order, as a real participant did, so a v1 state
  * built from it resumes where that participant stopped.
  */
 function ratedStudies({ sessionId, seed, count, seededOrder }) {
     if (seededOrder) {
-        return seededShuffle(studies, sessionId)
+        return v1StudyOrder(studies, sessionId)
             .slice(0, count)
             .map(({ id }) => id);
     }

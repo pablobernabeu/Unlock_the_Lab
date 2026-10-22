@@ -112,17 +112,28 @@ export function loadRules() {
 
 /**
  * Fails unless the rules are in force: a guest must not be able to write. An
- * emulator namespace without rules accepts every write.
+ * emulator namespace without rules accepts every write. With `timeoutMs`, it
+ * keeps trying that long, for emulators that load their rules just after they
+ * start answering.
+ * @param {object} [options]
+ * @param {number} [options.timeoutMs]
+ * @param {string} [options.hint] what a failure means
  */
-export async function assertRulesEnforced() {
-    const response = await fetch(databaseUrl('e2e-rules-check'), {
-        method: 'PUT',
-        body: JSON.stringify(1),
-    });
-    if (response.status !== 401) {
-        throw new Error(
-            `A guest write to ${NAMESPACE} returned ${response.status}; the database rules are not loaded.`
-        );
+export async function assertRulesEnforced({
+    timeoutMs = 0,
+    hint = 'the database rules are not loaded',
+} = {}) {
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+        const response = await fetch(databaseUrl('e2e-rules-check'), {
+            method: 'PUT',
+            body: JSON.stringify(1),
+        });
+        if (response.status === 401) return;
+        if (Date.now() >= deadline) {
+            throw new Error(`A guest write to ${NAMESPACE} returned ${response.status}: ${hint}.`);
+        }
+        await new Promise((resolve) => setTimeout(resolve, 500));
     }
 }
 
@@ -143,23 +154,37 @@ export async function waitForEmulators({ timeoutMs = 60_000 } = {}) {
     throw new Error(`The Firebase emulators did not answer: ${lastError?.message}`);
 }
 
-async function signUp({ email, password }) {
-    const data = await request(
-        `${AUTH}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`,
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, returnSecureToken: true }),
-        }
-    );
-    return data.localId;
+/** Creates an Auth emulator account (anonymous without credentials) and returns its sign-in data. */
+function signUp(credentials = {}) {
+    return request(`${AUTH}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...credentials, returnSecureToken: true }),
+    });
+}
+
+/**
+ * Fails unless the Auth emulator runs under PROJECT_ID. An emulator started
+ * for another project accepts the resets below but applies them to the wrong
+ * project, so the failure would otherwise surface later as a puzzling
+ * 'EMAIL_EXISTS'.
+ */
+export async function assertAuthProject() {
+    const { idToken } = await signUp();
+    const { aud } = JSON.parse(Buffer.from(idToken.split('.')[1], 'base64url').toString('utf8'));
+    if (aud !== PROJECT_ID) {
+        throw new Error(
+            `The Auth emulator runs for the project '${aud}', but the test build uses ` +
+                `'${PROJECT_ID}' (.env.test). Restart it with --project ${PROJECT_ID}.`
+        );
+    }
 }
 
 /** Deletes every Auth account, then creates one admin and one non-admin password account. */
 export async function resetAccounts() {
     await request(`${AUTH}/emulator/v1/projects/${PROJECT_ID}/accounts`, { method: 'DELETE' });
-    const adminUid = await signUp(ADMIN);
-    const nonAdminUid = await signUp(NON_ADMIN);
+    const { localId: adminUid } = await signUp(ADMIN);
+    const { localId: nonAdminUid } = await signUp(NON_ADMIN);
     return { adminUid, nonAdminUid };
 }
 

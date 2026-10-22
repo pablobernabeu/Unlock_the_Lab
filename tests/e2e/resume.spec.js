@@ -3,9 +3,8 @@
 // belongs to another sign-in.
 import studies from '../../src/content/en/studies.json' with { type: 'json' };
 import expertRatings from '../../src/content/expert-ratings.json' with { type: 'json' };
-import { seededShuffle } from '../../src/lib/shuffle.js';
-import { AUTH_USER_KEY, persistedAnonymousUser, readPath } from './emulator.js';
-import { LEGACY_NAME, LEGACY_SESSION, participants } from './fixture.js';
+import { AUTH_USER_KEY, persistedAnonymousUser, readPath, writePath } from './emulator.js';
+import { LEGACY_NAME, LEGACY_SESSION, participants, v1StudyOrder } from './fixture.js';
 import {
     currentStudy,
     rateWithMouse,
@@ -125,7 +124,7 @@ test('a session saved by version 1 resumes on the same page with the same score'
     await seedStorage(page, { ...v1Storage(), [AUTH_USER_KEY]: JSON.stringify(user) });
     const { leaderboard, ratings } = participants[LEGACY_SESSION];
     const rated = Object.keys(ratings).length;
-    const order = seededShuffle(studies, LEGACY_SESSION);
+    const order = v1StudyOrder(studies, LEGACY_SESSION);
 
     await page.goto('/');
     await expect(page.locator('.study__progress')).toHaveText(
@@ -154,14 +153,14 @@ test('a session saved by version 1 resumes on the same page with the same score'
 
     // The next answer counts on top of the v1 score.
     const study = await currentStudy(page);
+    const shownAt = Date.now();
     await rateWithMouse(page, { prediction: 5, rating: 4 });
     const { score } = await readFeedback(page);
     await expect(page.locator('#banner-rated')).toHaveText(`${rated + 1} of ${STUDY_COUNT}`);
-    expect(await readPath(`ratings/${study.id}/${LEGACY_SESSION}`)).toMatchObject({
-        uid: LEGACY_UID,
-        trial: rated + 1,
-        score,
-    });
+    const record = await readPath(`ratings/${study.id}/${LEGACY_SESSION}`);
+    expect(record).toMatchObject({ uid: LEGACY_UID, trial: rated + 1, score });
+    // Timed from this visit: v1's stored display times are not reused.
+    expect(record.responseTime).toBeLessThanOrEqual(Date.now() - shownAt + 1000);
     await expect
         .poll(() => readPath(`leaderboard/${LEGACY_SESSION}`))
         .toMatchObject({
@@ -174,6 +173,40 @@ test('a session saved by version 1 resumes on the same page with the same score'
     for (const [id, record] of Object.entries(ratings)) {
         expect(await readPath(`ratings/${id}/${LEGACY_SESSION}`)).toEqual(record);
     }
+    // The order carries on as version 1 would have shown it, in both directions.
+    await page.getByRole('button', { name: 'Back to the previous study' }).click();
+    await expect(page.locator('#study-title')).toHaveText(order[rated - 1].title);
+    await page.getByRole('button', { name: 'Next study' }).click();
+    await page.getByRole('button', { name: 'Next study' }).click();
+    await expect(page.locator('#study-title')).toHaveText(order[rated + 1].title);
+});
+
+test('a version 1 session missing from the leaderboard is added there study by study', async ({
+    page,
+}) => {
+    const { leaderboard, ratings } = participants[LEGACY_SESSION];
+    const rated = Object.keys(ratings).length;
+    await writePath(`leaderboard/${LEGACY_SESSION}`, null);
+    const user = await persistedAnonymousUser(LEGACY_UID);
+    await seedStorage(page, { ...v1Storage(), [AUTH_USER_KEY]: JSON.stringify(user) });
+
+    // The rules let an entry grow by one study and 100 points per write, so it steps up.
+    const seen = [];
+    await page.goto('/');
+    await expect
+        .poll(async () => {
+            const entry = await readPath(`leaderboard/${LEGACY_SESSION}`);
+            if (entry) seen.push(entry.papersRated);
+            return entry;
+        })
+        .toMatchObject({
+            score: leaderboard.score,
+            papersRated: rated,
+            uid: LEGACY_UID,
+            userName: LEGACY_NAME,
+        });
+    expect(seen.every((count, i) => i === 0 || count >= seen[i - 1])).toBe(true);
+    await expect(page.locator('#banner-rated')).toHaveText(`${rated} of ${STUDY_COUNT}`);
 });
 
 test('a saved session that belongs to another sign-in shows the claimed notice', async ({

@@ -13,6 +13,7 @@ import { formatPercent, formatRating } from '../../lib/format.js';
 import { t } from '../../lib/i18n.js';
 import { meanAccuracy } from '../../lib/scoring.js';
 import { chartPoints, leaderboardView, ratingProfile, tokenShares } from '../results-model.js';
+import { targetDigits } from '../target-precision.js';
 import { bandBadge, setChildren } from '../ui.js';
 import { formatTarget, renderExpertFeedback } from './feedback.js';
 import { drawRatingChart } from './results-chart.js';
@@ -384,7 +385,9 @@ function reviewItem(row) {
             fact(t('app.results.reviewPrediction'), row.prediction ?? notRecorded),
             fact(
                 t('app.results.reviewTarget'),
-                Number.isFinite(row.target) ? formatTarget(row.target) : notRecorded
+                Number.isFinite(row.target)
+                    ? formatTarget(row.target, targetDigits(row.target, row.prediction, row.score))
+                    : notRecorded
             ),
             fact(
                 t('app.results.reviewScore'),

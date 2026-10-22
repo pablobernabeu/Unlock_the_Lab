@@ -1,8 +1,15 @@
 // axe (WCAG 2.0, 2.1 and 2.2 A and AA rules) on every view of the three
 // pages and the 404 page, on a desktop and a phone-sized screen.
-import { ADMIN, readPath } from './emulator.js';
-import { LEGACY_NAME, LEGACY_SESSION } from './fixture.js';
-import { allocateTokens, expectNoAxeViolations, rateStudies, rateWithMouse } from './helpers.js';
+import { ADMIN, readPath, SERVER_TIMESTAMP, writePath } from './emulator.js';
+import { LEGACY_NAME, LEGACY_SESSION, SHARED_NAME } from './fixture.js';
+import {
+    allocateTokens,
+    expectNoAxeViolations,
+    rateStudies,
+    rateWithMouse,
+    savedState,
+    startWorkshop,
+} from './helpers.js';
 import { expect, test } from './test.js';
 
 test('the axe check reports a violation it is shown', async ({ page }) => {
@@ -78,6 +85,28 @@ for (const width of [1280, 360]) {
             await expect(page.locator('.results-board table')).toBeVisible();
             await expect(page.locator('.chart-box canvas')).toBeVisible();
             await expectNoAxeViolations(page, 'read-only results');
+        });
+
+        test('the nickname chooser and a closed session have no axe violations', async ({
+            page,
+        }) => {
+            await page.goto(`/?session=${encodeURIComponent(SHARED_NAME)}`);
+            await expect(
+                page.getByRole('heading', { level: 1, name: 'Choose the results' })
+            ).toBeVisible();
+            await expectNoAxeViolations(page, 'nickname chooser');
+
+            await startWorkshop(page);
+            const { sessionId } = await savedState(page);
+            await expect.poll(() => readPath(`active/${sessionId}`)).not.toBeNull();
+            await writePath('control/sessionsEndedAt', SERVER_TIMESTAMP);
+            await expect(
+                page.getByRole('heading', {
+                    level: 1,
+                    name: 'The facilitator has closed this session',
+                })
+            ).toBeVisible();
+            await expectNoAxeViolations(page, 'closed session');
         });
 
         test.describe('404', () => {
