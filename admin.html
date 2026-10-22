@@ -1,348 +1,627 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Control - Unlock the Lab</title>
-    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        body {
-            background: #f8fafc;
-        }
-        .admin-container {
-            max-width: 800px;
-            margin: 3rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .admin-header {
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .admin-section {
-            margin: 2rem 0;
-            padding: 1.5rem;
-            background: #f8fafc;
-            border-radius: 8px;
-        }
-        .status-box {
-            padding: 1rem;
-            background: #f0f9ff;
-            border-left: 4px solid #3b82f6;
-            border-radius: 4px;
-            margin: 1rem 0;
-        }
-        .danger-zone {
-            background: #fef2f2;
-            border-left: 4px solid #ef4444;
-        }
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-        .btn-danger:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-        }
-        #login-section {
-            max-width: 400px;
-            margin: 0 auto;
-            text-align: center;
-        }
-        .google-signin-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            width: 100%;
-            padding: 0.875rem 1.5rem;
-            background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #374151;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .google-signin-btn:hover {
-            background: #f9fafb;
-            border-color: #3b82f6;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .google-signin-btn img {
-            width: 20px;
-            height: 20px;
-        }
-        .error-message {
-            color: #ef4444;
-            padding: 0.75rem;
-            background: #fef2f2;
-            border-radius: 4px;
-            margin: 1rem 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="admin-container">
-        <div class="admin-header">
-            <h1>🔐 Admin Control Panel</h1>
-            <p style="color: #6b7280;">Manage workshop sessions and data</p>
-        </div>
-
-        <!-- Login Section -->
-        <div id="login-section">
-            <h2>Administrator Login</h2>
-            <p style="color: #6b7280; margin-bottom: 2rem;">Sign in with your admin credentials</p>
-            <input 
-                type="email" 
-                id="adminEmail" 
-                class="admin-input" 
-                placeholder="Admin email"
-                onkeypress="handleLoginKeyPress(event)"
-                autofocus
-                style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; margin-bottom: 1rem;"
-            >
-            <input 
-                type="password" 
-                id="adminPassword" 
-                class="admin-input" 
-                placeholder="Password"
-                onkeypress="handleLoginKeyPress(event)"
-                style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; margin-bottom: 1rem;"
-            >
-            <button class="google-signin-btn" onclick="loginWithPassword()" id="loginBtn" style="margin-top: 0.5rem;">
-                🔐 Sign in
-            </button>
-            <div id="login-error" class="error-message" style="display: none;"></div>
-        </div>
-
-        <!-- Admin Panel (hidden until logged in) -->
-        <div id="admin-panel" style="display: none;">
-            <div class="admin-section">
-                <h2>📊 Session Statistics</h2>
-                <div class="status-box">
-                    <p><strong>Active Sessions:</strong> <span id="active-count">Loading...</span></p>
-                    <p><strong>Total Ratings:</strong> <span id="total-ratings">Loading...</span></p>
-                    <p><strong>Leaderboard Entries:</strong> <span id="leaderboard-count">Loading...</span></p>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="noindex, nofollow" />
+        <title data-i18n="admin.pageTitle">Facilitator panel – Unlock the Lab</title>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/unlock-lab-icon.svg" type="image/svg+xml" />
+        <link rel="stylesheet" href="/src/styles/base.css" />
+        <link rel="stylesheet" href="/src/styles/admin.css" />
+        <script type="module" src="/src/admin/main.js"></script>
+    </head>
+    <body>
+        <a class="skip-link" href="#main" data-i18n="common.nav.skipToContent"
+            >Skip to main content</a
+        >
+        <header class="site-header">
+            <div class="container site-header__inner">
+                <a class="site-header__brand" href="/">
+                    <img
+                        class="site-header__logo"
+                        src="/unlock-lab-icon.svg"
+                        alt=""
+                        width="32"
+                        height="32"
+                    />
+                    <span data-i18n="common.appName">Unlock the Lab</span>
+                </a>
+                <div class="admin-header__tools">
+                    <nav
+                        class="admin-nav"
+                        aria-label="Pages"
+                        data-i18n-attr="aria-label:admin.navLabel"
+                    >
+                        <a href="/" data-i18n="common.nav.workshop">Workshop</a>
+                        <a href="/dashboard.html" data-i18n="common.nav.dashboard"
+                            >Live dashboard</a
+                        >
+                    </nav>
+                    <div data-locale-switcher></div>
                 </div>
             </div>
+        </header>
 
-            <div class="admin-section danger-zone">
-                <h2>⚠️ Session Management</h2>
-                <p style="margin-bottom: 1rem; color: #374151;">
-                    <strong>Stop All Active Sessions:</strong> This will clear all active participant data and force users to start new sessions. Ratings and leaderboard data will be preserved.
+        <main id="main" tabindex="-1">
+            <div class="container admin">
+                <h1 data-page-heading data-i18n="admin.heading">Facilitator panel</h1>
+                <p class="lead" data-i18n="admin.intro">
+                    Tools for workshop facilitators: live figures, room links, data exports and
+                    session controls.
                 </p>
-                <button class="btn-danger" onclick="stopAllSessions()" style="width: 100%; margin-bottom: 1rem;">
-                    🛑 Stop all active sessions
-                </button>
-                <div id="action-result" style="margin-top: 1rem;"></div>
-            </div>
 
-            <div class="admin-section danger-zone">
-                <h2>🗑️ Data Management</h2>
-                <p style="margin-bottom: 1rem; color: #374151;">
-                    <strong>⚠️ CAUTION:</strong> This will permanently delete all stored ratings data. This action cannot be undone. The leaderboard and active sessions will remain.
+                <noscript>
+                    <p class="info-box info-box--warning">
+                        The facilitator panel needs JavaScript. Turn it on in your browser and
+                        reload the page.
+                    </p>
+                </noscript>
+
+                <p class="admin-status" role="status" data-app-status>
+                    <span data-i18n="admin.status.starting"
+                        >Checking whether you are signed in…</span
+                    >
                 </p>
-                <button class="btn-danger" onclick="deleteAllRatings()" style="width: 100%;">
-                    🗑️ Delete all ratings data
-                </button>
-                <div id="delete-result" style="margin-top: 1rem;"></div>
+                <div class="cluster admin-actions" data-app-actions hidden></div>
+
+                <section class="card admin-login" aria-labelledby="login-heading" data-login hidden>
+                    <h2 id="login-heading" data-i18n="admin.login.heading">Sign in</h2>
+                    <p data-i18n-html="admin.login.intro">Sign in with an administrator account.</p>
+                    <div class="admin-login__alert" role="alert" data-login-alert></div>
+                    <form class="admin-login__form stack" data-login-form novalidate>
+                        <div class="field">
+                            <label for="admin-email" data-i18n="admin.login.email"
+                                >Email address</label
+                            >
+                            <input
+                                id="admin-email"
+                                name="email"
+                                type="email"
+                                autocomplete="username"
+                                autocapitalize="off"
+                                spellcheck="false"
+                                required
+                                aria-describedby="admin-email-error"
+                            />
+                            <p
+                                class="field-error"
+                                id="admin-email-error"
+                                data-field-error="email"
+                            ></p>
+                        </div>
+                        <div class="field">
+                            <label for="admin-password" data-i18n="admin.login.password"
+                                >Password</label
+                            >
+                            <input
+                                id="admin-password"
+                                name="password"
+                                type="password"
+                                autocomplete="current-password"
+                                required
+                                aria-describedby="admin-password-error"
+                            />
+                            <p
+                                class="field-error"
+                                id="admin-password-error"
+                                data-field-error="password"
+                            ></p>
+                        </div>
+                        <p class="field-error" role="alert" data-form-error></p>
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            data-login-submit
+                            data-i18n="admin.login.submit"
+                        >
+                            Sign in
+                        </button>
+                    </form>
+                    <p class="field-hint" data-i18n="admin.login.persistence">
+                        Your sign-in lasts until you close this tab.
+                    </p>
+                </section>
+
+                <div class="admin-panel stack" data-panel hidden>
+                    <div class="admin-account">
+                        <p data-account-email></p>
+                        <button
+                            type="button"
+                            class="btn btn-secondary btn-small"
+                            data-sign-out
+                            data-i18n="admin.account.signOut"
+                        >
+                            Sign out
+                        </button>
+                    </div>
+
+                    <nav
+                        class="admin-toc"
+                        aria-label="Sections"
+                        data-i18n-attr="aria-label:admin.sectionsLabel"
+                    >
+                        <ul class="cluster">
+                            <li>
+                                <a href="#overview" data-i18n="admin.overview.heading">Overview</a>
+                            </li>
+                            <li>
+                                <a href="#rooms" data-i18n="admin.rooms.heading">Room links</a>
+                            </li>
+                            <li>
+                                <a href="#export" data-i18n="admin.export.heading">Export data</a>
+                            </li>
+                            <li>
+                                <a href="#end-sessions" data-i18n="admin.end.heading"
+                                    >End all active sessions</a
+                                >
+                            </li>
+                            <li>
+                                <a href="#delete-data" data-i18n="admin.delete.heading"
+                                    >Delete participant data</a
+                                >
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <section
+                        class="card admin-section"
+                        id="overview"
+                        aria-labelledby="overview-heading"
+                    >
+                        <h2 id="overview-heading" data-i18n="admin.overview.heading">Overview</h2>
+                        <p class="admin-connection" data-connection data-state="connecting">
+                            <span class="admin-connection__dot" aria-hidden="true"></span>
+                            <span
+                                data-connection-text
+                                data-i18n="admin.overview.connection.connecting"
+                                >Connecting to the database…</span
+                            >
+                        </p>
+                        <p data-i18n="admin.overview.intro">
+                            Figures for the whole database, all rooms included.
+                        </p>
+                        <p class="admin-status" role="status" data-overview-error></p>
+                        <dl class="admin-stats">
+                            <div class="admin-stat">
+                                <dt data-i18n="admin.overview.sessions">Sessions</dt>
+                                <dd class="admin-stat__value" data-stat="sessions">–</dd>
+                                <dd
+                                    class="admin-stat__note"
+                                    data-i18n="admin.overview.sessionsNote"
+                                >
+                                    Created when a participant selects 'Get started'.
+                                </dd>
+                            </div>
+                            <div class="admin-stat">
+                                <dt data-i18n="admin.overview.participants">
+                                    Participants with ratings
+                                </dt>
+                                <dd class="admin-stat__value" data-stat="participants">–</dd>
+                                <dd
+                                    class="admin-stat__note"
+                                    data-i18n="admin.overview.participantsNote"
+                                >
+                                    Sessions with at least one rating.
+                                </dd>
+                            </div>
+                            <div class="admin-stat">
+                                <dt data-i18n="admin.overview.ratings">Ratings</dt>
+                                <dd class="admin-stat__value" data-stat="ratings">–</dd>
+                                <dd class="admin-stat__note" data-i18n="admin.overview.ratingsNote">
+                                    Ratings on the 1 to 7 scale, across all studies.
+                                </dd>
+                            </div>
+                            <div class="admin-stat">
+                                <dt data-stat-label="completed"></dt>
+                                <dd class="admin-stat__value" data-stat="completed">–</dd>
+                                <dd class="admin-stat__note" data-stat-note="completed"></dd>
+                            </div>
+                            <div class="admin-stat">
+                                <dt data-i18n="admin.overview.active">Active now</dt>
+                                <dd class="admin-stat__value" data-stat="active">–</dd>
+                                <dd class="admin-stat__note" data-stat-note="active"></dd>
+                            </div>
+                        </dl>
+                        <div class="info-box info-box--info">
+                            <p class="info-box__title" data-i18n="admin.overview.capacityTitle">
+                                How many people can join at once?
+                            </p>
+                            <div class="flow">
+                                <p data-i18n="admin.overview.capacityLimit">
+                                    The database accepts up to 100 simultaneous connections.
+                                </p>
+                                <p data-i18n="admin.overview.capacityEstimate">
+                                    'Active now' approximates but does not equal the connections.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="card admin-section" id="rooms" aria-labelledby="rooms-heading">
+                        <h2 id="rooms-heading" data-i18n="admin.rooms.heading">Room links</h2>
+                        <p data-i18n="admin.rooms.intro">Give each workshop its own room code.</p>
+                        <form class="admin-room-form" data-room-form novalidate>
+                            <div class="field">
+                                <label for="room-code" data-i18n="common.room.label"
+                                    >Room code</label
+                                >
+                                <p
+                                    class="field-hint"
+                                    id="room-code-hint"
+                                    data-i18n="common.room.hint"
+                                >
+                                    2 to 20 capital letters, digits or hyphens, for example OXFORD-1
+                                </p>
+                                <div class="admin-inline">
+                                    <input
+                                        id="room-code"
+                                        name="room"
+                                        type="text"
+                                        autocomplete="off"
+                                        autocapitalize="characters"
+                                        spellcheck="false"
+                                        aria-describedby="room-code-hint room-code-error"
+                                    />
+                                    <button
+                                        type="submit"
+                                        class="btn btn-primary"
+                                        data-i18n="admin.rooms.submit"
+                                    >
+                                        Make links
+                                    </button>
+                                </div>
+                                <p class="field-error" id="room-code-error" data-room-error></p>
+                            </div>
+                        </form>
+
+                        <div class="admin-room-result stack" data-room-result hidden>
+                            <h3 data-room-heading></h3>
+                            <p data-room-usage></p>
+                            <div class="field">
+                                <label for="room-workshop-link" data-i18n="admin.rooms.workshopLink"
+                                    >Workshop link for participants</label
+                                >
+                                <div class="admin-inline">
+                                    <input
+                                        id="room-workshop-link"
+                                        type="text"
+                                        readonly
+                                        spellcheck="false"
+                                        data-room-link="workshop"
+                                    />
+                                    <button
+                                        type="button"
+                                        class="btn btn-secondary"
+                                        data-copy="workshop"
+                                        data-i18n="admin.rooms.copyWorkshop"
+                                    >
+                                        Copy workshop link
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label
+                                    for="room-dashboard-link"
+                                    data-i18n="admin.rooms.dashboardLink"
+                                    >Dashboard link for this room</label
+                                >
+                                <div class="admin-inline">
+                                    <input
+                                        id="room-dashboard-link"
+                                        type="text"
+                                        readonly
+                                        spellcheck="false"
+                                        data-room-link="dashboard"
+                                    />
+                                    <button
+                                        type="button"
+                                        class="btn btn-secondary"
+                                        data-copy="dashboard"
+                                        data-i18n="admin.rooms.copyDashboard"
+                                    >
+                                        Copy dashboard link
+                                    </button>
+                                </div>
+                                <p>
+                                    <a
+                                        href="/dashboard.html"
+                                        data-room-open-dashboard
+                                        data-i18n="admin.rooms.openDashboard"
+                                        >Open the dashboard for this room</a
+                                    >
+                                </p>
+                            </div>
+                            <p class="admin-status" role="status" data-copy-status></p>
+                            <figure class="admin-qr">
+                                <div class="admin-qr__frame" data-room-qr></div>
+                                <figcaption data-room-qr-caption></figcaption>
+                            </figure>
+                            <p class="admin-status" role="status" data-qr-status></p>
+                            <p>
+                                <a
+                                    class="btn btn-secondary"
+                                    href="#rooms"
+                                    download
+                                    hidden
+                                    data-room-qr-download
+                                    data-i18n="admin.rooms.qrDownload"
+                                    >Download QR code (PNG)</a
+                                >
+                            </p>
+                        </div>
+                    </section>
+
+                    <section
+                        class="card admin-section"
+                        id="export"
+                        aria-labelledby="export-heading"
+                    >
+                        <h2 id="export-heading" data-i18n="admin.export.heading">Export data</h2>
+                        <p data-i18n-html="admin.export.intro">
+                            Download the data as they are right now.
+                        </p>
+                        <table class="table admin-export-table">
+                            <caption data-i18n="admin.export.tableCaption">
+                                Downloads for each part of the database
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col" data-i18n="admin.export.colData">Data</th>
+                                    <th scope="col" data-i18n="admin.export.colDownload">
+                                        Download
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-export-node="ratings">
+                                    <th scope="row">
+                                        <span data-i18n="admin.export.nodes.ratings.label"
+                                            >Ratings</span
+                                        >
+                                        <span class="admin-export-count" data-export-count></span>
+                                    </th>
+                                    <td>
+                                        <div class="cluster admin-export-buttons">
+                                            <button
+                                                type="button"
+                                                class="btn btn-secondary btn-small"
+                                                data-export="csv"
+                                                aria-label="Download ratings as CSV"
+                                                data-i18n="admin.export.csv"
+                                                data-i18n-attr="aria-label:admin.export.nodes.ratings.csv"
+                                            >
+                                                CSV
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="btn btn-secondary btn-small"
+                                                data-export="json"
+                                                aria-label="Download ratings as JSON"
+                                                data-i18n="admin.export.json"
+                                                data-i18n-attr="aria-label:admin.export.nodes.ratings.json"
+                                            >
+                                                JSON
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr data-export-node="leaderboard">
+                                    <th scope="row">
+                                        <span data-i18n="admin.export.nodes.leaderboard.label"
+                                            >Leaderboard</span
+                                        >
+                                        <span class="admin-export-count" data-export-count></span>
+                                    </th>
+                                    <td>
+                                        <div class="cluster admin-export-buttons">
+                                            <button
+                                                type="button"
+                                                class="btn btn-secondary btn-small"
+                                                data-export="csv"
+                                                aria-label="Download the leaderboard as CSV"
+                                                data-i18n="admin.export.csv"
+                                                data-i18n-attr="aria-label:admin.export.nodes.leaderboard.csv"
+                                            >
+                                                CSV
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="btn btn-secondary btn-small"
+                                                data-export="json"
+                                                aria-label="Download the leaderboard as JSON"
+                                                data-i18n="admin.export.json"
+                                                data-i18n-attr="aria-label:admin.export.nodes.leaderboard.json"
+                                            >
+                                                JSON
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr data-export-node="rankings">
+                                    <th scope="row">
+                                        <span data-i18n="admin.export.nodes.rankings.label"
+                                            >Token allocations (rankings)</span
+                                        >
+                                        <span class="admin-export-count" data-export-count></span>
+                                    </th>
+                                    <td>
+                                        <div class="cluster admin-export-buttons">
+                                            <button
+                                                type="button"
+                                                class="btn btn-secondary btn-small"
+                                                data-export="csv"
+                                                aria-label="Download token allocations as CSV"
+                                                data-i18n="admin.export.csv"
+                                                data-i18n-attr="aria-label:admin.export.nodes.rankings.csv"
+                                            >
+                                                CSV
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="btn btn-secondary btn-small"
+                                                data-export="json"
+                                                aria-label="Download token allocations as JSON"
+                                                data-i18n="admin.export.json"
+                                                data-i18n-attr="aria-label:admin.export.nodes.rankings.json"
+                                            >
+                                                JSON
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr data-export-node="sessions">
+                                    <th scope="row">
+                                        <span data-i18n="admin.export.nodes.sessions.label"
+                                            >Sessions</span
+                                        >
+                                        <span class="admin-export-count" data-export-count></span>
+                                    </th>
+                                    <td>
+                                        <div class="cluster admin-export-buttons">
+                                            <button
+                                                type="button"
+                                                class="btn btn-secondary btn-small"
+                                                data-export="csv"
+                                                aria-label="Download sessions as CSV"
+                                                data-i18n="admin.export.csv"
+                                                data-i18n-attr="aria-label:admin.export.nodes.sessions.csv"
+                                            >
+                                                CSV
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="btn btn-secondary btn-small"
+                                                data-export="json"
+                                                aria-label="Download sessions as JSON"
+                                                data-i18n="admin.export.json"
+                                                data-i18n-attr="aria-label:admin.export.nodes.sessions.json"
+                                            >
+                                                JSON
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="admin-snapshot">
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                data-export="snapshot"
+                                data-i18n="admin.export.snapshot"
+                            >
+                                Download full snapshot (JSON)
+                            </button>
+                            <p class="field-hint" data-i18n="admin.export.snapshotNote">
+                                One file with everything above plus the presence list and the
+                                session control.
+                            </p>
+                        </div>
+                        <p class="admin-status" role="status" data-export-status></p>
+                        <div class="info-box">
+                            <p data-i18n-html="admin.export.analysis">
+                                For the analysis report, give the snapshot or a folder of the JSON
+                                files to fetch-data.sh.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section
+                        class="card admin-section admin-section--danger"
+                        id="end-sessions"
+                        aria-labelledby="end-heading"
+                    >
+                        <h2 id="end-heading" data-i18n="admin.end.heading">
+                            End all active sessions
+                        </h2>
+                        <div class="flow">
+                            <p data-i18n="admin.end.intro">Use this when a workshop finishes.</p>
+                            <p data-end-results></p>
+                            <p data-i18n="admin.end.presence">It also clears the presence list.</p>
+                            <p class="text-muted" data-end-last></p>
+                        </div>
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            data-end-sessions
+                            data-i18n="admin.end.button"
+                        >
+                            End all active sessions
+                        </button>
+                        <p class="admin-status" role="status" data-end-status></p>
+                    </section>
+
+                    <section
+                        class="card admin-section admin-section--danger"
+                        id="delete-data"
+                        aria-labelledby="delete-heading"
+                    >
+                        <h2 id="delete-heading" data-i18n="admin.delete.heading">
+                            Delete participant data
+                        </h2>
+                        <div class="flow">
+                            <p data-i18n="admin.delete.intro">
+                                This permanently deletes, from the live database:
+                            </p>
+                            <ul>
+                                <li data-i18n-html="admin.delete.items.ratings">all ratings</li>
+                                <li data-i18n-html="admin.delete.items.leaderboard">
+                                    the leaderboard
+                                </li>
+                                <li data-i18n-html="admin.delete.items.rankings">
+                                    all token allocations
+                                </li>
+                                <li data-i18n-html="admin.delete.items.sessions">
+                                    all session records
+                                </li>
+                                <li data-i18n-html="admin.delete.items.active">
+                                    the presence list
+                                </li>
+                            </ul>
+                            <p data-i18n="admin.delete.kept">
+                                The list of administrators and the session control are kept.
+                            </p>
+                            <p data-i18n-html="admin.delete.github">
+                                Copies saved by the daily backup on GitHub are not affected.
+                            </p>
+                            <p data-i18n="admin.delete.exportFirst">
+                                Download a full snapshot first.
+                            </p>
+                        </div>
+                        <div class="cluster">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-delete-snapshot
+                                data-i18n="admin.export.snapshot"
+                            >
+                                Download full snapshot (JSON)
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-danger"
+                                data-delete
+                                data-i18n="admin.delete.button"
+                            >
+                                Delete participant data…
+                            </button>
+                        </div>
+                        <p class="admin-status" role="status" data-delete-status></p>
+                    </section>
+                </div>
             </div>
+        </main>
 
-            <div class="admin-section">
-                <h2>🔗 Quick Links</h2>
-                <p><a href="dashboard.html" class="btn-primary" style="display: inline-block; text-decoration: none; margin-right: 1rem;">📊 Public dashboard</a></p>
-                <p><a href="index.html" class="btn-secondary" style="display: inline-block; text-decoration: none;">← Back to workshop</a></p>
+        <footer class="site-footer">
+            <div class="container">
+                <p data-i18n-html="common.footer.author"></p>
+                <p data-i18n-html="common.footer.disclaimer"></p>
+                <p data-i18n-html="common.footer.materials"></p>
+                <p data-i18n-html="common.footer.licence"></p>
+                <p data-i18n-html="common.footer.issues"></p>
+                <p data-footer-version></p>
             </div>
-
-            <div style="text-align: center; margin-top: 2rem;">
-                <button onclick="logoutAdmin()" style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">Logout</button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { auth, database } from './firebase-config.js';
-        import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
-        import { ref, get, remove } from 'firebase/database';
-
-        // Check auth state on load
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                showAdminPanel();
-                loadStats();
-            } else {
-                showLoginForm();
-            }
-        });
-        
-        window.handleLoginKeyPress = function(event) {
-            if (event.key === 'Enter') {
-                loginWithPassword();
-            }
-        };
-
-        window.loginWithPassword = async function() {
-            const errorDiv = document.getElementById('login-error');
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
-            
-            if (!email || !password) {
-                errorDiv.textContent = '❌ Please enter both email and password';
-                errorDiv.style.display = 'block';
-                return;
-            }
-            
-            const loginBtn = document.getElementById('loginBtn');
-            loginBtn.disabled = true;
-            loginBtn.textContent = 'Signing in...';
-            
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                errorDiv.style.display = 'none';
-                document.getElementById('adminPassword').value = '';
-            } catch (error) {
-                console.error('Sign-in error:', error);
-                let errorMessage = 'Authentication failed';
-                
-                if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-                    errorMessage = 'Invalid email or password';
-                } else if (error.code === 'auth/too-many-requests') {
-                    errorMessage = 'Too many failed attempts. Try again later';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'Invalid email address';
-                }
-                
-                errorDiv.textContent = `❌ ${errorMessage}`;
-                errorDiv.style.display = 'block';
-                document.getElementById('adminPassword').value = '';
-            } finally {
-                loginBtn.disabled = false;
-                loginBtn.textContent = '🔐 Sign In';
-            }
-        };
-
-        window.logoutAdmin = async function() {
-            await signOut(auth);
-        };
-
-        function showLoginForm() {
-            document.getElementById('login-section').style.display = 'block';
-            document.getElementById('admin-panel').style.display = 'none';
-        }
-
-        function showAdminPanel() {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('admin-panel').style.display = 'block';
-        }
-
-        async function loadStats() {
-            try {
-                // Count active sessions
-                const activeRef = ref(database, 'active');
-                const activeSnapshot = await get(activeRef);
-                const activeCount = activeSnapshot.exists() ? Object.keys(activeSnapshot.val()).length : 0;
-                document.getElementById('active-count').textContent = activeCount;
-
-                // Count total ratings
-                const ratingsRef = ref(database, 'ratings');
-                const ratingsSnapshot = await get(ratingsRef);
-                let totalRatings = 0;
-                if (ratingsSnapshot.exists()) {
-                    const ratings = ratingsSnapshot.val();
-                    Object.values(ratings).forEach(paper => {
-                        totalRatings += Object.keys(paper).length;
-                    });
-                }
-                document.getElementById('total-ratings').textContent = totalRatings;
-
-                // Count leaderboard entries
-                const leaderboardRef = ref(database, 'leaderboard');
-                const leaderboardSnapshot = await get(leaderboardRef);
-                const leaderboardCount = leaderboardSnapshot.exists() ? Object.keys(leaderboardSnapshot.val()).length : 0;
-                document.getElementById('leaderboard-count').textContent = leaderboardCount;
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
-
-        window.stopAllSessions = async function() {
-            if (!confirm('Are you sure you want to stop all active sessions? This will force all participants to start new sessions.')) {
-                return;
-            }
-
-            const resultDiv = document.getElementById('action-result');
-            resultDiv.innerHTML = '<p style="color: #f59e0b;">⏳ Stopping all sessions...</p>';
-
-            try {
-                const activeRef = ref(database, 'active');
-                await remove(activeRef);
-                
-                resultDiv.innerHTML = '<p style="color: #10b981; padding: 1rem; background: #d1fae5; border-radius: 4px;">✅ All active sessions have been stopped successfully.</p>';
-                
-                // Reload stats
-                await loadStats();
-            } catch (error) {
-                resultDiv.innerHTML = `<p style="color: #ef4444; padding: 1rem; background: #fef2f2; border-radius: 4px;">❌ Error: ${error.message}</p>`;
-            }
-        };
-
-        window.deleteAllRatings = async function() {
-            const ratingsRef = ref(database, 'ratings');
-            const ratingsSnapshot = await get(ratingsRef);
-            
-            if (!ratingsSnapshot.exists()) {
-                alert('ℹ️ No ratings data to delete.');
-                return;
-            }
-            
-            const ratings = ratingsSnapshot.val();
-            let totalRatings = 0;
-            Object.values(ratings).forEach(paper => {
-                totalRatings += Object.keys(paper).length;
-            });
-            
-            const confirmMsg = `⚠️ WARNING: You are about to permanently delete ${totalRatings} rating(s) across all studies.\n\nThis action CANNOT be undone!\n\nType "DELETE" to confirm:`;
-            const userInput = prompt(confirmMsg);
-            
-            if (userInput !== 'DELETE') {
-                alert('❌ Deletion cancelled.');
-                return;
-            }
-
-            const resultDiv = document.getElementById('delete-result');
-            resultDiv.innerHTML = '<p style="color: #f59e0b;">⏳ Deleting all ratings data...</p>';
-
-            try {
-                await remove(ratingsRef);
-                
-                resultDiv.innerHTML = '<p style="color: #10b981; padding: 1rem; background: #d1fae5; border-radius: 4px;">✅ All ratings data has been permanently deleted.</p>';
-                
-                // Reload stats
-                await loadStats();
-            } catch (error) {
-                resultDiv.innerHTML = `<p style="color: #ef4444; padding: 1rem; background: #fef2f2; border-radius: 4px;">❌ Error: ${error.message}</p>`;
-            }
-        };
-
-        // Export for global access
-        window.auth = auth;
-        window.database = database;
-    </script>
-</body>
+        </footer>
+    </body>
 </html>

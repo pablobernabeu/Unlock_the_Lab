@@ -1,0 +1,224 @@
+{
+  "pageTitle": "Facilitator panel – Unlock the Lab",
+  "heading": "Facilitator panel",
+  "intro": "Tools for workshop facilitators: live figures, room links, data exports and session controls.",
+  "navLabel": "Pages",
+  "sectionsLabel": "Sections of the facilitator panel",
+  "status": {
+    "starting": "Checking whether you are signed in…",
+    "checking": "Checking that this account is an administrator…",
+    "loadFailed": "The sign-in service could not be loaded. Check your connection and try again.",
+    "checkFailed": "We could not check whether this account is an administrator. Check your connection and try again."
+  },
+  "login": {
+    "heading": "Sign in",
+    "intro": "Sign in with an administrator account. An account is an administrator when its user ID is listed under <code>/admins</code> in the database, which only the project owner can change (see <a href=\"https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/docs/deployment.md#administrators\">the deployment guide</a>).",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "persistence": "Your sign-in lasts until you close this tab.",
+    "emailMissing": "Enter your email address.",
+    "passwordMissing": "Enter your password.",
+    "errors": {
+      "invalidCredential": "The email address or password is not right.",
+      "invalidEmail": "Enter a valid email address, such as name@example.com.",
+      "tooManyRequests": "Too many attempts. Wait a few minutes, then try again.",
+      "userDisabled": "This account has been switched off.",
+      "generic": "Sign-in did not work. Please try again."
+    },
+    "notAdminTitle": "This account is not an administrator",
+    "notAdminText": "You have been signed out. To make it an administrator, the project owner adds its user ID under /admins in the Firebase console, as the deployment guide explains.",
+    "notAdminUid": "User ID: {uid}",
+    "previewDisabled": "The facilitator panel is disabled on preview builds because they use the live database. Use the facilitator panel on the live site instead."
+  },
+  "account": {
+    "signedInAs": "Signed in as {email}",
+    "signOut": "Sign out",
+    "signedOut": "You have signed out."
+  },
+  "errors": {
+    "permissionDenied": "The database refused this request. Check that this account is still an administrator, then reload the page.",
+    "notConnected": "This page is not connected to the database at the moment, so nothing was changed. Check your connection and try again."
+  },
+  "overview": {
+    "heading": "Overview",
+    "intro": "Figures for the whole database, all rooms included. They update by themselves.",
+    "connection": {
+      "connecting": "Connecting to the database…",
+      "live": "Connected: the figures are live.",
+      "offline": "Not connected to the database. The figures may be out of date."
+    },
+    "loadFailed": "Some figures could not be loaded. {reason}",
+    "sessions": "Sessions",
+    "sessionsNote": "Created when a participant selects 'Get started' (from version 2 of the app). Sessions begun in version 1 have one only if the participant came back after the update.",
+    "participants": "Participants with ratings",
+    "participantsNote": "Sessions with at least one rating.",
+    "ratings": "Ratings",
+    "ratingsNote": "Ratings on the 1 to 7 scale, across all studies.",
+    "completed": "Rated {count} or more",
+    "completedNote": {
+      "one": "Sessions with at least {count} rated study.",
+      "other": "Sessions with at least {count} rated studies."
+    },
+    "active": "Active now",
+    "activeNote": {
+      "one": "Participants' presence entries updated in the last minute.",
+      "other": "Participants' presence entries updated in the last {count} minutes."
+    },
+    "presenceTotal": {
+      "one": "The presence list holds {count} entry in all.",
+      "other": "The presence list holds {count} entries in all."
+    },
+    "capacityTitle": "How many people can join at once?",
+    "capacityLimit": "On Firebase's free Spark plan, the database accepts at most 100 simultaneous connections. Every open page uses one: each participant's workshop page, each dashboard screen (a projected one included) and this facilitator panel. When the limit is reached, new visitors cannot connect until others leave.",
+    "capacityEstimate": "'Active now' counts participants' presence entries only, so it approximates but does not equal the number of connections. The Usage tab of the Realtime Database in the Firebase console shows the real number."
+  },
+  "rooms": {
+    "heading": "Room links",
+    "intro": "Give each workshop its own room code. Participants who join through a room link appear on that room's leaderboard, and the dashboard can show that room on its own. Scores are still worked out from everyone's ratings, so they stay comparable between rooms.",
+    "submit": "Make links",
+    "missing": "Enter a room code.",
+    "resultHeading": "Links for room {room}",
+    "unused": "No one has used this room code yet.",
+    "used": {
+      "one": "{count} participant has already used room {room}. Everyone who joins with these links shares a leaderboard with them, so choose a new code for a separate workshop.",
+      "other": "{count} participants have already used room {room}. Everyone who joins with these links shares a leaderboard with them, so choose a new code for a separate workshop."
+    },
+    "workshopLink": "Workshop link for participants",
+    "dashboardLink": "Dashboard link for this room",
+    "openDashboard": "Open the dashboard for this room",
+    "copyWorkshop": "Copy workshop link",
+    "copyDashboard": "Copy dashboard link",
+    "copiedWorkshop": "Workshop link copied.",
+    "copiedDashboard": "Dashboard link copied.",
+    "copyFallback": "This browser did not allow copying. The link is selected: press Ctrl+C (or Cmd+C on a Mac) to copy it.",
+    "qrAlt": "QR code for the workshop link for room {room}",
+    "qrCaption": "Participants can scan this code to open the workshop in room {room}.",
+    "qrDownload": "Download QR code (PNG)",
+    "qrFailed": "The QR code could not be made. The links above still work."
+  },
+  "export": {
+    "heading": "Export data",
+    "intro": "Download the data as they are at the moment you click. CSV files open in a spreadsheet, with one row per record. JSON files hold each part of the database exactly as stored. The <a href=\"https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/docs/data.md\">data dictionary (docs/data.md)</a> explains every column and field.",
+    "tableCaption": "Downloads for each part of the database",
+    "colData": "Data",
+    "colDownload": "Download",
+    "records": {
+      "one": "{number} record",
+      "other": "{number} records"
+    },
+    "csv": "CSV",
+    "json": "JSON",
+    "nodes": {
+      "ratings": {
+        "label": "Ratings",
+        "csv": "Download ratings as CSV",
+        "json": "Download ratings as JSON"
+      },
+      "leaderboard": {
+        "label": "Leaderboard",
+        "csv": "Download the leaderboard as CSV",
+        "json": "Download the leaderboard as JSON"
+      },
+      "rankings": {
+        "label": "Token allocations (rankings)",
+        "csv": "Download token allocations as CSV",
+        "json": "Download token allocations as JSON"
+      },
+      "sessions": {
+        "label": "Sessions",
+        "csv": "Download sessions as CSV",
+        "json": "Download sessions as JSON"
+      }
+    },
+    "snapshot": "Download full snapshot (JSON)",
+    "snapshotNote": "One file with everything in the table plus the presence list and the time sessions were last ended, stamped with the time of export.",
+    "analysis": "For the analysis report in <code>analysis/</code>, run <code>analysis/fetch-data.sh</code> with the option <code>--from</code> followed by either the full snapshot file or a folder holding <code>ratings.json</code>, <code>leaderboard.json</code>, <code>rankings.json</code> and <code>sessions.json</code> (their names are what the script expects). The per-node JSON files can also be restored with the Firebase CLI, as <a href=\"https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/docs/deployment.md#backups-and-restoring\">the deployment guide</a> explains.",
+    "preparing": "Preparing the download…",
+    "done": "Downloaded {file}.",
+    "failed": "The download could not be prepared. {reason}",
+    "offline": "This page is not connected to the database at the moment, so a download could hold out-of-date data. Check your connection and try again."
+  },
+  "end": {
+    "heading": "End all active sessions",
+    "intro": "Use this when a workshop finishes. Every session that started before that moment is closed: the participant sees 'The facilitator has closed this session' and can no longer save answers, even after reloading the page or coming back later. Their answers so far are kept. Anyone who opens the workshop afterwards starts as normal.",
+    "results": {
+      "one": "Participants who have rated at least {count} study can still see their results. Everyone can start again as a new participant.",
+      "other": "Participants who have rated at least {count} studies can still see their results. Everyone can start again as a new participant."
+    },
+    "presence": "It also clears the presence list, so 'Active now' starts again from zero.",
+    "lastEnded": "Sessions were last ended on {date}.",
+    "neverEnded": "Sessions have not been ended from this panel yet.",
+    "button": "End all active sessions",
+    "confirmTitle": "End all active sessions?",
+    "confirmText": "Every session that started before now will be closed, including sessions whose page is shut at the moment. The presence list will be cleared. Ratings, the leaderboard and token allocations are kept.",
+    "confirmActive": {
+      "one": "Active now: {count} participant.",
+      "other": "Active now: {count} participants."
+    },
+    "confirm": "End all sessions",
+    "working": "Ending the sessions…",
+    "done": "Done. Every session that started before now is closed and the presence list is empty. Workshop pages that are open and online show the closing message straight away; others show it when they next connect.",
+    "pending": "The database has not confirmed the change yet. It will apply when the connection allows; check 'Sessions were last ended' above in a moment.",
+    "failed": "Sessions were not ended. {reason}"
+  },
+  "delete": {
+    "heading": "Delete participant data",
+    "intro": "This permanently deletes, from the live database:",
+    "items": {
+      "ratings": "all ratings (<code>/ratings</code>)",
+      "leaderboard": "the leaderboard (<code>/leaderboard</code>)",
+      "rankings": "all token allocations (<code>/rankings</code>)",
+      "sessions": "all session records (<code>/sessions</code>)",
+      "active": "the presence list (<code>/active</code>)"
+    },
+    "kept": "The list of administrators and the time sessions were last ended are kept.",
+    "github": "Copies already saved by the daily backup on the repository's <code>data</code> branch on GitHub are not affected. After a deletion, the backup keeps those copies and refuses to replace them with empty files until someone runs it by hand with 'Allow empty nodes' ticked (see <a href=\"https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/docs/deployment.md#backups-and-restoring\">the deployment guide</a>).",
+    "exportFirst": "Download a full snapshot first, so that you keep a copy of everything that is deleted. The analysis report can read the snapshot as it is.",
+    "button": "Delete participant data…",
+    "nothing": "There is no participant data to delete.",
+    "readFailed": "The data could not be counted, so nothing was deleted. {reason}",
+    "confirmTitle": "Delete all participant data?",
+    "confirmIntro": "This permanently deletes from the live database:",
+    "counts": {
+      "ratings": {
+        "one": "{count} rating",
+        "other": "{count} ratings"
+      },
+      "leaderboard": {
+        "one": "{count} leaderboard entry",
+        "other": "{count} leaderboard entries"
+      },
+      "rankings": {
+        "one": "{count} token allocation",
+        "other": "{count} token allocations"
+      },
+      "sessions": {
+        "one": "{count} session record",
+        "other": "{count} session records"
+      },
+      "active": {
+        "one": "{count} presence entry",
+        "other": "{count} presence entries"
+      }
+    },
+    "participants": {
+      "one": "This is the data of {count} participant (counted by session).",
+      "other": "This is the data of {count} participants (counted by session)."
+    },
+    "race": "These figures were counted when this message opened. Anything added before you confirm is deleted too, so end all active sessions first if a workshop is running.",
+    "githubShort": "Copies already saved by the daily backup on GitHub (the data branch) are not affected.",
+    "snapshotFirst": "Download a full snapshot first",
+    "typeCount": "To confirm, type the number of participants: {count}",
+    "confirm": "Delete permanently",
+    "working": "Deleting…",
+    "done": "Deleted. The ratings, leaderboard, token allocations, session records and presence list are now empty.",
+    "doneButNew": {
+      "one": "Deleted. Since then {count} new record has arrived, from someone who still has the workshop open.",
+      "other": "Deleted. Since then {count} new records have arrived, from people who still have the workshop open."
+    },
+    "pending": "The database has not confirmed the deletion yet. It will apply when the connection allows; check the overview figures in a moment.",
+    "failed": "Nothing was deleted. {reason}"
+  }
+}

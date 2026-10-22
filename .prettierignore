@@ -1,0 +1,11 @@
+dist
+dist-e2e
+node_modules
+package-lock.json
+materials
+analysis/*_files
+coverage
+playwright-report
+test-results
+.tmp-*/
+data/

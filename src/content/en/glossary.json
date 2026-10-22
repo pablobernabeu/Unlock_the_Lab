@@ -1,0 +1,158 @@
+[
+  {
+    "term": "Abstract",
+    "definition": "A brief summary at the beginning of a research paper outlining the study's purpose, methods, results and conclusions."
+  },
+  {
+    "term": "Actigraphy",
+    "definition": "Measuring sleep and activity with a motion sensor worn on the wrist. It is more objective than asking people how well they slept."
+  },
+  {
+    "term": "Blinding",
+    "definition": "Keeping people in a study unaware of who receives which treatment, so that expectations cannot sway the results. In a single-blind study the participants do not know; in a double-blind study neither the participants nor the researchers assessing them know."
+  },
+  {
+    "term": "Cherry-picking",
+    "definition": "Presenting only the results or studies that support a claim while leaving out those that do not."
+  },
+  {
+    "term": "Citation",
+    "definition": "A reference to another study or source, showing where information came from and allowing readers to verify claims."
+  },
+  {
+    "term": "Cohort Study",
+    "definition": "An observational study that follows a group of people over time, sometimes for decades, to see how their habits or circumstances relate to later outcomes such as illness."
+  },
+  {
+    "term": "Conflict of Interest",
+    "definition": "When researchers have financial, professional or personal interests that could influence their work. Good studies declare these transparently."
+  },
+  {
+    "term": "Confounding Variable",
+    "definition": "A third factor that influences both the supposed cause and the outcome, creating a link between them that is not causal. For example, wealth may explain why people who buy organic food are healthier."
+  },
+  {
+    "term": "Control Group",
+    "definition": "A comparison group that doesn't receive the treatment being tested, used to determine if an intervention actually works."
+  },
+  {
+    "term": "Correlation vs Causation",
+    "definition": "Correlation means two things happen together; causation means one causes the other. Correlation does NOT prove causation."
+  },
+  {
+    "term": "Cross-sectional Study",
+    "definition": "An observational study that measures people once, at a single point in time. It can show that two things go together but not which came first."
+  },
+  {
+    "term": "Data",
+    "definition": "The information collected during a study, which can include measurements, observations, survey responses or other recorded facts."
+  },
+  {
+    "term": "Effect Size",
+    "definition": "How large a difference or relationship is, not just whether there is one. For the common measure Cohen's <i>d</i>, about 0.2 counts as small, 0.5 as medium and 0.8 as large."
+  },
+  {
+    "term": "Heterogeneity",
+    "definition": "How much the results of the studies in a review or meta-analysis differ from one another. When it is high, a single pooled figure should be read with caution."
+  },
+  {
+    "term": "Hypothesis",
+    "definition": "A testable prediction about what will happen in a study, based on existing knowledge or theory."
+  },
+  {
+    "term": "Impact Factor",
+    "definition": "The average number of times a journal's recent articles are cited by other research. It is a rough sign of a journal's prestige but says little about the quality of any single study."
+  },
+  {
+    "term": "Meta-analysis",
+    "definition": "A statistical method that pools the results of several studies on the same question into one overall estimate. It is often part of a systematic review."
+  },
+  {
+    "term": "Methods",
+    "definition": "The section describing how the study was conducted, including participants, materials, procedures and analysis techniques."
+  },
+  {
+    "term": "Observational Study",
+    "definition": "A study in which researchers record what people already do or experience, without assigning them to groups. It can reveal associations but cannot by itself show cause and effect."
+  },
+  {
+    "term": "Open Access",
+    "definition": "Research papers that are freely available to read online without a paywall or subscription. Anyone can access the full text immediately."
+  },
+  {
+    "term": "Open Data",
+    "definition": "When researchers make their raw data publicly available so others can verify results and conduct their own analyses."
+  },
+  {
+    "term": "Open Science Framework (OSF)",
+    "definition": "A free online platform where researchers can preregister studies and share their data, code and materials so that others can check and reuse them."
+  },
+  {
+    "term": "P-hacking",
+    "definition": "Trying many different analyses and reporting only those that reach statistical significance. It makes chance findings look real; preregistration helps to prevent it."
+  },
+  {
+    "term": "Paywall",
+    "definition": "A barrier that requires payment (often £30+) or institutional access to read a research paper. This limits who can verify the science."
+  },
+  {
+    "term": "Peer Review",
+    "definition": "A process where other experts in the field evaluate a research paper before publication to check its quality and validity."
+  },
+  {
+    "term": "Placebo",
+    "definition": "A dummy treatment, such as a sugar pill or a sham device, that looks like the real one but has no active ingredient. Comparing a treatment with a placebo shows whether it works beyond people's expectations (the placebo effect)."
+  },
+  {
+    "term": "Predatory Journal",
+    "definition": "A publication that charges authors fees but skips proper peer review. Many reputable open-access journals also charge publication fees; the warning sign is the missing quality control. These journals prioritise profit over scientific quality."
+  },
+  {
+    "term": "Preprint",
+    "definition": "An early version of a research paper shared publicly before peer review. Useful for rapid communication but not yet vetted by experts."
+  },
+  {
+    "term": "Preregistration",
+    "definition": "Declaring your research plan and analysis methods publicly before collecting data, which reduces bias and questionable research practices."
+  },
+  {
+    "term": "Randomised Controlled Trial (RCT)",
+    "definition": "An experiment in which chance decides whether each participant receives the treatment being tested or joins a control group. Because the groups start out alike, differences in outcome can be attributed to the treatment."
+  },
+  {
+    "term": "Replication",
+    "definition": "Repeating a study to see if the same results occur. Replicable findings are more trustworthy than one-off results."
+  },
+  {
+    "term": "Results",
+    "definition": "The section presenting what the study found, including statistical outcomes and data visualisations."
+  },
+  {
+    "term": "Reverse Causality",
+    "definition": "When the supposed effect is actually the cause. For example, people who sleep badly may use their phones more because they are awake, rather than phone use causing poor sleep."
+  },
+  {
+    "term": "Sample Size",
+    "definition": "The number of participants (<i>N</i>) or observations in a study. Larger samples generally provide more reliable results."
+  },
+  {
+    "term": "Statistical Significance",
+    "definition": "A finding is called statistically significant when results at least this strong would rarely occur by chance if there were really no effect (by convention, <i>p</i> < 0.05). It does not show how large or important an effect is, and a non-significant result does not prove that there is no effect."
+  },
+  {
+    "term": "Systematic Review",
+    "definition": "A review that searches for all the studies on a question using a method set out in advance, assesses their quality and summarises the evidence. Unlike a narrative review, it is designed to avoid cherry-picking."
+  },
+  {
+    "term": "Theory",
+    "definition": "In science, a theory is a well-tested explanation of how something works, supported by evidence from many studies; in everyday speech the word often just means a guess. The rubric's Theory criterion asks something different: how well a study builds on existing research and whether it addresses a real gap in knowledge."
+  },
+  {
+    "term": "Variable",
+    "definition": "Any factor that can change or be measured in a study, such as age, temperature or test scores."
+  },
+  {
+    "term": "White Paper",
+    "definition": "A report published directly by a company, industry body or campaign group, usually without independent peer review. White papers are often used for marketing or lobbying."
+  }
+]

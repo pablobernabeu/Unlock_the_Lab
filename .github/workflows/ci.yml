@@ -1,0 +1,173 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    # Changes that cannot affect the site or the rules do not need a deploy.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'materials/**'
+      - 'analysis/**'
+      - 'CITATION.cff'
+      - 'LICENSE*'
+
+permissions:
+  contents: read
+
+# A newer push to a pull request cancels the older run; runs on main queue instead.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: Lint, unit tests and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm test
+      - run: npm run build
+
+  rules:
+    name: Database rules (emulator)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Cache the Firebase emulators
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ hashFiles('package-lock.json') }}
+          restore-keys: firebase-emulators-
+      - run: npm ci
+      - run: npm run test:rules
+
+  e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Cache the Firebase emulators
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ hashFiles('package-lock.json') }}
+          restore-keys: firebase-emulators-
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  deploy:
+    name: Deploy hosting and database rules
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [check, rules, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://unlock-the-lab.web.app
+    # Deploys run one at a time, in order, and are never cancelled half-way.
+    concurrency:
+      group: firebase-deploy-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      # An environment secret of 'production', so jobs without that environment (such as
+      # previews, which run pull-request code) never receive this key (docs/deployment.md).
+      - name: Write the service account key
+        env:
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_DEPLOY_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$SERVICE_ACCOUNT" ]; then
+            echo "::error::The production environment has no FIREBASE_DEPLOY_SERVICE_ACCOUNT secret (see docs/deployment.md)."
+            exit 1
+          fi
+          umask 077
+          printf '%s' "$SERVICE_ACCOUNT" > "$RUNNER_TEMP/service-account.json"
+      - name: Deploy
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/service-account.json
+        run: >-
+          npx firebase deploy --only hosting,database --project unlock-the-lab-workshop
+          --non-interactive --message "CI deploy of $GITHUB_SHA"
+      - name: Remove the service account key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/service-account.json"
+
+  preview:
+    name: Preview channel
+    # Secrets are not available to pull requests from forks or Dependabot.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Previews use the production database; this flag makes every page say so.
+      - run: npm run build
+        env:
+          VITE_DEPLOY_TARGET: preview
+      # Pinned to a commit because this step receives the service account key. That key has
+      # Firebase Hosting Admin, so it could also deploy the live site, but no database role;
+      # the database deploy key is an environment secret of the deploy job.
+      - uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0.11.0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_UNLOCK_THE_LAB_WORKSHOP }}
+          projectId: unlock-the-lab-workshop
+          expires: 7d
