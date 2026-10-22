@@ -1,7 +1,7 @@
 {
   "pageTitle": "Live dashboard – Unlock the Lab",
   "heading": "Live dashboard",
-  "intro": "How workshop participants rate the fictional studies and how well they predict the target ratings. The figures update by themselves as people take part.",
+  "intro": "How workshop participants rate the fictional studies and how well they predict the crowd's ratings. The figures update by themselves as people take part.",
   "navLabel": "Pages",
   "connection": {
     "connecting": "Connecting to the live data…",
@@ -53,7 +53,7 @@
   },
   "leaderboard": {
     "heading": "Leaderboard",
-    "introScore": "Who predicts best? For each study, participants predict the target rating. A prediction scores 100 points, minus {penalty} for every point it is away from the target (rounded to a whole number and never below 0).",
+    "introScore": "Who predicts best? For each study, participants predict the average rating that participants give it, and the prediction is scored against a target. A prediction scores 100 points, minus {penalty} for every point it is away from the target (rounded to a whole number and never below 0).",
     "introTarget": "The target combines the expert rating, counted as if {weight} participants had given it, with the ratings that other participants had given the study by then, in every room.",
     "introRules": "Accuracy is a participant's average score per rated study, rounded to a whole percentage. Only participants who have rated at least {count} studies are ranked; anyone who has rated fewer is left out of the table. At the same accuracy, the participant who rated more studies is placed higher, and if that is also the same, they share a place. The table lists participants whose scores have been saved, so it can hold fewer people than the figures above. Select a nickname to see that participant's results.",
     "tabsLabel": "Time period",
@@ -120,7 +120,7 @@
   },
   "table": {
     "heading": "Statistics by study",
-    "intro": "Every figure comes from participant ratings only; the expert's rating has its own column. 'Ratings' is the number of participants who rated the study, 'SD' (standard deviation) shows how much their ratings vary and '95% CI' is the confidence interval for the mean. 'Mean prediction' is the average of the target ratings participants predicted for the study. A dash means there are too few ratings: the SD and the interval need at least two.",
+    "intro": "Every figure comes from participant ratings only; the expert's rating has its own column. 'Ratings' is the number of participants who rated the study, 'SD' (standard deviation) shows how much their ratings vary and '95% CI' is the confidence interval for the mean. 'Mean prediction' is the average of participants' predictions of the crowd's rating for the study. A dash means there are too few ratings: the SD and the interval need at least two.",
     "sortHint": "Select a column heading to sort the table. The 95% CI column sorts by its lower limit.",
     "regionLabel": "Statistics by study (scrolls sideways on small screens)",
     "columns": {

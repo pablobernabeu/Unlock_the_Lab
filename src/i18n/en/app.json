@@ -1,6 +1,6 @@
 {
   "meta": {
-    "description": "A science-literacy workshop: judge the quality of fictional studies with the criteria scientists use, predict the target rating and get an expert's feedback."
+    "description": "A science-literacy workshop: judge the quality of fictional studies with the criteria scientists use, predict how other participants rate them and get an expert's feedback."
   },
   "documentTitle": "{page} – Unlock the Lab",
   "pageTitle": {
@@ -41,11 +41,11 @@
     "fictional": "<strong>The studies are fictional.</strong> They were written for this workshop and are modelled on the strengths and flaws of real research, but none of them describes a real study.",
     "tasksHeading": "Your two tasks",
     "tasksIntro": "For each study you give two answers on a scale from 1 (very low quality) to 7 (very high quality):",
-    "taskPredict": "<strong>Predict the target rating.</strong> This is the answer that earns points. The target is explained below.",
-    "taskRate": "<strong>Give your own rating.</strong> Judge the study yourself with the six criteria. Your own rating does not change your score, but it becomes part of the target for people who rate the study after you.",
+    "taskPredict": "<strong>Predict the crowd.</strong> Guess the average rating that workshop participants give the study. This is the answer that earns points; how it is scored is explained below.",
+    "taskRate": "<strong>Give your own rating.</strong> Judge the study yourself with the six criteria. Your own rating does not change your score, but it becomes part of the crowd that later participants predict.",
     "scoringHeading": "How scoring works",
-    "scoringTarget": "Every study has a rating from an expert. The target combines that rating, counted as if {weight} people had given it, with the ratings that other participants have given the same study so far. Your own rating is never part of your target.",
-    "scoringEarly": "Because the expert counts so heavily, the target stays close to the expert's rating, especially early on. Even with {count} ratings from other participants, the expert's rating makes up {share} of the target.",
+    "scoringTarget": "Your prediction is scored against a target rating. The target combines the ratings that other participants have given the study so far with an expert's rating, which counts as if {weight} people had given it. Your own rating is never part of your target.",
+    "scoringEarly": "Because the expert counts so heavily, the target stays close to the expert's rating until many people have taken part. Even with {count} ratings from other participants, the expert's rating makes up {share} of the target.",
     "scoringPoints": "A prediction that matches the target exactly scores 100 points. You lose {penalty} points for each point you are away from the target, so a prediction 1 point away scores {one} and one 2 points away scores {two}.",
     "scoringFeedback": "After each study you see your score, the target with how it was worked out and the expert's feedback on each of the six criteria.",
     "leaderboardHeading": "Leaderboard and finishing",
@@ -87,8 +87,8 @@
     "back": "Back to the previous study",
     "backHint": "You can go back once.",
     "answersHeading": "Your answers",
-    "predictionLegend": "1. Predict the target rating",
-    "predictionHint": "What will the target be? It combines the expert's rating with the ratings of other participants so far.",
+    "predictionLegend": "1. Predict the crowd",
+    "predictionHint": "What will the average rating from all workshop participants be? Your score compares your prediction with a target that also counts the expert's rating heavily.",
     "ratingLegend": "2. Your own rating",
     "ratingHint": "How good is this study overall? Weigh up the six criteria.",
     "endLow": "Very low",
