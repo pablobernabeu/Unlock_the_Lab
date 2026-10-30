@@ -1,5 +1,35 @@
 # Changelog
 
+## 2.1.0 (unreleased)
+
+Content version 3: new study texts, rubric and expert ratings. Ratings record their content version, so analyses can keep the versions apart (`docs/data.md`, 'Content versions').
+
+### Content
+
+- Every study card is rewritten. Cards describe what the authors did, where and how the study appeared and what they claim, without judging it, so that participants judge the quality themselves. Every empirical study states its sample size, and the near-duplicate cards (studies 12, 23 and 25, and the six cards that report no real study: 29, 32, 34, 40, 46 and 48) are now distinct. Titles are reworded so that each is clearly accurate, slightly overstated or sensational. Each study keeps its id, topic and design.
+- The expert feedback is rewritten for the new cards.
+- The rubric's anchors are revised. Access is rated by who can read the paper, and Theory's middle band rates soundness. Some labels change: for Access, Impossible and Difficult become Closed and Restricted; for Source, Unverified becomes Use with caution; for Theory, Nonsense and Standard become Unfounded and Sound but limited. The interface's description of Theory now asks whether a study builds soundly on earlier research.
+- A new guide (`src/content/en/guide.json`) explains how to combine the six criteria into one rating, with a worked example and a note that Access concerns openness, not whether the findings are correct.
+- The glossary gains entries for the terms the new cards use and drops some that they no longer need.
+- 13 expert ratings change, where a blind panel of three AI raters of the new cards, reconciled with the version 2 ratings by a fixed rule, supported a change: STUDY-7 (2 to 1), STUDY-13 (5 to 4), STUDY-14 (5 to 6), STUDY-15 (3 to 2), STUDY-23 (3 to 2), STUDY-25 (3 to 2), STUDY-27 (5 to 7), STUDY-30 (4 to 5), STUDY-31 (6 to 7), STUDY-37 (6 to 7), STUDY-43 (6 to 5), STUDY-44 (2 to 1) and STUDY-45 (5 to 7). `src/content/expert-ratings-history.json` keeps the expert ratings of every content version.
+
+### Participant app
+
+- The guide page and the 'Glossary and rubric' dialog show the new guide: the Access note follows the rubric, and the advice on reaching one rating has its own tab.
+- A target now uses only the ratings made with the current content version, plus the expert rating as before; ratings of earlier versions describe different texts. The welcome page says so. On the results page, the comparison with other participants also uses ratings of the same content version, and the results at a personal link compare each rating with the expert rating of its version.
+
+### Dashboard
+
+- A content-version filter, set to the current version by default, applies to the ratings chart, the statistics table and the study details. An earlier version is compared with its own expert ratings; with all versions, each study is compared with the average of the expert ratings that its participants saw. The choice is kept in the link (`?version=2` or `?version=all`).
+
+### Analysis
+
+- Each rating is compared with the expert rating of its content version, read from `src/content/expert-ratings-history.json`, and reconstructed targets follow the rule of the app that made the rating. A new parameter, `content_version`, restricts the analysis to one version.
+
+### Workshop handouts
+
+- The handouts are rendered from content version 3. The evaluation guide adds the Access note after the rubric and the advice on combining the criteria into one rating with its worked example, and the sample studies are chosen by the same rule from the new expert ratings and feedback.
+
 ## 2.0.0 (unreleased)
 
 A rewrite of the app, its data handling and the repository. Ratings stored by version 1 remain valid; `docs/data.md` lists the fields that version 2 adds.

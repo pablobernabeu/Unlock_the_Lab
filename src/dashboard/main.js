@@ -14,7 +14,7 @@ import { normaliseEntries } from '../lib/leaderboard.js';
 import { renderLocaleSwitcher } from '../lib/locale-switcher.js';
 import { initMotion, renderMotionToggle } from '../lib/motion.js';
 import { roomFromUrl } from '../lib/room.js';
-import { scoringTarget, validRatings } from '../lib/scoring.js';
+import { scoringTarget, targetRatings } from '../lib/scoring.js';
 import { safeGetJSON } from '../lib/storage.js';
 import { createBatcher } from './batcher.js';
 import { createConnectionStatus } from './connection-status.js';
@@ -36,6 +36,7 @@ import { createOverview } from './overview.js';
 import { createRoomFilter } from './room-filter.js';
 import { createStatsTable } from './stats-table.js';
 import { createStudyDialog } from './study-dialog.js';
+import { createVersionFilter, versionFromParam } from './version-filter.js';
 
 /** Time-based figures (active now, the 24-hour leaderboard) are recomputed this often. */
 const CLOCK_TICK_MS = 30 * 1000;
@@ -80,6 +81,7 @@ function createDashboard() {
         loaded: new Set(),
         serverOffset: 0,
         room: roomFromUrl(),
+        contentVersion: versionFromParam(new URL(location.href).searchParams.get('version')),
         studies: null,
         entries: [],
         rows: [],
@@ -103,12 +105,13 @@ function createDashboard() {
         const study = state.studies?.find((candidate) => candidate.id === studyId);
         const row = state.rows.find((candidate) => candidate.id === studyId);
         if (!study || !row) return null;
-        // The game's target is global: every room's ratings, plus the expert rating.
+        // The game's target is global: every room's ratings of the current content
+        // version, plus the expert rating, whatever the filters show.
         const target = scoringTarget(
-            validRatings(state.nodes.ratings?.[studyId]),
+            targetRatings(state.nodes.ratings?.[studyId]),
             study.expertRating
         );
-        return { study, row, target, room: state.room };
+        return { study, row, target, room: state.room, contentVersion: state.contentVersion };
     }
 
     function openStudy(studyId, opener) {
@@ -121,9 +124,10 @@ function createDashboard() {
     function renderRatings() {
         const groups = groupRatings(state.nodes.ratings, {
             room: state.room,
+            contentVersion: state.contentVersion,
             studyIds: state.studies.map((study) => study.id),
         });
-        state.rows = studyRows(state.studies, groups);
+        state.rows = studyRows(state.studies, groups, { contentVersion: state.contentVersion });
         statsTable.update(state.rows);
         chart?.update(state.rows);
         renderChartSummary(state.rows);
@@ -140,7 +144,11 @@ function createDashboard() {
         if (changed('ratings', 'room') && ready('ratings')) {
             overview.setCounts(ratingCounts(state.nodes.ratings, { room: state.room }));
         }
-        if (changed('ratings', 'content', 'room', 'chart') && ready('ratings') && state.studies) {
+        if (
+            changed('ratings', 'content', 'room', 'version', 'chart') &&
+            ready('ratings') &&
+            state.studies
+        ) {
             renderRatings();
         }
         if (changed('leaderboard', 'room', 'clock') && ready('leaderboard')) {
@@ -174,6 +182,17 @@ function createDashboard() {
         onChange(room) {
             state.room = room;
             batcher.mark('room');
+            batcher.flush();
+        },
+    });
+
+    createVersionFilter({
+        select: qs('#version-select'),
+        hint: qs('[data-version-hint]'),
+        initialVersion: state.contentVersion,
+        onChange(version) {
+            state.contentVersion = version;
+            batcher.mark('version');
             batcher.flush();
         },
     });

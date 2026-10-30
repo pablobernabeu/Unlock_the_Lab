@@ -1,10 +1,16 @@
 // Deterministic synthetic data for the end-to-end tests. It mixes the record
 // shapes the live database holds: version 1 sessions (no /sessions record,
 // some ratings without uid, one bare-number rating, an empty username, two
-// entries sharing a nickname) and version 2 sessions with every field, one of
-// them in a workshop room.
-import expertRatings from '../../src/content/expert-ratings.json' with { type: 'json' };
+// entries sharing a nickname), a session of content version 2 and sessions of
+// the current content version with every field, one of them in a workshop room.
+import expertRatingHistory from '../../src/content/expert-ratings-history.json' with { type: 'json' };
 import studies from '../../src/content/en/studies.json' with { type: 'json' };
+
+/**
+ * The content version the app stamps on new ratings; only ratings of this
+ * version count towards a target. Kept apart from src/lib on purpose.
+ */
+export const CONTENT_VERSION = 3;
 
 export const ROOM = 'DEMO-1';
 const DAY = 24 * 60 * 60 * 1000;
@@ -79,7 +85,8 @@ function participant({ sessionId, userName, uid, count, seed, time, version, roo
     const studyIds = ratedStudies({ sessionId, seed, count, seededOrder });
     for (let i = 1; i <= count; i += 1) {
         const studyId = studyIds[i - 1];
-        const expert = expertRatings[studyId];
+        // The expert rating the participant saw, which is what they were scored against.
+        const expert = expertRatingHistory[version][studyId];
         const rating = clampRating(expert + (rng() - 0.5) * 3);
         const prediction = clampRating(expert + (rng() - 0.5) * 2);
         const studyScore = Math.max(0, 100 - Math.round(12 * Math.abs(prediction - expert)));
@@ -91,9 +98,9 @@ function participant({ sessionId, userName, uid, count, seed, time, version, roo
             timestamp: time + i * 60000,
         };
         if (uid) record.uid = uid;
-        if (version === 2) {
+        if (version >= 2) {
             Object.assign(record, {
-                contentVersion: 2,
+                contentVersion: version,
                 feedbackShown: true,
                 target: expert,
                 score: studyScore,
@@ -107,7 +114,7 @@ function participant({ sessionId, userName, uid, count, seed, time, version, roo
     const leaderboard = { score, papersRated: count, timestamp: time + count * 60000, userName };
     if (uid) leaderboard.uid = uid;
     if (room) leaderboard.room = room;
-    return { sessionId, ratings, leaderboard };
+    return { sessionId, version, ratings, leaderboard };
 }
 
 const people = [
@@ -145,7 +152,7 @@ const people = [
         count: 14,
         seed: 17,
         time: BASE_TIME + 3 * DAY,
-        version: 2,
+        version: CONTENT_VERSION,
         room: ROOM,
     }),
     participant({
@@ -166,6 +173,16 @@ const people = [
         time: BASE_TIME + 5 * DAY,
         version: 1,
     }),
+    participant({
+        sessionId: 'session_1790000200000_v3plain',
+        userName: 'Gentle Badger 58',
+        uid: 'v2-uid-f',
+        // Fewer than 10, so the four ranked participants stay four.
+        count: 8,
+        seed: 31,
+        time: BASE_TIME + 6 * DAY,
+        version: CONTENT_VERSION,
+    }),
 ];
 
 /** The fixture's own record of each participant, for building browser states in specs. */
@@ -182,16 +199,19 @@ function buildFixture() {
             ratings[studyId][person.sessionId] = record;
         }
         leaderboard[person.sessionId] = person.leaderboard;
-        if (person.leaderboard.uid?.startsWith('v2-')) {
+        if (person.version >= 2) {
             sessions[person.sessionId] = {
                 uid: person.leaderboard.uid,
                 createdAt: person.leaderboard.timestamp - 3_600_000,
-                contentVersion: 2,
-                appVersion: '2.0.0',
+                contentVersion: person.version,
+                appVersion: person.version === 2 ? '2.0.0' : '2.1.0',
                 locale: 'en',
                 feedbackMode: 'each',
                 ...(person.leaderboard.room ? { room: person.leaderboard.room } : {}),
             };
+        }
+        // Criterion weights come once a participant has rated enough studies to finish.
+        if (person.version >= 2 && person.leaderboard.papersRated >= 10) {
             const tokens = [
                 [2, 3, 4, 3, 6, 2],
                 [4, 2, 5, 2, 5, 2],

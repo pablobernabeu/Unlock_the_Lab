@@ -10,6 +10,7 @@ import { DB_TIMEOUT_MS, withTimeout } from '../lib/db-utils.js';
 import { db } from '../lib/firebase.js';
 import { normaliseEntries } from '../lib/leaderboard.js';
 import { USERNAME_PATTERN } from '../lib/patterns.js';
+import { isObject, recordContentVersion } from '../lib/records.js';
 import { othersMean, readOnlyReviewRows, resolveSessionParam } from './results-model.js';
 
 async function read(path) {
@@ -26,14 +27,23 @@ export async function loadLeaderboard() {
 }
 
 /**
- * Other participants' mean rating of each study, leaving out `sessionId`.
- * @param {string[]} studyIds
+ * Other participants' mean rating of each study, leaving out `sessionId` and
+ * counting only ratings made with the same content version as the participant's:
+ * the version of the participant's stored rating, or the row's.
+ * @param {Array<{study: {id: string}, contentVersion: number}>} rows review rows
  * @param {string} sessionId
  * @returns {Promise<Record<string, {n: number, mean: number|null}>>}
  */
-export async function loadOthersMeans(studyIds, sessionId) {
+export async function loadOthersMeans(rows, sessionId) {
     const pairs = await Promise.all(
-        studyIds.map(async (id) => [id, othersMean(await read(`ratings/${id}`), sessionId)])
+        rows.map(async ({ study, contentVersion }) => {
+            const node = await read(`ratings/${study.id}`);
+            const version =
+                isObject(node) && Object.hasOwn(node, sessionId)
+                    ? recordContentVersion(node[sessionId])
+                    : contentVersion;
+            return [study.id, othersMean(node, sessionId, version)];
+        })
     );
     return Object.fromEntries(pairs);
 }

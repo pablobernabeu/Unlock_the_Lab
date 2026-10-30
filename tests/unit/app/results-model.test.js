@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CONTENT_VERSION } from '../../../src/lib/config.js';
 import { normaliseEntries } from '../../../src/lib/leaderboard.js';
 import {
     chartPoints,
@@ -36,6 +37,19 @@ describe('othersMean', () => {
     it('has no mean without other ratings', () => {
         expect(othersMean(null, SID)).toEqual({ n: 0, mean: null });
     });
+
+    it('can count only ratings of one content version', () => {
+        const node = {
+            [SID]: { rating: 7, contentVersion: 3 },
+            a: { rating: 2, contentVersion: 3 },
+            b: { rating: 6, contentVersion: 2 },
+            c: { rating: 5 },
+            d: 1,
+        };
+        expect(othersMean(node, SID, 3)).toEqual({ n: 1, mean: 2 });
+        expect(othersMean(node, SID, 1)).toEqual({ n: 2, mean: 3 });
+        expect(othersMean(node, SID)).toEqual({ n: 4, mean: 3.5 });
+    });
 });
 
 describe('ownReviewRows', () => {
@@ -66,6 +80,8 @@ describe('ownReviewRows', () => {
             ['STUDY-3', 2, 99, 3.95],
         ]);
         expect(rows[1].crowd).toEqual({ n: 5, mean: 2.8 });
+        expect(rows.every((row) => row.contentVersion === CONTENT_VERSION)).toBe(true);
+        expect(rows.map((row) => row.expertRating)).toEqual([6, 4]);
     });
 
     it('reports unknown targets of v1 ratings as null', () => {
@@ -103,17 +119,36 @@ describe('readOnlyReviewRows', () => {
         expect(rows[1]).toMatchObject({ rating: 2, prediction: 1, score: null, target: null });
     });
 
+    it('keeps the content version of each rating, version 1 when it has none', () => {
+        const tree = {
+            'STUDY-1': { [SID]: { rating: 2, timestamp: 300 } },
+            'STUDY-2': { [SID]: { rating: 6, timestamp: 200, trial: 1, contentVersion: 2 } },
+        };
+        const rows = readOnlyReviewRows(tree, SID, studies);
+        expect(rows.map((row) => [row.study.id, row.contentVersion])).toEqual([
+            ['STUDY-2', 2],
+            ['STUDY-1', 1],
+        ]);
+    });
+
+    it('gives the expert rating of the content version of each rating', () => {
+        // STUDY-13 is rated 5 in version 2 and 4 in version 3.
+        const study = { id: 'STUDY-13', title: 'Thirteen', expertRating: 4 };
+        const tree = { 'STUDY-13': { [SID]: { rating: 5, trial: 1, contentVersion: 2 } } };
+        expect(readOnlyReviewRows(tree, SID, [study])[0].expertRating).toBe(5);
+    });
+
     it('accepts very old bare-number ratings', () => {
         const rows = readOnlyReviewRows({ 'STUDY-1': { [SID]: 3 } }, SID, studies);
-        expect(rows[0]).toMatchObject({ rating: 3, prediction: null });
+        expect(rows[0]).toMatchObject({ rating: 3, prediction: null, contentVersion: 1 });
     });
 });
 
 describe('ratingProfile and chartPoints', () => {
     const rows = [
-        { study: studies[0], rating: 2 },
-        { study: studies[1], rating: 7 },
-        { study: studies[2], rating: 5 },
+        { study: studies[0], rating: 2, expertRating: 1 },
+        { study: studies[1], rating: 7, expertRating: 6 },
+        { study: studies[2], rating: 5, expertRating: 4 },
     ];
     const others = {
         'STUDY-1': { n: 2, mean: 1.5 },
@@ -132,9 +167,15 @@ describe('ratingProfile and chartPoints', () => {
     });
 
     it('calls small average differences similar', () => {
-        const close = [{ study: studies[2], rating: 4 }];
+        const close = [{ study: studies[2], rating: 4, expertRating: 4 }];
         expect(ratingProfile(close, {}).direction).toBe('similar');
-        expect(ratingProfile([{ study: studies[1], rating: 4 }], {}).direction).toBe('lower');
+        const lower = [{ study: studies[1], rating: 4, expertRating: 6 }];
+        expect(ratingProfile(lower, {}).direction).toBe('lower');
+    });
+
+    it("compares with each row's expert rating, not the study's current one", () => {
+        const earlier = [{ study: studies[1], rating: 4, expertRating: 4 }];
+        expect(ratingProfile(earlier, {}).meanSignedFromExpert).toBe(0);
     });
 
     it('plots only studies that others have rated', () => {

@@ -3,7 +3,7 @@
 // the browser by version 1 of the app, and a saved session whose id now
 // belongs to another sign-in.
 import studies from '../../src/content/en/studies.json' with { type: 'json' };
-import expertRatings from '../../src/content/expert-ratings.json' with { type: 'json' };
+import expertRatingHistory from '../../src/content/expert-ratings-history.json' with { type: 'json' };
 import {
     AUTH_USER_KEY,
     persistedAnonymousUser,
@@ -11,7 +11,13 @@ import {
     SERVER_TIMESTAMP,
     writePath,
 } from './emulator.js';
-import { LEGACY_NAME, LEGACY_SESSION, participants, v1StudyOrder } from './fixture.js';
+import {
+    CONTENT_VERSION,
+    LEGACY_NAME,
+    LEGACY_SESSION,
+    participants,
+    v1StudyOrder,
+} from './fixture.js';
 import {
     allocateTokens,
     currentStudy,
@@ -34,7 +40,7 @@ function v1Storage() {
     const ids = Object.keys(ratings);
     const pick = (field) => Object.fromEntries(ids.map((id) => [id, ratings[id][field]]));
     const paperScores = Object.fromEntries(
-        ids.map((id) => [id, scoreFor(ratings[id].prediction, expertRatings[id])])
+        ids.map((id) => [id, scoreFor(ratings[id].prediction, expertRatingHistory[1][id])])
     );
     const state = {
         // v1 page indices: 0 welcome, 1 guide, then the studies; this is the 13th study.
@@ -235,7 +241,7 @@ test('a session saved by version 1 resumes on the same page with the same score'
         .poll(() => readPath(`sessions/${LEGACY_SESSION}`))
         .toMatchObject({
             uid: LEGACY_UID,
-            contentVersion: 2,
+            contentVersion: CONTENT_VERSION,
             locale: 'en',
             feedbackMode: 'each',
         });

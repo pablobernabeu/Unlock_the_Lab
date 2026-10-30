@@ -1,10 +1,11 @@
 // A new participant's whole journey with the keyboard only: the welcome page,
 // the guide, 10 studies, finishing early, the criterion weights and the
 // results, checked against what reaches the database.
+import guide from '../../src/content/en/guide.json' with { type: 'json' };
 import studies from '../../src/content/en/studies.json' with { type: 'json' };
 import expertRatings from '../../src/content/expert-ratings.json' with { type: 'json' };
 import { readPath, SERVER_TIMESTAMP, writePath } from './emulator.js';
-import { v1StudyOrder } from './fixture.js';
+import { CONTENT_VERSION, v1StudyOrder } from './fixture.js';
 import {
     activate,
     allocateTokens,
@@ -68,11 +69,23 @@ test('a new participant takes part from start to results with the keyboard only'
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1, name: 'Unlock the Lab' })).toBeVisible();
     await expect(page.locator('#welcome-scoring-target')).toContainText(
-        'counts as if 100 people had given it'
+        'counts as if 100 people had given it. Only ratings of the current version of the study descriptions count'
     );
 
     await activate(page, '#welcome-start');
     await expect(page.getByRole('heading', { level: 1, name: 'Before you begin' })).toBeFocused();
+    // The guide shows how to reach one rating, with its worked example and the note on Access.
+    const guideView = page.locator('#view-guide');
+    await expect(
+        guideView.getByRole('heading', { level: 2, name: 'From six criteria to one rating' })
+    ).toBeVisible();
+    await expect(
+        guideView.getByRole('heading', { level: 3, name: 'A worked example' })
+    ).toBeVisible();
+    await expect(
+        guideView.getByRole('heading', { level: 3, name: 'About the Access criterion' })
+    ).toBeVisible();
+    for (const text of Object.values(guide)) await expect(guideView).toContainText(text);
     await activate(page, '#guide-start');
     await expect(page.locator('#study-title')).toBeFocused();
 
@@ -83,8 +96,8 @@ test('a new participant takes part from start to results with the keyboard only'
     expect(sessionRecord).toEqual({
         uid: expect.any(String),
         createdAt: expect.any(Number),
-        contentVersion: 2,
-        appVersion: '2.0.0',
+        contentVersion: CONTENT_VERSION,
+        appVersion: '2.1.0',
         locale: 'en',
         feedbackMode: 'each',
     });
@@ -116,6 +129,12 @@ test('a new participant takes part from start to results with the keyboard only'
                 'true'
             );
             await expect(help.locator('#help-rubric')).toBeVisible();
+            await expect(help.locator('#help-rubric')).toContainText(guide.accessNote);
+            await page.keyboard.press('ArrowRight');
+            await expect(help.getByRole('tab', { name: 'Overall rating' })).toBeFocused();
+            const rating = help.getByRole('tabpanel', { name: 'Overall rating' });
+            await expect(rating).toContainText(guide.combining);
+            await expect(rating).toContainText(guide.example);
             await page.keyboard.press('Escape');
             await expect(help).toBeHidden();
             await expect(page.locator('.study-toolbar__help')).toBeFocused();
@@ -163,7 +182,7 @@ test('a new participant takes part from start to results with the keyboard only'
             rating: answer.rating,
             prediction: answer.prediction,
             uid,
-            contentVersion: 2,
+            contentVersion: CONTENT_VERSION,
             feedbackShown: true,
             score: feedback.score,
             trial,
@@ -332,18 +351,35 @@ test('the score can be worked out from the target shown, even where two decimals
     const { sessionId } = await savedState(page);
     const study = await currentStudy(page);
     const edge = roundingEdge(study.expertRating);
-    // The other participants' ratings; the first is stored as a bare number, as the oldest were.
-    await writePath(
-        `ratings/${study.id}`,
-        Object.fromEntries(
+    // The other participants' ratings of the current version, and ratings of earlier
+    // versions that do not count: a bare number, as the oldest were, a version 1
+    // record (which has no version) and a version 2 record.
+    const earlier = {
+        session_1700000000100_bare: 7,
+        session_1700000000101_v1: { rating: 7, prediction: 7, timestamp: 1_700_000_000_101 },
+        session_1700000000102_v2: {
+            rating: 7,
+            prediction: 7,
+            timestamp: 1_700_000_000_102,
+            uid: 'uid-v2',
+            contentVersion: CONTENT_VERSION - 1,
+        },
+    };
+    await writePath(`ratings/${study.id}`, {
+        ...earlier,
+        ...Object.fromEntries(
             edge.ratings.map((rating, i) => [
                 `session_17000000000${String(i).padStart(2, '0')}_edge${i}`,
-                i === 0
-                    ? rating
-                    : { rating, prediction: 4, timestamp: 1_700_000_000_000 + i, uid: `uid-${i}` },
+                {
+                    rating,
+                    prediction: 4,
+                    timestamp: 1_700_000_000_000 + i,
+                    uid: `uid-${i}`,
+                    contentVersion: CONTENT_VERSION,
+                },
             ])
-        )
-    );
+        ),
+    });
 
     await rateWithMouse(page, { prediction: edge.prediction, rating: 4 });
     const feedback = await readFeedback(page);

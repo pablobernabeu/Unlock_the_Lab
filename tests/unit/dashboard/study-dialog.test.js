@@ -8,6 +8,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createStudyDialog } from '../../../src/dashboard/study-dialog.js';
+import { CONTENT_VERSION } from '../../../src/lib/config.js';
 import { qs, qsa } from '../../../src/lib/dom.js';
 import { initI18n } from '../../../src/lib/i18n.js';
 
@@ -41,13 +42,14 @@ function study(feedback) {
     };
 }
 
-function open(feedback) {
+function open(feedback, details = {}) {
     const dialog = qs('[data-study-dialog]');
     createStudyDialog(dialog).open({
         study: study(feedback),
         row: ROW,
         target: { target: 2.05, n: 3 },
         room: null,
+        ...details,
     });
     return dialog;
 }
@@ -99,5 +101,36 @@ describe('study dialog', () => {
         const section = feedbackSection(open(undefined));
         expect(qs('p', section).textContent).toBe('There is no expert feedback for this study.');
         expect(qs('ul', section)).toBeNull();
+    });
+
+    it('names the version of the figures when it is not the current one', () => {
+        const statsText = (dialog) =>
+            qs('#study-dialog-stats-heading', dialog).closest('section').textContent;
+        expect(statsText(open(undefined, { contentVersion: CONTENT_VERSION }))).not.toContain(
+            'Figures for'
+        );
+        expect(statsText(open(undefined, { contentVersion: 1 }))).toContain(
+            "Figures for ratings of version 1 only, compared with that version's expert rating."
+        );
+        expect(statsText(open(undefined, { contentVersion: null }))).toContain(
+            'Figures for ratings of every version.'
+        );
+    });
+
+    it('says when the expert rating is an average over versions and refreshes it', () => {
+        const dialog = qs('[data-study-dialog]');
+        const studyDialog = createStudyDialog(dialog);
+        const averaged = { ...ROW, expertRating: 1.5, expertAveraged: true, band: 'low' };
+        const details = { study: study(undefined), target: { target: 1.02, n: 3 }, room: null };
+        studyDialog.open({ ...details, row: averaged, contentVersion: null });
+        expect(qs('.study-dialog__expert', dialog).textContent).toBe(
+            'Expert rating: 1.50 out of 7 (Low), the average of the expert ratings that its participants saw'
+        );
+        studyDialog.refresh({ ...details, row: { ...averaged, expertRating: 1.25 } });
+        expect(qs('.study-dialog__expert', dialog).textContent).toContain('1.25 out of 7');
+        studyDialog.refresh({ ...details, row: ROW });
+        expect(qs('.study-dialog__expert', dialog).textContent).toBe(
+            'Expert rating: 2 out of 7 (Low)'
+        );
     });
 });

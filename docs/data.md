@@ -4,13 +4,23 @@ Unlock the Lab stores its data in a Firebase Realtime Database (project `unlock-
 
 The rules in `database.rules.json` enforce the shapes below for new writes. Records written by version 1 of the app (before content version 2) lack some fields; the notes on each node say which. All timestamps are milliseconds since the Unix epoch (UTC), written by the server since version 2; version 1 wrote the browser's clock.
 
+## Content versions
+
+The study texts, the expert ratings and the rubric change together, as a content version. Every rating since version 2 of the app records the version it was made with (`contentVersion`); a rating without one was made with version 1. `src/content/expert-ratings-history.json` holds the expert ratings of every version (for version 1, those after its revision; `analysis/reference/content-revisions.csv` has the earlier ones), and `src/content/expert-ratings.json` those of the current one. The dashboard and the analysis in `analysis/` compare each rating with the expert rating of its own version.
+
+| Content version | App version | What changed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1               | 1.0.0       | The original 48 studies, glossary and rubric. A revision on 21 February 2026 changed the texts of 22 studies and the expert ratings of seven; `analysis/reference/content-revisions.csv` lists the changes, and the analysis identifies the ratings made before it.                                                                                                                                                                                                                                                                                               |
+| 2               | 2.0.0       | Corrections of errors in the study texts and the glossary (for example, critiques of title claims that the titles no longer made, a recommendation of Sci-Hub and factual slips) and expert feedback on every study. The expert ratings are those of version 1 after its revision.                                                                                                                                                                                                                                                                                |
+| 3               | 2.1.0       | Every study card rewritten to describe what the authors did and where the study appeared, without judging it, with a sample size for every empirical study and distinct cards for studies that had been near-duplicates; titles reworded so that each is clearly accurate, slightly overstated or sensational. New expert feedback, revised rubric anchors (for example, Access is now rated by who can read the paper), a guide to combining the six criteria into one rating (`src/content/en/guide.json`), new glossary entries and 13 changed expert ratings. |
+
 ## Identifiers
 
 | Identifier  | Format                                | Notes                                                                                                                                                                                                                                                                                                 |
 | ----------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sessionId` | `session_<ms>_<random>`               | Created in the browser when the welcome page loads and saved in local storage once the participant selects 'Get started'; `<ms>` is the client time of that page load. A reload after starting resumes the same session.                                                                              |
 | `uid`       | Firebase Auth uid                     | Anonymous account of the browser that owns the session. Version 1 kept one uid per browser, so several version 1 sessions can share a uid (for example, on a shared classroom computer). Since version 2, 'Start as a new participant' signs out first, so each new session normally has its own uid. |
-| `studyId`   | `STUDY-1` to `STUDY-48`               | Stable across content versions. Texts are in `src/content/en/studies.json`, expert ratings in `src/content/expert-ratings.json`. Pilot backups also use ids such as `STUDY-001` (see below).                                                                                                          |
+| `studyId`   | `STUDY-1` to `STUDY-48`               | Stable across content versions: each id keeps its topic and design. Texts are in `src/content/en/studies.json`, expert ratings in `src/content/expert-ratings.json` and `src/content/expert-ratings-history.json`. Pilot backups also use ids such as `STUDY-001` (see below).                        |
 | `room`      | 2-20 characters, `A-Z`, `0-9` and `-` | Optional workshop code from the `?room=` link.                                                                                                                                                                                                                                                        |
 
 ## `/sessions/{sessionId}`
@@ -48,7 +58,7 @@ One record per study a participant rated. Written once and never changed.
 
 ### Scoring
 
-For a prediction `p` on a study whose expert rating is `e`, with `n` earlier ratings from other participants summing to `S`:
+For a prediction `p` on a study whose expert rating is `e`, with `n` earlier ratings from other participants made with the same content version summing to `S`:
 
 ```
 target = (S + 100 × e) / (n + 100)
@@ -56,6 +66,8 @@ score  = max(0, 100 − round(12 × |p − target|))
 ```
 
 The expert rating counts as 100 participants (`SEED_WEIGHT` in `src/lib/config.js`), so while fewer than a few hundred people have rated a study the target stays close to the expert rating. The participant's own rating is not part of the target.
+
+Since content version 3, the target uses only the ratings made with the current content version (`targetRatings` in `src/lib/scoring.js`; a rating without `contentVersion` counts as version 1), because ratings of earlier versions describe different texts. Versions 1 and 2 of the app used every earlier rating of the study.
 
 ## `/leaderboard/{sessionId}`
 

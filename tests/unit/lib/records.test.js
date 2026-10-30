@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { inRoom, isObject, recordRoom } from '../../../src/lib/records.js';
+import {
+    inContentVersion,
+    inRoom,
+    isObject,
+    recordContentVersion,
+    recordRoom,
+} from '../../../src/lib/records.js';
 
 describe('isObject', () => {
     it('is true for object records only', () => {
@@ -28,5 +34,28 @@ describe('recordRoom and inRoom', () => {
         expect(inRoom({ rating: 4 }, 'DEMO-1')).toBe(false);
         expect(inRoom({ room: 'DEMO-1' }, 'DEMO-1')).toBe(true);
         expect(inRoom({ room: 'OTHER' }, 'DEMO-1')).toBe(false);
+    });
+});
+
+describe('recordContentVersion and inContentVersion', () => {
+    it('reads the stamped version and counts records without one as version 1', () => {
+        expect(recordContentVersion({ rating: 4, contentVersion: 3 })).toBe(3);
+        expect(recordContentVersion({ rating: 4, contentVersion: 2 })).toBe(2);
+        expect(recordContentVersion({ rating: 4 })).toBe(1);
+        expect(recordContentVersion(4)).toBe(1);
+        expect(recordContentVersion(null)).toBe(1);
+        for (const invalid of [0, -2, 2.5, '3', null]) {
+            expect(recordContentVersion({ rating: 4, contentVersion: invalid })).toBe(1);
+        }
+    });
+
+    it('keeps every version when none is selected', () => {
+        expect(inContentVersion({ rating: 4, contentVersion: 3 }, null)).toBe(true);
+        expect(inContentVersion(4, null)).toBe(true);
+        expect(inContentVersion({ rating: 4 }, 1)).toBe(true);
+        expect(inContentVersion(4, 1)).toBe(true);
+        expect(inContentVersion({ rating: 4 }, 3)).toBe(false);
+        expect(inContentVersion({ rating: 4, contentVersion: 2 }, 3)).toBe(false);
+        expect(inContentVersion({ rating: 4, contentVersion: 3 }, 3)).toBe(true);
     });
 });

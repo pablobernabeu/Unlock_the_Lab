@@ -23,7 +23,7 @@ import { t } from '../lib/i18n.js';
 import { motionAllowed, onMotionChange } from '../lib/motion.js';
 import { errorBarSegment } from './data.js';
 import { bandLabel } from './labels.js';
-import { formatCount, formatStat } from './numbers.js';
+import { formatCount, formatExpert, formatStat } from './numbers.js';
 
 Chart.register(
     BarController,
@@ -214,10 +214,15 @@ function chartConfig({ horizontal, colours, getRows, getIntervals }) {
                             const row = getRows()[item.dataIndex];
                             if (!row) return '';
                             return item.datasetIndex === 1
-                                ? t('dashboard.chart.tooltipExpert', {
-                                      rating: formatCount(row.expertRating),
-                                      band: bandLabel(row.band),
-                                  })
+                                ? t(
+                                      row.expertAveraged
+                                          ? 'dashboard.chart.tooltipExpertAverage'
+                                          : 'dashboard.chart.tooltipExpert',
+                                      {
+                                          rating: formatExpert(row.expertRating),
+                                          band: bandLabel(row.band),
+                                      }
+                                  )
                                 : meanLabel(row);
                         },
                         afterBody: ([item]) =>

@@ -6,12 +6,13 @@
 import { get, ref, serverTimestamp, set } from 'firebase/database';
 import { DB_TIMEOUT_MS, isPermissionDenied, withTimeout } from '../lib/db-utils.js';
 import { db } from '../lib/firebase.js';
-import { predictionScore, scoringTarget, validRatings } from '../lib/scoring.js';
+import { predictionScore, scoringTarget, targetRatings } from '../lib/scoring.js';
 import { mean } from '../lib/stats.js';
 import { buildRatingRecord } from './rating-record.js';
 
 /**
- * Reads the study's ratings and works out the target without the participant's own rating.
+ * Reads the study's ratings and works out the target from the other participants'
+ * ratings of the current content version.
  * @param {object} study with id and expertRating
  * @param {string} sessionId
  * @returns {Promise<{target: number, crowd: {n: number, mean: number|null}}>}
@@ -22,7 +23,7 @@ export async function readTarget(study, sessionId) {
         DB_TIMEOUT_MS,
         'Reading the ratings'
     );
-    const others = validRatings(snapshot.val(), sessionId);
+    const others = targetRatings(snapshot.val(), sessionId);
     const { target, n } = scoringTarget(others, study.expertRating);
     return { target, crowd: { n, mean: mean(others) } };
 }

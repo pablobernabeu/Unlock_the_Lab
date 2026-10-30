@@ -5,7 +5,12 @@
  * the comparison with other participants load afterwards and fill their
  * sections when they arrive.
  */
-import { MIN_STUDIES_TO_RANK, RESULTS_TOP_N, TOKEN_BUDGET } from '../../lib/config.js';
+import {
+    CONTENT_VERSION,
+    MIN_STUDIES_TO_RANK,
+    RESULTS_TOP_N,
+    TOKEN_BUDGET,
+} from '../../lib/config.js';
 import { qualityBand } from '../../lib/content.js';
 import { CRITERIA, labelKey } from '../../lib/criteria.js';
 import { el, qs } from '../../lib/dom.js';
@@ -367,9 +372,11 @@ function fact(label, value) {
 }
 
 function reviewItem(row) {
-    const { study } = row;
-    const band = qualityBand(study.expertRating);
+    const { study, expertRating } = row;
+    const band = qualityBand(expertRating);
     const notRecorded = t('app.results.notRecorded');
+    const earlierVersion =
+        Number.isInteger(row.contentVersion) && row.contentVersion !== CONTENT_VERSION;
     const titleId = `review-title-${study.id}`;
     const labelId = `review-feedback-${study.id}`;
     return el(
@@ -392,11 +399,18 @@ function reviewItem(row) {
                 Number.isInteger(row.score) ? row.score : notRecorded
             ),
             fact(t('app.results.reviewExpert'), [
-                String(study.expertRating),
+                String(expertRating),
                 ' ',
                 band ? bandBadge(band, qualityLabel(band)) : null,
             ])
         ),
+        earlierVersion
+            ? el(
+                  'p',
+                  { class: 'review-item__note' },
+                  t('app.results.reviewEarlierVersion', { version: row.contentVersion })
+              )
+            : null,
         el(
             'details',
             { class: 'results-details' },
@@ -406,6 +420,7 @@ function reviewItem(row) {
                 { 'aria-labelledby': `${labelId} ${titleId}` },
                 el('span', { id: labelId }, t('app.results.reviewFeedback'))
             ),
+            // The current text's feedback, with its own expert rating.
             renderExpertFeedback(study, { withHeading: false })
         )
     );

@@ -25,6 +25,14 @@ studies <- read_studies('..')
 check('reads 48 studies with expert ratings and titles',
       nrow(studies) == 48 && all(studies$expert %in% 1:7) && !anyNA(studies$title))
 check('orders studies numerically', identical(studies$study_id[1:3], c('STUDY-1', 'STUDY-2', 'STUDY-3')))
+expert_history <- read_expert_history('..')
+current_history <- expert_history[expert_history$version == config$CONTENT_VERSION, ]
+check('reads the expert ratings of every content version up to the current one',
+      identical(sort(unique(expert_history$version)), seq_len(config$CONTENT_VERSION)) &&
+          all(table(expert_history$version) == 48) && all(expert_history$expert %in% 1:7))
+check('the current version of the history holds the current expert ratings',
+      identical(current_history$expert[match(studies$study_id, current_history$study_id)],
+                studies$expert))
 
 # Scoring matches src/lib/scoring.js and its unit tests.
 check('JavaScript rounding rounds halves up', js_round(2.5) == 3 && js_round(0.5) == 1)
@@ -79,7 +87,7 @@ history <- tibble::tibble(
     locale = NA_character_, room = NA_character_
 )
 annotated <- history |>
-    annotate_ratings(studies, config, snapshot_now) |>
+    annotate_ratings(studies, expert_history, config, snapshot_now) |>
     assign_content_versions(revisions) |>
     assign_trials()
 check('labels the pre-revision rating', annotated$content_label[1] == 'v1 (before the revision commit)')
@@ -99,6 +107,59 @@ check('the earlier expert rating is used when assumed',
       near(assign_targets(set_expert_at_time(annotated, 'earlier'), 100, 12)$target[1],
            (7 + 4 * 100) / 101))
 check('scores follow the targets', scored$score[2] == prediction_score(1, scored$target[2], 12))
+check('records without a content version are version 1 and get its expert ratings',
+      all(annotated$version == 1L) &&
+          annotated$expert[2] == expert_history$expert[expert_history$version == 1 &
+                                                           expert_history$study_id == 'STUDY-48'])
+
+# Content versions: each rating gets the expert rating of its version, and from
+# version TARGETS_WITHIN_VERSION_FROM a target counts only ratings of its own version.
+expert_in <- function(version, id) {
+    expert_history$expert[expert_history$version == version & expert_history$study_id == id]
+}
+v1_of <- function(id) expert_in(1, id)
+v3_of <- function(id) expert_in(3, id)
+changed_id <- Filter(function(id) v1_of(id) != v3_of(id), studies$study_id)[1]
+mixed <- tibble::tibble(
+    study_id = changed_id,
+    session_id = c('session_1771700000000_aaaaaaaaa', 'session_1790000000000_bbbbbbbbb',
+                   'session_1790000000001_ccccccccc', 'session_1790000000002_ddddddddd',
+                   'session_1790000000003_eeeeeeeee'),
+    shape = 'object', rating = c(6, 2, 3, 4, 5), prediction = 4, response_time_ms = 30000,
+    timestamp_ms = c(1771700000000, 1790000000000, 1790000100000, 1790000200000, 1790000300000),
+    uid = NA_character_,
+    # A v1 record, a version 2 record, then version 3 records and one with a version
+    # that has no expert ratings.
+    content_version = c(NA, 2, 3, 3, 99),
+    feedback_shown = NA, target_stored = NA_real_, score_stored = NA_real_, trial_stored = NA_real_,
+    locale = NA_character_, room = NA_character_
+)
+mixed_annotated <- mixed |>
+    annotate_ratings(studies, expert_history, config, snapshot_now) |>
+    assign_content_versions(revisions) |>
+    assign_trials() |>
+    set_expert_at_time('revised')
+check('reads each rating\'s content version',
+      identical(mixed_annotated$version, c(1L, 2L, 3L, 3L, 99L)))
+check('gives each rating the expert rating of its content version',
+      identical(mixed_annotated$expert_at_time[1:4],
+                c(v1_of(changed_id), v1_of(changed_id), v3_of(changed_id), v3_of(changed_id))))
+check('treats a content version without expert ratings as invalid',
+      identical(mixed_annotated$valid_record, c(TRUE, TRUE, TRUE, TRUE, FALSE)) &&
+          !mixed_annotated$known_version[5])
+mixed_scored <- assign_targets(mixed_annotated, 100, 12)
+check('a version 2 target counts the earlier ratings of every version',
+      mixed_scored$n_other[2] == 1 &&
+          near(mixed_scored$target[2], (6 + v1_of(changed_id) * 100) / 101))
+check('a version 3 target counts only earlier version 3 ratings',
+      mixed_scored$n_other[3] == 0 && near(mixed_scored$target[3], v3_of(changed_id)) &&
+          mixed_scored$n_other[4] == 1 &&
+          near(mixed_scored$target[4], (3 + v3_of(changed_id) * 100) / 101))
+version_steps <- apply_exclusions(mixed_scored, character(), 5000, FALSE, content_version = 3L)
+check('keeps one content version when asked',
+      identical(version_steps$data$version, c(3L, 3L)) && version_steps$flow$removed[3] == 2)
+check('keeps every content version by default',
+      nrow(apply_exclusions(mixed_scored, character(), 5000, FALSE)$data) == 4)
 
 # The leaderboard check picks the assumption that reproduces the stored totals.
 board <- tibble::tibble(session_id = annotated$session_id[1], score = scored$score[1] + 0,
@@ -158,7 +219,7 @@ check('flags a session whose ratings are all the same', identical(straight_linin
 check('needs the minimum number of ratings to flag', length(straight_lining_sessions(flagged, 7)) == 0)
 steps <- apply_exclusions(scored, character(), 5000, exclude_pre_revision = TRUE)
 check('removes fast responses and pre-revision ratings of revised studies',
-      identical(steps$flow$removed[-1], c(0L, 0L, 1L, 2L)) && nrow(steps$data) == 2)
+      identical(steps$flow$removed[-1], c(0L, 0L, 0L, 1L, 2L)) && nrow(steps$data) == 2)
 
 allocations <- tibble::tibble(session_id = c('a', 'b', 'c'), title = c(20, 10, 5.5), access = 0,
                               source = c(0, 11, 14.5), theory = 0, methods = 0, conclusion = 0)

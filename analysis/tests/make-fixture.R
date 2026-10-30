@@ -3,8 +3,9 @@
 #
 #   Rscript tests/make-fixture.R <out-dir> [full|tiny|empty]
 #
-# 'full' mixes v2 sessions (rooms, both feedback modes, stored trials, targets
-# and scores, /rankings and /sessions) with v1-style records and the oddities
+# 'full' mixes v2 sessions of content versions 2 and 3 (rooms, both feedback
+# modes, stored trials, targets and scores, /rankings and /sessions) with
+# v1-style records and the oddities
 # the report must handle: bare-number ratings, an empty username, a
 # straight-lining session, a too-fast response, an unknown study id, an
 # out-of-range rating, v1 sessions with the defective study order, a rating
@@ -20,7 +21,9 @@ dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 # Study orders come from the same shuffle as the app's, so the report's order
 # checks see realistic sessions, including v1's defective order.
 source('R/derive.R')
-expert <- unlist(jsonlite::fromJSON('../src/content/expert-ratings.json'))
+# Expert ratings by content version; the app scores each rating against its version's.
+expert_history <- jsonlite::fromJSON('../src/content/expert-ratings-history.json')
+expert_of <- function(study, version) expert_history[[as.character(version)]][[study]]
 study_ids <- jsonlite::fromJSON('../src/content/en/studies.json')$id
 criteria <- c('title', 'access', 'source', 'theory', 'methods', 'conclusion')
 weight <- 100
@@ -55,8 +58,9 @@ simulate_session <- function(start_ms, n, version, room = NULL, feedback = NULL)
     chosen <- order[seq_len(n)]
     times <- start_ms + cumsum(round(rlnorm(n, log(45000), 0.6)))
     rows <- lapply(seq_len(n), function(i) {
-        rating <- clamp(1.3 + 0.7 * expert[[chosen[i]]] + leniency + rnorm(1, 0, 0.9))
-        prediction <- clamp(0.6 * rating + 0.4 * expert[[chosen[i]]] + rnorm(1, 0, 0.6))
+        expert <- expert_of(chosen[i], version)
+        rating <- clamp(1.3 + 0.7 * expert + leniency + rnorm(1, 0, 0.9))
+        prediction <- clamp(0.6 * rating + 0.4 * expert + rnorm(1, 0, 0.6))
         list(study = chosen[i], rating = rating, prediction = prediction,
              responseTime = round(rlnorm(1, log(40000), 0.7)), timestamp = times[i], trial = i)
     })
@@ -64,10 +68,13 @@ simulate_session <- function(start_ms, n, version, room = NULL, feedback = NULL)
          uid = paste(sample(c(LETTERS, letters, 0:9), 28, replace = TRUE), collapse = ''))
 }
 
+# Targets as the app computed them: from content version 3 only earlier ratings
+# of the same version count; earlier versions of the app counted every one.
 build_ratings <- function(sessions) {
     flat <- do.call(rbind, lapply(sessions, function(s) {
         do.call(rbind, lapply(s$rows, function(r) {
-            data.frame(id = s$id, study = r$study, rating = r$rating, timestamp = r$timestamp)
+            data.frame(id = s$id, study = r$study, rating = r$rating, timestamp = r$timestamp,
+                       version = s$version)
         }))
     }))
     ratings <- list()
@@ -75,14 +82,17 @@ build_ratings <- function(sessions) {
     for (s in sessions) {
         total <- 0
         for (r in s$rows) {
-            earlier <- flat[flat$study == r$study & flat$id != s$id & flat$timestamp < r$timestamp, ]
-            target <- (sum(earlier$rating) + expert[[r$study]] * weight) / (nrow(earlier) + weight)
+            earlier <- flat[flat$study == r$study & flat$id != s$id & flat$timestamp < r$timestamp &
+                                (s$version < 3 | flat$version == s$version), ]
+            expert <- expert_of(r$study, s$version)
+            target <- (sum(earlier$rating) + expert * weight) / (nrow(earlier) + weight)
             score <- max(0, 100 - js_round(abs(r$prediction - target) * penalty))
             total <- total + score
             record <- list(rating = r$rating, prediction = r$prediction,
                            responseTime = r$responseTime, timestamp = r$timestamp)
-            if (s$version == 2) {
-                record <- c(record, list(uid = s$uid, contentVersion = 2, feedbackShown = s$feedback,
+            if (s$version >= 2) {
+                record <- c(record, list(uid = s$uid, contentVersion = s$version,
+                                         feedbackShown = s$feedback,
                                          target = target, score = score, trial = r$trial,
                                          locale = 'en'))
                 if (!is.null(s$room)) record$room <- s$room
@@ -93,7 +103,7 @@ build_ratings <- function(sessions) {
                       timestamp = max(vapply(s$rows, function(r) r$timestamp, numeric(1))),
                       userName = paste('Gentle', sample(c('Otter', 'Owl', 'Badger'), 1),
                                        sprintf('%02d', sample(0:99, 1))))
-        if (s$version == 2) entry$uid <- s$uid
+        if (s$version >= 2) entry$uid <- s$uid
         if (!is.null(s$room)) entry$room <- s$room
         leaderboard[[s$id]] <- entry
     }
@@ -114,9 +124,11 @@ if (variant == 'empty') {
     write_node(built$leaderboard, 'leaderboard')
 } else {
     base <- 1790000000000
+    # Sessions of content version 2 and then of version 3, as after an update.
     v2 <- lapply(seq_len(40), function(i) {
         room <- if (i <= 18) 'WORKSHOP-A' else if (i <= 30) 'WORKSHOP-B' else NULL
-        simulate_session(base + i * 600000, sample(10:20, 1), 2, room = room, feedback = i %% 3 != 0)
+        simulate_session(base + i * 600000, sample(10:20, 1), if (i <= 20) 2 else 3, room = room,
+                         feedback = i %% 3 != 0)
     })
     v1 <- lapply(seq_len(12), function(i) simulate_session(1771620000000 + i * 3600000,
                                                            sample(3:13, 1), 1))
@@ -158,8 +170,9 @@ if (variant == 'empty') {
     rankings <- list()
     session_records <- list()
     for (s in v2) {
-        record <- list(uid = s$uid, createdAt = s$rows[[1]]$timestamp - 60000, contentVersion = 2,
-                       appVersion = '2.0.0', locale = 'en',
+        record <- list(uid = s$uid, createdAt = s$rows[[1]]$timestamp - 60000,
+                       contentVersion = s$version,
+                       appVersion = if (s$version == 2) '2.0.0' else '2.1.0', locale = 'en',
                        feedbackMode = if (isTRUE(s$feedback)) 'each' else 'end')
         if (!is.null(s$room)) record$room <- s$room
         session_records[[s$id]] <- record

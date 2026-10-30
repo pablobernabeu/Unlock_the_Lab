@@ -44,7 +44,7 @@
     "taskPredict": "<strong>Predict the crowd.</strong> Guess the average rating that workshop participants give the study. This is the answer that earns points; how it is scored is explained below.",
     "taskRate": "<strong>Give your own rating.</strong> Judge the study yourself with the six criteria. Your own rating does not change your score, but it becomes part of the crowd that later participants predict.",
     "scoringHeading": "How scoring works",
-    "scoringTarget": "Your prediction is scored against a target rating. The target combines the ratings that other participants have given the study so far with an expert's rating, which counts as if {weight} people had given it. Your own rating is never part of your target.",
+    "scoringTarget": "Your prediction is scored against a target rating. The target combines the ratings that other participants have given the study so far with an expert's rating, which counts as if {weight} people had given it. Only ratings of the current version of the study descriptions count, and your own rating is never part of your target.",
     "scoringEarly": "Because the expert counts so heavily, the target stays close to the expert's rating until many people have taken part. Even with {count} ratings from other participants, the expert's rating makes up {share} of the target.",
     "scoringPoints": "A prediction that matches the target exactly scores 100 points. You lose {penalty} points for each point you are away from the target, so a prediction 1 point away scores {one} and one 2 points away scores {two}.",
     "scoringFeedback": "After each study you see your score, the target with how it was worked out and the expert's feedback on each of the six criteria.",
@@ -60,7 +60,7 @@
   },
   "guide": {
     "heading": "Before you begin",
-    "intro": "Take your time with the glossary and the rubric. They explain the terms in the studies and the six criteria you will judge them by. You can open both again from any study with the 'Glossary and rubric' button.",
+    "intro": "Take your time with the glossary, the rubric and the advice on reaching one rating. They explain the terms in the studies, the six criteria you will judge them by and how to combine them. You can open them all again from any study with the 'Glossary and rubric' button.",
     "glossaryHeading": "Glossary",
     "glossaryIntro": "Terms you will meet in the studies.",
     "rubricHeading": "Quality rubric",
@@ -69,6 +69,9 @@
     "rubricLow": "Low (1–2)",
     "rubricMedium": "Medium (3–5)",
     "rubricHigh": "High (6–7)",
+    "accessHeading": "About the Access criterion",
+    "combiningHeading": "From six criteria to one rating",
+    "exampleHeading": "A worked example",
     "back": "Back",
     "start": "Start rating studies"
   },
@@ -78,7 +81,8 @@
     "close": "Close",
     "tabsLabel": "Reference",
     "glossaryTab": "Glossary",
-    "rubricTab": "Rubric"
+    "rubricTab": "Rubric",
+    "ratingTab": "Overall rating"
   },
   "study": {
     "progress": "Study {position} of {total}",
@@ -250,6 +254,7 @@
     "reviewScore": "Score",
     "reviewExpert": "Expert rating",
     "reviewFeedback": "Expert feedback on this study",
+    "reviewEarlierVersion": "This answer was given to an earlier version of the study (content version {version}). The expert rating above is the one for that version, while the title and feedback shown here belong to the current version.",
     "notRecorded": "not recorded",
     "weightsHeading": "How the criteria were weighted",
     "weightsValue": "{count} of {budget} tokens ({percent})",

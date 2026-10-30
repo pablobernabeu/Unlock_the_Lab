@@ -1,9 +1,9 @@
-# Helpers for the workshop handouts. They read the studies, glossary, rubric
-# and expert ratings from the app's content files (src/content), the app's
-# interface text (src/i18n/en) and its scoring constants (src/lib), and turn
-# them into Markdown for Quarto. Nothing the handouts say about a study, the
-# criteria or the scoring is typed in here, so a new render always matches
-# the app.
+# Helpers for the workshop handouts. They read the studies, glossary, rubric,
+# rating guide and expert ratings from the app's content files (src/content),
+# the app's interface text (src/i18n/en) and its scoring constants (src/lib),
+# and turn them into Markdown for Quarto. Nothing the handouts say about a
+# study, the criteria or the scoring is typed in here, so a new render always
+# matches the app.
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
@@ -104,6 +104,7 @@ load_handout_data <- function(root = find_repo_root()) {
         studies = studies,
         glossary = read_json_file(file.path(content, 'en', 'glossary.json')),
         rubric = read_json_file(file.path(content, 'en', 'rubric.json')),
+        guide = read_json_file(file.path(content, 'en', 'guide.json')),
         strings = list(
             app = read_json_file(file.path(root, 'src', 'i18n', 'en', 'app.json')),
             common = read_json_file(file.path(root, 'src', 'i18n', 'en', 'common.json'))
@@ -262,8 +263,8 @@ footer_metadata <- function(data, licence = HANDOUT_LICENCE) {
 #' The last paragraph of a handout: where it comes from, the licence and the app.
 closing_line <- function(data, licence = HANDOUT_LICENCE) {
     sprintf(
-        paste('Made from the studies, glossary and rubric of content version %d of',
-              'Unlock the Lab, the same files the app uses. %s. %s'),
+        paste('Made from the studies, glossary, rubric and rating guide of content version %d',
+              'of Unlock the Lab, the same files the app uses. %s. %s'),
         data$config$content_version, md_escape(licence), sprintf('<%s>', data$url)
     )
 }

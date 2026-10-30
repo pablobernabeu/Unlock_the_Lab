@@ -26,6 +26,16 @@ export function formatCount(value) {
 }
 
 /**
+ * An expert rating: a whole number as it is, the average used for every
+ * content version together as a statistic, e.g. 6 -> '6', 5.25 -> '5.25'.
+ * @param {number|null|undefined} value
+ * @returns {string}
+ */
+export function formatExpert(value) {
+    return Number.isInteger(value) ? formatCount(value) : formatStat(value);
+}
+
+/**
  * A proportion as a percentage with one decimal, e.g. 0.2346 -> '23.5%'.
  * @param {number|null|undefined} value 0-1
  * @returns {string}

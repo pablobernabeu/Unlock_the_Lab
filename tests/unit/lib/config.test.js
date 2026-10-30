@@ -21,7 +21,7 @@ describe('config', () => {
             INACTIVITY_WARNING_MS: 5 * 60 * 1000,
             PRESENCE_HEARTBEAT_MS: 60 * 1000,
             ACTIVE_WINDOW_MS: 2 * 60 * 1000,
-            CONTENT_VERSION: 2,
+            CONTENT_VERSION: 3,
             FEEDBACK_MODE: 'each',
             LEADERBOARD_SIZE: 200,
             RESULTS_TOP_N: 5,

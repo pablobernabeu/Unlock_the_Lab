@@ -1,11 +1,12 @@
 /**
  * The 'Glossary and rubric' dialog on study pages: a native modal <dialog>
- * (focus moves in, the page behind is inert, Escape closes) with two tabs
- * that follow the ARIA tabs pattern (arrow keys, Home and End).
+ * (focus moves in, the page behind is inert, Escape closes) with tabs for the
+ * glossary, the rubric and the rating guide that follow the ARIA tabs pattern
+ * (arrow keys, Home and End).
  */
 import { el } from '../../lib/dom.js';
 import { t } from '../../lib/i18n.js';
-import { renderGlossary, renderRubric } from './reference.js';
+import { renderAccessNote, renderGlossary, renderRatingGuide, renderRubric } from './reference.js';
 
 let dialog = null;
 
@@ -16,7 +17,21 @@ function buildTabs(content) {
             label: t('app.help.glossaryTab'),
             body: renderGlossary(content.glossary),
         },
-        { id: 'help-rubric', label: t('app.help.rubricTab'), body: renderRubric(content.rubric) },
+        {
+            id: 'help-rubric',
+            label: t('app.help.rubricTab'),
+            body: el(
+                'div',
+                { class: 'flow' },
+                renderRubric(content.rubric),
+                renderAccessNote(content.guide)
+            ),
+        },
+        {
+            id: 'help-rating',
+            label: t('app.help.ratingTab'),
+            body: renderRatingGuide(content.guide),
+        },
     ];
     const tabs = panels.map(({ id, label }, index) =>
         el(
@@ -119,7 +134,7 @@ function buildDialog(content) {
 
 /**
  * Opens the dialog, building it on first use, and returns focus to the opener on close.
- * @param {{glossary: object[], rubric: object[]}} content
+ * @param {{glossary: object[], rubric: object[], guide: object}} content
  * @param {HTMLElement} [opener]
  * @returns {void}
  */

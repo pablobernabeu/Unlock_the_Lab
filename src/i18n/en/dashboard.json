@@ -14,9 +14,21 @@
     "label": "Room",
     "all": "All rooms",
     "hintAll": "Facilitators can give a workshop its own room code. Choose a room to see only its activity.",
-    "hintSelected": "Showing activity from room {room} only. Ratings made without a room code, including all those from before room codes existed, appear only under 'All rooms'. Targets and scores always use everyone's ratings, so they can be compared between rooms.",
+    "hintSelected": "Showing activity from room {room} only. Ratings made without a room code, including all those from before room codes existed, appear only under 'All rooms'. Targets and scores always use the ratings from every room, so they can be compared between rooms.",
     "announceAll": "Showing all rooms.",
     "announceRoom": "Showing room {room}."
+  },
+  "version": {
+    "label": "Content version",
+    "current": "Version {version} (current)",
+    "earlier": "Version {version}",
+    "all": "All versions",
+    "hintCurrent": "Showing ratings of the current study texts. Earlier versions showed different texts and expert ratings.",
+    "hintEarlier": "Showing ratings of version {version}, compared with that version's expert ratings. Earlier versions showed different texts and expert ratings; a study opened below shows its current text and feedback.",
+    "hintAll": "Showing ratings of every version. Earlier versions showed different texts and expert ratings, so each study is compared with the average of the expert ratings that its participants saw.",
+    "hintScope": "This choice applies to the ratings chart, the statistics table and the study details; the other figures cover every version.",
+    "announce": "Showing version {version}.",
+    "announceAll": "Showing all versions."
   },
   "find": {
     "heading": "Find your results",
@@ -55,7 +67,7 @@
   "leaderboard": {
     "heading": "Leaderboard",
     "introScore": "Who predicts best? For each study, participants predict the average rating that participants give it, and the prediction is scored against a target. A prediction scores 100 points, minus {penalty} for every point it is away from the target (rounded to a whole number and never below 0).",
-    "introTarget": "The target combines the expert rating, counted as if {weight} participants had given it, with the ratings that other participants had given the study by then, in every room.",
+    "introTarget": "The target combines the expert rating, counted as if {weight} participants had given it, with the ratings that other participants had given the same version of the study by then, in every room.",
     "introRules": "A participant's average score is the mean of their prediction scores over the studies they have rated, rounded to a whole percentage. Only participants who have rated at least {count} studies are ranked; anyone who has rated fewer is left out of the table. At the same average score, the participant who rated more studies is placed higher, and if that is also the same, they share a place. The table lists participants whose scores have been saved, so it can hold fewer people than the figures above. Select a nickname to see that participant's results.",
     "tabsLabel": "Time period",
     "tabAll": "All time",
@@ -102,7 +114,7 @@
     "introBars": "Each bar is the average quality rating that participants gave a study, on the scale from 1 to 7. Only participants' ratings count: the expert's rating is not part of the bar.",
     "introIntervals": "The dark line on each bar is the 95% confidence interval for that average, worked out with the t distribution. It is long when people disagree or when few have rated the study, and missing when fewer than two have. Where an interval runs past 1 or 7, it stops at the edge of the chart without an end cap; the tooltip, the table and the study details give its full limits.",
     "introExpert": "The white diamond is the expert's rating. The bar colour shows the expert's quality band, as in the key below.",
-    "introTarget": "The game scores predictions against a different value, the target: the expert rating counted as if {weight} participants had given it, combined with the ratings of other participants from every room. While fewer than {weight} participants have rated a study, its target is closer to the expert rating than to the average of their ratings.",
+    "introTarget": "The game scores predictions against a different value, the target: the expert rating counted as if {weight} participants had given it, combined with the ratings that participants in every room have given the current version of the study. While fewer than {weight} participants have rated a study, its target is closer to the expert rating than to the average of their ratings.",
     "introSelect": "Select a bar, or a study in the table below, to read the study and the expert's feedback.",
     "legendLabel": "Chart key",
     "legendMean": "Participant mean with 95% confidence interval",
@@ -114,6 +126,7 @@
     "tooltipMeanSingle": "Participant mean: {mean} (n = 1, too few for an interval)",
     "tooltipNoRatings": "No participant ratings yet",
     "tooltipExpert": "Expert rating: {rating} ({band})",
+    "tooltipExpertAverage": "Expert rating, averaged over versions: {rating} ({band})",
     "tooltipFooter": "Click or tap to read the study",
     "summary": "{rated} of {total} studies have participant ratings. For {close} of them, the participant mean is within one point of the expert rating.",
     "summaryNone": "No study has participant ratings yet.",
@@ -146,8 +159,11 @@
   },
   "dialog": {
     "expert": "Expert rating: {rating} out of 7 ({band})",
+    "expertAverage": "Expert rating: {rating} out of 7 ({band}), the average of the expert ratings that its participants saw",
     "statsHeading": "How participants rated it",
     "roomNote": "Figures for room {room} only.",
+    "versionNote": "Figures for ratings of version {version} only, compared with that version's expert rating. The text and feedback below are those of the current version.",
+    "versionNoteAll": "Figures for ratings of every version. The text and feedback below are those of the current version.",
     "stats": {
       "n": "Ratings",
       "mean": "Mean rating",
@@ -155,10 +171,10 @@
       "ci": "95% confidence interval",
       "prediction": "Mean prediction"
     },
-    "targetNone": "The game would score a new prediction for this study against {target}, the expert rating, because no participant has rated it yet.",
+    "targetNone": "The game would score a new prediction for this study against {target}, the expert rating, because no participant has rated the current version of the study yet.",
     "target": {
-      "one": "The game would score a new prediction for this study against a target of {target}: the expert rating counted as {weight} participants, combined with the {count} participant rating so far (from every room).",
-      "other": "The game would score a new prediction for this study against a target of {target}: the expert rating counted as {weight} participants, combined with all {count} participant ratings so far (from every room)."
+      "one": "The game would score a new prediction for this study against a target of {target}: the expert rating counted as {weight} participants, combined with the {count} participant rating of the current version so far (from every room).",
+      "other": "The game would score a new prediction for this study against a target of {target}: the expert rating counted as {weight} participants, combined with all {count} participant ratings of the current version so far (from every room)."
     },
     "studyHeading": "The study",
     "fictional": "This study is fictional. It was written for the workshop and is modelled on the strengths and flaws of real research.",

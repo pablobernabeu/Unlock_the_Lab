@@ -6,15 +6,16 @@ The interface and the content can be translated without touching the code. Engli
 
 Each language has a code `xx`: a language tag such as `es`, `nb` or `pt-BR`, made of two or three lower-case letters and optionally one region or script part. The code is stored with every rating, and `npm test` checks its form. Copy these files:
 
-| Copy                           | To                             | What it contains                |
-| ------------------------------ | ------------------------------ | ------------------------------- |
-| `src/i18n/en/common.json`      | `src/i18n/xx/common.json`      | Strings shared by all pages     |
-| `src/i18n/en/app.json`         | `src/i18n/xx/app.json`         | Participant app                 |
-| `src/i18n/en/dashboard.json`   | `src/i18n/xx/dashboard.json`   | Public dashboard                |
-| `src/i18n/en/admin.json`       | `src/i18n/xx/admin.json`       | Facilitator panel (optional)    |
-| `src/content/en/studies.json`  | `src/content/xx/studies.json`  | Study cards and expert feedback |
-| `src/content/en/glossary.json` | `src/content/xx/glossary.json` | Glossary                        |
-| `src/content/en/rubric.json`   | `src/content/xx/rubric.json`   | Rubric                          |
+| Copy                           | To                             | What it contains                                                                            |
+| ------------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------- |
+| `src/i18n/en/common.json`      | `src/i18n/xx/common.json`      | Strings shared by all pages                                                                 |
+| `src/i18n/en/app.json`         | `src/i18n/xx/app.json`         | Participant app                                                                             |
+| `src/i18n/en/dashboard.json`   | `src/i18n/xx/dashboard.json`   | Public dashboard                                                                            |
+| `src/i18n/en/admin.json`       | `src/i18n/xx/admin.json`       | Facilitator panel (optional)                                                                |
+| `src/content/en/studies.json`  | `src/content/xx/studies.json`  | Study cards and expert feedback                                                             |
+| `src/content/en/glossary.json` | `src/content/xx/glossary.json` | Glossary                                                                                    |
+| `src/content/en/rubric.json`   | `src/content/xx/rubric.json`   | Rubric                                                                                      |
+| `src/content/en/guide.json`    | `src/content/xx/guide.json`    | Guide to combining the criteria into one rating, with a worked example and a note on Access |
 
 Once any file exists under `src/i18n/xx/`, the language appears in the language menu (in the page header or footer), and `?lang=xx` selects it directly. Its name in the menu comes from the browser's own list of language names.
 
@@ -26,7 +27,8 @@ Once any file exists under `src/i18n/xx/`, the language appears in the language 
 - A few strings contain simple HTML such as `<strong>`, `<em>`, `<i>` or a link. Keep the tags and translate the text inside them.
 - In `studies.json`, keep each study's `id`. Translate the text fields and the `summary` and `note` of the feedback, but leave the `band` values (`low`, `medium`, `high`) in English: the pages use them for styling and translate the labels themselves. The feedback is shown as plain text, so it must not contain HTML.
 - `glossary.json` and `rubric.json` are matched to English by position, so keep the entries in the same order as the English files, even if that is not alphabetical in your language.
-- Expert ratings live in `src/content/expert-ratings.json` and are shared by all languages; do not copy that file.
+- Expert ratings live in `src/content/expert-ratings.json` and, for every content version, `src/content/expert-ratings-history.json`. Both are shared by all languages; do not copy them.
+- `guide.json` is plain text: it must not contain HTML.
 
 ## Checking a translation
 

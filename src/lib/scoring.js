@@ -6,9 +6,11 @@
  *   target = (sum of other ratings + expertRating × SEED_WEIGHT) / (n + SEED_WEIGHT)
  *   score  = max(0, 100 − round(SCORE_PENALTY × |prediction − target|))
  *
- * The participant's own rating is never part of their target.
+ * The participant's own rating is never part of their target, and only ratings
+ * made with the current content version are: earlier versions had other texts.
  */
-import { RATING_MAX, RATING_MIN, SCORE_PENALTY, SEED_WEIGHT } from './config.js';
+import { CONTENT_VERSION, RATING_MAX, RATING_MIN, SCORE_PENALTY, SEED_WEIGHT } from './config.js';
+import { inContentVersion } from './records.js';
 
 /** v1 fell back to the scale midpoint when a study had no expert rating. */
 const SCALE_MIDPOINT = (RATING_MIN + RATING_MAX) / 2;
@@ -38,20 +40,33 @@ export function ratingOf(record) {
  * `{rating, ...}` objects or, in very old data, bare numbers.
  * @param {Record<string, unknown> | null | undefined} node
  * @param {string} [excludeKey] session id to leave out (the participant's own rating)
+ * @param {number|null} [contentVersion] keep only ratings made with this content
+ *   version (records without one count as version 1); null keeps every version
  * @returns {number[]}
  */
-export function validRatings(node, excludeKey) {
+export function validRatings(node, excludeKey, contentVersion = null) {
     if (!node || typeof node !== 'object') return [];
     return Object.entries(node)
-        .filter(([key]) => key !== excludeKey)
+        .filter(([key, entry]) => key !== excludeKey && inContentVersion(entry, contentVersion))
         .map(([, entry]) => ratingOf(entry))
         .filter((rating) => rating !== null);
 }
 
 /**
+ * The other participants' ratings a target is built from: those in a
+ * `/ratings/{studyId}` node made with the current content version.
+ * @param {Record<string, unknown> | null | undefined} node
+ * @param {string} [excludeKey] session id to leave out (the participant's own rating)
+ * @returns {number[]}
+ */
+export function targetRatings(node, excludeKey) {
+    return validRatings(node, excludeKey, CONTENT_VERSION);
+}
+
+/**
  * The value a prediction is scored against.
  * @param {number[] | Record<string, unknown> | null} otherRatings ratings by other
- *   participants, as an array or a raw ratings node
+ *   participants, as an array or a raw ratings node (read with targetRatings)
  * @param {number} expertRating 1-7
  * @param {number} [weight] how many participants the expert rating counts as
  * @returns {{target: number, n: number}} `n` is the number of participant ratings used
@@ -59,7 +74,7 @@ export function validRatings(node, excludeKey) {
 export function scoringTarget(otherRatings, expertRating, weight = SEED_WEIGHT) {
     const ratings = Array.isArray(otherRatings)
         ? otherRatings.filter(isValidRating)
-        : validRatings(otherRatings);
+        : targetRatings(otherRatings);
     const expert = isValidRating(expertRating) ? expertRating : SCALE_MIDPOINT;
     const n = ratings.length;
     if (n === 0) return { target: expert, n };

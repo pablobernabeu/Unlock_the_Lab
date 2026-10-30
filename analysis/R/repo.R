@@ -58,8 +58,8 @@ read_app_config <- function(repo_root) {
     config
 }
 
-#' Studies with their expert ratings (src/content/expert-ratings.json is the
-#' single source of the expert ratings; titles come from the English texts).
+#' Studies with their current expert ratings (src/content/expert-ratings.json is
+#' the single source of the expert ratings; titles come from the English texts).
 read_studies <- function(repo_root) {
     content <- file.path(repo_root, 'src', 'content')
     experts <- jsonlite::fromJSON(file.path(content, 'expert-ratings.json'))
@@ -77,6 +77,21 @@ read_studies <- function(repo_root) {
     studies$study_number <- as.integer(sub('^STUDY-', '', studies$study_id))
     studies$band <- quality_band(studies$expert)
     studies[order(studies$study_number), ]
+}
+
+#' Expert ratings of every content version, one row per version and study, from
+#' src/content/expert-ratings-history.json (whose current version holds the
+#' values of src/content/expert-ratings.json).
+read_expert_history <- function(repo_root) {
+    path <- file.path(repo_root, 'src', 'content', 'expert-ratings-history.json')
+    if (!file.exists(path)) stop('Missing file: ', path, call. = FALSE)
+    history <- jsonlite::fromJSON(path, simplifyVector = FALSE)
+    rows <- lapply(names(history), function(key) {
+        ratings <- history[[key]]
+        tibble::tibble(version = as.integer(key), study_id = names(ratings),
+                       expert = as.numeric(unlist(ratings, use.names = FALSE)))
+    })
+    dplyr::bind_rows(rows)
 }
 
 #' Study ids in the order of src/content/en/studies.json, which the app

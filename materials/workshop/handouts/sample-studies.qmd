@@ -30,7 +30,8 @@ emit(
     sprintf(paste('These %s fictional studies come from Unlock the Lab and are printed as participants',
                   'see them in the app, with the two answers that the app asks for. Use them for',
                   'discussion in groups, as a warm-up before the app or for anyone taking part on',
-                  'paper. The evaluation guide has the rubric and the glossary to go with them.'),
+                  'paper. The evaluation guide has the rubric, the advice on reaching one rating and',
+                  'the glossary to go with them.'),
             number_words(length(picked))),
     sprintf(
         paste('The set covers the three quality bands of the expert ratings: %s. From each band it',
@@ -46,8 +47,8 @@ emit(
           'summary and a note on each criterion; keep it back until everyone has answered.',
           'To play \'Predict the crowd\' on paper, collect the ratings, work out the group\'s',
           'average for each study and compare it with the predictions. The live dashboard shows',
-          'how everyone who has used the app rated each study, under the dashboard number given in',
-          'the answer key.')
+          'how participants have rated the current version of each study in the app, under the',
+          'dashboard number given in the answer key.')
 )
 ```
 

@@ -32,6 +32,7 @@ for (const width of [1280, 360]) {
             await page.getByRole('button', { name: 'Get started' }).click();
             await expect(page.locator('#view-guide')).toBeVisible();
             await expect(page.locator('#guide-rubric')).not.toBeEmpty();
+            await expect(page.locator('#guide-rating')).not.toBeEmpty();
             await expectNoAxeViolations(page, 'guide');
 
             await page.getByRole('button', { name: 'Start rating studies' }).click();
@@ -45,6 +46,9 @@ for (const width of [1280, 360]) {
             await help.getByRole('tab', { name: 'Rubric' }).click();
             await expect(help.getByRole('tabpanel')).toBeVisible();
             await expectNoAxeViolations(page, 'help dialog, rubric');
+            await help.getByRole('tab', { name: 'Overall rating' }).click();
+            await expect(help.getByRole('tabpanel', { name: 'Overall rating' })).toBeVisible();
+            await expectNoAxeViolations(page, 'help dialog, overall rating');
             await page.keyboard.press('Escape');
             await expect(help).toBeHidden();
 

@@ -3,13 +3,13 @@
  * statistics, in a native modal <dialog> (focus moves in and is contained,
  * Escape closes it and focus returns to the control that opened it).
  */
-import { SEED_WEIGHT } from '../lib/config.js';
+import { CONTENT_VERSION, SEED_WEIGHT } from '../lib/config.js';
 import { CRITERIA, labelKey } from '../lib/criteria.js';
 import { el, qs, setText } from '../lib/dom.js';
 import { t } from '../lib/i18n.js';
 import { plainText } from './data.js';
 import { bandLabel } from './labels.js';
-import { formatCount, formatStat } from './numbers.js';
+import { formatCount, formatExpert, formatStat } from './numbers.js';
 
 const STATS_HEADING_ID = 'study-dialog-stats-heading';
 
@@ -38,7 +38,16 @@ function targetText({ target, n }) {
     return t('dashboard.dialog.target', { target: formatted, weight: SEED_WEIGHT, count: n });
 }
 
-function statsSection(row, target, room) {
+function versionNote(contentVersion) {
+    if (contentVersion === CONTENT_VERSION) return null;
+    const text =
+        contentVersion === null
+            ? t('dashboard.dialog.versionNoteAll')
+            : t('dashboard.dialog.versionNote', { version: contentVersion });
+    return el('p', { class: 'text-muted' }, text);
+}
+
+function statsSection({ row, target, room, contentVersion = CONTENT_VERSION }) {
     const ci =
         row.lower === null
             ? formatStat(null)
@@ -51,6 +60,7 @@ function statsSection(row, target, room) {
         { class: 'study-dialog__section', 'aria-labelledby': STATS_HEADING_ID },
         el('h3', { id: STATS_HEADING_ID }, t('dashboard.dialog.statsHeading')),
         room ? el('p', { class: 'text-muted' }, t('dashboard.dialog.roomNote', { room })) : null,
+        versionNote(contentVersion),
         el(
             'dl',
             { class: 'study-dialog__stats' },
@@ -114,23 +124,30 @@ function feedbackSection(study) {
 }
 
 function expertLine(row) {
-    if (row.expertRating === null) return null;
+    if (row.expertRating === null) return el('p', { class: 'study-dialog__expert', hidden: true });
     return el(
         'p',
         { class: 'study-dialog__expert' },
-        t('dashboard.dialog.expert', {
-            rating: formatCount(row.expertRating),
+        t(row.expertAveraged ? 'dashboard.dialog.expertAverage' : 'dashboard.dialog.expert', {
+            rating: formatExpert(row.expertRating),
             band: bandLabel(row.band),
         })
     );
 }
 
 /**
+ * @typedef {object} StudyDetails
+ * @property {object} study
+ * @property {object} row from studyRows
+ * @property {{target: number, n: number}} target
+ * @property {string|null} room
+ * @property {number|null} [contentVersion] the version of the figures (null: every version)
+ */
+
+/**
  * @param {HTMLDialogElement} dialog
- * @returns {{open: (details: {study: object, row: object, target: {target: number, n: number},
- *   room: string|null}, opener?: HTMLElement|null) => void,
- *   refresh: (details: {row: object, target: {target: number, n: number}, room: string|null}) => void,
- *   openStudyId: () => string|null}}
+ * @returns {{open: (details: StudyDetails, opener?: HTMLElement|null) => void,
+ *   refresh: (details: StudyDetails) => void, openStudyId: () => string|null}}
  */
 export function createStudyDialog(dialog) {
     const title = qs('#study-dialog-title', dialog);
@@ -139,6 +156,7 @@ export function createStudyDialog(dialog) {
     let openId = null;
     let opener = null;
     let stats = null;
+    let expert = null;
 
     qs('[data-study-dialog-close]', dialog).addEventListener('click', () => dialog.close());
     // A click on the backdrop lands on the dialog element outside its box.
@@ -159,26 +177,27 @@ export function createStudyDialog(dialog) {
     });
 
     return {
-        open({ study, row, target, room }, openedBy = null) {
+        open(details, openedBy = null) {
+            const { study, row } = details;
             openId = study.id;
             opener = openedBy;
             setText(idLine, study.id);
             setText(title, plainText(study.title));
-            stats = statsSection(row, target, room);
-            body.replaceChildren(
-                expertLine(row) ?? '',
-                stats,
-                studySection(study),
-                feedbackSection(study)
-            );
+            stats = statsSection(details);
+            expert = expertLine(row);
+            body.replaceChildren(expert, stats, studySection(study), feedbackSection(study));
             if (!dialog.open) dialog.showModal();
             dialog.scrollTop = 0;
         },
-        refresh({ row, target, room }) {
-            if (!dialog.open || openId !== row.id || !stats) return;
-            const next = statsSection(row, target, room);
+        refresh(details) {
+            if (!dialog.open || openId !== details.row.id || !stats) return;
+            const next = statsSection(details);
             stats.replaceWith(next);
             stats = next;
+            // With every version, the expert rating is an average that new ratings can move.
+            const nextExpert = expertLine(details.row);
+            expert.replaceWith(nextExpert);
+            expert = nextExpert;
         },
         openStudyId: () => openId,
     };
