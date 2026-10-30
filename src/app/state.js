@@ -194,10 +194,7 @@ export function migrateState(raw, { studyCount, legacyUserName = null }) {
             (target) => Number.isFinite(target) && target >= RATING_MIN && target <= RATING_MAX
         )
     );
-    const storedVersions = studyMap(
-        raw.paperVersions,
-        (version) => Number.isInteger(version) && version >= 1 && version <= CONTENT_VERSION
-    );
+    const storedVersions = studyMap(raw.paperVersions, isContentVersion);
 
     return {
         ...createState({
@@ -273,11 +270,13 @@ export function isRated(state, studyId) {
  * @param {number|null} rating.target
  * @param {{n: number, mean: number|null}|null} rating.crowd
  * @param {boolean} rating.feedbackShown
+ * @param {number} [rating.contentVersion] the version of the stored answer (a refused
+ *   write returns an earlier answer's); defaults to the current one
  * @returns {object}
  */
 export function commitRating(
     state,
-    { studyId, rating, prediction, score, target, crowd, feedbackShown }
+    { studyId, rating, prediction, score, target, crowd, feedbackShown, contentVersion }
 ) {
     const userRatings = { ...state.userRatings, [studyId]: rating };
     const paperScores = { ...state.paperScores, [studyId]: score };
@@ -290,7 +289,10 @@ export function commitRating(
         paperTargets: { ...state.paperTargets },
         paperCrowd: { ...state.paperCrowd },
         paperFeedbackShown: { ...state.paperFeedbackShown },
-        paperVersions: { ...state.paperVersions, [studyId]: CONTENT_VERSION },
+        paperVersions: {
+            ...state.paperVersions,
+            [studyId]: isContentVersion(contentVersion) ? contentVersion : CONTENT_VERSION,
+        },
     };
     if (Number.isFinite(target)) next.paperTargets[studyId] = target;
     if (crowd) next.paperCrowd[studyId] = { n: crowd.n, mean: crowd.mean };
@@ -349,7 +351,7 @@ export function mergeStates(base, latest) {
         paperTargets: join('paperTargets'),
         paperCrowd: join('paperCrowd'),
         paperFeedbackShown: join('paperFeedbackShown'),
-        paperVersions: join('paperVersions'),
+        paperVersions: laterVersions(base.paperVersions, latest.paperVersions),
         celebratedPapers: [
             ...latest.celebratedPapers,
             ...base.celebratedPapers.filter((id) => !latest.celebratedPapers.includes(id)),
@@ -364,6 +366,22 @@ export function mergeStates(base, latest) {
         rankingKeptLocally: weights.rankingKeptLocally,
         finishedFromPage: latest.finishedFromPage ?? base.finishedFromPage,
     };
+}
+
+function isContentVersion(value) {
+    return Number.isInteger(value) && value >= 1 && value <= CONTENT_VERSION;
+}
+
+/**
+ * Joins two copies' content versions per answer, keeping the later one: a copy saved by
+ * an older app has none, and loading it infers versions that are never later than the truth.
+ */
+function laterVersions(base, latest) {
+    const versions = { ...base };
+    for (const [id, version] of Object.entries(latest)) {
+        versions[id] = Math.max(versions[id] ?? 0, version);
+    }
+    return versions;
 }
 
 function canonical(value) {

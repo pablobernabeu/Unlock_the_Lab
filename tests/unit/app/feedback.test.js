@@ -3,7 +3,7 @@ import { readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { renderExpertFeedback } from '../../../src/app/views/feedback.js';
+import { renderExpertFeedback, renderFeedbackPanel } from '../../../src/app/views/feedback.js';
 import { loadContent } from '../../../src/lib/content.js';
 import { CRITERION_KEYS } from '../../../src/lib/criteria.js';
 import { initI18n } from '../../../src/lib/i18n.js';
@@ -32,6 +32,30 @@ describe('renderExpertFeedback', () => {
         expect(panel.querySelector('.criterion-notes__note').textContent).toBe(
             'No <b>control</b> group.'
         );
+    });
+});
+
+describe('renderFeedbackPanel', () => {
+    const study = { id: 'STUDY-13', expertRating: 4, feedback: { summary: 'A summary.' } };
+    const result = { rating: 5, prediction: 5, score: 100, target: 5, crowd: { n: 1, mean: 5 } };
+    const makeUp = (panel) =>
+        [...panel.querySelectorAll('.feedback__facts li')].find((line) =>
+            line.textContent.startsWith('How the target was worked out')
+        ).textContent;
+
+    it("describes the target with the study's expert rating", () => {
+        const panel = renderFeedbackPanel({ study, result, showExpert: false, actions: [] });
+        expect(makeUp(panel)).toContain("the expert's rating of 4");
+    });
+
+    it('describes an earlier answer with the expert rating its target was made from', () => {
+        const panel = renderFeedbackPanel({
+            study,
+            result: { ...result, expertRating: 5 },
+            showExpert: false,
+            actions: [],
+        });
+        expect(makeUp(panel)).toContain("the expert's rating of 5");
     });
 });
 

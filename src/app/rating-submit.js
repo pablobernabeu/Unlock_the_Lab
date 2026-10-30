@@ -4,8 +4,10 @@
  * and the leaderboard only after `submitRating` resolves.
  */
 import { get, ref, serverTimestamp, set } from 'firebase/database';
+import { CONTENT_VERSION } from '../lib/config.js';
 import { DB_TIMEOUT_MS, isPermissionDenied, withTimeout } from '../lib/db-utils.js';
 import { db } from '../lib/firebase.js';
+import { recordContentVersion } from '../lib/records.js';
 import { predictionScore, scoringTarget, targetRatings } from '../lib/scoring.js';
 import { mean } from '../lib/stats.js';
 import { buildRatingRecord } from './rating-record.js';
@@ -31,7 +33,8 @@ export async function readTarget(study, sessionId) {
 /**
  * Saves the answers. When the rules refuse the write because this session's
  * rating already exists (a retry after a lost acknowledgement, or a second
- * tab), the stored record is used instead.
+ * tab), the stored record is used instead, with the content version it was
+ * made with.
  * @param {object} options
  * @param {object} options.study
  * @param {string} options.sessionId
@@ -43,7 +46,7 @@ export async function readTarget(study, sessionId) {
  * @param {string} options.locale
  * @param {string|null} options.room
  * @returns {Promise<{rating: number, prediction: number, score: number, target: number,
- *   crowd: {n: number, mean: number|null}|null}>}
+ *   crowd: {n: number, mean: number|null}|null, contentVersion: number}>}
  */
 export async function submitRating({ study, sessionId, uid, rating, prediction, ...rest }) {
     const { target, crowd } = await readTarget(study, sessionId);
@@ -60,12 +63,13 @@ export async function submitRating({ study, sessionId, uid, rating, prediction, 
     });
     try {
         await set(recordRef, record);
-        return { rating, prediction, score, target, crowd };
+        return { rating, prediction, score, target, crowd, contentVersion: CONTENT_VERSION };
     } catch (error) {
         if (!isPermissionDenied(error)) throw error;
         const existing = (await get(recordRef)).val();
         if (!existing || existing.uid !== uid) throw error;
         const storedTarget = Number.isFinite(existing.target) ? existing.target : target;
+        const contentVersion = recordContentVersion(existing);
         return {
             rating: existing.rating,
             prediction: existing.prediction,
@@ -74,7 +78,8 @@ export async function submitRating({ study, sessionId, uid, rating, prediction, 
                 : predictionScore(existing.prediction, storedTarget),
             target: storedTarget,
             // Only describe the target's make-up when it is the one just computed.
-            crowd: storedTarget === target ? crowd : null,
+            crowd: storedTarget === target && contentVersion === CONTENT_VERSION ? crowd : null,
+            contentVersion,
         };
     }
 }

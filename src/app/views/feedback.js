@@ -135,7 +135,8 @@ function ratingLines({ rating, crowd }) {
  * @param {object} options
  * @param {object} options.study
  * @param {{rating: number, prediction: number|null, score: number|null, target: number|null,
- *   crowd: {n: number, mean: number|null}|null}} options.result
+ *   crowd: {n: number, mean: number|null}|null, expertRating?: number|null}} options.result
+ *   `expertRating` is the one the target was made from, when not the study's current one
  * @param {boolean} [options.showExpert] include the expert's feedback (FEEDBACK_MODE 'each')
  * @param {HTMLElement[]} options.actions buttons shown under the feedback
  * @returns {HTMLElement}
@@ -162,7 +163,10 @@ export function renderFeedbackPanel({ study, result, showExpert = true, actions 
             'ul',
             { class: 'feedback__facts' },
             [
-                ...targetLines({ ...result, expertRating: study.expertRating }),
+                ...targetLines({
+                    ...result,
+                    expertRating: result.expertRating ?? study.expertRating,
+                }),
                 ...ratingLines(result),
             ].map((line) => el('li', null, line))
         ),

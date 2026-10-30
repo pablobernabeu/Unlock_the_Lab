@@ -3,7 +3,13 @@
  * card, the two answer scales (real radio inputs in fieldsets) and, once the
  * answers are saved, the feedback panel.
  */
-import { MIN_STUDIES_TO_FINISH, RATING_MAX, RATING_MIN } from '../../lib/config.js';
+import {
+    CONTENT_VERSION,
+    MIN_STUDIES_TO_FINISH,
+    RATING_MAX,
+    RATING_MIN,
+} from '../../lib/config.js';
+import { expertRatingFor } from '../../lib/content.js';
 import { CRITERIA, labelKey } from '../../lib/criteria.js';
 import { isPermissionDenied } from '../../lib/db-utils.js';
 import { el, escapeHtml } from '../../lib/dom.js';
@@ -321,18 +327,21 @@ function feedbackActions(app, studyIndex) {
 }
 
 /**
- * The saved answers for a study, in the shape the feedback panel expects.
+ * The saved answers for a study, in the shape the feedback panel expects. An answer
+ * given to an earlier content version carries the expert rating its target was made from.
  * @param {object} state
  * @param {string} studyId
  * @returns {object}
  */
 export function savedResult(state, studyId) {
+    const version = state.paperVersions?.[studyId] ?? CONTENT_VERSION;
     return {
         rating: state.userRatings[studyId],
         prediction: state.userPredictions[studyId] ?? null,
         score: state.paperScores[studyId] ?? null,
         target: state.paperTargets[studyId] ?? null,
         crowd: state.paperCrowd[studyId] ?? null,
+        expertRating: version < CONTENT_VERSION ? expertRatingFor(studyId, version) : null,
     };
 }
 

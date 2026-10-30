@@ -285,6 +285,18 @@ describe('commitRating', () => {
         expect(next.totalScore).toBe(100);
     });
 
+    it('keeps the content version of a stored earlier answer and ignores an impossible one', () => {
+        const answer = { rating: 5, prediction: 5, score: 100, target: 5, crowd: null };
+        const earlier = commitRating(base, { studyId: 'STUDY-1', ...answer, contentVersion: 2 });
+        expect(earlier.paperVersions).toEqual({ 'STUDY-1': 2 });
+        const impossible = commitRating(base, {
+            studyId: 'STUDY-1',
+            ...answer,
+            contentVersion: CONTENT_VERSION + 1,
+        });
+        expect(impossible.paperVersions).toEqual({ 'STUDY-1': CONTENT_VERSION });
+    });
+
     it('adds to the total', () => {
         const once = commitRating(base, {
             studyId: 'STUDY-1',
@@ -427,6 +439,14 @@ describe('mergeStates', () => {
         expect(merged.currentPage).toBe(3);
         // Neither input is changed.
         expect(Object.keys(tabA.userRatings)).toEqual(['STUDY-1', 'STUDY-2']);
+    });
+
+    it('keeps the later content version of an answer, which an older copy can only infer', () => {
+        const current = rate(start, 'STUDY-1', 88);
+        // Saved by a tab still running an older app, then inferred on loading.
+        const older = { ...current, paperVersions: { 'STUDY-1': 2 } };
+        expect(mergeStates(current, older).paperVersions).toEqual({ 'STUDY-1': CONTENT_VERSION });
+        expect(mergeStates(older, current).paperVersions).toEqual({ 'STUDY-1': CONTENT_VERSION });
     });
 
     it('keeps one-way flags and the earliest times', () => {
