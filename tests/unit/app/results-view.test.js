@@ -93,7 +93,9 @@ describe('renderResultsView', () => {
         const item = readOnlyView([row]).querySelector('.review-item');
         const expert = [...item.querySelectorAll('.review-item__fact')].at(-1);
         expect(expert.querySelector('dd').textContent).toMatch(/^5 /);
-        expect(item.querySelector('.review-item__note').textContent).toContain('content version 2');
+        expect(item.querySelector('.review-item__note').textContent).toBe(
+            'Given to content version 2 of this study.'
+        );
         // The feedback is the current text's, with its own expert rating.
         expect(item.querySelector('.expert-feedback__rating').textContent).toContain(
             'Expert rating: 2 out of 7'
@@ -112,7 +114,44 @@ describe('renderResultsView', () => {
             contentVersion: CONTENT_VERSION,
             expertRating: 2,
         };
-        const item = readOnlyView([row]).querySelector('.review-item');
-        expect(item.querySelector('.review-item__note')).toBeNull();
+        const view = readOnlyView([row]);
+        expect(view.querySelector('.review-item__note')).toBeNull();
+        expect(view.textContent).not.toContain('earlier version');
+    });
+
+    it('explains earlier versions once, above the list', () => {
+        const rows = [1, 2].map((version, index) => ({
+            study: study(index + 1, `Study ${index + 1}`),
+            rating: 3,
+            prediction: null,
+            score: null,
+            target: null,
+            crowd: null,
+            trial: null,
+            contentVersion: version,
+            expertRating: 3,
+        }));
+        const view = readOnlyView(rows);
+        const explanations = [...view.querySelectorAll('p')].filter((p) =>
+            p.textContent.startsWith('Some answers were given to an earlier version')
+        );
+        expect(explanations).toHaveLength(1);
+        expect(explanations[0].nextElementSibling.matches('.review-list')).toBe(true);
+        expect(view.querySelectorAll('.review-item__note')).toHaveLength(2);
+    });
+
+    it('treats a version newer than the current one as not earlier', () => {
+        const row = {
+            study: study(13, 'Current text'),
+            rating: 2,
+            prediction: 2,
+            score: 100,
+            target: 2,
+            crowd: null,
+            trial: 1,
+            contentVersion: CONTENT_VERSION + 1,
+            expertRating: 2,
+        };
+        expect(readOnlyView([row]).querySelector('.review-item__note')).toBeNull();
     });
 });

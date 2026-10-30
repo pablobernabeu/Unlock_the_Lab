@@ -371,12 +371,15 @@ function fact(label, value) {
     return el('div', { class: 'review-item__fact' }, el('dt', null, label), el('dd', null, value));
 }
 
+/** True for an answer given to an earlier content version than the current one. */
+function isEarlierVersion(row) {
+    return Number.isInteger(row.contentVersion) && row.contentVersion < CONTENT_VERSION;
+}
+
 function reviewItem(row) {
     const { study, expertRating } = row;
     const band = qualityBand(expertRating);
     const notRecorded = t('app.results.notRecorded');
-    const earlierVersion =
-        Number.isInteger(row.contentVersion) && row.contentVersion !== CONTENT_VERSION;
     const titleId = `review-title-${study.id}`;
     const labelId = `review-feedback-${study.id}`;
     return el(
@@ -404,7 +407,7 @@ function reviewItem(row) {
                 band ? bandBadge(band, qualityLabel(band)) : null,
             ])
         ),
-        earlierVersion
+        isEarlierVersion(row)
             ? el(
                   'p',
                   { class: 'review-item__note' },
@@ -432,6 +435,9 @@ function reviewSection(model) {
         'results-review-heading',
         t('app.results.reviewHeading'),
         el('p', null, t('app.results.reviewIntro')),
+        model.rows.some(isEarlierVersion)
+            ? el('p', null, t('app.results.reviewEarlierVersions'))
+            : null,
         el('ol', { class: 'review-list' }, model.rows.map(reviewItem))
     );
 }

@@ -15,7 +15,7 @@ Development and tests use the Firebase emulators. Do not point a development bui
 - The code is plain JavaScript modules. Shared logic belongs in `src/lib/` and should stay free of Firebase imports where possible, so it can be unit-tested.
 - Interface text lives in `src/i18n/en/*.json`, not in the JavaScript or HTML; the only exceptions are the `<noscript>` messages in `index.html` and `admin.html`. Write it in British English with single quotation marks.
 - Changes to the database rules need tests in `tests/rules/`, and changes to the shape of stored data need an update to `docs/data.md`.
-- Changing the meaning of a study card or an expert rating changes the research stimulus. Raise `CONTENT_VERSION` in `src/lib/config.js`, so that ratings made before and after the change can be told apart. Add the new version's expert ratings to `src/content/expert-ratings-history.json` and record the change in `CHANGELOG.md` and in the table of content versions in `docs/data.md`.
+- Changing the meaning of a study card or an expert rating changes the research stimulus. Raise `CONTENT_VERSION` in `src/lib/config.js`, so that ratings made before and after the change can be told apart. Add the new version's expert ratings to `src/content/expert-ratings-history.json`, update the tests that pin the current ratings (`tests/unit/lib/content.test.js`), re-render the workshop handouts (`materials/workshop/handouts/build.sh`) and record the change in `CHANGELOG.md` and in the table of content versions in `docs/data.md`.
 - Translations are described in [docs/translating.md](docs/translating.md).
 
 By contributing, you agree that your code is released under the MIT License and your content under CC BY 4.0, as described in the README.

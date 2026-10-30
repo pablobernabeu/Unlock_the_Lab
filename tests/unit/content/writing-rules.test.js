@@ -59,11 +59,15 @@ const VERDICT_WORDS = [
     'strong',
     'misleading',
     'cherry-picked',
+    'closed',
+    'restricted',
+    'unfounded',
+    'use with caution',
 ];
 
 /** Any verdict word as a whole word, in any case ('unsound' or 'strongly' do not match). */
 const VERDICT_PATTERN = new RegExp(
-    `(?<!\\p{L})(?:${VERDICT_WORDS.map((word) => word.replace(' ', '\\s+')).join('|')})(?!\\p{L})`,
+    `(?<!\\p{L})(?:${VERDICT_WORDS.map((word) => word.replaceAll(' ', '\\s+')).join('|')})(?!\\p{L})`,
     'iu'
 );
 
