@@ -2,7 +2,7 @@
 
 Copyright © 2025-2026 Pablo Bernabeu.
 
-The educational content of Unlock the Lab is licensed under the Creative Commons Attribution 4.0 International Public License (CC BY 4.0). This covers the study scenarios, expert ratings and feedback, rubric and glossary in `src/content/`, the workshop materials and artwork in `materials/` and the icons in `public/`.
+The educational content of Unlock the Lab is licensed under the Creative Commons Attribution 4.0 International Public License (CC BY 4.0). This covers the study scenarios, expert ratings and feedback, rubric, glossary and rating guide in `src/content/`, the workshop materials and artwork in `materials/` and the icons in `public/`.
 
 The source code is licensed separately under the MIT License (see `LICENSE`).
 

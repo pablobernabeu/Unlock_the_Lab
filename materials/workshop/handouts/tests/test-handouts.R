@@ -105,13 +105,25 @@ check('reads the app\'s address', grepl('^https://', data$url))
 check('the rubric has a row per criterion with three bands',
       length(data$rubric) == nrow(data$criteria) &&
           all(vapply(data$rubric, function(row) all(c('low', 'medium', 'high') %in% names(row)), logical(1))))
+anchors <- unlist(lapply(data$rubric, function(row) unlist(row[c('low', 'medium', 'high')])))
+check('every rubric anchor starts with a short label and a colon, which the guide sets in bold',
+      all(grepl('^[A-Z][^:.]{0,30}: ', anchors)))
+check('every glossary entry has a term and a definition',
+      length(data$glossary) > 0 &&
+          all(vapply(data$glossary, function(entry) {
+              nzchar(entry$term %||% '') && nzchar(entry$definition %||% '')
+          }, logical(1))))
+check('reads the rating guide: the advice on combining, the worked example and the Access note',
+      all(vapply(c('combining', 'example', 'accessNote'), function(key) {
+          nzchar(data$guide[[key]] %||% '')
+      }, logical(1))))
 fields <- c('title', unique(data$criteria$field), 'access', 'source', 'conclusion')
 texts <- c(
     unlist(lapply(data$studies, function(study) {
         c(unlist(study[intersect(fields, names(study))]), study$feedback$summary,
           vapply(study$feedback$criteria, function(criterion) criterion$note, ''))
     })),
-    unlist(data$glossary), unlist(lapply(data$rubric, unlist))
+    unlist(data$glossary), unlist(lapply(data$rubric, unlist)), unlist(data$guide)
 )
 converted <- vapply(texts, html_to_md, '', USE.NAMES = FALSE)
 check('all content converts, with no HTML tags left', !any(grepl('<[a-z/]', converted)))

@@ -3,16 +3,23 @@
  * Database snapshots, free of Firebase and the DOM so they can be unit-tested.
  *
  * Rooms: v2 records carry a `room` code; v1 records have none, so they only
- * count when no room is selected. Readers accept every legacy shape the
- * database holds (bare-number ratings, missing fields, empty usernames). The
- * headline counts, which the facilitator panel shows too, are in src/lib/counts.js.
+ * count when no room is selected. Content versions: v1 records have none and
+ * count as version 1. Readers accept every legacy shape the database holds
+ * (bare-number ratings, missing fields, empty usernames). The headline counts,
+ * which the facilitator panel shows too, are in src/lib/counts.js.
  */
-import { LEADERBOARD_SIZE, MIN_STUDIES_TO_RANK } from '../lib/config.js';
-import { compareStudyIds, qualityBand, studyNumber } from '../lib/content.js';
+import { CONTENT_VERSION, LEADERBOARD_SIZE, MIN_STUDIES_TO_RANK } from '../lib/config.js';
+import { compareStudyIds, expertRatingFor, qualityBand, studyNumber } from '../lib/content.js';
 import { isValidAllocation } from '../lib/criteria.js';
 import { rankEntries } from '../lib/leaderboard.js';
 import { SESSION_ID_PATTERN, STUDY_ID_PATTERN } from '../lib/patterns.js';
-import { inRoom, isObject, recordRoom } from '../lib/records.js';
+import {
+    inContentVersion,
+    inRoom,
+    isObject,
+    recordContentVersion,
+    recordRoom,
+} from '../lib/records.js';
 import { isValidRating, ratingOf } from '../lib/scoring.js';
 import { mean, meanCI, shareCI } from '../lib/stats.js';
 
@@ -31,6 +38,7 @@ const MIN_SHARE_SCALE = 0.4;
 /**
  * @typedef {object} RatingGroup
  * @property {number[]} ratings valid quality ratings (1-7)
+ * @property {number[]} versions the content version of each rating, in the same order
  * @property {number[]} predictions valid predictions from the same records
  */
 
@@ -40,21 +48,25 @@ const MIN_SHARE_SCALE = 0.4;
  * @param {Record<string, unknown> | null | undefined} node `/ratings`
  * @param {object} [options]
  * @param {string|null} [options.room] keep only ratings made in this room
+ * @param {number|null} [options.contentVersion] keep only ratings made with this
+ *   content version (null: every version)
  * @param {Iterable<string>|null} [options.studyIds] keep only these studies
  * @returns {Map<string, RatingGroup>}
  */
-export function groupRatings(node, { room = null, studyIds = null } = {}) {
+export function groupRatings(node, { room = null, contentVersion = null, studyIds = null } = {}) {
     const groups = new Map();
     if (!isObject(node)) return groups;
     const allowed = studyIds ? new Set(studyIds) : null;
     for (const [studyId, studyNode] of Object.entries(node)) {
         if (!STUDY_ID_PATTERN.test(studyId) || !isObject(studyNode)) continue;
         if (allowed && !allowed.has(studyId)) continue;
-        const group = { ratings: [], predictions: [] };
+        const group = { ratings: [], versions: [], predictions: [] };
         for (const record of Object.values(studyNode)) {
             const rating = ratingOf(record);
             if (rating === null || !inRoom(record, room)) continue;
+            if (!inContentVersion(record, contentVersion)) continue;
             group.ratings.push(rating);
+            group.versions.push(recordContentVersion(record));
             if (isValidRating(record?.prediction)) group.predictions.push(record.prediction);
         }
         groups.set(studyId, group);
@@ -95,8 +107,10 @@ export function shortTitle(title, maxLength = 48) {
  * @property {number} number e.g. 12 for STUDY-12
  * @property {string} title plain text
  * @property {string} shortTitle
- * @property {number|null} expertRating
- * @property {'low'|'medium'|'high'|null} band expert quality band
+ * @property {number|null} expertRating the expert rating the participant figures are
+ *   compared with (see comparedExpert)
+ * @property {boolean} expertAveraged true when that is an average of different versions' ratings
+ * @property {'low'|'medium'|'high'|null} band expert quality band (of the nearest whole rating)
  * @property {number} n participant ratings
  * @property {number|null} mean
  * @property {number|null} sd
@@ -106,26 +120,55 @@ export function shortTitle(title, maxLength = 48) {
  * @property {number} predictions number of predictions behind meanPrediction
  */
 
-const NO_RATINGS = Object.freeze({ ratings: [], predictions: [] });
+const NO_RATINGS = Object.freeze({ ratings: [], versions: [], predictions: [] });
+
+/** A study's expert rating under a content version (`study.expertRating` is the current one). */
+function expertIn(study, version) {
+    return version === CONTENT_VERSION ? study.expertRating : expertRatingFor(study.id, version);
+}
+
+/**
+ * The expert rating that a study's participant figures are compared with.
+ * For one content version it is that version's rating. For every version
+ * (null) it is the mean of the expert ratings of the versions its ratings
+ * were made with, so that each rating meets the expert rating its participant
+ * saw and the participant mean minus this value is the mean difference from
+ * them. A study without ratings keeps the current expert rating.
+ * @param {{id: string, expertRating: number|null}} study
+ * @param {RatingGroup} group
+ * @param {number|null} contentVersion
+ * @returns {{value: number|null, averaged: boolean}} `averaged`: the ratings met different values
+ */
+export function comparedExpert(study, group, contentVersion) {
+    if (contentVersion !== null) return { value: expertIn(study, contentVersion), averaged: false };
+    const experts = group.versions.map((version) => expertIn(study, version)).filter(isValidRating);
+    if (experts.length === 0) return { value: study.expertRating, averaged: false };
+    return { value: mean(experts), averaged: new Set(experts).size > 1 };
+}
 
 /**
  * One row of statistics per study, in content order, from participant ratings only.
  * @param {Array<{id: string, title: string, expertRating: number|null}>} studies from loadContent
  * @param {Map<string, RatingGroup>} groups
+ * @param {object} [options]
+ * @param {number|null} [options.contentVersion] the version the groups hold (null: every
+ *   version), which sets the expert rating of each row
  * @returns {StudyRow[]}
  */
-export function studyRows(studies, groups) {
+export function studyRows(studies, groups, { contentVersion = CONTENT_VERSION } = {}) {
     return (studies ?? []).map((study) => {
         const group = groups.get(study.id) ?? NO_RATINGS;
         const ci = meanCI(group.ratings);
-        const expertRating = isValidRating(study.expertRating) ? study.expertRating : null;
+        const expert = comparedExpert(study, group, contentVersion);
+        const expertRating = isValidRating(expert.value) ? expert.value : null;
         return {
             id: study.id,
             number: studyNumber(study.id),
             title: plainText(study.title),
             shortTitle: shortTitle(study.title),
             expertRating,
-            band: qualityBand(expertRating),
+            expertAveraged: expertRating !== null && expert.averaged,
+            band: expertRating === null ? null : qualityBand(Math.round(expertRating)),
             n: ci.n,
             mean: ci.mean,
             sd: ci.sd,

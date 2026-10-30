@@ -222,10 +222,7 @@ export function startParticipantApp({ content, logo, reload = () => location.rel
             entries: loadLeaderboard().then((entries) =>
                 totals.papersRated > 0 ? withOwnEntry(entries, ownEntry) : entries
             ),
-            others: loadOthersMeans(
-                rows.map((row) => row.study.id),
-                state.sessionId
-            ),
+            others: loadOthersMeans(rows, state.sessionId),
             tokens: tokenShares(state.criterionTokens) ? state.criterionTokens : null,
             tokensKeptLocally: state.rankingKeptLocally,
         });

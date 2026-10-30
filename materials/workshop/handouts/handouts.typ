@@ -43,6 +43,9 @@
 #show table.cell.where(y: 0): set text(weight: "bold")
 // Pandoc puts tables in figures, which Typst would otherwise keep on one page.
 #show figure: set block(breakable: true)
+// A table may run on to the next page, but a row (a criterion of the rubric)
+// is never split between two pages.
+#set table.cell(breakable: false)
 
 // The answer scale of a study: the low end label, a circle per point to mark
 // and the high end label.

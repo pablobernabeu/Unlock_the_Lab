@@ -3,10 +3,12 @@
  * comparison with other participants and the expert, criterion weight shares
  * and the participant's own leaderboard entry. No DOM and no Firebase.
  */
-import { RESULTS_TOP_N, TOKEN_BUDGET } from '../lib/config.js';
+import { CONTENT_VERSION, RESULTS_TOP_N, TOKEN_BUDGET } from '../lib/config.js';
+import { expertRatingFor } from '../lib/content.js';
 import { CRITERION_KEYS } from '../lib/criteria.js';
 import { findEntriesByUsername, findRank, rankEntries } from '../lib/leaderboard.js';
 import { SESSION_ID_PATTERN, USERNAME_PATTERN } from '../lib/patterns.js';
+import { recordContentVersion } from '../lib/records.js';
 import {
     displayedAccuracy,
     isValidRating,
@@ -23,32 +25,44 @@ export const SIMILAR_THRESHOLD = 0.25;
  * Mean of the other participants' ratings of one study (the expert is never in /ratings).
  * @param {Record<string, unknown>|null|undefined} node a `/ratings/{studyId}` value
  * @param {string} [excludeSessionId] the participant whose own rating is left out
+ * @param {number|null} [contentVersion] count only ratings made with this content version
+ *   (null: every version)
  * @returns {{n: number, mean: number|null}}
  */
-export function othersMean(node, excludeSessionId) {
-    const ratings = validRatings(node, excludeSessionId);
+export function othersMean(node, excludeSessionId, contentVersion = null) {
+    const ratings = validRatings(node, excludeSessionId, contentVersion);
     return { n: ratings.length, mean: mean(ratings) };
 }
 
 /**
- * Rows for the participant's own results, in the order the studies were rated.
+ * Rows for the participant's own results, in the order the studies were rated,
+ * each with the expert rating of the content version it was given to.
  * @param {object[]} order studies in the participant's seeded order
  * @param {object} state participant state (see state.js)
  * @returns {Array<{study: object, rating: number, prediction: number|null, score: number|null,
- *   target: number|null, crowd: {n: number, mean: number|null}|null, trial: number}>}
+ *   target: number|null, crowd: {n: number, mean: number|null}|null, trial: number,
+ *   contentVersion: number, expertRating: number}>}
  */
 export function ownReviewRows(order, state) {
     return order
         .filter((study) => Object.hasOwn(state.userRatings, study.id))
-        .map((study, index) => ({
-            study,
-            rating: state.userRatings[study.id],
-            prediction: state.userPredictions[study.id] ?? null,
-            score: state.paperScores[study.id] ?? null,
-            target: state.paperTargets[study.id] ?? null,
-            crowd: state.paperCrowd[study.id] ?? null,
-            trial: index + 1,
-        }));
+        .map((study, index) => {
+            const contentVersion = state.paperVersions?.[study.id] ?? CONTENT_VERSION;
+            return {
+                study,
+                rating: state.userRatings[study.id],
+                prediction: state.userPredictions[study.id] ?? null,
+                score: state.paperScores[study.id] ?? null,
+                target: state.paperTargets[study.id] ?? null,
+                crowd: state.paperCrowd[study.id] ?? null,
+                trial: index + 1,
+                contentVersion,
+                expertRating:
+                    contentVersion === CONTENT_VERSION
+                        ? study.expertRating
+                        : (expertRatingFor(study.id, contentVersion) ?? study.expertRating),
+            };
+        });
 }
 
 function numberOrNull(value, isValid = Number.isFinite) {
@@ -57,12 +71,14 @@ function numberOrNull(value, isValid = Number.isFinite) {
 
 /**
  * Rows for a read-only results page, built from the whole `/ratings` tree.
- * v1 records lack target, score and trial; they come back as null.
+ * v1 records lack target, score and trial; they come back as null. The expert
+ * rating is the one of the record's content version.
  * @param {Record<string, Record<string, unknown>>|null} ratingsTree
  * @param {string} sessionId
  * @param {object[]} studies all studies (with id), any order
  * @returns {Array<{study: object, rating: number, prediction: number|null, score: number|null,
- *   target: number|null, crowd: null, trial: number|null, timestamp: number|null}>}
+ *   target: number|null, crowd: null, trial: number|null, timestamp: number|null,
+ *   contentVersion: number, expertRating: number}>}
  */
 export function readOnlyReviewRows(ratingsTree, sessionId, studies) {
     const rows = [];
@@ -71,6 +87,7 @@ export function readOnlyReviewRows(ratingsTree, sessionId, studies) {
         const rating = ratingOf(record);
         if (rating === null) continue;
         const isScore = (value) => Number.isInteger(value) && value >= 0 && value <= 100;
+        const contentVersion = recordContentVersion(record);
         rows.push({
             study,
             rating,
@@ -80,6 +97,8 @@ export function readOnlyReviewRows(ratingsTree, sessionId, studies) {
             crowd: null,
             trial: numberOrNull(record?.trial, Number.isInteger),
             timestamp: numberOrNull(record?.timestamp),
+            contentVersion,
+            expertRating: expertRatingFor(study.id, contentVersion) ?? study.expertRating,
         });
     }
     return rows.sort(
@@ -92,7 +111,7 @@ export function readOnlyReviewRows(ratingsTree, sessionId, studies) {
 /**
  * Comparison of a participant's ratings with the other participants' means
  * and with the expert ratings.
- * @param {Array<{study: object, rating: number}>} rows
+ * @param {Array<{study: object, rating: number, expertRating: number}>} rows
  * @param {Record<string, {n: number, mean: number|null}>} others studyId -> others' mean
  * @returns {{compared: number, missing: number, meanAbsFromOthers: number|null,
  *   meanAbsFromExpert: number|null, meanSignedFromExpert: number|null,
@@ -102,14 +121,14 @@ export function ratingProfile(rows, others) {
     const fromOthers = [];
     const fromExpert = [];
     let missing = 0;
-    for (const { study, rating } of rows) {
+    for (const { study, rating, expertRating } of rows) {
         const crowd = others?.[study.id];
         if (crowd && crowd.n > 0 && Number.isFinite(crowd.mean)) {
             fromOthers.push(Math.abs(rating - crowd.mean));
         } else {
             missing += 1;
         }
-        if (isValidRating(study.expertRating)) fromExpert.push(rating - study.expertRating);
+        if (isValidRating(expertRating)) fromExpert.push(rating - expertRating);
     }
     const signed = mean(fromExpert);
     let direction = null;

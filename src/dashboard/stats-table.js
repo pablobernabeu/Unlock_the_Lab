@@ -8,7 +8,7 @@ import { getLocale, t } from '../lib/i18n.js';
 import { SORT_KEYS, sortStudyRows } from './data.js';
 import { preserveFocus, syncChildren } from './focus.js';
 import { bandLabel } from './labels.js';
-import { formatCount, formatStat } from './numbers.js';
+import { formatCount, formatExpert, formatStat } from './numbers.js';
 
 const COLUMN_LABELS = Object.freeze({
     study: () => t('dashboard.table.columns.study'),
@@ -51,7 +51,7 @@ function fillExpert(cell, row) {
     if (cell.dataset.signature === signature) return;
     cell.dataset.signature = signature;
     cell.replaceChildren(
-        formatCount(row.expertRating),
+        formatExpert(row.expertRating),
         ...(row.band
             ? [' ', el('span', { class: `badge badge--${row.band}` }, bandLabel(row.band))]
             : [])

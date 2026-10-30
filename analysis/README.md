@@ -2,7 +2,7 @@
 
 This folder holds a reproducible report on the data that Unlock the Lab collects. It compares participants' quality ratings with the expert ratings, estimates how reliable the study means are, examines predictions and how they are scored, looks for learning across trials and summarises criterion weights, response times, rooms and content versions. The report is written in [Quarto](https://quarto.org) with R. Every number in its text is computed from the data when it is rendered, and the wording of its conclusions follows the estimates, so the same source can be rendered again as data accumulate.
 
-The report reads the scoring constants, validation patterns, criteria and their labels, study titles and expert ratings from the app's own source (`src/lib/config.js`, `src/lib/patterns.js`, `src/lib/criteria.js`, `src/i18n/en/common.json` and `src/content/`), so it always matches the app it sits next to.
+The report reads the scoring constants, validation patterns, criteria and their labels, study titles and expert ratings from the app's own source (`src/lib/config.js`, `src/lib/patterns.js`, `src/lib/criteria.js`, `src/i18n/en/common.json` and `src/content/`), so it always matches the app it sits next to. The expert ratings of every content version come from `src/content/expert-ratings-history.json`.
 
 ## Requirements
 
@@ -66,6 +66,7 @@ quarto render report.qmd -P rt_floor_s:3 -P exclude_pre_revision:true
 | `rt_floor_s`              | 5        | Ratings given faster than this many seconds are excluded                       |
 | `straightline_min_n`      | 6        | Sessions with at least this many ratings, all identical, are excluded          |
 | `exclude_pre_revision`    | `false`  | Exclude ratings of revised studies given before the v1 content revision commit |
+| `content_version`         | `all`    | Content version to analyse, such as 3, or `all` for every version              |
 | `conf_level`              | 0.95     | Confidence level of every interval                                             |
 | `n_boot`                  | 2000     | Nonparametric bootstrap resamples                                              |
 | `n_sim`                   | 1000     | Parametric bootstrap simulations for the intraclass correlation                |
@@ -75,7 +76,7 @@ A full render takes about half a minute, most of it in the bootstrap.
 
 ## Assumptions
 
-The report states its assumptions where they arise and collects them in a section on limitations. The main ones concern v1 data, which store less than v2. v1 ratings have no trial number, target, score, content version or feedback flag. The report recomputes each session's study order from its session id with the app's shuffle and takes v1 trial numbers from it, checked against the rating timestamps. This also identifies the v1 sessions affected by the shuffle defect fixed in commit 2fe7517 (September 2026), whose order always began with the same study and could stop early. Targets are reconstructed from the ratings that preceded each one and checked against the leaderboard totals that v1 did store. The content version of a v1 rating is inferred from the time of the v1 content revision, which is described in `reference/content-revisions.csv`, and the same leaderboard check shows which expert ratings were live before that revision was committed. Ratings on the 1–7 scale are treated as interval data in the linear mixed models, with a cumulative link mixed model as a check, and the incomplete crossed design (each participant rates a random subset of studies) is handled with crossed random effects for sessions and studies.
+The report states its assumptions where they arise and collects them in a section on limitations. The main ones concern v1 data, which store less than v2. v1 ratings have no trial number, target, score, content version or feedback flag. The report recomputes each session's study order from its session id with the app's shuffle and takes v1 trial numbers from it, checked against the rating timestamps. This also identifies the v1 sessions affected by the shuffle defect fixed in commit 2fe7517 (September 2026), whose order always began with the same study and could stop early. Targets are reconstructed from the ratings that preceded each one, as the app computed them (from content version 3, only ratings of the same content version count), and checked against the leaderboard totals that v1 did store. The content version of a v1 rating is inferred from the time of the v1 content revision, which is described in `reference/content-revisions.csv`, and the same leaderboard check shows which expert ratings were live before that revision was committed. Ratings on the 1–7 scale are treated as interval data in the linear mixed models, with a cumulative link mixed model as a check, and the incomplete crossed design (each participant rates a random subset of studies) is handled with crossed random effects for sessions and studies.
 
 ## Files
 
@@ -94,11 +95,11 @@ The report states its assumptions where they arise and collects them in a sectio
 | `tests/test-helpers.R`            | Checks of the helper functions                                                         |
 | `tests/make-fixture.R`            | Writes synthetic snapshots for checking that the report renders with any data shape    |
 
-Ratings stamped with `contentVersion` are compared with the current expert ratings. If a later content version changes an expert rating, record the earlier value for that version and extend `set_expert_at_time()` in `R/derive.R` to use it, as is done for the v1 revision.
+Each rating is compared with the expert rating of its content version (version 1 for records without `contentVersion`), read from `src/content/expert-ratings-history.json`. A new content version needs no change to the analysis once its expert ratings are in that file. Only the v1 revision, which changed expert ratings within version 1, needs `reference/content-revisions.csv`. When the analysis set holds several content versions, a study's expert rating in the study-level comparison is the mean of the expert ratings its ratings were scored against.
 
 ## Checking changes
 
-After changing the report or its helpers, run the checks and render the report against the synthetic snapshots as well as the real data. The fixtures cover v2 records with rooms, both feedback modes, rankings and sessions, as well as legacy oddities (including v1's defective study order, a rating that failed to save and two saved out of order), a snapshot with three ratings and an empty one.
+After changing the report or its helpers, run the checks and render the report against the synthetic snapshots as well as the real data. The fixtures cover v2 records of content versions 2 and 3 with rooms, both feedback modes, rankings and sessions, as well as legacy oddities (including v1's defective study order, a rating that failed to save and two saved out of order), a snapshot with three ratings and an empty one.
 
 ```sh
 cd analysis

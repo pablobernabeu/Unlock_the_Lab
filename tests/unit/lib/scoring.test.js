@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SCORE_PENALTY, SEED_WEIGHT } from '../../../src/lib/config.js';
+import { CONTENT_VERSION, SCORE_PENALTY, SEED_WEIGHT } from '../../../src/lib/config.js';
 import {
     displayedAccuracy,
     isValidRating,
@@ -8,6 +8,7 @@ import {
     ratingOf,
     scoreBand,
     scoringTarget,
+    targetRatings,
     validRatings,
 } from '../../../src/lib/scoring.js';
 
@@ -86,6 +87,21 @@ describe('validRatings', () => {
         expect(validRatings(node, 'session_1_a')).toEqual([6]);
     });
 
+    it('can keep one content version, counting records without one as version 1', () => {
+        const node = {
+            a: { rating: 2, contentVersion: 3 },
+            b: { rating: 3, contentVersion: 2 },
+            c: { rating: 4 },
+            d: 5,
+            e: { rating: 6, contentVersion: 3 },
+        };
+        expect(validRatings(node, undefined, 3)).toEqual([2, 6]);
+        expect(validRatings(node, 'e', 3)).toEqual([2]);
+        expect(validRatings(node, undefined, 2)).toEqual([3]);
+        expect(validRatings(node, undefined, 1)).toEqual([4, 5]);
+        expect(validRatings(node, undefined, null)).toEqual([2, 3, 4, 5, 6]);
+    });
+
     it('returns an empty list for missing nodes', () => {
         expect(validRatings(null)).toEqual([]);
         expect(validRatings(undefined)).toEqual([]);
@@ -97,6 +113,34 @@ describe('validRatings', () => {
         expect(isValidRating(7)).toBe(true);
         expect(isValidRating(0.99)).toBe(false);
         expect(isValidRating('4')).toBe(false);
+    });
+});
+
+describe('targetRatings', () => {
+    const current = CONTENT_VERSION;
+
+    it('keeps only ratings of the current content version', () => {
+        const node = {
+            mine: { rating: 7, contentVersion: current },
+            other: { rating: 3, contentVersion: current },
+            earlier: { rating: 1, contentVersion: current - 1 },
+            v1: { rating: 2 },
+            bare: 6,
+            off: { rating: 9, contentVersion: current },
+        };
+        expect(targetRatings(node)).toEqual([7, 3]);
+        expect(targetRatings(node, 'mine')).toEqual([3]);
+    });
+
+    it('treats records without a content version as version 1', () => {
+        const node = { a: { rating: 4 }, b: 5 };
+        expect(targetRatings(node)).toEqual(current === 1 ? [4, 5] : []);
+        expect(validRatings(node, undefined, 1)).toEqual([4, 5]);
+    });
+
+    it('returns an empty list for missing nodes', () => {
+        expect(targetRatings(null)).toEqual([]);
+        expect(targetRatings(undefined, 'mine')).toEqual([]);
     });
 });
 
@@ -112,8 +156,14 @@ describe('scoringTarget', () => {
         expect(target).toBeCloseTo(170 / 110, 12);
     });
 
-    it('accepts a raw ratings node', () => {
-        expect(scoringTarget({ a: { rating: 5 }, b: 3 }, 1)).toEqual({ target: 108 / 102, n: 2 });
+    it('accepts a raw ratings node and counts its current-version ratings only', () => {
+        const node = {
+            a: { rating: 5, contentVersion: CONTENT_VERSION },
+            b: { rating: 3, contentVersion: CONTENT_VERSION },
+            c: { rating: 7, contentVersion: CONTENT_VERSION - 1 },
+            d: 7,
+        };
+        expect(scoringTarget(node, 1)).toEqual({ target: 108 / 102, n: 2 });
     });
 
     it('supports another weight', () => {
@@ -154,7 +204,8 @@ describe('v1 parity', () => {
             const expert = pick();
             const prediction = pick();
             const v1 = v1Score(count === 0 ? null : node, expert, prediction);
-            const { target } = scoringTarget(node, expert);
+            // v1 pooled every rating; the version filter is tested above.
+            const { target } = scoringTarget(validRatings(node), expert);
             expect(target).toBeCloseTo(v1.target, 12);
             expect(predictionScore(prediction, target)).toBe(v1.score);
         }

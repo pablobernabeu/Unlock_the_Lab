@@ -1,38 +1,38 @@
 [
   {
     "name": "Title",
-    "low": "Clickbait: Uses words like 'Miracle', 'Proven', 'Cure'. Scarier or better than the actual data.",
-    "medium": "Modest: Describes the finding but might leave out limitations to sound more interesting.",
-    "high": "Accurate: Boring but true. Describes exactly what happened (e.g. 'Correlation observed in mice')."
+    "low": "Clickbait: Uses hype such as 'miracle', 'proves', 'cure', 'shocking' or 'breakthrough', or promises far more than the study shows.",
+    "medium": "Modest: Calmly worded, but slightly overstates the finding or leaves out an important limit, such as who was studied or that it shows only a link.",
+    "high": "Accurate: Boring but true. Says what was studied, in whom and what was found, with any key limit (for example 'Coffee linked to shorter sleep in mice')."
   },
   {
     "name": "Access",
-    "low": "Impossible: Behind a paywall (£30+), no link provided or 'Contact author' with no reply.",
-    "medium": "Difficult: Requires university login, searching through specific databases or requesting via forums.",
-    "high": "Open: One-click access to the full PDF. Free for everyone (Open Access)."
+    "low": "Closed: Almost no one can read it. The full paper costs money (often £30 or more) with no free copy, or only a summary is public.",
+    "medium": "Restricted: Only some people can read it free. Readers need a university login or a sign-up, or must ask for a copy or know where to find one.",
+    "high": "Open: Anyone can read the full paper or report free online, with no login or sign-up (open access)."
   },
   {
     "name": "Source",
-    "low": "Suspicious: Marketing blogs, 'Predatory' journals (pay-to-publish) or corporate white papers.",
-    "medium": "Unverified: Preprints (not yet reviewed), or mid-tier journals that sometimes favour hype.",
-    "high": "Trusted: Top-tier peer-reviewed journals, reputable independent research institutes or government bodies."
+    "low": "Suspicious: Predatory journals (pay to publish, no real peer review), blogs, websites, videos or magazines with no outside checks. Also reports by companies or interest groups on their own products (white papers).",
+    "medium": "Use with caution: Preprints (not yet peer reviewed) and average or less selective journals, or ones keen on eye-catching results. Also peer-reviewed work paid for or checked by people with a stake in the result.",
+    "high": "Trusted: Selective or well-established peer-reviewed journals (such as those of large scientific societies), independent research bodies or government agencies. No funder has a stake in the result."
   },
   {
     "name": "Theory",
-    "low": "Nonsense: Ignores all previous science. Invents new laws of physics/biology without proof.",
-    "medium": "Standard: Repeats what we already know without adding much new value.",
-    "high": "Robust: Fills a clear gap in knowledge. Uses past research responsibly to build a new argument."
+    "low": "Unfounded: Ignores or goes against well-established science, or rests on an idea with no evidence behind it.",
+    "medium": "Sound but limited: Builds reasonably on accepted research, but has a weak point. It rests on an untested assumption, skips other explanations or fills no clear gap.",
+    "high": "Robust: Uses past research responsibly to fill a clear gap in knowledge. Examples are a new question or a needed replication (repeating a study whose result is still uncertain)."
   },
   {
     "name": "Methods & Data",
-    "low": "Flawed & Closed: Tiny sample size. No control group. Data is secret/hidden.",
-    "medium": "Acceptable: Decent sample size. Standard methods. Data available upon request.",
-    "high": "Rigorous & Open: Preregistration, large sample size, gold-standard controls and fully available materials and data."
+    "low": "Flawed & Closed: No real study, a tiny sample, hand-picked evidence or a measure that cannot answer the question. No fair comparison (no control group, or groups that differ in obvious ways). The data are kept secret.",
+    "medium": "Acceptable: A reasonable design and sample, but with clear weak points, for example no blinding, a one-off survey or people rating themselves. Data are partly shared or available on request.",
+    "high": "Rigorous & Open: A strong design and a large enough sample for the question, for example groups chosen by chance, blinding, a preregistered plan and independent checks. Data are open, or shared through a set process that protects privacy."
   },
   {
     "name": "Conclusion",
-    "low": "Overblown: Claims a fact based on a guess. Confuses correlation with causation.",
-    "medium": "Logical: Conclusion mostly fits the results but ignores some alternative explanations.",
-    "high": "Nuanced: Very careful. Admits what they don't know. Claims only what the data proves."
+    "low": "Overblown: Claims far more than the evidence shows. It may treat a link as proof of cause or claim effects that were never measured.",
+    "medium": "Logical: Mostly fits the evidence, but plays down limits or leaves out other explanations.",
+    "high": "Nuanced: Careful. Claims only what the evidence shows and says plainly what the study cannot show."
   }
 ]

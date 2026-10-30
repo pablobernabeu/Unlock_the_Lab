@@ -63,6 +63,12 @@ test('a v1 results link renders read-only without signing in or writing', async 
     );
     await expect(page.locator('.results-rank')).toContainText(`${LEGACY_NAME}'s position:`);
     await expect(page.locator('.review-item')).toHaveCount(Object.keys(ratings).length);
+    // Version 1 answers say so, and the page explains once that the title and feedback are current.
+    await expect(page.locator('.review-item__note')).toHaveCount(Object.keys(ratings).length);
+    await expect(page.locator('.review-item__note').first()).toHaveText(
+        'Given to content version 1 of this study.'
+    );
+    await expect(page.getByText('Where an answer was given to an earlier version')).toHaveCount(1);
     // Written for a reader, not the participant.
     await expect(page.locator('#results-thanks')).toBeHidden();
     await expect(page.locator('#results-nickname')).toBeHidden();

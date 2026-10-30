@@ -4,6 +4,7 @@ import expertRatings from '../../src/content/expert-ratings.json' with { type: '
 import studies from '../../src/content/en/studies.json' with { type: 'json' };
 import { expect } from './test.js';
 import { readPath } from './emulator.js';
+import { CONTENT_VERSION } from './fixture.js';
 
 /** Studies in the workshop. */
 export const STUDY_COUNT = studies.length;
@@ -25,12 +26,15 @@ export function scoreFor(prediction, target) {
     return Math.max(0, 100 - Math.round(SCORE_PENALTY * Math.abs(prediction - target)));
 }
 
-/** The target worked out independently from the database, leaving out `sessionId`. */
+/**
+ * The target worked out independently from the database, leaving out `sessionId`
+ * and ratings of earlier content versions (records without a version are version 1).
+ */
 export async function expectedTarget(studyId, sessionId) {
     const node = (await readPath(`ratings/${studyId}`)) ?? {};
     const others = Object.entries(node)
-        .filter(([key]) => key !== sessionId)
-        .map(([, value]) => (typeof value === 'number' ? value : value?.rating))
+        .filter(([key, value]) => key !== sessionId && value?.contentVersion === CONTENT_VERSION)
+        .map(([, value]) => value.rating)
         .filter((value) => Number.isFinite(value) && value >= 1 && value <= 7);
     const sum = others.reduce((total, value) => total + value, 0);
     const expert = expertRatings[studyId];

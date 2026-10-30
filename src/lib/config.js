@@ -33,8 +33,11 @@ export const PRESENCE_HEARTBEAT_MS = 60 * 1000;
 /** A presence entry counts as 'active now' if its heartbeat is newer than this. */
 export const ACTIVE_WINDOW_MS = 2 * 60 * 1000;
 
-/** Version of the study texts and expert ratings, stamped on every new rating. */
-export const CONTENT_VERSION = 2;
+/**
+ * Content version (study texts and feedback, expert ratings, rubric, rating guide and
+ * glossary; see docs/data.md), stamped on every new rating.
+ */
+export const CONTENT_VERSION = 3;
 
 /** When expert feedback is shown: after each study ('each') or only at the end ('end'). */
 export const FEEDBACK_MODE = 'each';

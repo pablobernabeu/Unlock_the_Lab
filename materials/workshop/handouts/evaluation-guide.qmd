@@ -97,32 +97,33 @@ emit(
             c(sprintf('**%s**', html_to_md(row$name)), vapply(cells, html_to_md, ''))
         }),
         c(16, 28, 28, 28)
-    )
+    ),
+    sprintf('## %s', md('app.guide.accessHeading')),
+    html_to_md(data$guide$accessNote)
 )
 ```
-
-# From six criteria to one rating
 
 ```{r}
 #| results: asis
 emit(
+    sprintf('# %s', md('app.guide.combiningHeading')),
     md('app.guide.rubricIntro'),
-    sprintf('The three columns of the rubric use the same scale as your rating: %s, %s and %s.',
-            md('app.guide.rubricLow'), md('app.guide.rubricMedium'), md('app.guide.rubricHigh')),
     sprintf("When you rate a study, the app asks: '%s'", md('app.study.ratingHint')),
+    html_to_md(data$guide$combining),
     paste('After each study, the expert\'s feedback gives a band for each criterion and a',
           'summary of how the expert weighed them up, so you can compare your judgement with',
           'the expert\'s.'),
     sprintf('At the end you share %d tokens between the six criteria to show which matter most to you.',
-            cfg$budget)
+            cfg$budget),
+    sprintf('## %s', md('app.guide.exampleHeading')),
+    html_to_md(data$guide$example)
 )
 ```
-
-# Glossary
 
 ```{r}
 #| results: asis
 emit(
+    sprintf('# %s', md('app.guide.glossaryHeading')),
     md('app.guide.glossaryIntro'),
     vapply(data$glossary, function(entry) {
         sprintf('%s\n:   %s', html_to_md(entry$term), html_to_md(entry$definition))

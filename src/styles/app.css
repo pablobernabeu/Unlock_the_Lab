@@ -239,6 +239,17 @@
     font-weight: 700;
 }
 
+/* The three tabs fit a phone-width dialog only with tighter spacing. */
+@media (max-width: 30rem) {
+    .help-tabs__list {
+        gap: 0;
+    }
+
+    .help-tabs__tab {
+        padding-inline: var(--space-2);
+    }
+}
+
 /* ---------- Study ---------- */
 
 .study-toolbar {
@@ -795,6 +806,12 @@
     align-items: center;
     gap: var(--space-2);
     font-weight: 700;
+}
+
+.review-item__note {
+    margin-bottom: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
 }
 
 .review-item .expert-feedback {

@@ -16,12 +16,19 @@
  *   criterionTokens        criterion -> tokens (0-20)
  * v2 adds stateVersion, room, paperTargets, paperFeedbackShown, joinedAt and a
  * few app fields (userName, paperCrowd, rankingSubmitted, rankingKeptLocally,
- * finishedFromPage).
+ * finishedFromPage). Content version 3 adds paperVersions (studyId -> content
+ * version of the answer), which migration infers for older states.
  *
  * Everything here is pure except loadState/saveState/clearState, which go
  * through lib/storage.js and never throw.
  */
-import { RATING_MAX, RATING_MIN, STORAGE_KEYS, TOKEN_BUDGET } from '../lib/config.js';
+import {
+    CONTENT_VERSION,
+    RATING_MAX,
+    RATING_MIN,
+    STORAGE_KEYS,
+    TOKEN_BUDGET,
+} from '../lib/config.js';
 import { CRITERION_KEYS, emptyAllocation } from '../lib/criteria.js';
 import { SESSION_ID_PATTERN, STUDY_ID_PATTERN, USERNAME_PATTERN } from '../lib/patterns.js';
 import { isObject } from '../lib/records.js';
@@ -146,6 +153,7 @@ export function createState({ sessionId, room = null, userName = null }) {
         paperTargets: {},
         paperFeedbackShown: {},
         paperCrowd: {},
+        paperVersions: {},
         joinedAt: null,
         userName: USERNAME_PATTERN.test(userName ?? '') ? userName : null,
         rankingSubmitted: false,
@@ -180,6 +188,13 @@ export function migrateState(raw, { studyCount, legacyUserName = null }) {
     const storedName = typeof raw.userName === 'string' ? raw.userName : legacyUserName;
     const finishedFrom = raw.finishedFromPage;
     const fromV1 = !(Number.isInteger(raw.stateVersion) && raw.stateVersion >= STATE_VERSION);
+    const paperTargets = rated(
+        studyMap(
+            raw.paperTargets,
+            (target) => Number.isFinite(target) && target >= RATING_MIN && target <= RATING_MAX
+        )
+    );
+    const storedVersions = studyMap(raw.paperVersions, isContentVersion);
 
     return {
         ...createState({
@@ -202,14 +217,17 @@ export function migrateState(raw, { studyCount, legacyUserName = null }) {
         // days old; kept as a first-display time it would record that as the response time.
         pageDisplayTimestamps: fromV1 ? {} : studyMap(raw.pageDisplayTimestamps, Number.isFinite),
         criterionTokens: sanitiseTokens(raw.criterionTokens),
-        paperTargets: rated(
-            studyMap(
-                raw.paperTargets,
-                (target) => Number.isFinite(target) && target >= RATING_MIN && target <= RATING_MAX
-            )
-        ),
+        paperTargets,
         paperFeedbackShown: rated(studyMap(raw.paperFeedbackShown, (shown) => shown === true)),
         paperCrowd: rated(sanitiseCrowd(raw.paperCrowd)),
+        // States saved before content version 3 have no versions: version 1 stored no
+        // targets and version 2 stored one with every answer it saved.
+        paperVersions: Object.fromEntries(
+            Object.keys(userRatings).map((id) => [
+                id,
+                storedVersions[id] ?? (!fromV1 && Object.hasOwn(paperTargets, id) ? 2 : 1),
+            ])
+        ),
         joinedAt: Number.isFinite(raw.joinedAt) ? raw.joinedAt : null,
         rankingSubmitted: raw.rankingSubmitted === true,
         rankingKeptLocally: raw.rankingSubmitted === true && raw.rankingKeptLocally === true,
@@ -252,11 +270,13 @@ export function isRated(state, studyId) {
  * @param {number|null} rating.target
  * @param {{n: number, mean: number|null}|null} rating.crowd
  * @param {boolean} rating.feedbackShown
+ * @param {number} [rating.contentVersion] the version of the stored answer (a refused
+ *   write returns an earlier answer's); defaults to the current one
  * @returns {object}
  */
 export function commitRating(
     state,
-    { studyId, rating, prediction, score, target, crowd, feedbackShown }
+    { studyId, rating, prediction, score, target, crowd, feedbackShown, contentVersion }
 ) {
     const userRatings = { ...state.userRatings, [studyId]: rating };
     const paperScores = { ...state.paperScores, [studyId]: score };
@@ -269,6 +289,10 @@ export function commitRating(
         paperTargets: { ...state.paperTargets },
         paperCrowd: { ...state.paperCrowd },
         paperFeedbackShown: { ...state.paperFeedbackShown },
+        paperVersions: {
+            ...state.paperVersions,
+            [studyId]: isContentVersion(contentVersion) ? contentVersion : CONTENT_VERSION,
+        },
     };
     if (Number.isFinite(target)) next.paperTargets[studyId] = target;
     if (crowd) next.paperCrowd[studyId] = { n: crowd.n, mean: crowd.mean };
@@ -327,6 +351,7 @@ export function mergeStates(base, latest) {
         paperTargets: join('paperTargets'),
         paperCrowd: join('paperCrowd'),
         paperFeedbackShown: join('paperFeedbackShown'),
+        paperVersions: laterVersions(base.paperVersions, latest.paperVersions),
         celebratedPapers: [
             ...latest.celebratedPapers,
             ...base.celebratedPapers.filter((id) => !latest.celebratedPapers.includes(id)),
@@ -341,6 +366,22 @@ export function mergeStates(base, latest) {
         rankingKeptLocally: weights.rankingKeptLocally,
         finishedFromPage: latest.finishedFromPage ?? base.finishedFromPage,
     };
+}
+
+function isContentVersion(value) {
+    return Number.isInteger(value) && value >= 1 && value <= CONTENT_VERSION;
+}
+
+/**
+ * Joins two copies' content versions per answer, keeping the later one: a copy saved by
+ * an older app has none, and loading it infers versions that are never later than the truth.
+ */
+function laterVersions(base, latest) {
+    const versions = { ...base };
+    for (const [id, version] of Object.entries(latest)) {
+        versions[id] = Math.max(versions[id] ?? 0, version);
+    }
+    return versions;
 }
 
 function canonical(value) {

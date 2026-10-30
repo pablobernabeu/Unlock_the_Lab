@@ -19,23 +19,29 @@ is_whole_in_range <- function(x, lower, upper) {
     !is.na(x) & x == floor(x) & x >= lower & x <= upper
 }
 
-#' Adds validity flags and the study's current expert rating to every record.
-annotate_ratings <- function(ratings, studies, config, snapshot_time) {
+#' Adds validity flags, the content version and the expert rating of the
+#' study in that version to every record. `version` is the stored
+#' `contentVersion`, or 1 for records without a valid one, as in the app
+#' (src/lib/records.js recordContentVersion). `history` is read_expert_history().
+annotate_ratings <- function(ratings, studies, history, config, snapshot_time) {
     patterns <- config$patterns
     rating_ok <- function(x) is_whole_in_range(x, config$RATING_MIN, config$RATING_MAX)
     late_limit_ms <- as.numeric(snapshot_time) * 1000 + 5 * 60 * 1000
 
     ratings |>
-        dplyr::left_join(dplyr::select(studies, 'study_id', 'study_number', 'expert'),
-                         by = 'study_id') |>
+        dplyr::mutate(version = dplyr::if_else(is_whole_in_range(.data$content_version, 1, Inf),
+                                               as.integer(.data$content_version), 1L)) |>
+        dplyr::left_join(dplyr::select(studies, 'study_id', 'study_number'), by = 'study_id') |>
+        dplyr::left_join(history, by = c('version', 'study_id')) |>
         dplyr::mutate(
             valid_study_id = grepl(patterns$STUDY_ID_PATTERN, .data$study_id, perl = TRUE),
-            known_study = !is.na(.data$expert),
+            known_study = !is.na(.data$study_number),
+            known_version = !is.na(.data$expert) | !.data$known_study,
             valid_session_id = grepl(patterns$SESSION_ID_PATTERN, .data$session_id, perl = TRUE),
             valid_rating = rating_ok(.data$rating),
             valid_prediction = rating_ok(.data$prediction),
-            valid_record = .data$valid_study_id & .data$known_study & .data$valid_session_id &
-                .data$valid_rating,
+            valid_record = .data$valid_study_id & .data$known_study & .data$known_version &
+                .data$valid_session_id & .data$valid_rating,
             # The app's own test (src/lib/scoring.js validRatings): any value on the scale counts.
             counts_for_target = !is.na(.data$rating) & .data$rating >= config$RATING_MIN &
                 .data$rating <= config$RATING_MAX,
@@ -76,9 +82,10 @@ assign_content_versions <- function(ratings, revisions) {
         dplyr::select(-'revision_time', -'expert_before')
 }
 
-#' The expert rating the app scored each rating against. `assumption` says
-#' which expert ratings were live before the revision commit: 'revised' (the
-#' current values) or 'earlier' (the values listed in content-revisions.csv).
+#' The expert rating the app scored each rating against: that of the rating's
+#' content version. `assumption` says which expert ratings were live before
+#' the v1 revision commit: 'revised' (the version 1 values) or 'earlier' (the
+#' values listed in content-revisions.csv).
 set_expert_at_time <- function(ratings, assumption = c('revised', 'earlier')) {
     assumption <- match.arg(assumption)
     use_earlier <- assumption == 'earlier' & !is.na(ratings$expert_earlier)
@@ -280,11 +287,17 @@ use_order_positions <- function(ratings, orders) {
         dplyr::select(-'order_position', -'use_position')
 }
 
+#' Content version from which the app builds a target only from ratings of the
+#' same content version (app 2.1.0, `targetRatings` in src/lib/scoring.js).
+#' The apps of earlier versions used every rating of the study.
+TARGETS_WITHIN_VERSION_FROM <- 3
+
 #' Scoring targets and scores. Stored values (v2) are used when present. For
 #' other ratings the target is reconstructed from the snapshot as the app
 #' computed it: every rating on the scale of the same study by another session
 #' with an earlier timestamp (ratings without a timestamp are assumed to be
-#' earlier), blended with the expert rating in force at the time.
+#' earlier), from content version TARGETS_WITHIN_VERSION_FROM on only those of
+#' the same content version, blended with the expert rating in force at the time.
 assign_targets <- function(ratings, weight, penalty) {
     usable <- ratings$counts_for_target
     n_other <- rep(NA_real_, nrow(ratings))
@@ -295,7 +308,9 @@ assign_targets <- function(ratings, weight, penalty) {
         times <- ratings$timestamp_ms[pool]
         targets_needed <- pool[ratings$valid_record[pool] & !is.na(times)]
         for (i in targets_needed) {
-            earlier <- pool[ratings$session_id[pool] != ratings$session_id[i] &
+            same_version <- ratings$version[i] < TARGETS_WITHIN_VERSION_FROM |
+                ratings$version[pool] == ratings$version[i]
+            earlier <- pool[ratings$session_id[pool] != ratings$session_id[i] & same_version &
                 (is.na(times) | times < ratings$timestamp_ms[i])]
             n_other[i] <- length(earlier)
             sum_other[i] <- sum(ratings$rating[earlier])
@@ -354,12 +369,24 @@ straight_lining_sessions <- function(ratings, min_n) {
 }
 
 #' Applies the exclusion steps in order and records what each removed.
+#' `content_version` keeps the ratings of one content version (NULL keeps all).
 #' Returns the analysis set and a table of the steps.
-apply_exclusions <- function(ratings, straight_liners, rt_floor_ms, exclude_pre_revision) {
+apply_exclusions <- function(ratings, straight_liners, rt_floor_ms, exclude_pre_revision,
+                             content_version = NULL) {
     steps <- list(
         list(
-            label = 'Invalid study id, session id or rating value',
+            label = 'Invalid study id, session id, content version or rating value',
             drop = function(d) !d$valid_record
+        ),
+        list(
+            label = if (is.null(content_version)) {
+                'Ratings of other content versions (not applied: every version is analysed)'
+            } else {
+                paste('Ratings of content versions other than', content_version)
+            },
+            drop = function(d) {
+                if (is.null(content_version)) rep(FALSE, nrow(d)) else d$version != content_version
+            }
         ),
         list(
             label = 'Sessions flagged for straight-lining',

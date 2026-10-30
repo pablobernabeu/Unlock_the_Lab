@@ -29,6 +29,7 @@ params:
   rt_floor_s: 5
   straightline_min_n: 6
   exclude_pre_revision: false
+  content_version: all
   conf_level: 0.95
   n_boot: 2000
   n_sim: 1000
@@ -55,6 +56,7 @@ ci_label <- paste(fmt_pct(level), 'CI')
 # own source files, so the analysis cannot drift from what participants saw.
 config <- read_app_config(params$repo_root)
 studies <- read_studies(params$repo_root)
+expert_history <- read_expert_history(params$repo_root)
 revisions <- read_content_revisions('reference/content-revisions.csv')
 criterion_labels <- read_criterion_labels(params$repo_root, config$criteria)
 scale_limits <- c(config$RATING_MIN, config$RATING_MAX)
@@ -78,6 +80,13 @@ enough_for_model <- function(data) {
         n_distinct(data$study_id) >= minimum$model_studies
 }
 
+# The content version to analyse: a version number, or NULL for every version.
+version_filter <- if (identical(as.character(params$content_version), 'all')) {
+    NULL
+} else {
+    as.integer(params$content_version)
+}
+
 theme_set(theme_report())
 ```
 
@@ -91,7 +100,7 @@ rankings_all <- flatten_rankings(snapshot$nodes$rankings, config$criteria)
 sessions <- flatten_sessions(snapshot$nodes$sessions)
 
 ratings_base <- flatten_ratings(snapshot$nodes$ratings) |>
-    annotate_ratings(studies, config, snap_time$time) |>
+    annotate_ratings(studies, expert_history, config, snap_time$time) |>
     assign_content_versions(revisions) |>
     assign_trials()
 
@@ -109,7 +118,7 @@ ratings_all <- expert_check$ratings
 
 straight_liners <- straight_lining_sessions(ratings_all, params$straightline_min_n)
 exclusions <- apply_exclusions(ratings_all, straight_liners, params$rt_floor_s * 1000,
-                               params$exclude_pre_revision)
+                               params$exclude_pre_revision, version_filter)
 
 analysed <- exclusions$data |>
     mutate(
@@ -178,6 +187,8 @@ shapes <- list(
     unstamped = sum(!ratings_all$stamped)
 )
 
+per_version <- count(valid_all, version, name = 'n')
+
 ranked <- filter(leaderboard, !is.na(papers_rated), papers_rated >= config$MIN_STUDIES_TO_RANK,
                  !is.na(score))
 ranked_accuracy <- median_iqr(ranked$score / ranked$papers_rated)
@@ -243,7 +254,7 @@ prose(when = !has_ratings, "
 The snapshot contains no valid ratings, so none of the analyses below can be run.
 ")
 prose(when = has_ratings, "
-The /ratings node holds `r plural(nrow(ratings_all), 'rating record')`, of which `r fmt_int(nrow(valid_all))` `r agree(nrow(valid_all), 'is', 'are')` valid (@sec-quality). They come from `r plural(n_distinct(valid_all$session_id), 'session')` and cover `r fmt_int(sum(per_study$n > 0))` of the `r fmt_int(nrow(studies))` studies, and were given `r fmt_date_span(time_range[1], time_range[2])`. Of all records, `r fmt_int(shapes$object)` are objects and `r count_or_none(shapes$number)` are bare numbers (the oldest format, with no prediction or time), and an authentication identifier is present in `r count_or_none(shapes$with_uid)`. A content version, which marks records written by v2, is present in `r count_or_none(shapes$stamped)`; `r v1_written`.
+The /ratings node holds `r plural(nrow(ratings_all), 'rating record')`, of which `r fmt_int(nrow(valid_all))` `r agree(nrow(valid_all), 'is', 'are')` valid (@sec-quality). They come from `r plural(n_distinct(valid_all$session_id), 'session')` and cover `r fmt_int(sum(per_study$n > 0))` of the `r fmt_int(nrow(studies))` studies, and were given `r fmt_date_span(time_range[1], time_range[2])`. Of all records, `r fmt_int(shapes$object)` are objects and `r count_or_none(shapes$number)` are bare numbers (the oldest format, with no prediction or time), and an authentication identifier is present in `r count_or_none(shapes$with_uid)`. A content version, which marks records written by v2, is present in `r count_or_none(shapes$stamped)`; `r v1_written`. By content version (records without one count as version 1), the valid ratings are `r fmt_list(paste0(fmt_int(per_version$n), ' of version ', per_version$version))`.`r if (!is.null(version_filter)) paste0(' The analysis set is restricted to content version ', version_filter, ' (parameter content_version).') else ''`
 
 `r session_count_text`, and `r finished_text` `r config$MIN_STUDIES_TO_FINISH`, the number v2 requires before a participant can finish early`r if (shapes$unstamped > 0) ' (in v1 the threshold changed over time)' else ''`.`r if (nrow(stopped_at_gap) > 0) paste0(' In ', plural(nrow(stopped_at_gap), 'v1 session'), ' the participant could not go further because of a defect in the study order (@sec-order).') else ''` Studies received a median of `r plural(study_counts$median, 'rating')` (range `r fmt_int(min(per_study$n))` to `r fmt_int(max(per_study$n))`)`r if (any(per_study$n == 0)) paste0('; ', plural(sum(per_study$n == 0), 'study', 'studies'), ' received none') else ', so every study was rated at least once'`. @fig-sample shows both distributions.
 ")
@@ -287,6 +298,8 @@ checks <- tribble(
     ~Check, ~Unit, ~Count,
     'Study id malformed or not among the current studies', 'ratings',
         sum(!ratings_all$valid_study_id | !ratings_all$known_study),
+    'Content version without expert ratings', 'ratings',
+        sum(ratings_all$known_study & !ratings_all$known_version),
     'Session id malformed', 'ratings', sum(!ratings_all$valid_session_id),
     paste('Rating not a whole number from', config$RATING_MIN, 'to', config$RATING_MAX), 'ratings',
         sum(!ratings_all$valid_rating),
@@ -328,7 +341,7 @@ n_expert_changed <- sum(revisions$expert_before != revisions$expert_after)
 n_text_changed <- sum(revisions$text_fields_changed != '')
 revision_time <- if (nrow(revisions) > 0) min(revisions$revised_at) else as.POSIXct(NA)
 revision_current <- revisions |>
-    left_join(select(studies, study_id, expert), by = 'study_id') |>
+    left_join(select(filter(expert_history, version == 1), study_id, expert), by = 'study_id') |>
     filter(expert_after != expert)
 check <- expert_check$check
 n_pre_expert_changed <- sum(ratings_all$valid_record & !is.na(ratings_all$expert_earlier) &
@@ -353,7 +366,7 @@ v1_sessions_with_positions <- n_distinct(
 
 ```{r}
 #| label: tbl-checks
-#| tbl-cap: 'Data quality checks. Records failing the first three checks are excluded; the others are reported for information.'
+#| tbl-cap: 'Data quality checks. Records failing the first four checks are excluded; the others are reported for information.'
 md_table(checks)
 ```
 
@@ -446,7 +459,7 @@ prose(when = nrow(revisions) > 0, "
 On `r fmt_datetime(revision_time)` a revision of the v1 content was committed. It changed the text of `r plural(n_text_changed, 'study', 'studies')` and the expert rating of `r fmt_int(n_expert_changed)`. v1 ratings carry no content version, so which version a rating saw has to be inferred from its timestamp. `r if (nrow(pre_revision) == 0) 'No valid rating in the snapshot was given before the commit.' else paste0('The snapshot has ', plural(nrow(pre_revision), 'valid rating'), ' given before the commit, ', count_or_none(nrow(pre_revision_changed)), ' of them on revised studies.')`
 ")
 prose(when = nrow(revision_current) > 0, "
-Warning: `r plural(nrow(revision_current), 'study', 'studies')` (`r fmt_list(revision_current$study_id)`) now have an expert rating that differs from the value set by the v1 revision. Reconstructed v1 targets use the current values and are wrong for these studies; reference/content-revisions.csv needs updating.
+Warning: `r plural(nrow(revision_current), 'study', 'studies')` (`r fmt_list(revision_current$study_id)`) have a version 1 expert rating in src/content/expert-ratings-history.json that differs from the value set by the v1 revision. Reconstructed v1 targets use the history's values and are wrong for these studies; the history or reference/content-revisions.csv needs correcting.
 ")
 assumption_text <- if (n_pre_expert_changed == 0) {
     paste(' No rating given before the commit concerns a study whose expert rating changed,',
@@ -476,7 +489,7 @@ assumption_text <- if (n_pre_expert_changed == 0) {
 sensitivity_feasible <- any(analysed$pre_revision_changed) && enough_for_model(analysed) &&
     enough_for_model(filter(analysed, !pre_revision_changed))
 prose(when = expert_check$compared > 0, "
-The v1 app stored no per-study targets or scores, only each session's running total on the leaderboard. The report therefore reconstructs every v1 target from the snapshot: the ratings of the same study by other sessions with an earlier timestamp, blended with the expert rating as the app did. Summed by session, the reconstructed scores reproduce the stored total exactly for `r fmt_int(expert_check$matched[[expert_check$choice]])` of the `r plural(expert_check$compared, 'session')` that can be checked (those whose leaderboard count matches the ratings found)`r if (any(check$difference != 0)) paste0('; the largest discrepancy is ', plural(max(abs(check$difference)), 'point')) else ''`.`r assumption_text`
+The v1 app stored no per-study targets or scores, only each session's running total on the leaderboard. The report therefore reconstructs every v1 target from the snapshot: the ratings of the same study by other sessions with an earlier timestamp, blended with the expert rating as the app did. Every rating is scored against the expert rating of its content version, from src/content/expert-ratings-history.json. From content version `r TARGETS_WITHIN_VERSION_FROM`, the app counts only earlier ratings of the same content version, and so does the reconstruction; earlier versions of the app counted every earlier rating. Summed by session, the reconstructed scores reproduce the stored total exactly for `r fmt_int(expert_check$matched[[expert_check$choice]])` of the `r plural(expert_check$compared, 'session')` that can be checked (those whose leaderboard count matches the ratings found)`r if (any(check$difference != 0)) paste0('; the largest discrepancy is ', plural(max(abs(check$difference)), 'point')) else ''`.`r assumption_text`
 ")
 prose(when = expert_check$compared == 0 && n_pre_expert_changed > 0, "
 No leaderboard total can be compared with the reconstructed scores, so the report assumes that the revised expert ratings were live throughout. This affects the reconstructed targets of `r plural(n_pre_expert_changed, 'rating')` given before the commit.
@@ -493,12 +506,21 @@ The leaderboard check concerns expert ratings only; it cannot show which study t
 mean_predictions <- analysed |>
     group_by(study_id) |>
     summarise(mean_prediction = mean(prediction, na.rm = TRUE), .groups = 'drop')
+# Each rating is compared with the expert rating it was scored against, so a
+# study rated under content versions with different expert ratings is compared
+# with their mean over its ratings.
+study_experts <- analysed |>
+    group_by(study_id) |>
+    summarise(expert = mean(expert_at_time), expert_values = n_distinct(expert_at_time),
+              .groups = 'drop')
 study_summary <- grouped_mean_ci(analysed, 'study_id', 'rating', level) |>
     left_join(mean_predictions, by = 'study_id') |>
-    right_join(select(studies, study_id, study_number, title, expert, band), by = 'study_id') |>
-    mutate(n = coalesce(n, 0L)) |>
+    left_join(study_experts, by = 'study_id') |>
+    right_join(select(studies, study_id, study_number, title), by = 'study_id') |>
+    mutate(n = coalesce(n, 0L), band = quality_band(js_round(expert))) |>
     arrange(study_number)
 rated_studies <- filter(study_summary, n > 0)
+n_mixed_expert <- sum(rated_studies$expert_values > 1)
 # Intervals from two ratings span most of the scale and hide the points, so the
 # figure draws them from this many ratings; the table lists all of them.
 plot_min_n <- 3
@@ -515,7 +537,7 @@ prose(when = !has_ratings, "
 There are no valid ratings to compare with the expert ratings.
 ")
 prose(when = has_ratings, "
-@tbl-studies lists each study's mean participant rating with a `r ci_label` from the t distribution (shown when a study has at least two ratings) and @fig-study-means plots the means against the expert ratings. The means describe participants only; the expert rating is not blended into them.
+@tbl-studies lists each study's mean participant rating with a `r ci_label` from the t distribution (shown when a study has at least two ratings) and @fig-study-means plots the means against the expert ratings. The means describe participants only; the expert rating is not blended into them.`r if (n_mixed_expert > 0) paste0(' ', plural(n_mixed_expert, 'study', 'studies'), ' in the analysis set ', agree(n_mixed_expert, 'was', 'were'), ' rated under content versions with different expert ratings; for ', agree(n_mixed_expert, 'it', 'them'), ' the expert rating shown is the mean of the expert ratings that ', agree(n_mixed_expert, 'its', 'their'), ' ratings were scored against, so each rating is compared with the expert rating its participant saw.') else ''`
 ")
 prose(when = has_ratings && !ok_study_cor, "
 With `r plural(nrow(rated_studies), 'rated study', 'rated studies')`, too few to estimate a correlation (at least `r minimum$correlation` are needed), the study-level comparison is descriptive only.
@@ -563,7 +585,7 @@ rated_studies |>
     transmute(
         Study = study_number,
         Title = short_title(title, 55),
-        Expert = expert,
+        Expert = ifelse(expert == round(expert), fmt_int(expert), fmt_num(expert, 2)),
         n = n,
         Mean = mean,
         SD = sd,
@@ -888,7 +910,7 @@ prose(when = !has_predictions, "
 There are no valid predictions with a target in the analysis set.
 ")
 prose(when = has_predictions, "
-Each prediction is scored against a target, (sum of the other participants' ratings + `r config$SEED_WEIGHT` × expert rating) / (n + `r config$SEED_WEIGHT`), where n is the number of other ratings of the study at the time, and earns max(0, 100 − round(`r config$SCORE_PENALTY` × |prediction − target|)) points. The expert rating's weight in the target is `r config$SEED_WEIGHT` / (n + `r config$SEED_WEIGHT`). `r if (max_other == 0) 'In this snapshot no prediction was made after another participant had rated the same study, so every target equalled the expert rating.' else paste0('In this snapshot no study had more than ', plural(max_other, 'earlier rating'), ' by others when a prediction was made, so the expert\\'s weight never fell below ', fmt_pct(min(weights), 1), ' and the target never differed from the expert rating by more than ', fmt_num(max_gap, 2), ' scale points.')` Predictions are whole numbers, so whenever the target lies within half a point of the (whole-number) expert rating, the best possible prediction is the expert rating itself. This held for `r fmt_share(best_is_expert, 'predictions')`, for which scoring well meant matching the expert rating, whatever participants believed they were predicting. v1 asked participants to predict the average rating of all participants without explaining the expert weighting; v2 explains it before the first study and after each one.
+Each prediction is scored against a target, (sum of the other participants' ratings + `r config$SEED_WEIGHT` × expert rating) / (n + `r config$SEED_WEIGHT`), where n is the number of other ratings of the study at the time (from content version `r TARGETS_WITHIN_VERSION_FROM`, of the same content version), and earns max(0, 100 − round(`r config$SCORE_PENALTY` × |prediction − target|)) points. The expert rating's weight in the target is `r config$SEED_WEIGHT` / (n + `r config$SEED_WEIGHT`). `r if (max_other == 0) 'In this snapshot no prediction was made after another participant had rated the same study, so every target equalled the expert rating.' else paste0('In this snapshot no study had more than ', plural(max_other, 'earlier rating'), ' by others when a prediction was made, so the expert\\'s weight never fell below ', fmt_pct(min(weights), 1), ' and the target never differed from the expert rating by more than ', fmt_num(max_gap, 2), ' scale points.')` Predictions are whole numbers, so whenever the target lies within half a point of the (whole-number) expert rating, the best possible prediction is the expert rating itself. This held for `r fmt_share(best_is_expert, 'predictions')`, for which scoring well meant matching the expert rating, whatever participants believed they were predicting. v1 asked participants to predict the average rating of all participants without explaining the expert weighting; v2 explains it before the first study and after each one.
 
 Targets and scores are stored with v2 ratings (`r fmt_int(n_stored)` here). For the `r fmt_int(n_reconstructed)` v1 ratings they were reconstructed as described in @sec-quality`r if (nrow(stored_check) > 0) paste0('; for the ', fmt_int(nrow(stored_check)), ' v2 ratings that allow the comparison, the stored and reconstructed targets agree to within 0.001 for ', fmt_int(stored_agree)) else ''`.
 
@@ -1113,9 +1135,17 @@ prose(when = ok_feedback, "
 ```{r}
 #| label: weights
 has_rankings_node <- snapshot$present[['rankings']]
+# With a content version selected, only sessions that rated studies of that
+# version count (v1 sessions have no /sessions record to tell their version).
+version_sessions <- if (is.null(version_filter)) {
+    character()
+} else {
+    filter(ratings_all, valid_record, version == version_filter)$session_id
+}
 weights_data <- if (has_rankings_node) {
     valid_allocations(rankings_all, config$criteria, config$TOKEN_BUDGET) |>
-        filter(!session_id %in% straight_liners)
+        filter(!session_id %in% straight_liners,
+               is.null(version_filter) | session_id %in% version_sessions)
 } else {
     rankings_all[0, ]
 }
@@ -1153,7 +1183,7 @@ prose(when = has_rankings_node && nrow(rankings_all) > 0 && n_weights == 0, "
 The /rankings node holds `r plural(nrow(rankings_all), 'allocation')` but none is valid (whole numbers from 0 to `r config$TOKEN_BUDGET` that sum to `r config$TOKEN_BUDGET`) and outside the excluded sessions, so there is nothing to summarise.
 ")
 prose(when = n_weights > 0, "
-Of the `r plural(nrow(rankings_all), 'token allocation')` in /rankings, `r fmt_int(n_weights)` are valid (whole numbers from 0 to `r config$TOKEN_BUDGET` that sum to `r config$TOKEN_BUDGET`) and come from sessions not flagged for straight-lining. A criterion's share is its tokens divided by `r config$TOKEN_BUDGET`; equal weighting would give each of the `r length(config$criteria)` criteria `r fmt_pct(1 / length(config$criteria), 1)`. `r top$label` received the largest mean share, `r fmt_pct(top$mean, 1)``r if (ok_weights) paste0(' (', ci_label, ' [', fmt_pct(top$lower, 1), ', ', fmt_pct(top$upper, 1), '])') else ''`.
+Of the `r plural(nrow(rankings_all), 'token allocation')` in /rankings, `r fmt_int(n_weights)` are valid (whole numbers from 0 to `r config$TOKEN_BUDGET` that sum to `r config$TOKEN_BUDGET`) and come from sessions not flagged for straight-lining.`r if (!is.null(version_filter)) paste0(' Only allocations from sessions that rated studies of content version ', version_filter, ' are included.') else ''` A criterion's share is its tokens divided by `r config$TOKEN_BUDGET`; equal weighting would give each of the `r length(config$criteria)` criteria `r fmt_pct(1 / length(config$criteria), 1)`. `r top$label` received the largest mean share, `r fmt_pct(top$mean, 1)``r if (ok_weights) paste0(' (', ci_label, ' [', fmt_pct(top$lower, 1), ', ', fmt_pct(top$upper, 1), '])') else ''`.
 ")
 prose(when = ok_weights, "
 @tbl-weights and @fig-weights give every criterion's mean share with a `r ci_label` from `r fmt_int(params$n_boot)` bootstrap resamples of participants (percentile method). `r if (length(above_equal) > 0) paste0('The interval lies above equal weighting for ', fmt_list(above_equal), '. ') else 'No interval lies entirely above equal weighting. '``r if (length(below_equal) > 0) paste0('It lies below for ', fmt_list(below_equal), '.') else 'None lies entirely below it.'` The shares of one participant sum to one, so the `r length(config$criteria)` means are not independent: a larger share for one criterion implies smaller shares elsewhere. `r if (n_weights < 30) 'With so few allocations, percentile intervals tend to be too narrow [@davison1997].' else ''`
@@ -1383,7 +1413,7 @@ md_table(version_table)
 prose("
 The participants are a convenience sample of workshop attendees, and the unit of analysis is the session, not the person: one person can start several sessions (on different devices or after choosing to start again), and a shared device can carry one session for several people. The data are pseudonymous, and the report cannot link sessions to individuals or describe the sample's background.
 
-The design is an incomplete crossed one: each session rated the first studies of its shuffled order, so most pairs of session and study are missing`r if (has_ratings) paste0(' and a study mean rests on a median of ', plural(median(rated_studies$n), 'rating')) else ''`. The mixed models assume normally distributed random effects and, in the linear models, interval-scaled ratings; the cumulative link model checks the latter for the main comparison only. Singular fits and convergence warnings are reported where they occur. Intervals are `r fmt_pct(level)` intervals without adjustment for the number of estimates, and the analyses are exploratory.
+The design is an incomplete crossed one: each session rated the first studies of its shuffled order, so most pairs of session and study are missing`r if (nrow(rated_studies) > 0) paste0(' and a study mean rests on a median of ', plural(median(rated_studies$n), 'rating')) else ''`. The mixed models assume normally distributed random effects and, in the linear models, interval-scaled ratings; the cumulative link model checks the latter for the main comparison only. Singular fits and convergence warnings are reported where they occur. Intervals are `r fmt_pct(level)` intervals without adjustment for the number of estimates, and the analyses are exploratory.
 
 Several variables are reconstructed for v1 data, which store neither trial numbers, targets, scores, content versions nor feedback flags. Trial numbers come from each session's seeded order, checked against timestamps written by participants' devices, or from the timestamps alone when the ratings follow neither order; targets assume that every rating in the snapshot with an earlier timestamp was present when the participant submitted, which fails if ratings were deleted or written out of order; the content version is inferred from the time of the revision commit, checked against the stored leaderboard totals for expert ratings but not for texts. v1 response times restart when a study is shown again.`r if (orders$defective > 0) paste0(' Until ', format(SHUFFLE_FIX$time, '%B %Y', tz = 'UTC'), ', v1\\'s shuffle defect gave sessions with a negative seed a fixed start and cut some of them short (@sec-order), so in those sessions neither the first studies nor the number of studies rated is random.') else ''`
 
@@ -1411,6 +1441,8 @@ tribble(
         'Sessions with at least this many identical ratings are excluded',
     'exclude_pre_revision', format(params$exclude_pre_revision),
         'Exclude ratings of revised studies given before the v1 revision commit',
+    'content_version', format(params$content_version),
+        'Content version to analyse, or all',
     'conf_level', format(params$conf_level), 'Confidence level of all intervals',
     'n_boot', format(params$n_boot), 'Nonparametric bootstrap resamples',
     'n_sim', format(params$n_sim), 'Parametric bootstrap simulations for the ICC',

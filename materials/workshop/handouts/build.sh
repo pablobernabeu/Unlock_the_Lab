@@ -18,6 +18,7 @@ inputs=(
     src/content/en/studies.json
     src/content/en/glossary.json
     src/content/en/rubric.json
+    src/content/en/guide.json
     src/content/expert-ratings.json
     src/i18n/en/app.json
     src/i18n/en/common.json

@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { CONTENT_VERSION } from '../../../src/lib/config.js';
+import { expertRatingFor, qualityBand } from '../../../src/lib/content.js';
 import { normaliseEntries } from '../../../src/lib/leaderboard.js';
 import { tCritical95 } from '../../../src/lib/stats.js';
 import {
@@ -6,6 +8,7 @@ import {
     DAY_MS,
     chartSummary,
     collectRooms,
+    comparedExpert,
     criterionShares,
     errorBarSegment,
     groupRatings,
@@ -58,9 +61,17 @@ const STUDY_IDS = STUDIES.map((study) => study.id);
 describe('groupRatings', () => {
     it('keeps valid ratings from every shape, with predictions from the same records', () => {
         const groups = groupRatings(RATINGS);
-        expect(groups.get('STUDY-1')).toEqual({ ratings: [2, 4, 6], predictions: [3, 5] });
+        expect(groups.get('STUDY-1')).toEqual({
+            ratings: [2, 4, 6],
+            versions: [1, 1, 1],
+            predictions: [3, 5],
+        });
         // An out-of-range prediction is dropped but its rating still counts.
-        expect(groups.get('STUDY-2')).toEqual({ ratings: [5, 3], predictions: [4] });
+        expect(groups.get('STUDY-2')).toEqual({
+            ratings: [5, 3],
+            versions: [1, 1],
+            predictions: [4],
+        });
     });
 
     it('ignores malformed study ids and non-object study nodes', () => {
@@ -80,6 +91,30 @@ describe('groupRatings', () => {
         expect(groups.get('STUDY-1').ratings).toEqual([6]);
         expect(groups.get('STUDY-2').ratings).toEqual([3]);
         expect(groups.get('STUDY-10').ratings).toEqual([]);
+    });
+
+    it('filters by content version, treating records without one as version 1', () => {
+        const node = {
+            'STUDY-7': {
+                [S1]: { rating: 2, prediction: 2 },
+                [S2]: 3,
+                [S3]: { rating: 1, prediction: 1, contentVersion: 3, room: 'DEMO-1' },
+                [S4]: { rating: 4, prediction: 5, contentVersion: 2 },
+            },
+        };
+        expect(groupRatings(node, { contentVersion: 3 }).get('STUDY-7')).toEqual({
+            ratings: [1],
+            versions: [3],
+            predictions: [1],
+        });
+        expect(groupRatings(node, { contentVersion: 1 }).get('STUDY-7').ratings).toEqual([2, 3]);
+        expect(groupRatings(node).get('STUDY-7').versions).toEqual([1, 1, 3, 2]);
+        expect(
+            groupRatings(node, { contentVersion: 3, room: 'DEMO-1' }).get('STUDY-7').ratings
+        ).toEqual([1]);
+        expect(
+            groupRatings(node, { contentVersion: 2, room: 'DEMO-1' }).get('STUDY-7').ratings
+        ).toEqual([]);
     });
 
     it('returns an empty map for a missing node', () => {
@@ -159,6 +194,98 @@ describe('studyRows', () => {
     it('treats a missing or invalid expert rating as none', () => {
         const [row] = studyRows([{ id: 'STUDY-5', title: 'x', expertRating: 9 }], new Map());
         expect(row).toMatchObject({ expertRating: null, band: null, n: 0 });
+    });
+});
+
+describe('studyRows by content version', () => {
+    const ids = Array.from({ length: 48 }, (_, i) => `STUDY-${i + 1}`);
+    const expert = (id, version) => expertRatingFor(id, version);
+    // A study whose expert rating changed after version 1 and two whose did not.
+    const changed = ids.find((id) => expert(id, 1) !== expert(id, CONTENT_VERSION));
+    const [steady, unrated] = ids.filter((id) => expert(id, 1) === expert(id, CONTENT_VERSION));
+    const studies = [changed, steady, unrated].map((id) => ({
+        id,
+        title: id,
+        expertRating: expert(id, CONTENT_VERSION),
+    }));
+    const node = {
+        [changed]: {
+            [S1]: { rating: 3 },
+            [S2]: { rating: 1, contentVersion: CONTENT_VERSION },
+            [S3]: { rating: 2, contentVersion: CONTENT_VERSION },
+            [S4]: { rating: 4, contentVersion: 2 },
+        },
+        [steady]: { [S1]: { rating: 2 }, [S2]: { rating: 1, contentVersion: CONTENT_VERSION } },
+    };
+    const rowsFor = (contentVersion) =>
+        Object.fromEntries(
+            studyRows(studies, groupRatings(node, { contentVersion }), { contentVersion }).map(
+                (row) => [row.id, row]
+            )
+        );
+
+    it('compares one version with that version’s expert ratings', () => {
+        expect(rowsFor(CONTENT_VERSION)[changed]).toMatchObject({
+            n: 2,
+            mean: 1.5,
+            expertRating: expert(changed, CONTENT_VERSION),
+            expertAveraged: false,
+        });
+        expect(rowsFor(1)[changed]).toMatchObject({
+            n: 1,
+            mean: 3,
+            expertRating: expert(changed, 1),
+            band: qualityBand(expert(changed, 1)),
+        });
+        expect(rowsFor(2)[changed]).toMatchObject({ n: 1, expertRating: expert(changed, 2) });
+        expect(rowsFor(1)[unrated]).toMatchObject({ n: 0, expertRating: expert(unrated, 1) });
+    });
+
+    it('compares every version with the expert ratings its ratings were made against', () => {
+        const row = rowsFor(null)[changed];
+        const met = [1, CONTENT_VERSION, CONTENT_VERSION, 2].map((version) =>
+            expert(changed, version)
+        );
+        const average = met.reduce((sum, value) => sum + value, 0) / met.length;
+        expect(row).toMatchObject({ n: 4, mean: 2.5, expertAveraged: true });
+        expect(row.expertRating).toBeCloseTo(average, 12);
+        // The participant mean minus this value is the mean difference from the expert each saw.
+        const differences = [3, 1, 2, 4].map((rating, i) => rating - met[i]);
+        expect(row.mean - row.expertRating).toBeCloseTo(
+            differences.reduce((sum, d) => sum + d, 0) / differences.length,
+            12
+        );
+        // The band is that of the nearest whole rating.
+        expect(row.band).toBe(qualityBand(Math.round(average)));
+        // The same value in every version is no average; a study without ratings keeps the current one.
+        expect(rowsFor(null)[steady]).toMatchObject({
+            expertRating: expert(steady, CONTENT_VERSION),
+            expertAveraged: false,
+        });
+        expect(rowsFor(null)[unrated]).toMatchObject({
+            n: 0,
+            expertRating: expert(unrated, CONTENT_VERSION),
+            expertAveraged: false,
+        });
+    });
+
+    it('has no expert rating for a version without expert ratings', () => {
+        const [row] = studyRows([studies[0]], new Map(), { contentVersion: 99 });
+        expect(row).toMatchObject({ expertRating: null, band: null, expertAveraged: false });
+    });
+});
+
+describe('comparedExpert', () => {
+    it('leaves out ratings of versions without expert ratings', () => {
+        const study = { id: 'STUDY-1', expertRating: 4 };
+        expect(comparedExpert(study, { versions: [1, 99] }, null)).toEqual({
+            value: expertRatingFor('STUDY-1', 1),
+            averaged: false,
+        });
+        expect(comparedExpert(study, { versions: [99] }, null)).toEqual({
+            value: 4,
+            averaged: false,
+        });
     });
 });
 

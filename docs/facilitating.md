@@ -13,11 +13,11 @@ This guide is for workshop leaders. It covers room links, what participants see,
     You can also type these links by hand. The panel tells you if the code has been used before.
 
 3. **Check the capacity** (see below) if you expect a large group.
-4. **Handouts.** `materials/workshop/handouts` has two handouts, each as a PDF to print and a Word file to adapt. The evaluation guide explains the tasks and the scoring and has the rubric and the glossary. The sample studies are six studies from the app, two from each quality band, printed as participants see them with the answer scales, followed by an answer key with the expert's ratings and notes. Both are built from the app's own content, so they match what participants see on screen; the folder's README explains how to render them again after the content changes.
+4. **Handouts.** `materials/workshop/handouts` has two handouts, each as a PDF to print and a Word file to adapt. The evaluation guide explains the tasks and the scoring and has the rubric, the advice on combining the criteria into one rating and the glossary. The sample studies are six studies from the app, two from each quality band, printed as participants see them with the answer scales, followed by an answer key with the expert's ratings and notes. Both are built from the app's own content, so they match what participants see on screen; the folder's README explains how to render them again after the content changes.
 
 ## During the workshop
 
-Participants open the workshop link, read the welcome page and select 'Get started'. Each participant gets a random nickname, such as 'Curious Otter 42'. No names or email addresses are asked for.
+Participants open the workshop link, read the welcome page and select 'Get started'. Each participant gets a random nickname, such as 'Curious Otter 42'. No names or email addresses are asked for. A guide page then shows the glossary, the rubric and advice on combining the six criteria into one rating, with a worked example; all three stay available from every study under 'Glossary and rubric'.
 
 For each of the 48 studies, which are fictional, participants:
 
@@ -25,11 +25,13 @@ For each of the 48 studies, which are fictional, participants:
 2. give their own rating on the same scale;
 3. see their score, the target their prediction was scored against and the expert's feedback on each of the six criteria.
 
-**Scoring.** A prediction is scored against a target that combines the ratings other participants have given the study so far with an expert's rating, which counts as if 100 people had given it. A prediction that matches the target scores 100 points, and each point of distance costs 12 points. Because the expert counts so heavily, the target stays close to the expert's rating for a long time. The target always uses ratings from every room, so scores can be compared between workshops.
+**Scoring.** A prediction is scored against a target that combines the ratings other participants have given the current version of the study so far with an expert's rating, which counts as if 100 people had given it. A prediction that matches the target scores 100 points, and each point of distance costs 12 points. Because the expert counts so heavily, the target stays close to the expert's rating for a long time. The target always uses ratings from every room, so scores can be compared between workshops.
 
 **Finishing.** Participants can finish at any point after rating 10 studies. They then share out 20 tokens across the six criteria to show which ones they think matter most, and see their results. A message after 12 studies reminds them that they can finish.
 
 **The leaderboard.** People are ranked by their average score per study, once they have rated at least 10 studies. When two people have the same average, shown as a whole percentage, the one who rated more studies ranks higher; if that is equal too, they share the place. People with fewer than 10 studies are not ranked yet; the dashboard counts them below the list. On the dashboard, choose your room in the room filter (or use the room's dashboard link) to show only your group, which suits a projected screen. On their results page, participants in a room can switch the top 5 between their workshop and everyone.
+
+**Content versions on the dashboard.** The study texts and expert ratings have been revised over time (see 'Content versions' in `docs/data.md`). The dashboard's chart, statistics table and study details show the ratings of the current version unless you choose another in its 'Content version' filter. An earlier version is compared with that version's expert ratings. With 'All versions', each study is compared with the average of the expert ratings that its participants saw, so every rating is set against the expert rating of its own version. The figures at the top, the leaderboard and the criterion weights always cover every version.
 
 **Inactivity.** After 25 minutes without activity, a participant sees 'Are you still there?'. After 30 minutes the session pauses and stops counting as active. 'Continue' resumes it where it left off, with nothing lost.
 

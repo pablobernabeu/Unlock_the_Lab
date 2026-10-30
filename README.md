@@ -11,7 +11,7 @@ Unlock the Lab is a web app for science-literacy workshops. Participants read sh
 ## How a session works
 
 1. **Welcome.** The tasks, the scoring and the data notice are explained before anything is stored. Each participant gets a random nickname, such as 'Curious Otter 42'.
-2. **Guide.** A glossary and the rubric for the six criteria, both available again from every study.
+2. **Guide.** A glossary, the rubric for the six criteria and advice on combining them into one rating, with a worked example, all available again from every study.
 3. **Studies.** For each of the 48 studies, shown in a different order to each participant, they give two answers on a scale from 1 to 7:
     - **Predict the crowd:** the average rating that workshop participants give the study. This answer earns points.
     - **Their own rating** of the study's quality.
@@ -23,20 +23,20 @@ Unlock the Lab is a web app for science-literacy workshops. Participants read sh
 
 ### Scoring
 
-A prediction `p` for a study with expert rating `e`, which `n` other participants have rated with ratings summing to `S`, is scored against
+A prediction `p` for a study with expert rating `e` is scored against a target built from the expert rating and the `n` ratings that other participants have given the study's current version, which sum to `S`:
 
 ```
 target = (S + 100 × e) / (n + 100)
 score  = max(0, 100 − round(12 × |p − target|))
 ```
 
-The expert rating counts as 100 participants, so the target stays close to it until many people have rated the study. A participant's own rating never counts towards their own target. Leaderboards rank people by their average score per study, once they have rated at least 10 studies. When two averages are the same as whole percentages, the person who rated more studies ranks higher; if that is equal too, they share the place. The weight and the other constants are in `src/lib/config.js`.
+The expert rating counts as 100 participants, so the target stays close to it until many people have rated the study. A participant's own rating never counts towards their own target, and nor do ratings made with earlier versions of the study texts and expert ratings ([content versions](docs/data.md#content-versions)). Leaderboards rank people by their average score per study, once they have rated at least 10 studies. When two averages are the same as whole percentages, the person who rated more studies ranks higher; if that is equal too, they share the place. The weight and the other constants are in `src/lib/config.js`.
 
 ## For workshop leaders
 
 [`docs/facilitating.md`](docs/facilitating.md) explains how to run a workshop: room codes with their own leaderboard view and QR code, the dashboard, ending a workshop and how many people can join at once (100 simultaneous connections on Firebase's free plan). Facilitators sign in to the facilitator panel at `/admin.html` to make room links, export the data and end sessions.
 
-Handouts are in [`materials/workshop/handouts`](materials/workshop/handouts/README.md), as PDF and Word files: an evaluation guide with the scoring, the rubric and the glossary, and six sample studies with an answer key. They are built with Quarto from the same content files as the app, so a new render keeps them in line with it. Slides with a banner and a QR code are in `materials/workshop`.
+Handouts are in [`materials/workshop/handouts`](materials/workshop/handouts/README.md), as PDF and Word files: an evaluation guide with the scoring, the rubric, the advice on combining the criteria into one rating and the glossary, and six sample studies with an answer key. They are built with Quarto from the same content files as the app, so a new render keeps them in line with it. Slides with a banner and a QR code are in `materials/workshop`.
 
 ## Data and privacy
 
@@ -98,7 +98,7 @@ src/app/                        participant app
 src/dashboard/                  public dashboard
 src/admin/                      facilitator panel
 src/lib/                        shared modules: scoring, statistics, leaderboard, translations, Firebase set-up
-src/content/                    studies, glossary and rubric per language; expert ratings
+src/content/                    studies, glossary, rubric and rating guide per language; expert ratings of every content version
 src/i18n/                       interface text per language
 src/styles/                     style sheets
 public/                         files copied unchanged into the build
@@ -122,13 +122,13 @@ The interface and the content can be translated without changing code; see [`doc
 ## Licence
 
 - Code: [MIT](LICENSE).
-- Content (the studies, rubric, glossary, workshop materials and artwork): [CC BY 4.0](LICENSE-CONTENT.md).
+- Content (the studies, rubric, glossary, rating guide, workshop materials and artwork): [CC BY 4.0](LICENSE-CONTENT.md).
 
 ## Citation
 
 Please cite the software as below; [`CITATION.cff`](CITATION.cff) has the details.
 
-Bernabeu, P. (2026). _Unlock the Lab: Your guide to reading science like a scientist_ (Version 2.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.19153148
+Bernabeu, P. (2026). _Unlock the Lab: Your guide to reading science like a scientist_ (Version 2.1.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.19153148
 
 ## Author
 

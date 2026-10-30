@@ -12,6 +12,12 @@ import { normaliseEntries } from '../../../src/lib/leaderboard.js';
 import { createFindResults } from '../../../src/dashboard/find-results.js';
 import { createLeaderboard } from '../../../src/dashboard/leaderboard.js';
 import { createRoomFilter, urlWithRoom } from '../../../src/dashboard/room-filter.js';
+import {
+    createVersionFilter,
+    urlWithVersion,
+    versionFromParam,
+} from '../../../src/dashboard/version-filter.js';
+import { CONTENT_VERSION } from '../../../src/lib/config.js';
 import { createStatsTable } from '../../../src/dashboard/stats-table.js';
 import { preserveFocus, syncChildren } from '../../../src/dashboard/focus.js';
 import { createConnectionStatus } from '../../../src/dashboard/connection-status.js';
@@ -384,6 +390,92 @@ describe('room filter', () => {
             onChange: vi.fn(),
         });
         expect(location.search).toBe('?lang=en');
+    });
+});
+
+describe('version filter', () => {
+    it('reads the version parameter, falling back to the current version', () => {
+        const options = { versions: [1, 2, 3], current: 3 };
+        expect(versionFromParam('2', options)).toBe(2);
+        expect(versionFromParam('all', options)).toBeNull();
+        expect(versionFromParam(null, options)).toBe(3);
+        for (const value of ['4', '0', '02', '2.0', ' 2', 'ALL', '']) {
+            expect(versionFromParam(value, options)).toBe(3);
+        }
+    });
+
+    it('sets the version parameter and removes it for the current version', () => {
+        expect(urlWithVersion('https://x.test/dashboard.html?room=DEMO-1', 1, 3)).toBe(
+            'https://x.test/dashboard.html?room=DEMO-1&version=1'
+        );
+        expect(urlWithVersion('https://x.test/dashboard.html', null, 3)).toBe(
+            'https://x.test/dashboard.html?version=all'
+        );
+        expect(urlWithVersion('https://x.test/dashboard.html?version=all&lang=en', 3, 3)).toBe(
+            'https://x.test/dashboard.html?lang=en'
+        );
+    });
+
+    it('defaults to the current version, lists every version and reports changes', () => {
+        const onChange = vi.fn();
+        const select = qs('#version-select');
+        createVersionFilter({
+            select,
+            hint: qs('[data-version-hint]'),
+            initialVersion: CONTENT_VERSION,
+            onChange,
+        });
+        const options = qsa('option', select);
+        expect(options[0].textContent).toBe(`Version ${CONTENT_VERSION} (current)`);
+        expect(options.map((option) => option.value)).toEqual([
+            ...Array.from({ length: CONTENT_VERSION }, (_, i) => String(CONTENT_VERSION - i)),
+            'all',
+        ]);
+        expect(select.value).toBe(String(CONTENT_VERSION));
+        const hint = qs('[data-version-hint]');
+        expect(hint.textContent).toContain(
+            'Earlier versions showed different texts and expert ratings.'
+        );
+        expect(select.getAttribute('aria-describedby')).toBe(hint.id);
+
+        select.value = 'all';
+        select.dispatchEvent(new Event('change'));
+        expect(onChange).toHaveBeenLastCalledWith(null);
+        expect(location.search).toBe('?version=all');
+        expect(hint.textContent).toContain('the average of the expert ratings');
+
+        select.value = '1';
+        select.dispatchEvent(new Event('change'));
+        expect(onChange).toHaveBeenLastCalledWith(1);
+        expect(location.search).toBe('?version=1');
+        expect(hint.textContent).toContain("compared with that version's expert ratings");
+
+        select.value = String(CONTENT_VERSION);
+        select.dispatchEvent(new Event('change'));
+        expect(onChange).toHaveBeenLastCalledWith(CONTENT_VERSION);
+        expect(location.search).toBe('');
+    });
+
+    it('keeps a version from the link and drops an unknown one', () => {
+        history.replaceState(null, '', '/dashboard.html?version=1&room=DEMO-1');
+        createVersionFilter({
+            select: qs('#version-select'),
+            hint: qs('[data-version-hint]'),
+            initialVersion: versionFromParam('1'),
+            onChange: vi.fn(),
+        });
+        expect(qs('#version-select').value).toBe('1');
+        expect(location.search).toBe('?version=1&room=DEMO-1');
+
+        history.replaceState(null, '', '/dashboard.html?version=9&room=DEMO-1');
+        createVersionFilter({
+            select: qs('#version-select'),
+            hint: qs('[data-version-hint]'),
+            initialVersion: versionFromParam('9'),
+            onChange: vi.fn(),
+        });
+        expect(qs('#version-select').value).toBe(String(CONTENT_VERSION));
+        expect(location.search).toBe('?room=DEMO-1');
     });
 });
 

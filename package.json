@@ -1,6 +1,6 @@
 {
   "name": "unlock-the-lab",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "description": "Interactive science-literacy workshop in which participants rate fictional studies and predict the crowd's ratings",
   "type": "module",

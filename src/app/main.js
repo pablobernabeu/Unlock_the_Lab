@@ -62,10 +62,7 @@ function showReadOnlyView(result) {
         rows: result.rows,
         room: entry?.room ?? null,
         entries: Promise.resolve(entries),
-        others: loadOthersMeans(
-            result.rows.map((row) => row.study.id),
-            result.sessionId
-        ),
+        others: loadOthersMeans(result.rows, result.sessionId),
         tokens: result.tokens,
     });
     renderReadOnlyResultActions();
