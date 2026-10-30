@@ -1,0 +1,6 @@
+# Unlock the Lab
+User-agent: *
+Disallow: /admin.html
+# Individual results pages (/?session=...) are public but not useful in search results.
+Disallow: /*?session=
+Disallow: /*&session=

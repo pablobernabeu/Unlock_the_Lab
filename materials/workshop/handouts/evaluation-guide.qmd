@@ -1,0 +1,133 @@
+---
+title: 'Unlock the Lab: evaluation guide'
+subtitle: How the workshop works, the six criteria and a glossary
+---
+
+```{r}
+#| include: false
+# Every sentence about the workshop, the scoring, the criteria and the terms
+# comes from the app's files (see handouts.R); this file only arranges them.
+source('handouts.R')
+data <- load_handout_data()
+cfg <- data$config
+text <- function(key, ...) tr(data$strings, key, list(...))
+md <- function(key, ...) html_to_md(text(key, ...))
+```
+
+```{r}
+#| results: asis
+emit(footer_metadata(data))
+```
+
+# How the workshop works
+
+```{r}
+#| results: asis
+emit(
+    md('app.welcome.intro'),
+    md('app.welcome.about'),
+    md('app.welcome.fictional'),
+    sprintf('## %s', md('app.welcome.tasksHeading')),
+    md('app.welcome.tasksIntro'),
+    paste0('1. ', md('app.welcome.taskPredict'), '\n2. ', md('app.welcome.taskRate')),
+    md('app.welcome.scoringFeedback')
+)
+```
+
+```{r}
+#| results: asis
+# The worked example uses the same number of other participants as the
+# welcome page's explanation (EXAMPLE_OTHER_RATINGS in scoring-facts.js).
+others <- cfg$example_others
+expert_share <- cfg$weight / (cfg$weight + others) * 100
+example <- list(expert = 5, others_mean = 3, prediction = 4)
+example_sum <- others * example$others_mean
+example_target <- scoring_target(example_sum, others, example$expert, cfg$weight)
+example_score <- prediction_score(example$prediction, example_target, cfg$penalty)
+
+emit(
+    sprintf('## %s', md('app.welcome.scoringHeading')),
+    md('app.welcome.scoringTarget', weight = cfg$weight),
+    md('app.welcome.scoringEarly', count = others, share = format_percent(expert_share)),
+    md('app.welcome.scoringPoints', penalty = cfg$penalty,
+       one = prediction_score(5, 4, cfg$penalty), two = prediction_score(6, 4, cfg$penalty)),
+    paste('As formulas, where *p* is your prediction, *e* the expert\'s rating, *n* the number',
+          'of other participants who have rated the study and *S* the sum of their ratings:'),
+    # Plain text rather than maths markup, which some word processors cannot show.
+    sprintf(paste0('> | *target* = (*S* + %d × *e*) / (*n* + %d)\n',
+                   '> | *score* = max(0, 100 − round(%d × \\|*p* − *target*\\|))'),
+            cfg$weight, cfg$weight, cfg$penalty),
+    sprintf(
+        paste('For example, if the expert rated a study %d and %d other participants have given',
+              'it an average of %d (a sum of %d), the target is (%d + %d × %d) / (%d + %d) =',
+              '%s. A prediction of %d is %s points away, so it scores',
+              '100 − round(%d × %s) = %d.'),
+        example$expert, others, example$others_mean, example_sum, example_sum, cfg$weight,
+        example$expert, others, cfg$weight, formatC(example_target, format = 'f', digits = 2),
+        example$prediction, formatC(abs(example$prediction - example_target), format = 'f', digits = 2),
+        cfg$penalty, formatC(abs(example$prediction - example_target), format = 'f', digits = 2),
+        example_score
+    ),
+    sprintf('## %s', md('app.welcome.leaderboardHeading')),
+    md('app.welcome.leaderboardText', minRank = cfg$min_rank),
+    md('app.welcome.length', total = cfg$study_count, minFinish = cfg$min_finish),
+    sprintf('**%s** %s', md('app.pageTitle.weights'), md('app.weights.intro', budget = cfg$budget))
+)
+```
+
+# The six criteria
+
+```{r}
+#| results: asis
+criteria <- data$criteria$key
+emit(
+    paste0('- ', vapply(criteria, function(key) {
+        sprintf('**%s:** %s', md(paste0('common.criteria.', key)),
+                md(paste0('common.criterionDescriptions.', key)))
+    }, ''), collapse = '\n'),
+    sprintf('## %s', md('app.guide.rubricHeading')),
+    md_table(
+        c(md('app.guide.rubricCriterion'), md('app.guide.rubricLow'), md('app.guide.rubricMedium'),
+          md('app.guide.rubricHigh')),
+        lapply(data$rubric, function(row) {
+            # The words before the colon are bold, as in the app's rubric.
+            cells <- vapply(c('low', 'medium', 'high'), function(band) {
+                sub('^([^:]+:)', '<strong>\\1</strong>', row[[band]])
+            }, '')
+            c(sprintf('**%s**', html_to_md(row$name)), vapply(cells, html_to_md, ''))
+        }),
+        c(16, 28, 28, 28)
+    )
+)
+```
+
+# From six criteria to one rating
+
+```{r}
+#| results: asis
+emit(
+    md('app.guide.rubricIntro'),
+    sprintf('The three columns of the rubric use the same scale as your rating: %s, %s and %s.',
+            md('app.guide.rubricLow'), md('app.guide.rubricMedium'), md('app.guide.rubricHigh')),
+    sprintf("When you rate a study, the app asks: '%s'", md('app.study.ratingHint')),
+    paste('After each study, the expert\'s feedback gives a band for each criterion and a',
+          'summary of how the expert weighed them up, so you can compare your judgement with',
+          'the expert\'s.'),
+    sprintf('At the end you share %d tokens between the six criteria to show which matter most to you.',
+            cfg$budget)
+)
+```
+
+# Glossary
+
+```{r}
+#| results: asis
+emit(
+    md('app.guide.glossaryIntro'),
+    vapply(data$glossary, function(entry) {
+        sprintf('%s\n:   %s', html_to_md(entry$term), html_to_md(entry$definition))
+    }, ''),
+    '---',
+    closing_line(data)
+)
+```

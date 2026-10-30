@@ -1,0 +1,168 @@
+{
+  "pageTitle": "Live dashboard – Unlock the Lab",
+  "heading": "Live dashboard",
+  "intro": "How workshop participants rate the fictional studies and how well they predict the crowd's ratings. The figures update by themselves as people take part.",
+  "navLabel": "Pages",
+  "noscript": "The live dashboard needs JavaScript. Turn it on in your browser and reload the page.",
+  "connection": {
+    "connecting": "Connecting to the live data…",
+    "live": "Connected. The figures update automatically.",
+    "offline": "Connection lost. The figures may be out of date until it is back."
+  },
+  "loadFailed": "Some of the data could not be loaded. Check your connection and reload the page.",
+  "room": {
+    "label": "Room",
+    "all": "All rooms",
+    "hintAll": "Facilitators can give a workshop its own room code. Choose a room to see only its activity.",
+    "hintSelected": "Showing activity from room {room} only. Ratings made without a room code, including all those from before room codes existed, appear only under 'All rooms'. Targets and scores always use everyone's ratings, so they can be compared between rooms.",
+    "announceAll": "Showing all rooms.",
+    "announceRoom": "Showing room {room}."
+  },
+  "find": {
+    "heading": "Find your results",
+    "intro": "Took part in the workshop? Open your personal results page here.",
+    "detected": "This device was used to take part as {name}.",
+    "detectedNoName": "This device was used to take part in the workshop.",
+    "detectedLink": "View your results",
+    "label": "Your nickname",
+    "hint": "For example 'Curious Otter 42'. Capital letters and spaces do not matter. You can also paste the link to your results.",
+    "submit": "Find my results",
+    "empty": "Enter your nickname.",
+    "loading": "The list of nicknames is still loading. Try again in a moment.",
+    "notFound": "No results found for '{name}'. Check the spelling: the whole nickname is needed, including the number. A nickname appears here once its first rating has been saved.",
+    "badLink": "This link does not lead to anyone's results. Enter your nickname instead.",
+    "several": {
+      "one": "{count} participant has this nickname:",
+      "other": "{count} participants have this nickname. Choose yours by the number of studies rated and the time of the latest rating:"
+    },
+    "choice": "{name}: {studies}, latest rating {date}",
+    "opening": "Opening the results for {name}…"
+  },
+  "overview": {
+    "heading": "At a glance",
+    "participants": "Participants",
+    "participantsNote": "Workshop sessions with at least one rating",
+    "ratings": "Ratings",
+    "ratingsNote": "Study ratings saved",
+    "completed": "Rated {count} or more",
+    "completedNote": "Participants who have rated at least {count} studies",
+    "active": "Active now",
+    "activeNote": {
+      "one": "Participants part-way through the workshop in the past minute",
+      "other": "Participants part-way through the workshop in the past {count} minutes"
+    }
+  },
+  "leaderboard": {
+    "heading": "Leaderboard",
+    "introScore": "Who predicts best? For each study, participants predict the average rating that participants give it, and the prediction is scored against a target. A prediction scores 100 points, minus {penalty} for every point it is away from the target (rounded to a whole number and never below 0).",
+    "introTarget": "The target combines the expert rating, counted as if {weight} participants had given it, with the ratings that other participants had given the study by then, in every room.",
+    "introRules": "A participant's average score is the mean of their prediction scores over the studies they have rated, rounded to a whole percentage. Only participants who have rated at least {count} studies are ranked; anyone who has rated fewer is left out of the table. At the same average score, the participant who rated more studies is placed higher, and if that is also the same, they share a place. The table lists participants whose scores have been saved, so it can hold fewer people than the figures above. Select a nickname to see that participant's results.",
+    "tabsLabel": "Time period",
+    "tabAll": "All time",
+    "tabDay": "Past 24 hours",
+    "dayNote": "Showing ranked participants whose score was last updated in the past 24 hours. Their average score covers every study they have rated.",
+    "roomNote": "Places are among participants in room {room}.",
+    "captionAll": "Leaderboard, all time",
+    "captionDay": "Leaderboard, past 24 hours",
+    "columns": {
+      "place": "Place",
+      "name": "Nickname",
+      "score": "Average score",
+      "studies": "Studies rated"
+    },
+    "thisDevice": "This device",
+    "emptyAll": "No one is ranked yet. Participants appear here once they have rated {count} studies.",
+    "emptyDay": "No ranked participant has a score updated in the past 24 hours.",
+    "unranked": {
+      "one": "{count} more participant has rated fewer than {min} studies and is not ranked yet.",
+      "other": "{count} more participants have rated fewer than {min} studies and are not ranked yet."
+    },
+    "truncated": "Only the top {count} places are listed.",
+    "showAll": {
+      "one": "Show all {count} listed participant",
+      "other": "Show all {count} listed participants"
+    },
+    "showFewer": "Show the first {count} only"
+  },
+  "criteria": {
+    "heading": "Which criteria matter most",
+    "intro": "At the end of the workshop, each participant shares out {budget} tokens among the {count} criteria, giving more to those they think matter most when judging a study. Each bar shows the average share of tokens a criterion received. The dark line across it is the 95% confidence interval for that average (t distribution); interval limits below 0% or above 100% are shown as 0% and 100%.",
+    "count": {
+      "one": "Based on {count} participant who shared out all their tokens.",
+      "other": "Based on {count} participants who shared out all their tokens."
+    },
+    "empty": "No one has shared out their tokens yet.",
+    "share": "{share} of tokens",
+    "ci": "95% CI {lower} to {upper}",
+    "ciMissing": "An interval needs at least two participants.",
+    "scaleStart": "0%"
+  },
+  "chart": {
+    "heading": "Ratings by study",
+    "introBars": "Each bar is the average quality rating that participants gave a study, on the scale from 1 to 7. Only participants' ratings count: the expert's rating is not part of the bar.",
+    "introIntervals": "The dark line on each bar is the 95% confidence interval for that average, worked out with the t distribution. It is long when people disagree or when few have rated the study, and missing when fewer than two have. Where an interval runs past 1 or 7, it stops at the edge of the chart without an end cap; the tooltip, the table and the study details give its full limits.",
+    "introExpert": "The white diamond is the expert's rating. The bar colour shows the expert's quality band, as in the key below.",
+    "introTarget": "The game scores predictions against a different value, the target: the expert rating counted as if {weight} participants had given it, combined with the ratings of other participants from every room. While fewer than {weight} participants have rated a study, its target is closer to the expert rating than to the average of their ratings.",
+    "introSelect": "Select a bar, or a study in the table below, to read the study and the expert's feedback.",
+    "legendLabel": "Chart key",
+    "legendMean": "Participant mean with 95% confidence interval",
+    "legendExpert": "Expert rating",
+    "canvasLabel": "Bar chart of the participants' mean rating for each study, with 95% confidence intervals and the expert rating. The table below gives the same figures.",
+    "axisStudy": "Study number",
+    "axisRating": "Mean rating (1 to 7)",
+    "tooltipMean": "Participant mean: {mean} (95% CI {lower} to {upper}, n = {count})",
+    "tooltipMeanSingle": "Participant mean: {mean} (n = 1, too few for an interval)",
+    "tooltipNoRatings": "No participant ratings yet",
+    "tooltipExpert": "Expert rating: {rating} ({band})",
+    "tooltipFooter": "Click or tap to read the study",
+    "summary": "{rated} of {total} studies have participant ratings. For {close} of them, the participant mean is within one point of the expert rating.",
+    "summaryNone": "No study has participant ratings yet.",
+    "failed": "The chart could not be loaded. The table below has the same figures."
+  },
+  "table": {
+    "heading": "Statistics by study",
+    "intro": "Every figure comes from participant ratings only; the expert's rating has its own column. 'Ratings' is the number of participants who rated the study, 'SD' (standard deviation) shows how much their ratings vary and '95% CI' is the confidence interval for the mean. 'Mean prediction' is the average of participants' predictions of the crowd's rating for the study. A dash means there are too few ratings: the SD and the interval need at least two.",
+    "sortHint": "Select a column heading to sort the table. The 95% CI column sorts by its lower limit.",
+    "regionLabel": "Statistics by study (scrolls sideways on small screens)",
+    "columns": {
+      "study": "Study",
+      "title": "Title",
+      "expert": "Expert rating",
+      "n": "Ratings",
+      "mean": "Mean",
+      "sd": "SD",
+      "ci": "95% CI",
+      "prediction": "Mean prediction"
+    },
+    "ciValue": "{lower} to {upper}",
+    "sorted": "Sorted by {column}, {direction}.",
+    "ascending": "ascending",
+    "descending": "descending"
+  },
+  "band": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "dialog": {
+    "expert": "Expert rating: {rating} out of 7 ({band})",
+    "statsHeading": "How participants rated it",
+    "roomNote": "Figures for room {room} only.",
+    "stats": {
+      "n": "Ratings",
+      "mean": "Mean rating",
+      "sd": "Standard deviation",
+      "ci": "95% confidence interval",
+      "prediction": "Mean prediction"
+    },
+    "targetNone": "The game would score a new prediction for this study against {target}, the expert rating, because no participant has rated it yet.",
+    "target": {
+      "one": "The game would score a new prediction for this study against a target of {target}: the expert rating counted as {weight} participants, combined with the {count} participant rating so far (from every room).",
+      "other": "The game would score a new prediction for this study against a target of {target}: the expert rating counted as {weight} participants, combined with all {count} participant ratings so far (from every room)."
+    },
+    "studyHeading": "The study",
+    "fictional": "This study is fictional. It was written for the workshop and is modelled on the strengths and flaws of real research.",
+    "feedbackHeading": "Expert feedback",
+    "noFeedback": "There is no expert feedback for this study."
+  }
+}

@@ -1,0 +1,632 @@
+/*
+ * Public live dashboard (dashboard.html). Builds on base.css tokens and
+ * components; text colours are the base tokens checked there for contrast.
+ */
+
+/* ---------- Header ---------- */
+
+.dashboard-header__tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-5);
+}
+
+.dashboard-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+}
+
+.dashboard-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-weight: 600;
+}
+
+.dashboard-nav a[aria-current='page'] {
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+/* ---------- Page intro and room filter ---------- */
+
+.dashboard-intro {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+}
+
+@media (min-width: 56rem) {
+    .dashboard-intro {
+        grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+    }
+}
+
+.dashboard-intro__text > * + * {
+    margin-top: var(--space-3);
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+.connection-status__dot {
+    flex: none;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+    background: var(--color-border-strong);
+}
+
+.connection-status[data-state='live'] .connection-status__dot {
+    background: var(--color-green-strong);
+}
+
+.connection-status[data-state='offline'] .connection-status__dot {
+    background: var(--color-danger);
+}
+
+.room-filter {
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+}
+
+.dashboard-error {
+    margin-top: var(--space-5);
+}
+
+/* ---------- Sections ---------- */
+
+.dash-section {
+    margin-top: var(--space-6);
+}
+
+.dash-section > h2 {
+    margin-bottom: var(--space-3);
+}
+
+.dash-section__intro {
+    --flow-space: var(--space-3);
+    max-width: 50rem;
+    margin-bottom: var(--space-5);
+}
+
+.dash-empty {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-muted);
+    color: var(--color-text-muted);
+}
+
+@media (max-width: 30rem) {
+    .dashboard .card {
+        padding: var(--space-4) var(--space-3);
+    }
+}
+
+/* ---------- Find your results ---------- */
+
+.find-results__detected {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+    margin-block: var(--space-4);
+    padding: var(--space-4);
+    border-left: 4px solid var(--color-brand-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-brand-tint);
+}
+
+.find-results__form {
+    margin-top: var(--space-4);
+}
+
+.find-results__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+.find-results__row input {
+    flex: 1 1 14rem;
+    width: auto;
+    max-width: 28rem;
+}
+
+.find-results__message > * {
+    margin-top: var(--space-3);
+}
+
+.find-results__choices {
+    margin-top: var(--space-2);
+}
+
+.find-results__message,
+.find-results__detected p {
+    overflow-wrap: anywhere;
+}
+
+.find-results__choices li + li {
+    margin-top: var(--space-2);
+}
+
+/* ---------- At a glance ---------- */
+
+.stat-tiles {
+    display: grid;
+    /* Two tiles side by side on phones (even at 320 px), four on wider screens. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin: 0;
+}
+
+.stat-tile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-tile dd {
+    margin: 0;
+}
+
+.stat-tile__label {
+    font-weight: 600;
+}
+
+.stat-tile__value {
+    order: 2;
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.stat-tile__note {
+    order: 3;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+@media (min-width: 40rem) {
+    .stat-tiles {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--space-4);
+    }
+}
+
+@media (max-width: 30rem) {
+    .stat-tile {
+        padding: var(--space-3);
+    }
+
+    .stat-tile__value {
+        font-size: 1.75rem;
+    }
+}
+
+/* ---------- Leaderboard ---------- */
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin-bottom: var(--space-4);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.tab {
+    min-height: var(--target-size);
+    margin-bottom: -2px;
+    padding: var(--space-2) var(--space-4);
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: none;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.tab:hover {
+    color: var(--color-text);
+}
+
+.tab[aria-selected='true'] {
+    border-bottom-color: var(--color-brand-strong);
+    color: var(--color-brand-strong);
+    font-weight: 700;
+}
+
+.tab-panel > * + * {
+    margin-top: var(--space-3);
+}
+
+.leaderboard-table thead th {
+    white-space: normal;
+}
+
+/* The place column takes only the width it needs, leaving room for the nickname. */
+.leaderboard-table__place {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.leaderboard-table__top th {
+    font-weight: 700;
+}
+
+/* Old records can hold very long nicknames: they wrap rather than widen the table. */
+.leaderboard-table th[scope='row'] {
+    overflow-wrap: anywhere;
+}
+
+.leaderboard-table .badge {
+    vertical-align: 0.1em;
+}
+
+@media (max-width: 30rem) {
+    .leaderboard-table {
+        font-size: var(--text-sm);
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+        padding-inline: var(--space-1);
+    }
+}
+
+/* ---------- Criterion importance ---------- */
+
+.criterion-list {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 50rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.criterion__text {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-2);
+    margin-bottom: var(--space-1);
+}
+
+.criterion__label {
+    font-weight: 600;
+}
+
+.criterion__value {
+    font-weight: 700;
+}
+
+.criterion__ci {
+    font-size: var(--text-sm);
+}
+
+.criterion__track {
+    position: relative;
+    height: 1rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-muted);
+}
+
+.criterion__fill {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: var(--color-brand-strong);
+}
+
+/* The interval: a dark line with end caps and a light halo so it shows on the bar. */
+.criterion__whisker {
+    position: absolute;
+    top: 50%;
+    height: 2px;
+    background: var(--color-text);
+    box-shadow: 0 0 0 1px var(--color-surface);
+    transform: translateY(-50%);
+}
+
+.criterion__whisker::before,
+.criterion__whisker::after {
+    content: '';
+    position: absolute;
+    top: -0.3125rem;
+    width: 2px;
+    height: 0.75rem;
+    background: var(--color-text);
+}
+
+.criterion__whisker::before {
+    left: -1px;
+}
+
+.criterion__whisker::after {
+    right: -1px;
+}
+
+/*
+ * Forced colours (Windows contrast themes) replace backgrounds with the page
+ * colour and drop shadows, which would hide the fills and the intervals. As
+ * for the app's token bars, the track gets an outline, the fill the system
+ * highlight colour and the interval the text colour with a page-colour halo.
+ */
+@media (forced-colors: active) {
+    .criterion__track {
+        border: 1px solid CanvasText;
+    }
+
+    .criterion__fill {
+        forced-color-adjust: none;
+        background: Highlight;
+    }
+
+    .criterion__whisker {
+        forced-color-adjust: none;
+        background: CanvasText;
+        box-shadow: 0 0 0 1px Canvas;
+    }
+
+    .criterion__whisker::before,
+    .criterion__whisker::after {
+        background: CanvasText;
+    }
+}
+
+.criterion-scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: calc(-1 * var(--space-2));
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+/* ---------- Ratings chart ---------- */
+
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    list-style: none;
+    font-size: var(--text-sm);
+}
+
+/* The marker stays beside the first line of its label when the label wraps. */
+.chart-legend li {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+}
+
+.chart-legend li > [aria-hidden='true'] {
+    align-self: flex-start;
+    margin-top: 0.1875rem;
+}
+
+.legend-swatch {
+    flex: none;
+    width: 0.875rem;
+    height: 0.875rem;
+    border-radius: 2px;
+    forced-color-adjust: none;
+}
+
+.legend-swatch--low {
+    background: var(--color-quality-low);
+}
+
+.legend-swatch--medium {
+    background: var(--color-quality-medium);
+}
+
+.legend-swatch--high {
+    background: var(--color-quality-high);
+}
+
+/* A small interval: a vertical line with caps. */
+.legend-interval {
+    position: relative;
+    flex: none;
+    width: 0.75rem;
+    height: 1rem;
+    border-block: 2px solid var(--color-text);
+}
+
+.legend-interval::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: calc(50% - 1px);
+    width: 2px;
+    background: var(--color-text);
+}
+
+.legend-diamond {
+    flex: none;
+    width: 0.625rem;
+    height: 0.625rem;
+    margin-inline: 0.125rem;
+    border: 2px solid var(--color-text);
+    background: var(--color-surface);
+    transform: rotate(45deg);
+}
+
+.chart-box {
+    position: relative;
+    width: 100%;
+    min-height: 12rem;
+}
+
+.chart-box canvas {
+    cursor: pointer;
+}
+
+.chart-summary {
+    margin-top: var(--space-4);
+}
+
+/* ---------- Statistics table ---------- */
+
+.stats-table th[scope='row'] {
+    white-space: nowrap;
+}
+
+.stats-table__study {
+    font-weight: 700;
+}
+
+.stats-table__title {
+    min-width: 14rem;
+}
+
+.stats-table__expert,
+.stats-table__ci {
+    white-space: nowrap;
+}
+
+.stats-table .num .sort-button {
+    flex-direction: row-reverse;
+}
+
+.sort-icon::after {
+    content: '↕';
+    color: var(--color-text-muted);
+    font-weight: 400;
+}
+
+[aria-sort='ascending'] .sort-icon::after {
+    content: '↑';
+    color: var(--color-text);
+}
+
+[aria-sort='descending'] .sort-icon::after {
+    content: '↓';
+    color: var(--color-text);
+}
+
+.table .sort-button:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Study dialog ---------- */
+
+.study-dialog {
+    width: min(48rem, calc(100vw - 2rem));
+    overflow-y: auto;
+}
+
+.study-dialog__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.study-dialog__id {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+.study-dialog__close {
+    flex: none;
+    width: var(--target-size);
+    height: var(--target-size);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--color-surface-muted);
+    color: var(--color-text);
+    font-size: var(--text-2xl);
+    line-height: 1;
+}
+
+.study-dialog__close:hover {
+    background: var(--color-border);
+}
+
+.study-dialog__expert {
+    font-weight: 600;
+}
+
+.study-dialog__section {
+    margin-top: var(--space-6);
+}
+
+.study-dialog__section h3 {
+    margin-bottom: var(--space-3);
+    font-size: var(--text-lg);
+}
+
+.study-dialog__section > p + * {
+    margin-top: var(--space-3);
+}
+
+.study-dialog__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 6.5rem), 1fr));
+    gap: var(--space-3);
+    margin: 0 0 var(--space-3);
+}
+
+.study-dialog__stats div {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-muted);
+}
+
+.study-dialog__stats dt {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+.study-dialog__stats dd {
+    margin: 0;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.study-dialog__field + .study-dialog__field {
+    margin-top: var(--space-4);
+}
+
+.study-dialog__field h4 {
+    margin-bottom: var(--space-1);
+    font-size: var(--text-base);
+}
+
+.study-dialog__feedback {
+    padding: 0;
+    list-style: none;
+}
+
+.study-dialog__feedback li + li {
+    margin-top: var(--space-4);
+}
+
+.study-dialog__criterion {
+    margin-bottom: var(--space-1);
+}
+
+@media (max-width: 30rem) {
+    .study-dialog {
+        padding: var(--space-4);
+    }
+}

@@ -1,2 +1,29 @@
+node_modules/
+dist/
+dist-e2e/
+.firebase/
+*.log
+.env.local
+.env.*.local
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.vite/
+
+# Quarto / R
+analysis/data/
+analysis/*_files/
+analysis/.quarto/
+analysis/*.html
+.Rhistory
+.RData
+.Rproj.user/
+materials/**/.quarto/
+materials/**/*_files/
+
+# Legacy
 ratings.pdf
-node_modules
+
+# Scratch folders used by local checks
+.tmp-*/

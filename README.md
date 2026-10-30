@@ -1,197 +1,137 @@
 # Unlock the Lab: Your guide to reading science like a scientist
 
-A web-based application for teaching critical evaluation of scientific research through interactive peer assessment.
-
 [![DOI](https://zenodo.org/badge/1102647925.svg)](https://doi.org/10.5281/zenodo.19153148)
+[![CI](https://github.com/pablobernabeu/Unlock_the_Lab/actions/workflows/ci.yml/badge.svg)](https://github.com/pablobernabeu/Unlock_the_Lab/actions/workflows/ci.yml)
 
-## Overview
+Unlock the Lab is a web app for science-literacy workshops. Participants read short descriptions of fictional but realistic studies and judge their quality with six criteria that scientists use: Title, Access, Source, Theory, Methods & Data and Conclusion. After each study they see how well they did and an expert's feedback.
 
-Unlock the Lab is an educational tool designed to develop science literacy by training participants to evaluate research quality using evidence-based criteria. The application presents fictional research scenarios and challenges users to predict peer consensus on research quality, creating an engaging environment for learning to distinguish rigorous science from sensationalised claims.
+- Workshop: https://unlock-the-lab.web.app
+- Live dashboard: https://unlock-the-lab.web.app/dashboard.html
 
-### Educational Objectives
+## How a session works
 
-- Develop critical thinking skills for evaluating scientific claims
-- Understand research quality indicators (methodology, data transparency, publication practices)
-- Recognise barriers to accessing scientific knowledge (paywalls, predatory publishing)
-- Practice objective assessment independent of title framing
-- Build consensus evaluation skills through peer comparison
+1. **Welcome.** The tasks, the scoring and the data notice are explained before anything is stored. Each participant gets a random nickname, such as 'Curious Otter 42'.
+2. **Guide.** A glossary and the rubric for the six criteria, both available again from every study.
+3. **Studies.** For each of the 48 studies, shown in a different order to each participant, they give two answers on a scale from 1 to 7:
+    - **Predict the crowd:** the average rating that workshop participants give the study. This answer earns points.
+    - **Their own rating** of the study's quality.
 
-## Features
+    They then see their score, the target it was scored against and the expert's rating with a note on each criterion.
 
-### Core Functionality
+4. **Weights.** After at least 10 studies (all 48 if they like), participants share 20 tokens across the six criteria to show which matter most to them.
+5. **Results.** Average score, place on the leaderboard, a chart comparing their ratings with everyone else's, a review of every study they rated and a personal link to come back to the results.
 
-- **Interactive Workshop Flow**: Guided progression through educational content, evaluation rubric and 48 fictional research scenarios
-- **Dual Assessment System**: Participants rate both research quality (1-7 scale) and predict peer consensus
-- **Real-time Leaderboard**: Rankings based on prediction accuracy with 24-hour and all-time views (top 200)
-- **Live Analytics Dashboard**: Public visualisation of aggregate ratings, participant statistics and study-level metrics. Each study's mean rating comes from participant ratings only, with a 95% confidence interval based on the t distribution, and the expert rating is shown beside it
-- **Anonymous Participation**: Automatic assignment of unique usernames (e.g., 'Cheerful Penguin') for data privacy
-- **Comprehensive Glossary**: 21 scientific terms with accessible definitions, available throughout the activity
+### Scoring
 
-### Technical Capabilities
+A prediction `p` for a study with expert rating `e`, which `n` other participants have rated with ratings summing to `S`, is scored against
 
-- Real-time data synchronisation via Firebase Realtime Database
-- Responsive design for desktop and mobile devices
-- Interactive data visualisations using Chart.js
-- Session timeout management (30-minute initial limit, extendable to 2 hours)
-- Active participant tracking (60-second activity window)
-- Percentage-based scoring system (0-100% per study, aggregate score)
-
-### Administrative Tools
-
-- Email/password authentication for admin access
-- Session management controls (end all active sessions)
-- Firebase usage monitoring (concurrent connections, storage, session count)
-- Study detail modals with paper information and DOI links
-- Sortable statistics table with colour-coded metrics
-
-## Technology Stack
-
-### Frontend
-- HTML5, CSS3, JavaScript (ES6+)
-- Chart.js (data visualisation): 4.5.1 from npm in the workshop app, 4.4.0 from jsDelivr on the dashboard
-- Vite 5.4.21 (build tool)
-
-### Backend
-- Firebase Realtime Database (data storage and synchronisation)
-- Firebase Authentication (admin access control)
-- Firebase Hosting (deployment)
-
-### Data Structure
 ```
-/ratings/{sessionId}/{studyId} - Individual study ratings
-/active/{sessionId} - Active participant timestamps
-/leaderboard/{sessionId} - Completed session scores
+target = (S + 100 × e) / (n + 100)
+score  = max(0, 100 − round(12 × |p − target|))
 ```
 
-## Installation
+The expert rating counts as 100 participants, so the target stays close to it until many people have rated the study. A participant's own rating never counts towards their own target. Leaderboards rank people by their average score per study, once they have rated at least 10 studies. When two averages are the same as whole percentages, the person who rated more studies ranks higher; if that is equal too, they share the place. The weight and the other constants are in `src/lib/config.js`.
 
-### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn
-- Firebase project with Realtime Database and Authentication enabled
+## For workshop leaders
 
-### Setup
+[`docs/facilitating.md`](docs/facilitating.md) explains how to run a workshop: room codes with their own leaderboard view and QR code, the dashboard, ending a workshop and how many people can join at once (100 simultaneous connections on Firebase's free plan). Facilitators sign in to the facilitator panel at `/admin.html` to make room links, export the data and end sessions.
 
-1. Clone the repository:
+Handouts are in [`materials/workshop/handouts`](materials/workshop/handouts/README.md), as PDF and Word files: an evaluation guide with the scoring, the rubric and the glossary, and six sample studies with an answer key. They are built with Quarto from the same content files as the app, so a new render keeps them in line with it. Slides with a banner and a QR code are in `materials/workshop`.
+
+## Data and privacy
+
+- Participants are pseudonymous: they are identified by a random nickname and random codes, and are never asked for a name, email address or other personal details.
+- There are no analytics and no tracking cookies.
+- Everything participants submit is publicly readable, so that the dashboard works without sign-in, and a daily backup copies it to the public `data` branch of this repository (with a commit whenever the data have changed). The welcome page says so before anyone starts.
+- [`docs/data.md`](docs/data.md) describes every node and field, including the records version 1 of the app wrote.
+- [`analysis/`](analysis/README.md) holds a reproducible Quarto report on the data.
+
+## Local development
+
+You need Node.js 24.12 or later, and Java 21 or later for the Firebase emulators.
+
 ```bash
 git clone https://github.com/pablobernabeu/Unlock_the_Lab.git
 cd Unlock_the_Lab
+npm ci
+npm run emulators   # first terminal: database (port 9000) and Auth (port 9099) emulators
+npm run dev         # second terminal: http://localhost:3000
 ```
 
-2. Install dependencies:
+`npm run dev` talks only to the local emulators, never to the live database. The dashboard is at `/dashboard.html` and the facilitator panel at `/admin.html`. Without the emulators the pages still load, but nothing can be saved. To try the facilitator panel, create an account in the Auth emulator and list its uid under `/admins`:
+
 ```bash
-npm install
+curl -s 'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=local' \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"admin@example.com","password":"admin-password","returnSecureToken":true}'
+# copy "localId" from the reply, then:
+curl -s -X PUT -H 'Authorization: Bearer owner' -d 'true' \
+  'http://127.0.0.1:9000/admins/<localId>.json?ns=unlock-the-lab-workshop-default-rtdb'
 ```
 
-3. Configure Firebase:
-   - Create a Firebase project at https://console.firebase.google.com
-   - Enable Realtime Database and Email/Password Authentication
-   - Copy your Firebase configuration to `firebase-config.js`
+`npm run dev:live` runs the development server against the live database instead. Everything you do there is saved as real data, so use it only when you must.
 
-4. Run development server:
-```bash
-npm run dev
-```
+### Checks
 
-5. Build for production:
-```bash
-npm run build
-```
+| Command                | What it does                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `npm run lint`         | ESLint                                                                                                                   |
+| `npm run format:check` | Prettier (`npm run format` fixes the formatting)                                                                         |
+| `npm test`             | unit tests (Vitest)                                                                                                      |
+| `npm run test:rules`   | database rules tests; starts its own emulators, so stop `npm run emulators` first                                        |
+| `npm run test:e2e`     | Playwright end-to-end and accessibility tests on a test build (in `dist-e2e/`, served on port 4317), using the emulators |
+| `npm run build`        | production build in `dist/`                                                                                              |
+| `npm run check`        | lint, format check, unit tests and build, as the first CI job runs them                                                  |
 
-6. Deploy to Firebase:
-```bash
-firebase deploy --only hosting
-```
+`npm run test:e2e` needs a browser (`npx playwright install chromium`) and reuses emulators that are already running. Each test **wipes the local database namespace and every Auth emulator account**, the same ones `npm run dev` uses, so expect to lose any local test data.
 
-## Usage
+## Deployment
 
-### For Participants
+CI (`.github/workflows/ci.yml`) runs the checks on every pull request, publishes a preview channel for pull requests from this repository and deploys the site and the database rules to Firebase when a change reaches `main`. Previews use the live database and say so on every page. [`docs/deployment.md`](docs/deployment.md) covers the one-off set-up, administrators, backups and restoring, the legacy domain and running your own copy.
 
-1. Navigate to the application URL
-2. Review the educational content, glossary and rubric
-3. Evaluate 48 research scenarios by rating quality (1-7) and predicting peer ratings
-4. Receive immediate feedback on prediction accuracy
-5. View final score and leaderboard position upon completion
-
-### For Facilitators/Admins
-
-1. Access admin panel via the Admin link (bottom right corner)
-2. Sign in with configured email and password
-3. Monitor real-time participant activity and Firebase usage
-4. Manage active sessions as needed
-5. View detailed analytics on the public dashboard
-
-## Scoring System
-
-- **Per-Study Score**: `100 - |predicted_rating - actual_average| × 12` (capped at 0-100)
-- **Aggregate Score**: Sum of all 48 study scores
-- **Percentage Display**: `(total_score / (num_studies × 100)) × 100`
-- **Leaderboard Ranking**: Based on aggregate score, top 200 displayed
-
-## Data Management
-
-### Privacy Considerations
-
-- No demographic data or personally identifiable information collected
-- Anonymous usernames auto-generated and validated for uniqueness
-- Session IDs used as primary identifiers
-- All data fully anonymised for research purposes
-
-## Project Structure
+## Project structure
 
 ```
-/
-├── index.html          # Main application entry point
-├── dashboard.html      # Public analytics dashboard
-├── admin.html          # Admin login page
-├── app.js              # Core application logic
-├── styles.css          # Global styles
-├── firebase-config.js  # Firebase configuration
-├── vite.config.js      # Build configuration
-├── firebase.json       # Firebase Hosting and database configuration
-├── database.rules.json # Realtime Database security rules
-└── public/             # Static files copied as-is into the build
-    ├── glossary.json               # Scientific terminology definitions
-    ├── rubric.json                 # Evaluation criteria
-    ├── papers.json                 # Research scenario data
-    ├── feature-order-config.json   # Study feature orderings (not read by the current code)
-    ├── unlock-lab-icon.svg         # Application logo
-    └── unlock-lab-icon-inverted.svg
+index.html, dashboard.html,     page shells for the workshop, the dashboard,
+admin.html, 404.html            the facilitator panel and the not-found page
+src/app/                        participant app
+src/dashboard/                  public dashboard
+src/admin/                      facilitator panel
+src/lib/                        shared modules: scoring, statistics, leaderboard, translations, Firebase set-up
+src/content/                    studies, glossary and rubric per language; expert ratings
+src/i18n/                       interface text per language
+src/styles/                     style sheets
+public/                         files copied unchanged into the build
+tools/                          build step that writes the English text into the pages
+tests/unit/, tests/rules/,      unit tests, database rules tests and
+tests/e2e/                      end-to-end tests
+analysis/                       Quarto report on the workshop data
+scripts/                        daily backup and the end-to-end test server
+docs/                           data dictionary, deployment, facilitator guide, translating
+materials/                      workshop handouts (built from src/content with Quarto), slides and artwork
+redirect/                       page that forwards the legacy domain to the current one
+database.rules.json             Realtime Database security rules
+firebase.json, .firebaserc      Firebase Hosting, database and emulator settings
+.github/                        CI, backup workflow and Dependabot
 ```
 
-## Contributing
+## Translating
 
-Contributions are welcome through GitHub issues and pull requests. Areas for enhancement include:
-
-- Additional research scenarios
-- Localisation/internationalisation
-- Accessibility improvements (WCAG compliance)
-- Mobile experience optimisation
-- Analytics export functionality
-
-See the [issues page](https://github.com/pablobernabeu/Unlock_the_Lab/issues) for current development priorities.
+The interface and the content can be translated without changing code; see [`docs/translating.md`](docs/translating.md). A language menu appears once a second language exists.
 
 ## Licence
 
-This project is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) - free to use with attribution. The following reference should be used:
+- Code: [MIT](LICENSE).
+- Content (the studies, rubric, glossary, workshop materials and artwork): [CC BY 4.0](LICENSE-CONTENT.md).
 
-Bernabeu, P. (2026). *Unlock the Lab: Your guide to reading science like a scientist* (Version 1.0.0) [Computer software]. Zenodo. [https://doi.org/10.5281/zenodo.19153148](https://doi.org/10.5281/zenodo.19153148)
+## Citation
+
+Please cite the software as below; [`CITATION.cff`](CITATION.cff) has the details.
+
+Bernabeu, P. (2026). _Unlock the Lab: Your guide to reading science like a scientist_ (Version 2.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.19153148
 
 ## Author
 
-Dr Pablo Bernabeu  
-Department of Education, University of Oxford
+Dr Pablo Bernabeu, Department of Education, University of Oxford. The app and workshop were created in a personal capacity; the employer is not affiliated with, does not endorse and bears no liability for them.
 
-## Acknowledgements
-
-- Workshop design based on peer assessment pedagogy
-- Fictional research scenarios created for educational purposes
-- Open source libraries: Chart.js, Vite, Firebase SDK
-
-## Version History
-
-- **v1.0** (2026-03): Initial release with 48 scenarios, real-time leaderboard and analytics dashboard
-
-## Support
-
-For questions, issues, or feature requests, please use the [GitHub issue tracker](https://github.com/pablobernabeu/Unlock_the_Lab/issues).
+Suggestions and bug reports are welcome on the [issue tracker](https://github.com/pablobernabeu/Unlock_the_Lab/issues).

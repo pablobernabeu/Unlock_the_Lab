@@ -1,0 +1,966 @@
+/*
+ * Unlock the Lab: shared base styles (tokens, reset, typography, layout and
+ * components used by every page). Page-specific styles live in app.css,
+ * dashboard.css and admin.css.
+ *
+ * Colour contrast (WCAG 2.2 AA), computed with the WCAG relative-luminance formula.
+ * Normal text needs 4.5:1:
+ *   --color-text            #1e293b on --color-surface        #ffffff  14.63:1
+ *   --color-text            #1e293b on --color-bg             #f8fafc  13.98:1
+ *   --color-text            #1e293b on --color-surface-muted  #f1f5f9  13.35:1
+ *   --color-text            #1e293b on --color-brand-tint     #e6f6f5  13.14:1
+ *   --color-text            #1e293b on --color-amber-tint     #fef3c7  13.14:1
+ *   --color-text            #1e293b on --color-green-tint     #d1fae5  12.90:1
+ *   --color-text            #1e293b on --color-danger-tint    #fee2e2  11.98:1
+ *   --color-text            #1e293b on --color-info-tint      #dbeafe  11.99:1
+ *   --color-text-muted      #475569 on --color-surface        #ffffff   7.58:1
+ *   --color-text-muted      #475569 on --color-bg             #f8fafc   7.24:1
+ *   --color-text-muted      #475569 on --color-surface-muted  #f1f5f9   6.92:1
+ *   --color-brand-strong    #0f766e on --color-surface        #ffffff   5.47:1
+ *   --color-brand-strong    #0f766e on --color-bg             #f8fafc   5.23:1
+ *   --color-brand-strong    #0f766e on --color-brand-tint     #e6f6f5   4.92:1
+ *   --color-accent-strong   #5563d6 on --color-surface        #ffffff   5.07:1
+ *   --color-accent-strong   #5563d6 on --color-bg             #f8fafc   4.85:1
+ *   --color-amber-strong    #b45309 on --color-surface        #ffffff   5.02:1
+ *   --color-amber-text      #92400e on --color-amber-tint     #fef3c7   6.37:1
+ *   --color-green-strong    #047857 on --color-surface        #ffffff   5.48:1
+ *   --color-green-text      #065f46 on --color-green-tint     #d1fae5   6.78:1
+ *   --color-danger          #b91c1c on --color-surface        #ffffff   6.47:1
+ *   --color-danger          #b91c1c on --color-danger-tint    #fee2e2   5.30:1
+ *   --color-info-text       #1e40af on --color-info-tint      #dbeafe   7.15:1
+ *   white                   #ffffff on --color-brand-strong   #0f766e   5.47:1
+ *   white                   #ffffff on --color-brand-hover    #115e59   7.58:1
+ *   white                   #ffffff on --color-accent-strong  #5563d6   5.07:1
+ *   white                   #ffffff on --color-purple         #764ba2   6.37:1
+ *   white                   #ffffff on --color-amber-strong   #b45309   5.02:1
+ *   white                   #ffffff on --color-green-strong   #047857   5.48:1
+ *   white                   #ffffff on --color-danger         #b91c1c   6.47:1
+ *   white                   #ffffff on --color-danger-hover   #991b1b   8.31:1
+ *   white                   #ffffff on --color-text           #1e293b  14.63:1  (toasts)
+ *   white                   #ffffff on --color-quality-low    #881337   9.57:1
+ *   white                   #ffffff on --color-quality-medium #b45309   5.02:1
+ *   white                   #ffffff on --color-quality-high   #0369a1   5.93:1
+ * Large text (24px, or 18.66px bold) and UI components need 3:1:
+ *   white                   #ffffff on --color-accent         #667eea   3.66:1  (large text only)
+ *   --color-border-strong   #64748b on --color-surface        #ffffff   4.76:1  (form control borders)
+ *   --color-border-strong   #64748b on --color-bg             #f8fafc   4.55:1
+ *   --color-focus           #1d4ed8 on --color-surface        #ffffff   6.70:1
+ *   --color-focus           #1d4ed8 on --color-bg             #f8fafc   6.41:1
+ *   --color-focus           #1d4ed8 on --color-surface-muted  #f1f5f9   6.12:1
+ *   --color-focus           #1d4ed8 on --color-brand-tint     #e6f6f5   6.02:1
+ *   --color-focus           #1d4ed8 on --color-amber-tint     #fef3c7   6.02:1
+ *   --color-focus           #1d4ed8 on --color-danger-tint    #fee2e2   5.49:1
+ *   focus ring in toasts    #ffffff on --color-text           #1e293b  14.63:1
+ *   --color-quality-*       on --color-surface                         9.57 / 5.02 / 5.93:1  (chart marks)
+ * Decorative only, never for text or essential UI:
+ *   --color-brand #20b2aa 2.62:1, --color-amber #f59e0b 2.15:1, --color-green #10b981 2.54:1 on white.
+ *
+ * Quality bands with colour-vision deficiency, simulated with the Machado et al. (2009)
+ * matrices at full severity: the smallest CIEDE2000 distance between two bands, kept at 10
+ * or more so that bars, chips and markers stay apart (each band is at least 44 from white):
+ *   normal vision  30.2  low / medium
+ *   protanopia     26.2  low / high
+ *   deuteranopia   21.5  low / medium
+ *   tritanopia     13.7  low / medium
+ */
+
+/* ---------- Tokens ---------- */
+
+:root {
+    color-scheme: light;
+
+    /* v1 identity: teal brand, blue-violet and purple accents, amber and green. The
+       -strong variants are the accessible versions for text and for white text on top. */
+    --color-brand: #20b2aa;
+    --color-brand-strong: #0f766e;
+    --color-brand-hover: #115e59;
+    --color-brand-tint: #e6f6f5;
+    --color-accent: #667eea;
+    --color-accent-strong: #5563d6;
+    --color-purple: #764ba2;
+    --color-amber: #f59e0b;
+    --color-amber-strong: #b45309;
+    --color-amber-text: #92400e;
+    --color-amber-tint: #fef3c7;
+    --color-green: #10b981;
+    --color-green-strong: #047857;
+    --color-green-text: #065f46;
+    --color-green-tint: #d1fae5;
+    --color-danger: #b91c1c;
+    --color-danger-hover: #991b1b;
+    --color-danger-tint: #fee2e2;
+    --color-info-text: #1e40af;
+    --color-info-tint: #dbeafe;
+
+    --color-text: #1e293b;
+    --color-text-muted: #475569;
+    --color-text-inverse: #ffffff;
+    --color-bg: #f8fafc;
+    --color-surface: #ffffff;
+    --color-surface-muted: #f1f5f9;
+    --color-border: #e2e8f0;
+    --color-border-strong: #64748b;
+    --color-link: var(--color-brand-strong);
+    --color-link-hover: var(--color-brand-hover);
+    --color-focus: #1d4ed8;
+
+    /* Expert quality bands, told apart with colour-vision deficiency too (see the record at
+       the top). Always pair with a text label. */
+    --color-quality-low: #881337;
+    --color-quality-medium: #b45309;
+    --color-quality-high: #0369a1;
+
+    --font-body:
+        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: clamp(1.625rem, 1.3rem + 1.4vw, 2rem);
+    --leading: 1.6;
+
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-pill: 999px;
+    --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.08);
+    --shadow-md: 0 4px 12px rgb(15 23 42 / 0.1);
+    --shadow-lg: 0 12px 32px rgb(15 23 42 / 0.2);
+
+    --container-width: 50rem;
+    --container-wide: 75rem;
+    --header-height: 3.5rem;
+    --target-size: 2.75rem;
+    --transition-fast: 150ms ease;
+}
+
+/* ---------- Reset ---------- */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Keeps focused or linked elements clear of a sticky header. */
+    scroll-padding-top: calc(var(--header-height) + var(--space-4));
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading);
+    color: var(--color-text);
+    background: var(--color-bg);
+    overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote,
+dl,
+dd {
+    margin: 0;
+}
+
+ul,
+ol {
+    margin: 0;
+    padding-inline-start: 1.5rem;
+}
+
+img,
+svg,
+video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+canvas {
+    max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+    font: inherit;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* ---------- Typography ---------- */
+
+h1,
+h2,
+h3,
+h4 {
+    line-height: 1.25;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+h1 {
+    font-size: var(--text-3xl);
+    color: var(--color-brand-strong);
+}
+
+h2 {
+    font-size: var(--text-2xl);
+}
+
+h3 {
+    font-size: var(--text-xl);
+}
+
+h4 {
+    font-size: var(--text-lg);
+}
+
+a {
+    color: var(--color-link);
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.15em;
+}
+
+a:hover {
+    color: var(--color-link-hover);
+    text-decoration-thickness: 0.12em;
+}
+
+small,
+.text-small {
+    font-size: var(--text-sm);
+}
+
+.text-muted {
+    color: var(--color-text-muted);
+}
+
+.lead {
+    font-size: var(--text-lg);
+}
+
+code,
+kbd {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+}
+
+/* Vertical rhythm for prose: add .flow to a container of paragraphs, lists and headings. */
+.flow > * + * {
+    margin-block-start: var(--flow-space, 1em);
+}
+
+/* ---------- Layout ---------- */
+
+.container {
+    width: 100%;
+    max-width: var(--container-width);
+    margin-inline: auto;
+    padding-inline: var(--space-4);
+}
+
+.container--wide {
+    max-width: var(--container-wide);
+}
+
+.stack > * + * {
+    margin-block-start: var(--stack-space, var(--space-4));
+}
+
+.cluster {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--cluster-gap, var(--space-3));
+}
+
+main {
+    display: block;
+    padding-block: var(--space-6) var(--space-10);
+}
+
+/* Programmatic focus on headings and landmarks (tabindex="-1") needs no ring for mouse users. */
+[tabindex='-1']:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ---------- Header and footer ---------- */
+
+.site-header {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Preview builds only (src/lib/preview-banner.js): previews use the live database. */
+.preview-banner {
+    margin: 0;
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 3px solid var(--color-amber-strong);
+    background: var(--color-amber-tint);
+    color: var(--color-amber-text);
+    font-weight: 700;
+    text-align: center;
+}
+
+.site-header__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+    min-height: var(--header-height);
+    padding-block: var(--space-2);
+}
+
+.site-header__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.site-header__logo {
+    width: auto;
+    height: 2rem;
+}
+
+.site-footer {
+    margin-top: var(--space-10);
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+.site-footer p + p {
+    margin-top: var(--space-2);
+}
+
+.site-footer a {
+    color: var(--color-link);
+}
+
+/* ---------- Accessibility helpers ---------- */
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.skip-link {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    z-index: 1000;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--color-text);
+    color: var(--color-text-inverse);
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(-200%);
+}
+
+.skip-link:focus {
+    transform: none;
+    color: var(--color-text-inverse);
+}
+
+:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: var(--target-size);
+    padding: var(--space-2) var(--space-5);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    background: var(--color-surface-muted);
+    color: var(--color-text);
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast);
+}
+
+.btn:hover {
+    color: var(--color-text);
+}
+
+.btn-primary {
+    background: var(--color-brand-strong);
+    color: var(--color-text-inverse);
+}
+
+.btn-primary:hover {
+    background: var(--color-brand-hover);
+    color: var(--color-text-inverse);
+}
+
+.btn-secondary {
+    background: var(--color-surface);
+    border-color: var(--color-brand-strong);
+    color: var(--color-brand-strong);
+}
+
+.btn-secondary:hover {
+    background: var(--color-brand-tint);
+    color: var(--color-brand-hover);
+}
+
+.btn-danger {
+    background: var(--color-danger);
+    color: var(--color-text-inverse);
+}
+
+.btn-danger:hover {
+    background: var(--color-danger-hover);
+    color: var(--color-text-inverse);
+}
+
+.btn-link {
+    min-height: 1.5rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-link);
+    font-weight: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.15em;
+}
+
+.btn-link:hover {
+    color: var(--color-link-hover);
+}
+
+.btn-small {
+    min-height: 2rem;
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+}
+
+/* Disabled buttons stay legible but look inactive; the reason is given in nearby text. */
+.btn:disabled,
+.btn[aria-disabled='true'] {
+    background: var(--color-surface-muted);
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+}
+
+.btn-link:disabled {
+    background: none;
+    text-decoration: none;
+}
+
+/* ---------- Cards and information boxes ---------- */
+
+.card {
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.info-box {
+    --info-accent: var(--color-brand-strong);
+    --info-bg: var(--color-brand-tint);
+    padding: var(--space-4);
+    border-left: 4px solid var(--info-accent);
+    border-radius: var(--radius-md);
+    background: var(--info-bg);
+    color: var(--color-text);
+}
+
+.info-box a {
+    color: inherit;
+}
+
+.info-box__title {
+    margin-bottom: var(--space-2);
+    font-size: var(--text-lg);
+    font-weight: 700;
+}
+
+.info-box--info {
+    --info-accent: var(--color-info-text);
+    --info-bg: var(--color-info-tint);
+}
+
+.info-box--warning {
+    --info-accent: var(--color-amber-strong);
+    --info-bg: var(--color-amber-tint);
+}
+
+.info-box--danger {
+    --info-accent: var(--color-danger);
+    --info-bg: var(--color-danger-tint);
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.125rem var(--space-2);
+    border-radius: var(--radius-pill);
+    background: var(--color-text-muted);
+    color: var(--color-text-inverse);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+.badge--low {
+    background: var(--color-quality-low);
+}
+
+.badge--medium {
+    background: var(--color-quality-medium);
+}
+
+.badge--high {
+    background: var(--color-quality-high);
+}
+
+.badge--brand {
+    background: var(--color-brand-strong);
+}
+
+/* ---------- Forms ---------- */
+
+label {
+    font-weight: 600;
+}
+
+.field {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.field-hint {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+.field-error {
+    color: var(--color-danger);
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+.input,
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='search'],
+input[type='number'],
+input[type='url'],
+select,
+textarea {
+    width: 100%;
+    min-height: var(--target-size);
+    padding: var(--space-2) var(--space-3);
+    border: 2px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+textarea {
+    min-height: 6rem;
+}
+
+[aria-invalid='true'] {
+    border-color: var(--color-danger);
+}
+
+/* :where() keeps this at zero specificity so component classes (such as the switch) can resize. */
+:where(input[type='checkbox'], input[type='radio']) {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    accent-color: var(--color-brand-strong);
+}
+
+fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+legend {
+    padding-inline: var(--space-1);
+    font-weight: 700;
+}
+
+/* Animations switch (a native checkbox with role="switch"). */
+.motion-toggle {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.motion-toggle__input {
+    position: relative;
+    flex: none;
+    width: 2.75rem;
+    height: 1.5rem;
+    border: 2px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--color-border-strong);
+    appearance: none;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.motion-toggle__input::before {
+    content: '';
+    position: absolute;
+    top: 0.125rem;
+    left: 0.125rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--color-surface);
+    transition: transform var(--transition-fast);
+}
+
+.motion-toggle__input:checked {
+    border-color: var(--color-brand-strong);
+    background: var(--color-brand-strong);
+}
+
+.motion-toggle__input:checked::before {
+    transform: translateX(1.25rem);
+}
+
+.motion-toggle__input:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.motion-toggle__label {
+    font-weight: 600;
+}
+
+.motion-toggle__hint {
+    flex-basis: 100%;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+@media (forced-colors: active) {
+    .motion-toggle__input {
+        border-color: CanvasText;
+    }
+
+    .motion-toggle__input::before {
+        background: CanvasText;
+    }
+}
+
+.locale-switcher {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.locale-switcher select {
+    width: auto;
+    min-height: 2.25rem;
+    padding-block: var(--space-1);
+}
+
+/* ---------- Dialogs ---------- */
+
+.dialog {
+    width: min(32rem, calc(100vw - 2rem));
+    max-height: calc(100vh - 2rem);
+    padding: var(--space-6);
+    border: 0;
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-lg);
+}
+
+.dialog::backdrop {
+    background: rgb(15 23 42 / 0.6);
+}
+
+.dialog__title {
+    margin-bottom: var(--space-3);
+    font-size: var(--text-xl);
+}
+
+.dialog__message > * + * {
+    margin-top: var(--space-3);
+}
+
+.dialog__message .field {
+    margin-top: var(--space-4);
+}
+
+.dialog__actions {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+}
+
+@media (max-width: 30rem) {
+    .dialog {
+        padding: var(--space-5);
+    }
+
+    .dialog__actions .btn {
+        flex: 1 1 100%;
+    }
+}
+
+/* ---------- Toasts ---------- */
+
+.toast-region {
+    position: fixed;
+    inset-inline: 0;
+    bottom: var(--space-4);
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding-inline: var(--space-4);
+    pointer-events: none;
+}
+
+.toast {
+    --toast-accent: var(--color-brand);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    width: 100%;
+    max-width: 32rem;
+    padding: var(--space-3) var(--space-4);
+    border-left: 6px solid var(--toast-accent);
+    border-radius: var(--radius-md);
+    background: var(--color-text);
+    color: var(--color-text-inverse);
+    box-shadow: var(--shadow-lg);
+    pointer-events: auto;
+    animation: toast-in 200ms ease-out;
+    --color-focus: #ffffff;
+}
+
+.toast--success {
+    --toast-accent: var(--color-green);
+}
+
+.toast--warning {
+    --toast-accent: var(--color-amber);
+}
+
+.toast--error {
+    --toast-accent: #f87171;
+}
+
+.toast__message {
+    flex: 1;
+}
+
+.toast__close {
+    flex: none;
+    min-width: 2rem;
+    min-height: 2rem;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: inherit;
+    font-size: var(--text-xl);
+    line-height: 1;
+}
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(0.5rem);
+    }
+}
+
+/* ---------- Tables ---------- */
+
+/* A scrollable wrapper also needs tabindex="0", role="region" and an aria-label in the markup. */
+.table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.table caption {
+    padding-bottom: var(--space-2);
+    font-weight: 700;
+    text-align: left;
+}
+
+.table th,
+.table td {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: top;
+}
+
+.table thead th {
+    background: var(--color-surface-muted);
+    border-bottom: 2px solid var(--color-border-strong);
+    white-space: nowrap;
+}
+
+.table tbody tr:nth-child(even) {
+    background: var(--color-bg);
+}
+
+.table .num {
+    text-align: right;
+}
+
+/* Sortable headers hold a button; aria-sort on the th carries the state. */
+.table .sort-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 1.5rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-weight: 700;
+    text-align: inherit;
+}
+
+/* ---------- Not-found and other single-message pages ---------- */
+
+.page-message {
+    max-width: 36rem;
+    margin: var(--space-10) auto;
+    text-align: center;
+}
+
+.page-message .cluster {
+    justify-content: center;
+    margin-top: var(--space-6);
+}
+
+/* ---------- Motion ---------- */
+
+/* Gentle idle shake of the logo, as in v1, only while motion is allowed (motion.js sets data-motion). */
+@keyframes logo-shake {
+    0%,
+    50%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(-8deg);
+    }
+
+    75% {
+        transform: rotate(8deg);
+    }
+}
+
+:root[data-motion='on'] .logo-idle {
+    transform-origin: center;
+    animation: logo-shake 2s ease-in-out infinite;
+}
+
+/* No animation or transition when the device asks for reduced motion or
+   the person switched animations off. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+:root[data-motion='off'] *,
+:root[data-motion='off'] *::before,
+:root[data-motion='off'] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+}

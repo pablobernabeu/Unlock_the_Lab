@@ -1,0 +1,94 @@
+{
+  "appName": "Unlock the Lab",
+  "tagline": "Your guide to reading science like a scientist",
+  "nav": {
+    "skipToContent": "Skip to main content",
+    "workshop": "Workshop",
+    "dashboard": "Live dashboard",
+    "mainLabel": "Main"
+  },
+  "criteria": {
+    "title": "Title",
+    "access": "Access",
+    "source": "Source",
+    "theory": "Theory",
+    "methods": "Methods & Data",
+    "conclusion": "Conclusion"
+  },
+  "criterionDescriptions": {
+    "title": "Does the title describe the finding accurately, without hype?",
+    "access": "Can anyone read the full study free of charge?",
+    "source": "Was it published by a trustworthy, independent outlet?",
+    "theory": "Does it build on earlier research to fill a real gap in knowledge?",
+    "methods": "Are the design, sample and controls adequate, and are the data open?",
+    "conclusion": "Do the claims stay within what the data show?"
+  },
+  "quality": {
+    "low": "Low quality",
+    "medium": "Medium quality",
+    "high": "High quality",
+    "lowRange": "Expert rating 1–2",
+    "mediumRange": "Expert rating 3–5",
+    "highRange": "Expert rating 6–7"
+  },
+  "counts": {
+    "studies": {
+      "one": "{count} study",
+      "other": "{count} studies"
+    }
+  },
+  "participant": {
+    "unnamed": "Unnamed participant"
+  },
+  "room": {
+    "label": "Room code",
+    "hint": "2 to 20 capital letters, digits or hyphens, for example OXFORD-1",
+    "invalid": "Room codes have 2 to 20 characters: capital letters, digits or hyphens, starting with a letter or digit."
+  },
+  "dialog": {
+    "ok": "OK",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close",
+    "typeToConfirm": "Type {expected} to confirm"
+  },
+  "toast": {
+    "dismiss": "Dismiss message"
+  },
+  "motion": {
+    "label": "Animations",
+    "reducedBySystem": "Off because your device is set to reduce motion."
+  },
+  "language": {
+    "label": "Language",
+    "apply": "Change language"
+  },
+  "preview": {
+    "banner": "Preview build: anything you do here is saved to the live database."
+  },
+  "status": {
+    "loading": "Loading…"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "offline": "You seem to be offline. Check your connection and try again.",
+    "storageUnavailable": "Your browser is blocking site storage, so your progress will be lost if you close or reload this page.",
+    "retry": "Try again",
+    "reload": "Reload the page"
+  },
+  "footer": {
+    "author": "<strong>Author:</strong> Dr Pablo Bernabeu, Department of Education, University of Oxford",
+    "disclaimer": "<strong>Legal disclaimer:</strong> This app and workshop were created by Dr Pablo Bernabeu in a personal capacity during spare time. The employer is not affiliated with, does not endorse and bears no liability for this app or workshop.",
+    "licence": "<strong>Licence:</strong> code under the <a href=\"https://github.com/pablobernabeu/Unlock_the_Lab/blob/main/LICENSE\">MIT licence</a>; studies, rubric, glossary and workshop materials under <a href=\"https://creativecommons.org/licenses/by/4.0/\">CC BY 4.0</a>.",
+    "materials": "<strong>Materials and source code:</strong> <a href=\"https://github.com/pablobernabeu/Unlock_the_Lab\">github.com/pablobernabeu/Unlock_the_Lab</a>",
+    "issues": "Suggestions and bug reports are welcome on <a href=\"https://github.com/pablobernabeu/Unlock_the_Lab/issues\">GitHub</a>.",
+    "version": "Version {version}"
+  },
+  "notFound": {
+    "pageTitle": "Page not found – Unlock the Lab",
+    "heading": "Page not found",
+    "message": "There is no page at this address. Check the link, or go to one of these pages:",
+    "toWorkshop": "Go to the workshop",
+    "toDashboard": "Open the live dashboard"
+  }
+}
