@@ -1,7 +1,7 @@
 // axe (WCAG 2.0, 2.1 and 2.2 A and AA rules) on every view of the three
 // pages and the 404 page, on a desktop and a phone-sized screen.
-import { ADMIN, readPath, SERVER_TIMESTAMP, writePath } from './emulator.js';
-import { LEGACY_NAME, LEGACY_SESSION, SHARED_NAME } from './fixture.js';
+import { ADMIN, readPath, SERVER_TIMESTAMP, updatePath, writePath } from './emulator.js';
+import { CONTENT_VERSION, LEGACY_NAME, LEGACY_SESSION, SHARED_NAME } from './fixture.js';
 import {
     allocateTokens,
     expectNoAxeViolations,
@@ -56,6 +56,24 @@ for (const width of [1280, 360]) {
             await expectNoAxeViolations(page, 'feedback');
             await page.getByRole('button', { name: 'Next study' }).click();
             await rateStudies(page, 9);
+            // The fixture's current-version ratings cover only some studies, and the
+            // comparison chart counts only those, so another participant rates each
+            // study this session rated, whatever its random order.
+            const { userRatings } = await savedState(page);
+            await updatePath(
+                'ratings',
+                Object.fromEntries(
+                    Object.keys(userRatings).map((studyId) => [
+                        `${studyId}/session_1790000300000_a11ypeer`,
+                        {
+                            rating: 4,
+                            prediction: 4,
+                            timestamp: SERVER_TIMESTAMP,
+                            contentVersion: CONTENT_VERSION,
+                        },
+                    ])
+                )
+            );
 
             await page.getByRole('button', { name: 'Finish and see my results' }).click();
             await expect(page.getByRole('dialog', { name: 'Finish now?' })).toBeVisible();
