@@ -133,7 +133,7 @@ describe('renderResultsView', () => {
         }));
         const view = readOnlyView(rows);
         const explanations = [...view.querySelectorAll('p')].filter((p) =>
-            p.textContent.startsWith('Some answers were given to an earlier version')
+            p.textContent.startsWith('Where an answer was given to an earlier version')
         );
         expect(explanations).toHaveLength(1);
         expect(explanations[0].nextElementSibling.matches('.review-list')).toBe(true);

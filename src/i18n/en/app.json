@@ -254,7 +254,7 @@
     "reviewScore": "Score",
     "reviewExpert": "Expert rating",
     "reviewFeedback": "Expert feedback on this study",
-    "reviewEarlierVersions": "Some answers were given to an earlier version of the studies. For those, the expert rating listed with the answer is the one for that version, while the title and the expert feedback, including its rating, belong to the current version.",
+    "reviewEarlierVersions": "Where an answer was given to an earlier version of the studies, the expert rating listed with it is the one for that version, while the title and the expert feedback, including its rating, belong to the current version.",
     "reviewEarlierVersion": "Given to content version {version} of this study.",
     "notRecorded": "not recorded",
     "weightsHeading": "How the criteria were weighted",

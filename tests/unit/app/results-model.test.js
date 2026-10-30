@@ -13,7 +13,7 @@ import {
     tokenShares,
     withOwnEntry,
 } from '../../../src/app/results-model.js';
-import { commitRating, createState } from '../../../src/app/state.js';
+import { commitRating, createState, migrateState } from '../../../src/app/state.js';
 
 const SID = 'session_1790000000000_abc123def';
 const studies = [
@@ -95,6 +95,37 @@ describe('ownReviewRows', () => {
         expect(row.target).toBeNull();
         expect(row.crowd).toBeNull();
         expect(row.score).toBe(88);
+    });
+
+    it("gives an answer resumed from an earlier content version that version's expert rating", () => {
+        const resumed = migrateState(
+            {
+                sessionId: SID,
+                currentPage: 4,
+                userRatings: { 'STUDY-13': 5 },
+                userPredictions: { 'STUDY-13': 5 },
+                paperScores: { 'STUDY-13': 100 },
+            },
+            { studyCount: 48 }
+        );
+        const state = commitRating(resumed, {
+            studyId: 'STUDY-2',
+            rating: 6,
+            prediction: 6,
+            score: 100,
+            target: 6,
+            crowd: null,
+            feedbackShown: true,
+        });
+        const order = [
+            { id: 'STUDY-13', title: 'Thirteen', expertRating: 4 },
+            { id: 'STUDY-2', title: 'Two', expertRating: 6 },
+        ];
+        const rows = ownReviewRows(order, state);
+        expect(rows.map((row) => [row.study.id, row.contentVersion, row.expertRating])).toEqual([
+            ['STUDY-13', 1, 5],
+            ['STUDY-2', CONTENT_VERSION, 6],
+        ]);
     });
 });
 

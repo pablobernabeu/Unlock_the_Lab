@@ -35,7 +35,8 @@ export function othersMean(node, excludeSessionId, contentVersion = null) {
 }
 
 /**
- * Rows for the participant's own results, in the order the studies were rated.
+ * Rows for the participant's own results, in the order the studies were rated,
+ * each with the expert rating of the content version it was given to.
  * @param {object[]} order studies in the participant's seeded order
  * @param {object} state participant state (see state.js)
  * @returns {Array<{study: object, rating: number, prediction: number|null, score: number|null,
@@ -45,17 +46,23 @@ export function othersMean(node, excludeSessionId, contentVersion = null) {
 export function ownReviewRows(order, state) {
     return order
         .filter((study) => Object.hasOwn(state.userRatings, study.id))
-        .map((study, index) => ({
-            study,
-            rating: state.userRatings[study.id],
-            prediction: state.userPredictions[study.id] ?? null,
-            score: state.paperScores[study.id] ?? null,
-            target: state.paperTargets[study.id] ?? null,
-            crowd: state.paperCrowd[study.id] ?? null,
-            trial: index + 1,
-            contentVersion: CONTENT_VERSION,
-            expertRating: study.expertRating,
-        }));
+        .map((study, index) => {
+            const contentVersion = state.paperVersions?.[study.id] ?? CONTENT_VERSION;
+            return {
+                study,
+                rating: state.userRatings[study.id],
+                prediction: state.userPredictions[study.id] ?? null,
+                score: state.paperScores[study.id] ?? null,
+                target: state.paperTargets[study.id] ?? null,
+                crowd: state.paperCrowd[study.id] ?? null,
+                trial: index + 1,
+                contentVersion,
+                expertRating:
+                    contentVersion === CONTENT_VERSION
+                        ? study.expertRating
+                        : (expertRatingFor(study.id, contentVersion) ?? study.expertRating),
+            };
+        });
 }
 
 function numberOrNull(value, isValid = Number.isFinite) {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CONTENT_VERSION } from '../../../src/lib/config.js';
 import { SESSION_ID_PATTERN } from '../../../src/lib/patterns.js';
 import { seededShuffle } from '../../../src/lib/shuffle.js';
 import {
@@ -79,6 +80,13 @@ describe('migrateState from v1', () => {
         expect(migrated.paperScores).toEqual(V1_STATE.paperScores);
         expect(migrated.totalScore).toBe(352);
         expect(ratedCount(migrated)).toBe(4);
+    });
+
+    it('marks every answer as given to content version 1', () => {
+        expect(Object.keys(migrated.paperVersions).sort()).toEqual(
+            Object.keys(V1_STATE.userRatings).sort()
+        );
+        expect(new Set(Object.values(migrated.paperVersions))).toEqual(new Set([1]));
     });
 
     it('drops the v1 display times, which v1 reset on every display (last shown, not first)', () => {
@@ -180,6 +188,35 @@ describe('migrateState from v1', () => {
 });
 
 describe('migrateState from v2', () => {
+    it('infers the content version of answers saved before versions were stored', () => {
+        // Version 2 stored a target with every answer; answers resumed from version 1 have none.
+        const saved = {
+            ...createState({ sessionId: 'session_1790000000000_abc123def' }),
+            userRatings: { 'STUDY-1': 2, 'STUDY-2': 6 },
+            userPredictions: { 'STUDY-1': 2, 'STUDY-2': 6 },
+            paperScores: { 'STUDY-1': 88, 'STUDY-2': 100 },
+            paperTargets: { 'STUDY-2': 6 },
+        };
+        delete saved.paperVersions;
+        const migrated = migrateState(saved, { studyCount: STUDY_COUNT });
+        expect(migrated.paperVersions).toEqual({ 'STUDY-1': 1, 'STUDY-2': 2 });
+    });
+
+    it('keeps stored content versions and drops impossible ones', () => {
+        const saved = {
+            ...createState({ sessionId: 'session_1790000000000_abc123def' }),
+            userRatings: { 'STUDY-1': 2, 'STUDY-2': 6 },
+            paperTargets: { 'STUDY-1': 2, 'STUDY-2': 6 },
+            paperVersions: {
+                'STUDY-1': CONTENT_VERSION,
+                'STUDY-2': CONTENT_VERSION + 1,
+                'STUDY-9': 1,
+            },
+        };
+        const migrated = migrateState(saved, { studyCount: STUDY_COUNT });
+        expect(migrated.paperVersions).toEqual({ 'STUDY-1': CONTENT_VERSION, 'STUDY-2': 2 });
+    });
+
     it('round-trips a v2 state unchanged', () => {
         let state = createState({
             sessionId: 'session_1790000000000_abc123def',
@@ -244,6 +281,7 @@ describe('commitRating', () => {
         expect(next.paperTargets).toEqual({ 'STUDY-1': 1 });
         expect(next.paperCrowd).toEqual({ 'STUDY-1': { n: 0, mean: null } });
         expect(next.paperFeedbackShown).toEqual({ 'STUDY-1': true });
+        expect(next.paperVersions).toEqual({ 'STUDY-1': CONTENT_VERSION });
         expect(next.totalScore).toBe(100);
     });
 
@@ -384,6 +422,7 @@ describe('mergeStates', () => {
         expect(Object.keys(merged.paperTargets)).toHaveLength(3);
         expect(Object.keys(merged.paperCrowd)).toHaveLength(3);
         expect(Object.keys(merged.paperFeedbackShown)).toHaveLength(3);
+        expect(Object.keys(merged.paperVersions)).toHaveLength(3);
         // The page is the latest copy's.
         expect(merged.currentPage).toBe(3);
         // Neither input is changed.
