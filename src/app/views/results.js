@@ -29,6 +29,8 @@ import { drawRatingChart } from './results-chart.js';
  * @property {Promise<object[]>} entries leaderboard entries (own entry merged in)
  * @property {Promise<Record<string, {n: number, mean: number|null}>>} others
  * @property {Record<string, number>|null} tokens criterion weights
+ * @property {boolean} [tokensKeptLocally] the weights are only in this browser, because an
+ *   earlier allocation for the session was already stored
  */
 
 let activeChart = null;
@@ -434,6 +436,7 @@ function weightsSection(model) {
     return section(
         'results-weights-heading',
         t('app.results.weightsHeading'),
+        model.tokensKeptLocally ? el('p', null, t('app.results.weightsLocal')) : null,
         el(
             'ul',
             { class: 'weight-bars' },

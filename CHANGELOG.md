@@ -14,6 +14,7 @@ A rewrite of the app, its data handling and the repository. Ratings stored by ve
 - Accessible to keyboard and screen-reader users (WCAG 2.2 AA, checked with axe), with reduced-motion support, an animation switch and no browser pop-ups.
 - Answers count only once they are saved; failures can be retried. Sessions pause after 30 minutes without activity and resume where they stopped. 'Start as a new participant' supports shared computers.
 - Sessions in progress from version 1 resume with the same study order, answers and scores.
+- The browser's Back and Forward buttons move between the pages by the same rules as the app's own buttons, and two tabs of one session stay in step without losing answers.
 - Interface text and content can be translated; English is the only language so far.
 
 ### Dashboard and facilitator panel
@@ -33,10 +34,12 @@ A rewrite of the app, its data handling and the repository. Ratings stored by ve
 - Database rules bind every write to the session's owner, validate every field, bound leaderboard updates and allow only the nickname vocabulary. Administrators come from an allowlist (`/admins`) instead of any email/password account.
 - Usernames are never inserted as HTML (version 1 allowed stored cross-site scripting).
 - Google Analytics removed. Content Security Policy and security headers added.
+- Firebase App Check with reCAPTCHA Enterprise is ready to switch on (`docs/deployment.md`); the backups can then read with an App Check token.
 
 ### Repository
 
 - Code licensed under MIT; content stays CC BY 4.0. `CITATION.cff` added.
+- The workshop handouts (an evaluation guide with the rubric and glossary, and six sample studies with an answer key) are rebuilt with Quarto from the app's content files, as Word and PDF, replacing the version 1 handouts.
 - Vite 8, Firebase 13 and Chart.js bundled from npm; build output is no longer committed.
 - Unit, database-rules, end-to-end and accessibility tests run in CI, which deploys the site and the database rules from `main` and publishes a preview for each pull request from a branch of this repository. Development requires Node.js 24.12 or later.
 

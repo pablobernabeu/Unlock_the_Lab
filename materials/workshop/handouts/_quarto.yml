@@ -1,0 +1,30 @@
+# Shared settings for the handouts. Render with ./build.sh (or `quarto render`
+# in this folder); see README.md.
+project:
+  render:
+    - evaluation-guide.qmd
+    - sample-studies.qmd
+
+lang: en-GB
+author: Pablo Bernabeu
+
+execute:
+  echo: false
+  warning: false
+  message: false
+
+format:
+  typst:
+    papersize: a4
+    margin:
+      x: 2cm
+      top: 2cm
+      bottom: 2.5cm
+    fontsize: 11pt
+    include-in-header: handouts.typ
+    # Ragged-right text reads more easily on a handout than justified text;
+    # this has to follow the template's own paragraph settings.
+    include-before-body:
+      text: '#set par(justify: false)'
+  docx:
+    reference-doc: reference.docx

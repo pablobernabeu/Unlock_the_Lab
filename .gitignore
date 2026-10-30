@@ -19,6 +19,8 @@ analysis/*.html
 .Rhistory
 .RData
 .Rproj.user/
+materials/**/.quarto/
+materials/**/*_files/
 
 # Legacy
 ratings.pdf

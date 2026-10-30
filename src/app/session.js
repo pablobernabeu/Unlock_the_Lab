@@ -258,5 +258,9 @@ export function createSession({
         get closed() {
             return phase === 'closed';
         },
+        /** Paused after inactivity, until the participant continues. */
+        get paused() {
+            return phase === 'paused';
+        },
     };
 }

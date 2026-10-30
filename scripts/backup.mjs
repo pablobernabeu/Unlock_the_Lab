@@ -7,6 +7,10 @@
 // FIREBASE_DATABASE_URL overrides the database, for example the local emulator
 // (the app keeps its data in the namespace named after the production instance):
 //   FIREBASE_DATABASE_URL='http://127.0.0.1:9000/?ns=unlock-the-lab-workshop-default-rtdb' node scripts/backup.mjs --out tmp
+//
+// Once App Check is enforced for the database, set FIREBASE_APPCHECK_DEBUG_TOKEN to a debug
+// token registered for the web app: the script exchanges it for an App Check token and sends
+// that with every read (see 'Firebase App Check' in docs/deployment.md).
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -14,6 +18,19 @@ import { parseArgs } from 'node:util';
 
 export const DEFAULT_DATABASE_URL =
     'https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app';
+
+/** The web app that App Check tokens are issued for: public values from src/lib/firebase-config.js. */
+export const APP_CHECK_APP = Object.freeze({
+    projectId: 'unlock-the-lab-workshop',
+    appId: '1:604889899913:web:d46afe88111e8bcb7d3758',
+    apiKey: 'AIzaSyCjLzq8QNQqhGOpTJy3tzwuQrovMm6Vdi4',
+});
+
+/** The App Check API, as the Firebase web SDK calls it (@firebase/app-check). */
+export const APP_CHECK_ENDPOINT = 'https://content-firebaseappcheck.googleapis.com/v1';
+
+/** The live site, sent as the referrer so that a browser key restricted to it still works. */
+export const SITE_URL = 'https://unlock-the-lab.web.app/';
 
 // /active is left out on purpose: it is short-lived presence data.
 export const NODES = ['ratings', 'leaderboard', 'rankings', 'sessions'];
@@ -28,7 +45,8 @@ const USAGE = `Usage: node scripts/backup.mjs --out <dir> [--dry-run] [--allow-e
   --dry-run       fetch and compare, but write nothing
   --allow-empty   allow an empty node to replace a backup file that holds data
 
-Reads from FIREBASE_DATABASE_URL (default ${DEFAULT_DATABASE_URL}).`;
+Reads from FIREBASE_DATABASE_URL (default ${DEFAULT_DATABASE_URL}). With
+FIREBASE_APPCHECK_DEBUG_TOKEN set, every read carries an App Check token.`;
 
 /** Natural key order ('STUDY-2' before 'STUDY-10'), with code-unit order as the tiebreak. */
 export function compareKeys(a, b) {
@@ -200,6 +218,85 @@ function isRetryable(error) {
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
+ * Runs `task`, retrying network failures, timeouts, 408, 429 and 5xx responses after each
+ * of `delays`; other HTTP errors fail at once.
+ * @template T
+ * @param {() => Promise<T>} task
+ * @param {object} labels
+ * @param {string} labels.failed what could not be done, e.g. 'read /ratings'
+ * @param {string} labels.doing the same as a gerund, e.g. 'Reading /ratings'
+ * @param {{delays: number[], sleep: (ms: number) => Promise<void>, logger: Pick<Console, 'warn'>}} options
+ * @returns {Promise<T>}
+ */
+async function withRetries(task, { failed, doing }, { delays, sleep, logger }) {
+    for (let attempt = 1; ; attempt += 1) {
+        try {
+            return await task();
+        } catch (error) {
+            if (!isRetryable(error) || attempt > delays.length) {
+                throw new Error(`Could not ${failed} (attempt ${attempt}): ${error.message}`, {
+                    cause: error,
+                });
+            }
+            const delay = delays[attempt - 1];
+            logger.warn(`${doing} failed (${error.message}); retrying in ${delay / 1000} s.`);
+            await sleep(delay);
+        }
+    }
+}
+
+/**
+ * Exchanges a registered App Check debug token for an App Check token, with the request
+ * that the Firebase web SDK makes in debug mode. Retries as fetchNode does.
+ * @param {string} debugToken
+ * @param {object} [options]
+ * @param {typeof fetch} [options.fetchImpl]
+ * @param {{projectId: string, appId: string, apiKey: string}} [options.app]
+ * @param {number[]} [options.delays] ms to wait before each retry
+ * @param {(ms: number) => Promise<void>} [options.sleep]
+ * @param {Pick<Console, 'warn'>} [options.logger]
+ * @returns {Promise<string>} the App Check token, for the X-Firebase-AppCheck header
+ */
+export async function exchangeDebugToken(debugToken, options = {}) {
+    const {
+        fetchImpl = fetch,
+        app = APP_CHECK_APP,
+        delays = RETRY_DELAYS_MS,
+        sleep = wait,
+        logger = console,
+    } = options;
+    const url =
+        `${APP_CHECK_ENDPOINT}/projects/${app.projectId}/apps/${app.appId}:exchangeDebugToken` +
+        `?key=${app.apiKey}`;
+    try {
+        return await withRetries(
+            async () => {
+                const response = await fetchImpl(url, {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json', referer: SITE_URL },
+                    body: JSON.stringify({ debug_token: debugToken }),
+                    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+                });
+                if (!response.ok) throw new HttpError(response.status, await response.text());
+                const { token } = await response.json();
+                if (typeof token !== 'string' || token === '') {
+                    throw new Error('the response held no token');
+                }
+                return token;
+            },
+            { failed: 'get an App Check token', doing: 'Getting an App Check token' },
+            { delays, sleep, logger }
+        );
+    } catch (error) {
+        throw new Error(
+            `${error.message}. Check that FIREBASE_APPCHECK_DEBUG_TOKEN is registered as a ` +
+                'debug token of the web app (docs/deployment.md).',
+            { cause: error }
+        );
+    }
+}
+
+/**
  * Reads one node, retrying network failures, timeouts, 408, 429 and 5xx
  * responses after each of `delays`; other HTTP errors fail at once.
  * @param {string} baseUrl the database URL
@@ -209,33 +306,33 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * @param {number[]} [options.delays] ms to wait before each retry
  * @param {(ms: number) => Promise<void>} [options.sleep]
  * @param {Pick<Console, 'warn'>} [options.logger]
+ * @param {string|null} [options.appCheckToken] sent as X-Firebase-AppCheck when given
  * @returns {Promise<unknown>} the node's value (null when it is empty)
  */
 export async function fetchNode(baseUrl, node, options = {}) {
-    const { fetchImpl = fetch, delays = RETRY_DELAYS_MS, sleep = wait, logger = console } = options;
+    const {
+        fetchImpl = fetch,
+        delays = RETRY_DELAYS_MS,
+        sleep = wait,
+        logger = console,
+        appCheckToken = null,
+    } = options;
     const url = nodeUrl(baseUrl, node);
+    const headers = { accept: 'application/json' };
+    if (appCheckToken) headers['x-firebase-appcheck'] = appCheckToken;
 
-    for (let attempt = 1; ; attempt += 1) {
-        try {
+    return withRetries(
+        async () => {
             const response = await fetchImpl(url, {
-                headers: { accept: 'application/json' },
+                headers,
                 signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
             });
             if (!response.ok) throw new HttpError(response.status, await response.text());
             return await response.json();
-        } catch (error) {
-            if (!isRetryable(error) || attempt > delays.length) {
-                throw new Error(`Could not read /${node} (attempt ${attempt}): ${error.message}`, {
-                    cause: error,
-                });
-            }
-            const delay = delays[attempt - 1];
-            logger.warn(
-                `Reading /${node} failed (${error.message}); retrying in ${delay / 1000} s.`
-            );
-            await sleep(delay);
-        }
-    }
+        },
+        { failed: `read /${node}`, doing: `Reading /${node}` },
+        { delays, sleep, logger }
+    );
 }
 
 async function readExisting(outDir) {
@@ -292,16 +389,27 @@ export async function runBackup({
     delays = RETRY_DELAYS_MS,
     now = new Date(),
     logger = console,
+    appCheckDebugToken = null,
 }) {
     const host = new URL(baseUrl).host;
     logger.log(`Reading ${NODES.join(', ')} from ${host}${dryRun ? ' (dry run)' : ''}.`);
+    let appCheckToken = null;
+    if (appCheckDebugToken) {
+        appCheckToken = await exchangeDebugToken(appCheckDebugToken, { fetchImpl, delays, logger });
+        logger.log('Sending an App Check token from FIREBASE_APPCHECK_DEBUG_TOKEN.');
+    }
 
     const fetched = {};
     const skipped = [];
     let refusal = null;
     for (const node of NODES) {
         try {
-            fetched[node] = await fetchNode(baseUrl, node, { fetchImpl, delays, logger });
+            fetched[node] = await fetchNode(baseUrl, node, {
+                fetchImpl,
+                delays,
+                logger,
+                appCheckToken,
+            });
         } catch (error) {
             // The version 1 rules do not let anyone read /sessions, so until the version 2
             // rules are deployed that node is refused while the others can still be saved.
@@ -385,7 +493,8 @@ async function main(argv) {
         console.error(`FIREBASE_DATABASE_URL must be an http(s) URL, not ${baseUrl}`);
         return 1;
     }
-    return runBackup({ ...options, baseUrl });
+    const appCheckDebugToken = process.env.FIREBASE_APPCHECK_DEBUG_TOKEN?.trim() || null;
+    return runBackup({ ...options, baseUrl, appCheckDebugToken });
 }
 
 // Exit explicitly so that no open handle can keep a scheduled job running.

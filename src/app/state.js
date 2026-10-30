@@ -15,7 +15,8 @@
  *                          overwritten on every display, so v1 values are dropped on migration)
  *   criterionTokens        criterion -> tokens (0-20)
  * v2 adds stateVersion, room, paperTargets, paperFeedbackShown, joinedAt and a
- * few app fields (userName, paperCrowd, rankingSubmitted, finishedFromPage).
+ * few app fields (userName, paperCrowd, rankingSubmitted, rankingKeptLocally,
+ * finishedFromPage).
  *
  * Everything here is pure except loadState/saveState/clearState, which go
  * through lib/storage.js and never throw.
@@ -148,6 +149,8 @@ export function createState({ sessionId, room = null, userName = null }) {
         joinedAt: null,
         userName: USERNAME_PATTERN.test(userName ?? '') ? userName : null,
         rankingSubmitted: false,
+        /** The weights could not be stored because an earlier allocation exists; kept here only. */
+        rankingKeptLocally: false,
         finishedFromPage: null,
     };
 }
@@ -209,6 +212,7 @@ export function migrateState(raw, { studyCount, legacyUserName = null }) {
         paperCrowd: rated(sanitiseCrowd(raw.paperCrowd)),
         joinedAt: Number.isFinite(raw.joinedAt) ? raw.joinedAt : null,
         rankingSubmitted: raw.rankingSubmitted === true,
+        rankingKeptLocally: raw.rankingSubmitted === true && raw.rankingKeptLocally === true,
         finishedFromPage:
             Number.isInteger(finishedFrom) &&
             finishedFrom >= FIRST_STUDY_PAGE &&
@@ -270,6 +274,93 @@ export function commitRating(
     if (crowd) next.paperCrowd[studyId] = { n: crowd.n, mean: crowd.mean };
     if (feedbackShown) next.paperFeedbackShown[studyId] = true;
     return next;
+}
+
+/**
+ * The study page that 'Go back to rating studies' on the weights page leads
+ * to: the page the participant finished early from, while some studies are
+ * still unrated. Null when it is not on offer.
+ * @param {object} state
+ * @param {object[]} order the studies in the participant's order
+ * @returns {number|null}
+ */
+export function keepRatingPage(state, order) {
+    const page = state.finishedFromPage;
+    const unrated = order.some((study) => !isRated(state, study.id));
+    return unrated && Number.isInteger(page) ? page : null;
+}
+
+function earliest(a, b) {
+    if (!Number.isFinite(a)) return Number.isFinite(b) ? b : null;
+    return Number.isFinite(b) ? Math.min(a, b) : a;
+}
+
+/**
+ * Combines two copies of one session's state, such as this tab's and the one
+ * another tab of the same session has just saved, so that no progress is
+ * lost: answers, scores and one-way flags (the back step used, the weights
+ * saved) are joined, and `latest`, the copy changed most recently, decides the
+ * rest, such as the page shown and weights not yet saved.
+ * @param {object|null} base the older copy
+ * @param {object} latest the newer copy
+ * @returns {object} a new state (`latest` itself when `base` is another session)
+ */
+export function mergeStates(base, latest) {
+    if (!base || base.sessionId !== latest.sessionId) return latest;
+    const join = (field) => ({ ...base[field], ...latest[field] });
+    const userRatings = join('userRatings');
+    const paperScores = join('paperScores');
+    const firstDisplay = { ...latest.pageDisplayTimestamps };
+    for (const [id, time] of Object.entries(base.pageDisplayTimestamps)) {
+        firstDisplay[id] = earliest(firstDisplay[id], time);
+    }
+    // Saved weights are final, so they (and the results page that follows them) win over an
+    // allocation that another tab is still changing.
+    const weights = latest.rankingSubmitted || !base.rankingSubmitted ? latest : base;
+    return {
+        ...latest,
+        currentPage: weights.currentPage,
+        userRatings,
+        userPredictions: join('userPredictions'),
+        paperScores,
+        totalScore: sumScores(paperScores, userRatings),
+        paperTargets: join('paperTargets'),
+        paperCrowd: join('paperCrowd'),
+        paperFeedbackShown: join('paperFeedbackShown'),
+        celebratedPapers: [
+            ...latest.celebratedPapers,
+            ...base.celebratedPapers.filter((id) => !latest.celebratedPapers.includes(id)),
+        ],
+        pageDisplayTimestamps: firstDisplay,
+        hasUsedBackButton: base.hasUsedBackButton || latest.hasUsedBackButton,
+        joinedAt: earliest(base.joinedAt, latest.joinedAt),
+        userName: latest.userName ?? base.userName,
+        room: latest.room ?? base.room,
+        criterionTokens: weights.criterionTokens,
+        rankingSubmitted: weights.rankingSubmitted,
+        rankingKeptLocally: weights.rankingKeptLocally,
+        finishedFromPage: latest.finishedFromPage ?? base.finishedFromPage,
+    };
+}
+
+function canonical(value) {
+    if (Array.isArray(value)) return value.map(canonical);
+    if (!isObject(value)) return value;
+    return Object.fromEntries(
+        Object.keys(value)
+            .sort()
+            .map((key) => [key, canonical(value[key])])
+    );
+}
+
+/**
+ * True when two states hold the same values, whatever the order of their keys.
+ * @param {object|null} a
+ * @param {object|null} b
+ * @returns {boolean}
+ */
+export function sameState(a, b) {
+    return JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
 }
 
 /**

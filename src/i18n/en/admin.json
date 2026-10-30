@@ -4,6 +4,7 @@
   "intro": "Tools for workshop facilitators: live figures, room links, data exports and session controls.",
   "navLabel": "Pages",
   "sectionsLabel": "Sections of the facilitator panel",
+  "noscript": "The facilitator panel needs JavaScript. Turn it on in your browser and reload the page.",
   "status": {
     "starting": "Checking whether you are signed in…",
     "checking": "Checking that this account is an administrator…",

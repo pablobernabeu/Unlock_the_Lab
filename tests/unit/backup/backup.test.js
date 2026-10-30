@@ -4,10 +4,14 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+    APP_CHECK_APP,
+    APP_CHECK_ENDPOINT,
     DEFAULT_DATABASE_URL,
     INFO_FILE,
+    SITE_URL,
     compareKeys,
     countRecords,
+    exchangeDebugToken,
     fetchNode,
     fileHasData,
     isEmptyValue,
@@ -458,6 +462,189 @@ describe('runBackup', () => {
     it('rejects when the database cannot be read', async () => {
         const fetchImpl = vi.fn(async () => jsonResponse({ error: 'Permission denied' }, 401));
         await expect(run(fetchedData(), { fetchImpl })).rejects.toThrow(/Permission denied/);
+        expect(await readdir(outDir)).toEqual([]);
+    });
+});
+
+const EXCHANGE_URL =
+    'https://content-firebaseappcheck.googleapis.com/v1/projects/unlock-the-lab-workshop/apps/' +
+    '1:604889899913:web:d46afe88111e8bcb7d3758:exchangeDebugToken' +
+    '?key=AIzaSyCjLzq8QNQqhGOpTJy3tzwuQrovMm6Vdi4';
+
+/** Like fakeFetch, but also answers the App Check exchange with `token`. */
+function fakeFetchWithAppCheck(data, token = 'app-check-token') {
+    return vi.fn(async (url, init) => {
+        if (String(url).startsWith(APP_CHECK_ENDPOINT))
+            return jsonResponse({ token, ttl: '3600s' });
+        const node = new URL(url).pathname.replace(/^\/|\.json$/g, '');
+        return jsonResponse(
+            init.headers['x-firebase-appcheck'] === token ? (data[node] ?? null) : 0
+        );
+    });
+}
+
+describe('the App Check web app', () => {
+    it('is the public web app of src/lib/firebase-config.js and the live site', async () => {
+        vi.resetModules();
+        for (const name of ['PROJECT_ID', 'APP_ID', 'API_KEY'])
+            vi.stubEnv(`VITE_FIREBASE_${name}`, '');
+        const { firebaseConfig } = await import('../../../src/lib/firebase-config.js');
+        expect(APP_CHECK_APP).toEqual({
+            projectId: firebaseConfig.projectId,
+            appId: firebaseConfig.appId,
+            apiKey: firebaseConfig.apiKey,
+        });
+        const { homepage } = JSON.parse(
+            await readFile(new URL('../../../package.json', import.meta.url), 'utf8')
+        );
+        expect(SITE_URL).toBe(`${homepage}/`);
+    });
+});
+
+describe('exchangeDebugToken', () => {
+    it('uses the endpoint and method of the installed web SDK', async () => {
+        const { createRequire } = await import('node:module');
+        const sdk = await readFile(
+            createRequire(import.meta.url).resolve('@firebase/app-check'),
+            'utf8'
+        );
+        expect(sdk).toContain(`const BASE_ENDPOINT = '${APP_CHECK_ENDPOINT}'`);
+        expect(sdk).toContain("const EXCHANGE_DEBUG_TOKEN_METHOD = 'exchangeDebugToken'");
+        expect(sdk).toMatch(/debug_token: debugToken/);
+    });
+
+    const options = (fetchImpl) => ({
+        fetchImpl,
+        delays: [1, 1],
+        sleep: async () => {},
+        logger: silentLogger,
+    });
+
+    it('makes the request the web SDK makes in debug mode', async () => {
+        const fetchImpl = vi.fn(async () =>
+            jsonResponse({ token: 'app-check-token', ttl: '3600s' })
+        );
+        await expect(exchangeDebugToken('debug-token', options(fetchImpl))).resolves.toBe(
+            'app-check-token'
+        );
+        expect(fetchImpl).toHaveBeenCalledTimes(1);
+        const [url, init] = fetchImpl.mock.calls[0];
+        expect(url).toBe(EXCHANGE_URL);
+        expect(init.method).toBe('POST');
+        expect(init.headers).toEqual({
+            'content-type': 'application/json',
+            referer: 'https://unlock-the-lab.web.app/',
+        });
+        expect(JSON.parse(init.body)).toEqual({ debug_token: 'debug-token' });
+    });
+
+    it('retries server errors and network failures', async () => {
+        const fetchImpl = vi
+            .fn()
+            .mockResolvedValueOnce(new Response('busy', { status: 503 }))
+            .mockRejectedValueOnce(new TypeError('fetch failed'))
+            .mockResolvedValueOnce(jsonResponse({ token: 'app-check-token', ttl: '3600s' }));
+        await expect(exchangeDebugToken('debug-token', options(fetchImpl))).resolves.toBe(
+            'app-check-token'
+        );
+        expect(fetchImpl).toHaveBeenCalledTimes(3);
+    });
+
+    it('fails at once on a refused token, saying what to check, without the token', async () => {
+        const fetchImpl = vi.fn(async () =>
+            jsonResponse({ error: { code: 403, status: 'PERMISSION_DENIED' } }, 403)
+        );
+        const failure = exchangeDebugToken('secret-debug-token', options(fetchImpl));
+        await expect(failure).rejects.toThrow(
+            /^Could not get an App Check token \(attempt 1\): HTTP 403: .*PERMISSION_DENIED.*registered as a debug token/
+        );
+        await failure.catch((error) => expect(error.message).not.toContain('secret-debug-token'));
+        expect(fetchImpl).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects a response without a token', async () => {
+        const fetchImpl = vi.fn(async () => jsonResponse({ ttl: '3600s' }));
+        await expect(exchangeDebugToken('debug-token', options(fetchImpl))).rejects.toThrow(
+            /attempt 3\): the response held no token/
+        );
+    });
+});
+
+describe('fetchNode with App Check', () => {
+    it('sends the App Check token in the X-Firebase-AppCheck header', async () => {
+        const fetchImpl = vi.fn(async () => jsonResponse({ a: 1 }));
+        await fetchNode(DEFAULT_DATABASE_URL, 'ratings', {
+            fetchImpl,
+            appCheckToken: 'app-check-token',
+        });
+        expect(fetchImpl.mock.calls[0][1].headers).toEqual({
+            accept: 'application/json',
+            'x-firebase-appcheck': 'app-check-token',
+        });
+    });
+
+    it('sends only the accept header without one', async () => {
+        const fetchImpl = vi.fn(async () => jsonResponse({ a: 1 }));
+        await fetchNode(DEFAULT_DATABASE_URL, 'ratings', { fetchImpl });
+        expect(fetchImpl.mock.calls[0][1].headers).toEqual({ accept: 'application/json' });
+    });
+});
+
+describe('runBackup with App Check', () => {
+    let outDir;
+
+    beforeEach(async () => {
+        outDir = await mkdtemp(path.join(tmpdir(), 'utl-backup-'));
+    });
+
+    afterEach(async () => {
+        await rm(outDir, { recursive: true, force: true });
+    });
+
+    const run = (extra) =>
+        runBackup({ outDir, delays: [], now: NOW, logger: silentLogger, ...extra });
+
+    it('exchanges the debug token once and sends the App Check token with every read', async () => {
+        const fetchImpl = fakeFetchWithAppCheck(fetchedData());
+        const log = vi.fn();
+        expect(
+            await run({
+                fetchImpl,
+                appCheckDebugToken: 'debug-token',
+                logger: { ...silentLogger, log },
+            })
+        ).toBe(0);
+        const urls = fetchImpl.mock.calls.map(([url]) => String(url));
+        expect(urls[0]).toBe(EXCHANGE_URL);
+        expect(urls.slice(1)).toEqual(
+            ['ratings', 'leaderboard', 'rankings', 'sessions'].map(
+                (node) => `${DEFAULT_DATABASE_URL}/${node}.json`
+            )
+        );
+        expect(await readFile(path.join(outDir, 'ratings.json'), 'utf8')).toBe(serialise(RATINGS));
+        const lines = log.mock.calls.flat().join('\n');
+        expect(lines).toContain('Sending an App Check token from FIREBASE_APPCHECK_DEBUG_TOKEN.');
+        expect(lines).not.toContain('app-check-token');
+        expect(lines).not.toContain('debug-token');
+    });
+
+    it('reads exactly as before without a debug token', async () => {
+        const fetchImpl = fakeFetch(fetchedData());
+        expect(await run({ fetchImpl })).toBe(0);
+        expect(fetchImpl).toHaveBeenCalledTimes(4);
+        for (const [url, init] of fetchImpl.mock.calls) {
+            expect(String(url).startsWith(DEFAULT_DATABASE_URL)).toBe(true);
+            expect(init.method).toBeUndefined();
+            expect(init.headers).toEqual({ accept: 'application/json' });
+        }
+    });
+
+    it('reads nothing and writes nothing when the exchange fails', async () => {
+        const fetchImpl = vi.fn(async () => jsonResponse({ error: 'denied' }, 403));
+        await expect(run({ fetchImpl, appCheckDebugToken: 'debug-token' })).rejects.toThrow(
+            /App Check token/
+        );
+        expect(fetchImpl).toHaveBeenCalledTimes(1);
         expect(await readdir(outDir)).toEqual([]);
     });
 });

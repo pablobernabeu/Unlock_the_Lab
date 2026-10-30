@@ -3,6 +3,7 @@
   "heading": "Live dashboard",
   "intro": "How workshop participants rate the fictional studies and how well they predict the crowd's ratings. The figures update by themselves as people take part.",
   "navLabel": "Pages",
+  "noscript": "The live dashboard needs JavaScript. Turn it on in your browser and reload the page.",
   "connection": {
     "connecting": "Connecting to the live data…",
     "live": "Connected. The figures update automatically.",

@@ -165,6 +165,7 @@
     "saving": "Saving…",
     "saveFailed": "Your weights were not saved. Check your connection and try again.",
     "earlierKept": "Your earlier weights had been saved after all, so those are the ones kept.",
+    "earlierExists": "Your weights could not be saved, because an earlier set of weights for this session is already stored and cannot be replaced. Your results show the weights you have just chosen, which are kept in this browser only.",
     "keepRating": "Go back to rating studies"
   },
   "results": {
@@ -253,6 +254,7 @@
     "weightsHeading": "How the criteria were weighted",
     "weightsValue": "{count} of {budget} tokens ({percent})",
     "weightsNone": "No criterion weights were saved.",
+    "weightsLocal": "These weights are kept in this browser only. An earlier set of weights for this session is already stored, so these could not be saved.",
     "takeawaysHeading": "Points to take away",
     "takeawayAccess": "<strong>Open access and open data</strong> let anyone read and check the work. They are good signs, but not proof of quality on their own.",
     "takeawayHype": "<strong>Spotting hype:</strong> an overstated title is a warning sign, not a verdict. Check whether the methods and the conclusion support it.",
@@ -309,5 +311,17 @@
     "newText": "This clears the session saved in this browser ({name}, {count} rated) and starts a new one. Answers already sent stay in the research data, and the results link for that session keeps working.",
     "newTextEmpty": "This clears the session saved in this browser and starts a new one. Answers already sent stay in the research data.",
     "newConfirm": "Start a new session"
+  },
+  "history": {
+    "finished": "You have finished the workshop, so your results stay on this page.",
+    "closed": "The facilitator has closed this session, so this page stays as it is.",
+    "paused": "Your session is paused. Select 'Continue' to carry on.",
+    "saving": "Still saving. Wait a moment, then try again.",
+    "backUsed": "You have already gone back once, so you cannot return to an earlier study.",
+    "firstStudy": "There is no study before this one. The glossary and rubric are under 'Glossary and rubric'.",
+    "oneStep": "You can only go back to the study just before this one.",
+    "unanswered": "Studies cannot be skipped, so answer each one in turn.",
+    "allRated": "You have rated every study, so the next step is sharing out your tokens.",
+    "saveWeights": "Save your weights to see your results."
   }
 }

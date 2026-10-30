@@ -4,7 +4,9 @@
  * the state for keyboard and screen-reader users, and a row of token boxes for
  * pointer users (hidden from assistive technology, since it repeats the
  * stepper). The allocation is saved in the participant state on every change
- * and written once, create-only, to /rankings/{sessionId}.
+ * (which is also where it is read from, so a change made in another tab of
+ * the same session counts) and written once, create-only, to
+ * /rankings/{sessionId}.
  */
 import { TOKEN_BUDGET } from '../../lib/config.js';
 import { CRITERIA, descriptionKey, labelKey } from '../../lib/criteria.js';
@@ -13,7 +15,7 @@ import { t } from '../../lib/i18n.js';
 import { showToast } from '../../lib/toast.js';
 import { ConnectionError } from '../connection.js';
 import { submitRanking } from '../ranking-submit.js';
-import { isRated, resultsPage } from '../state.js';
+import { keepRatingPage, resultsPage } from '../state.js';
 import { allocationComplete, maxTokensFor, setTokens, tokensUsed } from '../tokens.js';
 import { isUnavailable, setChildren, setUnavailable } from '../ui.js';
 
@@ -21,7 +23,8 @@ import { isUnavailable, setChildren, setUnavailable } from '../ui.js';
  * Writes the allocation once the session is connected and has a nickname.
  * @param {object} app
  * @param {Record<string, number>} tokens
- * @returns {Promise<Record<string, number>>} the allocation stored in the database
+ * @returns {Promise<{status: 'saved'|'kept'|'earlier', tokens: Record<string, number>}>}
+ *   see submitRanking
  */
 async function saveRanking(app, tokens) {
     const { uid } = await app.session.whenReady();
@@ -116,7 +119,7 @@ function criterionRow(key, icon, onSet) {
  */
 export function renderWeightsView(app) {
     const view = document.getElementById('view-weights');
-    let tokens = { ...app.state.criterionTokens };
+    const allocation = () => app.state.criterionTokens;
     let busy = false;
 
     const used = el('p', { class: 'weights-total__text' });
@@ -129,16 +132,26 @@ export function renderWeightsView(app) {
     const hint = el('p', { id: 'weights-submit-hint', class: 'field-hint' });
     const status = el('p', { class: 'weights__status', role: 'status' });
     const error = el('p', { class: 'field-error', role: 'alert' });
+    const actions = el(
+        'div',
+        { class: 'view-actions weights__actions' },
+        submit,
+        hint,
+        status,
+        error
+    );
 
     const rows = CRITERIA.map(({ key, icon }) => criterionRow(key, icon, onSet));
 
     function refresh() {
-        const total = tokensUsed(tokens);
+        const total = tokensUsed(allocation());
         used.textContent = t('app.weights.used', { used: total, budget: TOKEN_BUDGET });
         fill.style.width = `${(total / TOKEN_BUDGET) * 100}%`;
-        rows.forEach(({ update }) => update(tokens));
-        const complete = allocationComplete(tokens);
+        rows.forEach(({ update }) => update(allocation()));
+        const complete = allocationComplete(allocation());
         setUnavailable(submit, busy || !complete);
+        // Read by the browser's Back button, which waits while the weights are saving.
+        actions.setAttribute('aria-busy', String(busy));
         hint.hidden = complete;
         hint.textContent = t('app.weights.submitHint', {
             budget: TOKEN_BUDGET,
@@ -149,17 +162,17 @@ export function renderWeightsView(app) {
 
     function onSet(key, value, { step = false } = {}) {
         if (busy) return;
-        const next = setTokens(tokens, key, step ? tokens[key] + value : value);
-        if (next === tokens) return;
-        tokens = next;
-        app.patch({ criterionTokens: tokens });
+        const current = allocation();
+        const next = setTokens(current, key, step ? current[key] + value : value);
+        if (next === current) return;
+        app.patch({ criterionTokens: next });
         error.textContent = '';
         refresh();
         announce(
             t('app.weights.announce', {
                 criterion: t(labelKey(key)),
-                count: tokens[key],
-                used: tokensUsed(tokens),
+                count: allocation()[key],
+                used: tokensUsed(allocation()),
                 budget: TOKEN_BUDGET,
             })
         );
@@ -176,12 +189,27 @@ export function renderWeightsView(app) {
         error.textContent = '';
         refresh();
         try {
-            const saved = await saveRanking(app, tokens);
+            const chosen = allocation();
+            const saved = await saveRanking(app, chosen);
             // An earlier attempt that timed out may have landed after all; its allocation stays.
-            const keptEarlier = CRITERIA.some(({ key }) => saved[key] !== tokens[key]);
-            app.patch({ rankingSubmitted: true, criterionTokens: saved });
+            const keptEarlier = CRITERIA.some(({ key }) => saved.tokens[key] !== chosen[key]);
+            const earlier = saved.status === 'earlier';
+            app.patch({
+                rankingSubmitted: true,
+                rankingKeptLocally: earlier,
+                criterionTokens: saved.tokens,
+            });
             app.navigate(resultsPage(app.studyCount));
-            if (keptEarlier) showToast(t('app.weights.earlierKept'));
+            if (earlier) {
+                // Not a toast: the participant should be able to read this at their own pace.
+                app.notices.show('weightsNotSaved', {
+                    tone: 'warning',
+                    text: t('app.weights.earlierExists'),
+                    dismissible: true,
+                });
+            } else if (keptEarlier) {
+                showToast(t('app.weights.earlierKept'));
+            }
             return;
         } catch (failure) {
             console.warn('[weights] Not saved:', failure);
@@ -195,10 +223,9 @@ export function renderWeightsView(app) {
         refresh();
     });
 
-    const unrated = app.order.some((study) => !isRated(app.state, study.id));
-    const backPage = app.state.finishedFromPage;
+    const backPage = keepRatingPage(app.state, app.order);
     const keepRating =
-        unrated && Number.isInteger(backPage)
+        backPage !== null
             ? el(
                   'button',
                   {
@@ -230,7 +257,7 @@ export function renderWeightsView(app) {
             { class: 'weights-list' },
             rows.map(({ row }) => row)
         ),
-        el('div', { class: 'view-actions weights__actions' }, submit, hint, status, error),
+        actions,
         keepRating ? el('p', { class: 'weights__back' }, keepRating) : null
     );
     refresh();

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fake } from './fake-database.js';
+import { databaseModule, fake } from './fake-database.js';
 
 vi.mock('firebase/database', () => import('./fake-database.js').then((m) => m.databaseModule));
 vi.mock('../../../src/lib/firebase.js', () =>
@@ -56,6 +56,45 @@ describe('createLeaderboardSync', () => {
         local = totals(5, 400);
         await sync.sync();
         expect(fake.read(ENTRY)).toMatchObject({ papersRated: 5, score: 400 });
+    });
+
+    it('plans each update from the entry as stored now, not as this page last wrote it', async () => {
+        local = totals(1, 80);
+        const sync = createSync();
+        await sync.sync();
+        // Another tab of the session saves a study; this tab then has both.
+        fake.write(ENTRY, { ...totals(2, 170), timestamp: fake.now });
+        local = totals(3, 250);
+        await sync.sync();
+        const sets = fake.writesTo('set', ENTRY).map(({ value }) => value.papersRated);
+        expect(sets).toEqual([1, 3]);
+        expect(fake.read(ENTRY)).toMatchObject({ papersRated: 3, score: 250 });
+    });
+
+    it('recovers within the same update when a write is refused', async () => {
+        fake.write(ENTRY, { ...totals(2, 160), timestamp: fake.now });
+        // This tab read the entry just before another tab's write landed.
+        databaseModule.get.mockImplementationOnce(async () => ({
+            exists: () => true,
+            val: () => ({ ...totals(1, 80), timestamp: fake.now }),
+        }));
+        fake.refuse('set', ENTRY);
+        local = totals(3, 240);
+        await createSync().sync();
+        expect(fake.read(ENTRY)).toMatchObject({ papersRated: 3, score: 240 });
+    });
+
+    it('catches up after a rating once the entry is no longer ahead', async () => {
+        // Another tab has saved more than this one knows about.
+        fake.write(ENTRY, { ...totals(4, 330), timestamp: fake.now });
+        local = totals(3, 240);
+        const sync = createSync();
+        await sync.sync();
+        expect(fake.writesTo('set', ENTRY)).toEqual([]);
+        // The next rating takes this tab past the stored entry.
+        local = totals(5, 420);
+        await sync.sync();
+        expect(fake.read(ENTRY)).toMatchObject({ papersRated: 5, score: 420 });
     });
 
     it('never updates an entry that belongs to another uid', async () => {

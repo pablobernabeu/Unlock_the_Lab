@@ -1,0 +1,98 @@
+---
+title: 'Unlock the Lab: sample studies'
+subtitle: Six studies for discussion, with an answer key for the facilitator
+---
+
+```{r}
+#| include: false
+# The studies, their texts and the expert's feedback come from the app's
+# files (see handouts.R); the six are chosen by choose_sample_studies().
+source('handouts.R')
+data <- load_handout_data()
+text <- function(key, ...) tr(data$strings, key, list(...))
+md <- function(key, ...) html_to_md(text(key, ...))
+picked <- choose_sample_studies(data$studies, data$criteria$key)
+labels <- paste('Study', LETTERS[seq_along(picked)])
+quality <- function(band) md(paste0('common.quality.', band))
+range_of <- function(band) md(paste0('common.quality.', band, 'Range'))
+```
+
+```{r}
+#| results: asis
+emit(footer_metadata(data))
+```
+
+# About this set
+
+```{r}
+#| results: asis
+emit(
+    sprintf(paste('These %s fictional studies come from Unlock the Lab and are printed as participants',
+                  'see them in the app, with the two answers that the app asks for. Use them for',
+                  'discussion in groups, as a warm-up before the app or for anyone taking part on',
+                  'paper. The evaluation guide has the rubric and the glossary to go with them.'),
+            number_words(length(picked))),
+    sprintf(
+        paste('The set covers the three quality bands of the expert ratings: %s. From each band it',
+              'takes the study that is hardest to judge, with the most criteria whose band differs',
+              'from the overall one, and the clearest, with the fewest, where possible with a',
+              'different expert rating. The studies keep their order in the app, so their letters',
+              'say nothing about their quality.'),
+        and_list(vapply(c('low', 'medium', 'high'), function(band) {
+            sprintf('%s (%s)', quality(band), tolower(range_of(band)))
+        }, ''))
+    ),
+    paste('Each study is on its own page. The answer key at the end gives the expert\'s rating, a',
+          'summary and a note on each criterion; keep it back until everyone has answered.',
+          'To play \'Predict the crowd\' on paper, collect the ratings, work out the group\'s',
+          'average for each study and compare it with the predictions. The live dashboard shows',
+          'how everyone who has used the app rated each study, under the dashboard number given in',
+          'the answer key.')
+)
+```
+
+```{r}
+#| results: asis
+for (i in seq_along(picked)) emit(study_card_md(data, picked[[i]], labels[i]))
+```
+
+```{r}
+#| results: asis
+answer_key <- 'Answer key'
+emit(
+    page_start('**For the facilitator**'),
+    sprintf('# %s {.unnumbered}', answer_key),
+    'The expert\'s feedback is the same as the app shows after each study.',
+    md_table(
+        c('Study', 'Title', 'Expert rating', 'Quality', 'Dashboard number'),
+        lapply(seq_along(picked), function(i) {
+            study <- picked[[i]]
+            c(labels[i], html_to_md(study$title), study$expertRating, quality(study$band),
+              study$number)
+        }),
+        c(10, 44, 12, 18, 16)
+    )
+)
+for (i in seq_along(picked)) {
+    study <- picked[[i]]
+    # Each study's key has a page of its own, so it can be printed alone.
+    emit(
+        page_start(sprintf('**%s**', answer_key)),
+        sprintf('## %s: %s {.unnumbered}', labels[i], html_to_md(study$title)),
+        sprintf('**%s** · %s', md('app.feedback.expertRating', rating = study$expertRating),
+                quality(study$band)),
+        html_to_md(study$feedback$summary),
+        sprintf('**%s**', md('app.feedback.criteriaHeading')),
+        md_table(
+            c(md('app.guide.rubricCriterion'), 'Band', 'Note'),
+            lapply(data$criteria$key, function(key) {
+                criterion <- study$feedback$criteria[[key]]
+                c(sprintf('**%s**', md(paste0('common.criteria.', key))),
+                  band_label(data, criterion$band), html_to_md(criterion$note))
+            }),
+            c(18, 12, 70)
+        )
+    )
+}
+emit('---', closing_line(data))
+```

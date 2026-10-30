@@ -171,6 +171,51 @@ describe('prerenderHtml', () => {
         );
     });
 
+    it('fills elements inside noscript, which the parser keeps as raw text', () => {
+        const page = `<main>
+<noscript>
+    <p class="info-box" data-i18n="common.appName">This page needs JavaScript.</p>
+    <a href="/" data-i18n-attr="title:common.risky">Home</a>
+</noscript>
+<p data-i18n="common.appName">x</p>
+</main>`;
+        const { html, missing } = prerenderHtml(page, messages);
+        expect(missing).toEqual([]);
+        expect(html).toBe(
+            page
+                .replace('This page needs JavaScript.', 'Unlock the Lab')
+                .replace(
+                    '<a href="/"',
+                    '<a title="Tom &amp; Jerry &lt;script&gt;alert(1)&lt;/script&gt; &quot;quoted&quot;" href="/"'
+                )
+                .replace(
+                    '<p data-i18n="common.appName">x</p>',
+                    '<p data-i18n="common.appName">Unlock the Lab</p>'
+                )
+        );
+    });
+
+    it('lists missing keys inside noscript', () => {
+        const page = '<noscript><p data-i18n="common.nope">Fallback</p></noscript>';
+        const { html, missing } = prerenderHtml(page, messages);
+        expect(html).toBe(page);
+        expect(missing).toEqual(['common.nope']);
+    });
+
+    it("lets a noscript element's own key win over the elements inside it", () => {
+        const { html } = prerenderHtml(
+            '<noscript data-i18n="common.appName"><p data-i18n="common.risky">x</p></noscript>',
+            messages
+        );
+        expect(html).toBe('<noscript data-i18n="common.appName">Unlock the Lab</noscript>');
+    });
+
+    it('leaves other noscript content as written', () => {
+        const page =
+            '<head><noscript><link rel="stylesheet" href="/no-js.css"><style>a > b {}</style></noscript></head>';
+        expect(prerenderHtml(page, messages)).toEqual({ html: page, missing: [] });
+    });
+
     it('fills elements inside templates', () => {
         const { html } = prerenderHtml(
             '<template id="t"><li><span data-i18n="common.appName">x</span></li></template>',
@@ -223,6 +268,20 @@ describe('i18nPrerender plugin', () => {
 });
 
 describe('real pages', () => {
+    it.each([
+        ['index.html', 'app.noscript'],
+        ['admin.html', 'admin.noscript'],
+        ['dashboard.html', 'dashboard.noscript'],
+    ])('%s has every string it needs, its noscript message included', (file, key) => {
+        const html = readFileSync(join(ROOT, file), 'utf8');
+        const english = loadLocale('en');
+        const { html: rendered, missing } = prerenderHtml(html, english);
+        expect(missing).toEqual([]);
+        const [namespace, name] = key.split('.');
+        const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(rendered)[1];
+        expect(noscript).toContain(`data-i18n="${key}">${english[namespace][name]}</p>`);
+    });
+
     it('404.html has every string it needs', () => {
         const html = readFileSync(join(ROOT, '404.html'), 'utf8');
         const { html: rendered, missing } = prerenderHtml(html, loadLocale('en'));

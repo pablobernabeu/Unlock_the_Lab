@@ -52,7 +52,7 @@ function cssColour(name, fallback) {
 
 function readColours() {
     return {
-        low: cssColour('--color-quality-low', '#9f1239'),
+        low: cssColour('--color-quality-low', '#881337'),
         medium: cssColour('--color-quality-medium', '#b45309'),
         high: cssColour('--color-quality-high', '#0369a1'),
         none: cssColour('--color-border-strong', '#64748b'),

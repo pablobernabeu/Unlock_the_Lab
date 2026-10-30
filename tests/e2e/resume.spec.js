@@ -1,12 +1,22 @@
-// Coming back to a session: reloads during the workshop, a session saved in
+// Coming back to a session: reloads during the workshop (also of a session
+// the facilitator has closed), two tabs of one session, a session saved in
 // the browser by version 1 of the app, and a saved session whose id now
 // belongs to another sign-in.
 import studies from '../../src/content/en/studies.json' with { type: 'json' };
 import expertRatings from '../../src/content/expert-ratings.json' with { type: 'json' };
-import { AUTH_USER_KEY, persistedAnonymousUser, readPath, writePath } from './emulator.js';
+import {
+    AUTH_USER_KEY,
+    persistedAnonymousUser,
+    readPath,
+    SERVER_TIMESTAMP,
+    writePath,
+} from './emulator.js';
 import { LEGACY_NAME, LEGACY_SESSION, participants, v1StudyOrder } from './fixture.js';
 import {
+    allocateTokens,
     currentStudy,
+    expectNoAxeViolations,
+    finishEarly,
     rateWithMouse,
     readFeedback,
     savedState,
@@ -117,6 +127,85 @@ test('reloading mid-study and after submitting keeps the study and the score, co
     expect(await savedState(page)).toMatchObject({ totalScore: total });
 });
 
+test('after a reload, a session the facilitator has closed never offers its study form', async ({
+    page,
+}) => {
+    await startWorkshop(page);
+    await rateWithMouse(page, { prediction: 4, rating: 4 });
+    await page.getByRole('button', { name: 'Next study' }).click();
+    await expect(page.locator('.answers')).toBeVisible();
+    await writePath('control/sessionsEndedAt', SERVER_TIMESTAMP);
+    const closed = page.getByRole('heading', {
+        level: 1,
+        name: 'The facilitator has closed this session',
+    });
+    await expect(closed).toBeVisible();
+
+    // Notes whether the study or its answer form is ever on screen while the page reloads.
+    await page.addInitScript(() => {
+        window.studyShown = false;
+        new MutationObserver(() => {
+            if (document.querySelector('#view-study:not([hidden]) :is(input, #study-title)')) {
+                window.studyShown = true;
+            }
+        }).observe(document, {
+            subtree: true,
+            childList: true,
+            attributes: true,
+            attributeFilter: ['hidden'],
+        });
+    });
+    await page.reload();
+    await expect(closed).toBeVisible();
+    await expect(
+        page.locator('#view-message').getByRole('button', { name: 'Start as a new participant' })
+    ).toBeVisible();
+    await expect(page.locator('#footer-new-participant')).toBeVisible();
+    expect(await page.evaluate(() => window.studyShown)).toBe(false);
+    await expect(page.locator('#view-study input')).toHaveCount(0);
+});
+
+test("two tabs of one session show each other's progress and never overwrite it", async ({
+    context,
+    page,
+}) => {
+    await startWorkshop(page);
+    const { sessionId } = await savedState(page);
+    const other = await context.newPage();
+    await other.goto('/');
+    await expect(other.locator('.study__progress')).toHaveText(`Study 1 of ${STUDY_COUNT}`);
+    await expect(other.locator('.answers')).toBeVisible();
+
+    // An answer in the first tab shows up in the second.
+    await rateWithMouse(page, { prediction: 4, rating: 5 });
+    const first = await readFeedback(page);
+    await expect(other.locator('#feedback-heading')).toHaveText(
+        `Your score: ${first.score} out of 100`
+    );
+    await expect(other.locator('#banner-rated')).toHaveText(`1 of ${STUDY_COUNT}`);
+
+    // The second tab moves on and answers the next study; the first follows.
+    await other.getByRole('button', { name: 'Next study' }).click();
+    await expect(page.locator('.study__progress')).toHaveText(`Study 2 of ${STUDY_COUNT}`);
+    await rateWithMouse(other, { prediction: 3, rating: 2 });
+    const second = await readFeedback(other);
+    await expect(page.locator('#feedback-heading')).toHaveText(
+        `Your score: ${second.score} out of 100`
+    );
+
+    // Whichever tab saves next, both answers stay.
+    await page.getByRole('button', { name: 'Next study' }).click();
+    await expect(other.locator('.study__progress')).toHaveText(`Study 3 of ${STUDY_COUNT}`);
+    const total = first.score + second.score;
+    expect(await savedState(page)).toMatchObject({ currentPage: 4, totalScore: total });
+    expect(Object.keys((await savedState(page)).userRatings)).toHaveLength(2);
+    await expect(page.locator('#banner-rated')).toHaveText(`2 of ${STUDY_COUNT}`);
+    await expect
+        .poll(() => readPath(`leaderboard/${sessionId}`))
+        .toMatchObject({ papersRated: 2, score: total });
+    await other.close();
+});
+
 test('a session saved by version 1 resumes on the same page with the same score', async ({
     page,
 }) => {
@@ -179,6 +268,48 @@ test('a session saved by version 1 resumes on the same page with the same score'
     await page.getByRole('button', { name: 'Next study' }).click();
     await page.getByRole('button', { name: 'Next study' }).click();
     await expect(page.locator('#study-title')).toHaveText(order[rated + 1].title);
+});
+
+test('weights that version 1 saved stay in the data, and the new ones are kept in the browser', async ({
+    page,
+}) => {
+    const v1Weights = {
+        title: 4,
+        access: 4,
+        source: 4,
+        theory: 4,
+        methods: 2,
+        conclusion: 2,
+        userName: LEGACY_NAME,
+        timestamp: participants[LEGACY_SESSION].leaderboard.timestamp,
+    };
+    await writePath(`rankings/${LEGACY_SESSION}`, v1Weights);
+    const user = await persistedAnonymousUser(LEGACY_UID);
+    await seedStorage(page, { ...v1Storage(), [AUTH_USER_KEY]: JSON.stringify(user) });
+    await page.goto('/');
+    await expect(page.locator('.answers')).toBeVisible();
+
+    await finishEarly(page);
+    const plan = await allocateTokens(page);
+    await expect(page.locator('[data-notice="weightsNotSaved"]')).toContainText(
+        'Your weights could not be saved, because an earlier set of weights for this session is already stored'
+    );
+    const kept = 'These weights are kept in this browser only.';
+    await expect(page.locator('#view-results')).toContainText(kept);
+    await expectNoAxeViolations(page, 'results with weights kept in the browser');
+    await expect(
+        page.locator('.weight-bars__item').filter({ hasText: 'Methods & Data' })
+    ).toContainText(`${plan.methods} of 20 tokens`);
+    expect(await readPath(`rankings/${LEGACY_SESSION}`)).toEqual(v1Weights);
+    expect(await savedState(page)).toMatchObject({
+        rankingSubmitted: true,
+        rankingKeptLocally: true,
+        criterionTokens: plan,
+    });
+
+    await page.reload();
+    await expect(page.getByRole('heading', { level: 1, name: 'Your results' })).toBeVisible();
+    await expect(page.locator('#view-results')).toContainText(kept);
 });
 
 test('a version 1 session missing from the leaderboard is added there study by study', async ({

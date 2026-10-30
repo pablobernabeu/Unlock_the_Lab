@@ -36,7 +36,7 @@ The expert rating counts as 100 participants, so the target stays close to it un
 
 [`docs/facilitating.md`](docs/facilitating.md) explains how to run a workshop: room codes with their own leaderboard view and QR code, the dashboard, ending a workshop and how many people can join at once (100 simultaneous connections on Firebase's free plan). Facilitators sign in to the facilitator panel at `/admin.html` to make room links, export the data and end sessions.
 
-Handouts are in `materials/workshop`: the sample studies and the evaluation guide with glossary (PDF and Word) and slides with a banner and a QR code. They were made before content version 2, so some study texts differ from the app; the app is the reference.
+Handouts are in [`materials/workshop/handouts`](materials/workshop/handouts/README.md), as PDF and Word files: an evaluation guide with the scoring, the rubric and the glossary, and six sample studies with an answer key. They are built with Quarto from the same content files as the app, so a new render keeps them in line with it. Slides with a banner and a QR code are in `materials/workshop`.
 
 ## Data and privacy
 
@@ -108,7 +108,7 @@ tests/e2e/                      end-to-end tests
 analysis/                       Quarto report on the workshop data
 scripts/                        daily backup and the end-to-end test server
 docs/                           data dictionary, deployment, facilitator guide, translating
-materials/                      workshop handouts and artwork
+materials/                      workshop handouts (built from src/content with Quarto), slides and artwork
 redirect/                       page that forwards the legacy domain to the current one
 database.rules.json             Realtime Database security rules
 firebase.json, .firebaserc      Firebase Hosting, database and emulator settings

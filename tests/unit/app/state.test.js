@@ -7,9 +7,12 @@ import {
     createState,
     describePage,
     isRated,
+    keepRatingPage,
+    mergeStates,
     migrateState,
     ratedCount,
     resultsPage,
+    sameState,
     startingState,
     studyPage,
     sumScores,
@@ -316,5 +319,144 @@ describe('startingState', () => {
         expect(startingState(done, options).state.currentPage).toBe(resultsPage(STUDY_COUNT));
         const notDone = { ...done, rankingSubmitted: false };
         expect(startingState(notDone, options).state.currentPage).toBe(weightsPage(STUDY_COUNT));
+    });
+});
+
+describe('rankingKeptLocally', () => {
+    const SID = 'session_1790000000000_abc123def';
+
+    it('survives a reload once the weights are submitted', () => {
+        const state = {
+            ...createState({ sessionId: SID }),
+            rankingSubmitted: true,
+            rankingKeptLocally: true,
+        };
+        const copy = migrateState(JSON.parse(JSON.stringify(state)), { studyCount: STUDY_COUNT });
+        expect(copy.rankingKeptLocally).toBe(true);
+    });
+
+    it('is dropped when the weights were never submitted', () => {
+        const raw = { ...createState({ sessionId: SID }), rankingKeptLocally: true };
+        expect(migrateState(raw, { studyCount: STUDY_COUNT }).rankingKeptLocally).toBe(false);
+    });
+});
+
+describe('keepRatingPage', () => {
+    const order = STUDY_IDS.map((id) => ({ id }));
+    const base = createState({ sessionId: 'session_1790000000000_abc123def' });
+    const rated = (count) => Object.fromEntries(STUDY_IDS.slice(0, count).map((id) => [id, 4]));
+
+    it('leads back to the page the participant finished early from', () => {
+        const state = { ...base, userRatings: rated(10), finishedFromPage: studyPage(10) };
+        expect(keepRatingPage(state, order)).toBe(studyPage(10));
+    });
+
+    it('is not on offer without an early finish or once every study is rated', () => {
+        expect(keepRatingPage({ ...base, userRatings: rated(10) }, order)).toBeNull();
+        const all = { ...base, userRatings: rated(STUDY_COUNT), finishedFromPage: studyPage(10) };
+        expect(keepRatingPage(all, order)).toBeNull();
+    });
+});
+
+describe('mergeStates', () => {
+    const SID = 'session_1790000000000_abc123def';
+    const rate = (state, studyId, score, extra = {}) =>
+        commitRating(state, {
+            studyId,
+            rating: 4,
+            prediction: 5,
+            score,
+            target: 4.5,
+            crowd: { n: 1, mean: 4 },
+            feedbackShown: true,
+            ...extra,
+        });
+    const start = { ...createState({ sessionId: SID, userName: 'Red Fox 07' }), currentPage: 2 };
+
+    it('keeps the answers of both copies and recomputes the total', () => {
+        const shared = rate(start, 'STUDY-1', 88);
+        const tabA = { ...rate(shared, 'STUDY-2', 76), currentPage: 4 };
+        const tabB = { ...rate(shared, 'STUDY-3', 100), currentPage: 3 };
+        const merged = mergeStates(tabA, tabB);
+        expect(Object.keys(merged.userRatings).sort()).toEqual(['STUDY-1', 'STUDY-2', 'STUDY-3']);
+        expect(merged.paperScores).toEqual({ 'STUDY-1': 88, 'STUDY-2': 76, 'STUDY-3': 100 });
+        expect(merged.totalScore).toBe(264);
+        expect(Object.keys(merged.paperTargets)).toHaveLength(3);
+        expect(Object.keys(merged.paperCrowd)).toHaveLength(3);
+        expect(Object.keys(merged.paperFeedbackShown)).toHaveLength(3);
+        // The page is the latest copy's.
+        expect(merged.currentPage).toBe(3);
+        // Neither input is changed.
+        expect(Object.keys(tabA.userRatings)).toEqual(['STUDY-1', 'STUDY-2']);
+    });
+
+    it('keeps one-way flags and the earliest times', () => {
+        const older = {
+            ...start,
+            hasUsedBackButton: true,
+            celebratedPapers: ['STUDY-1'],
+            joinedAt: 1000,
+            pageDisplayTimestamps: { 'STUDY-1': 500, 'STUDY-2': 900 },
+        };
+        const newer = {
+            ...start,
+            celebratedPapers: ['STUDY-4'],
+            joinedAt: 2000,
+            userName: null,
+            pageDisplayTimestamps: { 'STUDY-2': 700, 'STUDY-3': 800 },
+        };
+        const merged = mergeStates(older, newer);
+        expect(merged.hasUsedBackButton).toBe(true);
+        expect(merged.celebratedPapers).toEqual(['STUDY-4', 'STUDY-1']);
+        expect(merged.joinedAt).toBe(1000);
+        expect(merged.userName).toBe('Red Fox 07');
+        expect(merged.pageDisplayTimestamps).toEqual({
+            'STUDY-1': 500,
+            'STUDY-2': 700,
+            'STUDY-3': 800,
+        });
+    });
+
+    it('takes unsaved weights from the latest copy, but saved weights and their page always win', () => {
+        const tokensA = { title: 20, access: 0, source: 0, theory: 0, methods: 0, conclusion: 0 };
+        const tokensB = { title: 0, access: 20, source: 0, theory: 0, methods: 0, conclusion: 0 };
+        const a = { ...start, currentPage: weightsPage(STUDY_COUNT), criterionTokens: tokensA };
+        const b = { ...start, currentPage: weightsPage(STUDY_COUNT), criterionTokens: tokensB };
+        expect(mergeStates(a, b).criterionTokens).toEqual(tokensB);
+
+        const saved = { ...a, rankingSubmitted: true, currentPage: resultsPage(STUDY_COUNT) };
+        const merged = mergeStates(saved, { ...b, currentPage: studyPage(5) });
+        expect(merged).toMatchObject({
+            rankingSubmitted: true,
+            criterionTokens: tokensA,
+            currentPage: resultsPage(STUDY_COUNT),
+        });
+    });
+
+    it('ignores a copy of another session', () => {
+        const other = createState({ sessionId: 'session_1790000000001_zzz' });
+        expect(mergeStates(other, start)).toBe(start);
+        expect(mergeStates(null, start)).toBe(start);
+    });
+
+    it('settles: merging a merged copy again changes nothing', () => {
+        const tabA = rate(start, 'STUDY-2', 76);
+        const tabB = { ...rate(start, 'STUDY-3', 100), hasUsedBackButton: true };
+        const merged = mergeStates(tabA, tabB);
+        const stored = migrateState(JSON.parse(JSON.stringify(merged)), {
+            studyCount: STUDY_COUNT,
+        });
+        expect(sameState(mergeStates(merged, stored), stored)).toBe(true);
+        expect(sameState(mergeStates(stored, merged), merged)).toBe(true);
+    });
+});
+
+describe('sameState', () => {
+    it('compares values whatever the order of the keys', () => {
+        expect(
+            sameState({ a: 1, b: { c: [1, 2], d: null } }, { b: { d: null, c: [1, 2] }, a: 1 })
+        ).toBe(true);
+        expect(sameState({ a: [1, 2] }, { a: [2, 1] })).toBe(false);
+        expect(sameState({ a: 1 }, { a: 1, b: 2 })).toBe(false);
     });
 });

@@ -37,7 +37,7 @@
  *   white                   #ffffff on --color-danger         #b91c1c   6.47:1
  *   white                   #ffffff on --color-danger-hover   #991b1b   8.31:1
  *   white                   #ffffff on --color-text           #1e293b  14.63:1  (toasts)
- *   white                   #ffffff on --color-quality-low    #9f1239   8.02:1
+ *   white                   #ffffff on --color-quality-low    #881337   9.57:1
  *   white                   #ffffff on --color-quality-medium #b45309   5.02:1
  *   white                   #ffffff on --color-quality-high   #0369a1   5.93:1
  * Large text (24px, or 18.66px bold) and UI components need 3:1:
@@ -51,9 +51,17 @@
  *   --color-focus           #1d4ed8 on --color-amber-tint     #fef3c7   6.02:1
  *   --color-focus           #1d4ed8 on --color-danger-tint    #fee2e2   5.49:1
  *   focus ring in toasts    #ffffff on --color-text           #1e293b  14.63:1
- *   --color-quality-*       on --color-surface                         8.02 / 5.02 / 5.93:1  (chart marks)
+ *   --color-quality-*       on --color-surface                         9.57 / 5.02 / 5.93:1  (chart marks)
  * Decorative only, never for text or essential UI:
  *   --color-brand #20b2aa 2.62:1, --color-amber #f59e0b 2.15:1, --color-green #10b981 2.54:1 on white.
+ *
+ * Quality bands with colour-vision deficiency, simulated with the Machado et al. (2009)
+ * matrices at full severity: the smallest CIEDE2000 distance between two bands, kept at 10
+ * or more so that bars, chips and markers stay apart (each band is at least 44 from white):
+ *   normal vision  30.2  low / medium
+ *   protanopia     26.2  low / high
+ *   deuteranopia   21.5  low / medium
+ *   tritanopia     13.7  low / medium
  */
 
 /* ---------- Tokens ---------- */
@@ -96,8 +104,9 @@
     --color-link-hover: var(--color-brand-hover);
     --color-focus: #1d4ed8;
 
-    /* Expert quality bands: an ordered, colour-blind-friendlier trio. Always pair with a text label. */
-    --color-quality-low: #9f1239;
+    /* Expert quality bands, told apart with colour-vision deficiency too (see the record at
+       the top). Always pair with a text label. */
+    --color-quality-low: #881337;
     --color-quality-medium: #b45309;
     --color-quality-high: #0369a1;
 

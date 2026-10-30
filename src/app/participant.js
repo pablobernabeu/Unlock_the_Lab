@@ -1,7 +1,10 @@
 /**
- * The participant workshop: state, navigation between the views and the
- * session lifecycle. Page indices keep v1's meaning (state.js), so a session
- * started under v1 resumes on the same page.
+ * The participant workshop: state, navigation between the views (with a
+ * browser history entry for each, see history.js) and the session lifecycle.
+ * Page indices keep v1's meaning (state.js), so a session started under v1
+ * resumes on the same page. Other tabs of the same session share the saved
+ * state: each save merges with what is stored, and a save in another tab is
+ * merged in here, so newer progress is never overwritten by an older copy.
  */
 import {
     FEEDBACK_MODE,
@@ -9,6 +12,7 @@ import {
     INACTIVITY_WARNING_MS,
     MILESTONE_STUDIES,
     MIN_STUDIES_TO_FINISH,
+    STORAGE_KEYS,
 } from '../lib/config.js';
 import { withTimeout } from '../lib/db-utils.js';
 import { alertDialog, confirmDialog } from '../lib/dialog.js';
@@ -20,6 +24,7 @@ import { seededShuffle } from '../lib/shuffle.js';
 import { storageAvailable } from '../lib/storage.js';
 import { showToast } from '../lib/toast.js';
 import { updateScoreBanner } from './header.js';
+import { createHistory, historyMove } from './history.js';
 import { createNotices } from './notices.js';
 import { markFirstDisplay } from './response-time.js';
 import { loadLeaderboard, loadOthersMeans } from './results-data.js';
@@ -32,14 +37,24 @@ import {
     describePage,
     isRated,
     loadState,
+    mergeStates,
     ratedCount,
     resultsPage,
+    sameState,
     saveState,
     startingState,
     studyPage,
     weightsPage,
 } from './state.js';
-import { bindOnce, closeOpenDialogs, dialogOpen, focusView, setPageTitle, showView } from './ui.js';
+import {
+    bindOnce,
+    closeOpenDialogs,
+    dialogOpen,
+    focusView,
+    setPageTitle,
+    showView,
+    viewBusy,
+} from './ui.js';
 import { renderGuideView } from './views/guide.js';
 import { renderClosedView } from './views/message.js';
 import { renderResultsView } from './views/results.js';
@@ -52,6 +67,11 @@ import { renderWelcomeView } from './views/welcome.js';
 const CELEBRATION_SCORE = 90;
 const SIGN_OUT_TIMEOUT_MS = 3000;
 const MINUTE_MS = 60 * 1000;
+/**
+ * A resumed page waits this long at most for the facilitator's control check
+ * before it shows anyway (the live listener still closes it afterwards).
+ */
+const CONTROL_CHECK_WAIT_MS = 20000;
 
 /** Notices that only concern the page on which they appeared. */
 const PAGE_NOTICES = ['resume', 'roomMismatch'];
@@ -74,19 +94,23 @@ function prepareState(studyCount, urlRoom) {
  * @param {object} options
  * @param {{studies: object[], glossary: object[], rubric: object[]}} options.content
  * @param {{celebrate: () => void}} options.logo the header logo's animation
+ * @param {() => void} [options.reload] reloads the page (replaced in tests)
  * @returns {void}
  */
-export function startParticipantApp({ content, logo }) {
+export function startParticipantApp({ content, logo, reload = () => location.reload() }) {
     const studyCount = content.studies.length;
     const prepared = prepareState(studyCount, roomFromUrl());
     let state = prepared.state;
     // A first-time visitor's session is only stored once they choose to start.
     let persisted = prepared.saved;
     let storageWarned = false;
-    /** Set once 'Start as a new participant' is under way. */
+    /** Set once 'Start as a new participant' is under way, here or in another tab. */
     let leaving = false;
+    /** The page whose view is on screen; null while the page is still loading. */
+    let shownPage = null;
     const order = seededShuffle(content.studies, state.sessionId);
     const notices = createNotices(document.getElementById('app-notice'));
+    const browserHistory = createHistory({ sessionId: state.sessionId, onMove: moveInHistory });
 
     function warnStorage() {
         if (storageWarned) return;
@@ -100,6 +124,14 @@ export function startParticipantApp({ content, logo }) {
 
     function persist() {
         if (!persisted) return;
+        const stored = loadState(studyCount);
+        if (stored && stored.sessionId !== state.sessionId) {
+            // Another tab has started a new participant, whose session this one must not replace.
+            followOtherSession();
+            return;
+        }
+        // Another tab of this session may have saved progress that this one has not seen yet.
+        state = mergeStates(stored, state);
         if (!saveState(state)) warnStorage();
     }
 
@@ -156,6 +188,7 @@ export function startParticipantApp({ content, logo }) {
         finishEarly,
         onRatingSaved,
         confirmNewParticipant,
+        notices,
     };
 
     /* ---------- Views ---------- */
@@ -194,6 +227,7 @@ export function startParticipantApp({ content, logo }) {
                 state.sessionId
             ),
             tokens: tokenShares(state.criterionTokens) ? state.criterionTokens : null,
+            tokensKeptLocally: state.rankingKeptLocally,
         });
         renderOwnResultActions({
             sessionId: state.sessionId,
@@ -230,13 +264,15 @@ export function startParticipantApp({ content, logo }) {
         const kind = currentKind();
         updateScoreBanner(state, {
             studyCount,
-            visible: kind === 'study' || kind === 'weights',
+            visible:
+                shownPage !== null && !session.closed && (kind === 'study' || kind === 'weights'),
         });
         document.getElementById('footer-new-participant').hidden = !persisted;
     }
 
     function render(page, { focus = false } = {}) {
         const { view, title } = renderPage(page);
+        shownPage = page;
         showView(view.id);
         setPageTitle(title);
         refreshChrome();
@@ -245,22 +281,152 @@ export function startParticipantApp({ content, logo }) {
 
     /* ---------- Navigation ---------- */
 
-    function navigate(page) {
+    /** A participant who has submitted the weights has finished and goes to the results. */
+    function pageToShow(page) {
+        return page === weightsPage(studyCount) && state.rankingSubmitted
+            ? resultsPage(studyCount)
+            : page;
+    }
+
+    /**
+     * Shows a page and records it in the browser history: a new entry for the app's own
+     * buttons ('push'), the current entry after Back or Forward ('replace').
+     */
+    function goTo(page, { entry = 'push' } = {}) {
         notices.clearAll(PAGE_NOTICES);
-        // A participant who has submitted the weights has finished and goes to the results.
-        if (page === weightsPage(studyCount) && state.rankingSubmitted)
-            page = resultsPage(studyCount);
-        state = { ...state, currentPage: page };
+        state = { ...state, currentPage: pageToShow(page) };
         persist();
-        render(page, { focus: true });
+        // Saving found another tab's new session: this page is about to reload.
+        if (leaving) return;
+        // Weights another tab has saved meanwhile are final, so the merged page may differ.
+        const shown = pageToShow(state.currentPage);
+        render(shown, { focus: true });
+        if (entry === 'push') browserHistory.push(shown);
+        else browserHistory.replace(shown);
         if (currentKind() === 'results') session.finish();
     }
 
-    function begin() {
+    function navigate(page) {
+        goTo(page);
+    }
+
+    function begin({ page = 1, entry = 'push' } = {}) {
         persisted = true;
         if (!storageAvailable()) warnStorage();
-        navigate(1);
-        session.start({ presence: true });
+        goTo(page, { entry });
+        if (!leaving) session.start({ presence: currentKind() !== 'results' });
+    }
+
+    /* ---------- The browser's Back and Forward ---------- */
+
+    let dismissRefusal = () => {};
+
+    /** Says why Back or Forward did not move, without a dialog. */
+    function explainRefusal(key) {
+        const message = t(key);
+        dismissRefusal();
+        dismissRefusal = () => {};
+        // A toast would sit behind an open dialog (such as the pause), where it is missed.
+        if (dialogOpen()) announce(message);
+        else dismissRefusal = showToast(message);
+    }
+
+    function sessionStatus() {
+        if (session.closed) return 'closed';
+        return session.paused ? 'paused' : 'open';
+    }
+
+    /** Back or Forward landed on an entry for `target`; true when the app moves there. */
+    function moveInHistory(target) {
+        // The page is about to be replaced, or nothing is on screen yet (a closed session
+        // shows its closed view, though, and says why it stays).
+        if (leaving || (shownPage === null && !session.closed)) return false;
+        const move = historyMove({
+            from: state.currentPage,
+            to: target,
+            state,
+            order,
+            session: sessionStatus(),
+            busy: viewBusy(),
+        });
+        if (move.refused) {
+            explainRefusal(move.refused);
+            return false;
+        }
+        closeOpenDialogs();
+        if (move.usesBack) patch({ hasUsedBackButton: true });
+        if (!persisted && move.page >= 1) begin({ page: move.page, entry: 'replace' });
+        else goTo(move.page, { entry: 'replace' });
+        return true;
+    }
+
+    /* ---------- Other tabs of the same session ---------- */
+
+    /** Another tab has cleared this session or started another one: start again from storage. */
+    function followOtherSession() {
+        if (leaving) return;
+        persisted = false;
+        leaving = true;
+        reload();
+    }
+
+    /** True when the view on screen no longer matches the state (another tab changed it). */
+    function viewOutdated(previous) {
+        if (viewBusy()) return false;
+        const { kind, studyIndex } = describePage(shownPage, studyCount);
+        if (kind === 'study') {
+            const view = document.getElementById('view-study');
+            const formShown = view.querySelector('.answers') !== null;
+            const backShown = view.querySelector('.study-toolbar__back') !== null;
+            return (
+                formShown === isRated(state, order[studyIndex].id) ||
+                backShown !== (studyIndex > 0 && !state.hasUsedBackButton)
+            );
+        }
+        if (kind === 'weights') {
+            return (
+                !sameState(previous.criterionTokens, state.criterionTokens) ||
+                previous.finishedFromPage !== state.finishedFromPage
+            );
+        }
+        return false;
+    }
+
+    /** Shows what another tab of this session has moved on to. */
+    function followState(previous) {
+        // The closed view stays; a page still loading draws the latest state when it is ready.
+        if (session.closed || shownPage === null) return;
+        const page = pageToShow(state.currentPage);
+        if (page === shownPage) {
+            if (viewOutdated(previous)) render(page);
+            else refreshChrome();
+            return;
+        }
+        notices.clearAll(PAGE_NOTICES);
+        if (!session.paused) closeOpenDialogs();
+        render(page, { focus: !dialogOpen() && document.hasFocus() });
+        browserHistory.replace(page);
+        if (currentKind() === 'results') session.finish();
+        else if (page >= 1) session.start({ presence: true });
+    }
+
+    function onStorage(event) {
+        if (leaving || (event.key !== STORAGE_KEYS.state && event.key !== null)) return;
+        const stored = loadState(studyCount);
+        if (!stored) {
+            // 'Start as a new participant' in another tab has cleared this session.
+            if (persisted) followOtherSession();
+            return;
+        }
+        if (stored.sessionId !== state.sessionId) {
+            followOtherSession();
+            return;
+        }
+        const previous = state;
+        state = mergeStates(state, stored);
+        // This tab held progress that the other had not seen: save the combination for both.
+        if (!sameState(state, stored)) persist();
+        followState(previous);
     }
 
     async function finishEarly(page) {
@@ -376,7 +542,7 @@ export function startParticipantApp({ content, logo }) {
         });
         showView(view.id);
         setPageTitle(t('app.session.closedTitle'));
-        updateScoreBanner(state, { studyCount, visible: false });
+        refreshChrome();
         focusView(view);
     }
 
@@ -449,8 +615,43 @@ export function startParticipantApp({ content, logo }) {
         }
     }
 
+    /**
+     * Shows the page the session is on. A resumed session that can still change anything
+     * waits on the loading message until the facilitator's control check is done, so a
+     * closed session never offers its study form.
+     */
+    function showFirstPage() {
+        const kind = currentKind();
+        if (state.currentPage < 1 || kind === 'results') {
+            render(state.currentPage);
+            if (state.currentPage >= 1) session.start({ presence: false });
+            return;
+        }
+        let waited = false;
+        const shown = () => {
+            if (waited) return;
+            waited = true;
+            if (shownPage === null && !session.closed && !leaving) render(state.currentPage);
+        };
+        session.start({ presence: true }).finally(shown);
+        setTimeout(shown, CONTROL_CHECK_WAIT_MS);
+    }
+
+    /** The skip link moves focus without adding a #main entry to the browser history. */
+    function skipToContent(event) {
+        event.preventDefault();
+        const view = document.querySelector('.view:not([hidden])');
+        focusHeading(view?.querySelector('h1') ?? document.getElementById('main'));
+    }
+
     bindOnce(document.getElementById('footer-new-participant'), 'click', confirmNewParticipant);
-    render(state.currentPage);
+    bindOnce(document.querySelector('.skip-link'), 'click', skipToContent);
+    window.addEventListener('storage', onStorage);
+    // A page restored from the back/forward cache holds an old copy of the state.
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) reload();
+    });
+    browserHistory.start(state.currentPage);
     showStartNotices();
-    if (state.currentPage >= 1) session.start({ presence: currentKind() !== 'results' });
+    showFirstPage();
 }

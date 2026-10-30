@@ -81,6 +81,15 @@ export function dialogOpen() {
 }
 
 /**
+ * True while the view on screen is saving something (its form or actions are
+ * marked aria-busy), so leaving it now would lose track of the result.
+ * @returns {boolean}
+ */
+export function viewBusy() {
+    return document.querySelector('.view:not([hidden]) [aria-busy="true"]') !== null;
+}
+
+/**
  * Closes every open dialog (their promises resolve as cancelled).
  * @returns {void}
  */

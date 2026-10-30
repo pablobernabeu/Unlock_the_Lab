@@ -75,6 +75,9 @@ jobs:
       - name: Back up the database
         env:
           ALLOW_EMPTY: ${{ inputs.allow_empty }}
+          # Needed once App Check is enforced (docs/deployment.md). Without the repository
+          # secret this is empty, and the script reads without App Check as before.
+          FIREBASE_APPCHECK_DEBUG_TOKEN: ${{ secrets.FIREBASE_APPCHECK_DEBUG_TOKEN }}
         run: |
           if [ "$ALLOW_EMPTY" = 'true' ]; then
             node scripts/backup.mjs --out "$DATA_DIR" --allow-empty

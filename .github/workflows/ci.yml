@@ -36,7 +36,10 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm test
+      # Builds with Firebase App Check when the repository variable is set (docs/deployment.md).
       - run: npm run build
+        env:
+          VITE_APPCHECK_SITE_KEY: ${{ vars.VITE_APPCHECK_SITE_KEY }}
 
   rules:
     name: Database rules (emulator)
@@ -115,6 +118,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_APPCHECK_SITE_KEY: ${{ vars.VITE_APPCHECK_SITE_KEY }}
       # An environment secret of 'production', so jobs without that environment (such as
       # previews, which run pull-request code) never receive this key (docs/deployment.md).
       - name: Write the service account key

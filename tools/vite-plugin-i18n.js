@@ -9,9 +9,11 @@
  *
  * Strings come from src/i18n/en/<ns>.json. A missing key fails the build with
  * a list of every missing key; the dev server logs a warning instead and
- * leaves the element as it is. The attributes stay in place for the runtime
- * translator (src/lib/i18n.js), which uses the same key rules. Only those
- * elements change: the rest of the page is kept exactly as written.
+ * leaves the element as it is. Elements inside <noscript> are filled too,
+ * since that is the text readers without JavaScript see. The attributes stay
+ * in place for the runtime translator (src/lib/i18n.js), which uses the same
+ * key rules. Only those elements change: the rest of the page is kept exactly
+ * as written.
  */
 import { readdirSync, readFileSync } from 'node:fs';
 import { basename, join, relative, resolve } from 'node:path';
@@ -174,6 +176,22 @@ export function prerenderHtml(html, messages) {
     for (const element of root.querySelectorAll('[data-i18n-html]')) {
         const markup = resolveText(element.getAttribute('data-i18n-html'));
         if (markup !== null) replaceContent(element, 'data-i18n-html', markup);
+    }
+    // The parser keeps <noscript> content as raw text, as a browser with scripting on does. A
+    // browser with scripting off parses it as HTML, so it is rendered here as a page of its own.
+    for (const element of root.querySelectorAll('noscript')) {
+        // Its own data-i18n text replaces the content anyway, as at run time.
+        if (element.hasAttribute('data-i18n') || element.hasAttribute('data-i18n-html')) continue;
+        const [, end] = element.range;
+        const start = startTagEnd(element);
+        const endTag = html.slice(start, end).match(/<\/noscript\s*>$/i);
+        if (!endTag) continue;
+        const content = html.slice(start, end - endTag[0].length);
+        const rendered = prerenderHtml(content, messages);
+        for (const key of rendered.missing) missing.add(key);
+        if (rendered.html !== content) {
+            edits.push({ start, end: end - endTag[0].length, text: rendered.html });
+        }
     }
     for (const element of root.querySelectorAll('[data-i18n-attr]')) {
         const spec = element.getAttribute('data-i18n-attr');

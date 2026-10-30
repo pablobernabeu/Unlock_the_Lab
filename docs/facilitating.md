@@ -13,7 +13,7 @@ This guide is for workshop leaders. It covers room links, what participants see,
     You can also type these links by hand. The panel tells you if the code has been used before.
 
 3. **Check the capacity** (see below) if you expect a large group.
-4. **Handouts.** The files in `materials/workshop` (evaluation guide, glossary and sample studies) were made before content version 2. A few study texts have changed since, so treat the app as the reference.
+4. **Handouts.** `materials/workshop/handouts` has two handouts, each as a PDF to print and a Word file to adapt. The evaluation guide explains the tasks and the scoring and has the rubric and the glossary. The sample studies are six studies from the app, two from each quality band, printed as participants see them with the answer scales, followed by an answer key with the expert's ratings and notes. Both are built from the app's own content, so they match what participants see on screen; the folder's README explains how to render them again after the content changes.
 
 ## During the workshop
 
